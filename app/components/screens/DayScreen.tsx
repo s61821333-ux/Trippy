@@ -328,6 +328,50 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
               </span>
             )}
 
+            {/* Location — tappable deep link to maps */}
+            {event.location && (
+              <div style={{ marginBottom: 4 }}>
+                <a
+                  href={
+                    event.lat && event.lng
+                      ? `https://www.google.com/maps/search/?api=1&query=${event.lat},${event.lng}`
+                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    fontSize: 11, color: 'var(--brand)', fontWeight: 600,
+                    textDecoration: 'none',
+                    background: 'var(--brand-muted)',
+                    border: '1px solid rgba(59,110,82,0.22)',
+                    borderRadius: 100, padding: '2px 9px',
+                  }}
+                >
+                  📍 {event.location}
+                </a>
+              </div>
+            )}
+
+            {/* Custom tags */}
+            {event.tags && event.tags.length > 0 && (
+              <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 4 }}>
+                {event.tags.map((tag, ti) => (
+                  <span key={ti} style={{
+                    display: 'inline-flex', alignItems: 'center',
+                    fontSize: 10, fontWeight: 700,
+                    color: 'oklch(52% 0.16 225)',
+                    background: 'rgba(59,126,212,0.09)',
+                    border: '1px solid rgba(59,126,212,0.22)',
+                    borderRadius: 100, padding: '2px 8px',
+                  }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -478,10 +522,13 @@ export default function DayScreen() {
     updateDayMeta,
     setScreen,
     nickname,
+    dayEndHour,
   } = useAppStore();
   const { show } = useToast();
   const { t } = useI18n();
   const stripRef = useRef<HTMLDivElement>(null);
+
+  const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
 
   const [showAdd, setShowAdd]             = useState(false);
   const [editTarget, setEditTarget]       = useState<TripEvent | null>(null);
@@ -495,6 +542,7 @@ export default function DayScreen() {
   const [fNotes, setFNotes]               = useState('');
   const [manualCat, setManualCat]         = useState(false);
   const [fCost, setFCost]                     = useState('');
+  const [fTags, setFTags]                     = useState(''); // comma-separated tag input
   const [showEditDay, setShowEditDay]         = useState(false);
   const [editDayName, setEditDayName]         = useState('');
   const [editDayEmoji, setEditDayEmoji]       = useState('');
@@ -510,6 +558,30 @@ export default function DayScreen() {
     window.addEventListener('offline', down);
     return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down); };
   }, []);
+
+  // Fetch weather for the active day's location via Open-Meteo (free, no key)
+  useEffect(() => {
+    if (!trip) return;
+    const meta = trip.dayMeta[activeDay - 1];
+    const lat = meta?.lat;
+    const lng = meta?.lng;
+    if (!lat || !lng) return;
+    const dayDate = trip.startDate
+      ? new Date(new Date(trip.startDate).getTime() + (activeDay - 1) * 86_400_000).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0];
+    fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max&timezone=auto&forecast_days=14`
+    )
+      .then(r => r.json())
+      .then(d => {
+        const idx = (d?.daily?.time ?? []).indexOf(dayDate);
+        if (idx >= 0) {
+          setWeather({ code: d.daily.weathercode[idx], temp: Math.round(d.daily.temperature_2m_max[idx]) });
+        }
+      })
+      .catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeDay, trip?.startDate, trip?.dayMeta?.[activeDay - 1]?.lat, trip?.dayMeta?.[activeDay - 1]?.lng]);
 
 
   // Auto-detect category from event name when user hasn't manually chosen one
@@ -552,6 +624,17 @@ export default function DayScreen() {
     window.open(`https://www.openstreetmap.org/search?query=${encodeURIComponent(query)}`, '_blank');
   };
 
+  const weatherEmoji = (code: number) => {
+    if (code === 0) return '☀️';
+    if (code <= 3)  return '⛅';
+    if (code <= 48) return '🌫️';
+    if (code <= 67) return '🌧️';
+    if (code <= 77) return '🌨️';
+    if (code <= 82) return '🌦️';
+    if (code <= 86) return '🌨️';
+    return '⛈️';
+  };
+
   // Build interleaved list: event → connector → event → …
   type ListItem =
     | { type: 'event'; ev: TripEvent }
@@ -566,10 +649,10 @@ export default function DayScreen() {
       items.push({ type: 'connector', gapMins: Math.max(0, nextStart - curEnd), gapStart: curEnd, fromEv: evs[i], toEv: evs[i + 1] });
     }
   }
-  // Gap after last event (free time before end of day)
+  // Gap after last event (free time before end of day, respects night-owl setting)
   if (evs.length > 0) {
-    const lastEnd = toMins(evs[evs.length - 1].time) + evs[evs.length - 1].duration;
-    const endOfDay = 23 * 60;
+    const lastEnd  = toMins(evs[evs.length - 1].time) + evs[evs.length - 1].duration;
+    const endOfDay = dayEndHour * 60;
     if (endOfDay - lastEnd >= 45) {
       items.push({ type: 'connector', gapMins: endOfDay - lastEnd, gapStart: lastEnd });
     }
@@ -577,7 +660,7 @@ export default function DayScreen() {
 
   const openAdd = (prefillTime?: string) => {
     setFTime(prefillTime ?? '09:00');
-    setFDur('60'); setFName(''); setFCat('attraction'); setFLoc(''); setFLat(undefined); setFLng(undefined); setFNotes(''); setFCost('');
+    setFDur('60'); setFName(''); setFCat('attraction'); setFLoc(''); setFLat(undefined); setFLng(undefined); setFNotes(''); setFCost(''); setFTags('');
     setEditTarget(null);
     setManualCat(false);
     setShowAdd(true);
@@ -588,6 +671,7 @@ export default function DayScreen() {
     setFName(e.name); setFCat(e.category);
     setFLoc(e.location ?? ''); setFLat(e.lat); setFLng(e.lng); setFNotes(e.notes ?? '');
     setFCost(e.cost != null ? String(e.cost) : '');
+    setFTags((e.tags ?? []).join(', '));
     setEditTarget(e);
     setManualCat(true);
     setShowAdd(true);
@@ -597,11 +681,13 @@ export default function DayScreen() {
     if (!fName.trim()) { show(t('enterEventName')); return; }
     const dur  = parseInt(fDur, 10) || 60;
     const cost = fCost.trim() ? parseFloat(fCost) : undefined;
+    const tags = fTags.split(',').map(t => t.trim()).filter(Boolean);
     if (editTarget) {
       editEvent(activeDay, editTarget.id, {
         time: fTime, duration: dur, name: fName, category: fCat,
         location: fLoc || undefined, lat: fLat, lng: fLng, notes: fNotes || undefined,
         cost: cost && !isNaN(cost) ? cost : undefined,
+        tags: tags.length ? tags : undefined,
       });
       show(t('eventUpdated'));
       setShowAdd(false);
@@ -610,6 +696,7 @@ export default function DayScreen() {
         time: fTime, duration: dur, name: fName, category: fCat,
         location: fLoc || undefined, lat: fLat, lng: fLng, notes: fNotes || undefined,
         cost: cost && !isNaN(cost) ? cost : undefined,
+        tags: tags.length ? tags : undefined,
       });
       show(t('eventAdded'));
       setShowAdd(false);
@@ -828,6 +915,17 @@ export default function DayScreen() {
               borderRadius: 100, padding: '1px 8px',
             }}>
               ⚠️ {conflicts.size / 2 | 0 || 1} overlap
+            </span>
+          )}
+          {weather && (
+            <span style={{
+              fontSize: 11, fontWeight: 700,
+              color: 'var(--text-2)',
+              background: 'var(--bg-alt)',
+              border: '1px solid var(--border)',
+              borderRadius: 100, padding: '1px 8px', marginLeft: 2,
+            }}>
+              {weatherEmoji(weather.code)} {weather.temp}°C
             </span>
           )}
           <Icon name="edit" size={11} style={{ color: 'var(--text-3)', marginLeft: 2 }} />
@@ -1050,6 +1148,40 @@ export default function DayScreen() {
                   }}
                 />
               </div>
+            </div>
+
+            {/* Tags input */}
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
+                Tags <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(optional, comma-separated)</span>
+              </label>
+              <input
+                value={fTags}
+                onChange={e => setFTags(e.target.value)}
+                placeholder='e.g. "Cash only, Modest dress, Vegan-friendly"'
+                style={{
+                  width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                  fontSize: 13, fontWeight: 500,
+                  background: 'var(--bg)', color: 'var(--text)',
+                  border: '1px solid var(--border)', outline: 'none',
+                  boxSizing: 'border-box' as const,
+                }}
+              />
+              {fTags.trim() && (
+                <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
+                  {fTags.split(',').map(t => t.trim()).filter(Boolean).map((tag, i) => (
+                    <span key={i} style={{
+                      fontSize: 10, fontWeight: 700,
+                      color: 'oklch(52% 0.16 225)',
+                      background: 'rgba(59,126,212,0.09)',
+                      border: '1px solid rgba(59,126,212,0.22)',
+                      borderRadius: 100, padding: '2px 8px',
+                    }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: 10 }}>

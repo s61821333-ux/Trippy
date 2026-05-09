@@ -356,3 +356,72 @@ h1, h2, h3, h4, .font-display {
 .depth-strip::before    { display: none; }
 .glow-teal, .glow-gold  { filter: none; }
 .emoji-glow             { text-shadow: none; }
+
+/* ─── Reduced Motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+/* ─── High Contrast ──────────────────────────────────────────── */
+[data-high-contrast="true"] {
+  --bg:            #FFFFFF;
+  --bg-alt:        #F0F0F0;
+  --surface:       #FFFFFF;
+  --surface-warm:  #FAFAFA;
+  --border:        #767676;
+  --border-strong: #333333;
+  --text:          #000000;
+  --text-2:        #1A1A1A;
+  --text-3:        #444444;
+  --brand:         #00401F;
+  --brand-hover:   #002A14;
+  --brand-light:   #C8E6D4;
+  --brand-muted:   rgba(0, 64, 31, 0.12);
+  --terra:         #7A2200;
+  --terra-hover:   #5C1A00;
+  --terra-light:   #F5D5C8;
+  --terra-muted:   rgba(122, 34, 0, 0.12);
+  --sand:          #6B4C00;
+  --sand-light:    #F0DFA0;
+  --success:       #005200;
+  --success-bg:    #CCEECC;
+  --warning:       #6B3500;
+  --warning-bg:    #FFE0AA;
+  --danger:        #8B0000;
+  --danger-bg:     #FFCCCC;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.25);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.30), 0 1px 2px rgba(0,0,0,0.20);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.25), 0 2px 4px rgba(0,0,0,0.18);
+}
+
+[data-high-contrast="true"][data-dark="true"] {
+  --bg:            #000000;
+  --bg-alt:        #111111;
+  --surface:       #0A0A0A;
+  --surface-warm:  #141414;
+  --border:        #999999;
+  --border-strong: #CCCCCC;
+  --text:          #FFFFFF;
+  --text-2:        #EEEEEE;
+  --text-3:        #AAAAAA;
+  --brand:         #55FF99;
+  --brand-hover:   #33FF88;
+  --brand-light:   rgba(85, 255, 153, 0.18);
+  --brand-muted:   rgba(85, 255, 153, 0.10);
+  --success:       #00FF88;
+  --success-bg:    rgba(0, 255, 136, 0.18);
+  --danger:        #FF5555;
+  --danger-bg:     rgba(255, 85, 85, 0.18);
+}

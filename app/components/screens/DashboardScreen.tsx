@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Chip from '../ui/Chip';
 import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
 import { useAppStore } from '@/lib/store';
-import { fmtDate, getGaps, toMins, getDayIcon, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget } from '@/lib/utils';
+import { fmtDate, getGaps, toMins, getDayIcon, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget, estimateCarbonKg } from '@/lib/utils';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
 
@@ -27,14 +27,27 @@ const INSIGHT_COLORS: Record<string, { bg: string; border: string; text: string 
   balance: { bg: 'rgba(200,100,30,0.10)',  border: 'rgba(200,100,30,0.22)',  text: 'oklch(55% 0.18 50)'  },
   ready:   { bg: 'rgba(40,160,90,0.09)',   border: 'rgba(40,160,90,0.22)',   text: 'oklch(50% 0.15 148)' },
   tip:     { bg: 'rgba(59,126,212,0.09)',  border: 'rgba(59,126,212,0.22)',  text: 'oklch(52% 0.16 225)' },
+  eco:     { bg: 'rgba(30,140,90,0.09)',   border: 'rgba(30,140,90,0.22)',   text: 'oklch(48% 0.16 158)' },
+  pacing:  { bg: 'rgba(180,60,200,0.08)',  border: 'rgba(180,60,200,0.20)',  text: 'oklch(50% 0.17 310)' },
+  relax:   { bg: 'rgba(40,160,200,0.08)',  border: 'rgba(40,160,200,0.20)',  text: 'oklch(50% 0.14 210)' },
 };
 
 export default function DashboardScreen() {
-  const { trip, nickname, setScreen, setActiveDay, logout, supplies } = useAppStore();
+  const {
+    trip, nickname, setScreen, setActiveDay, logout, supplies,
+    hideBudget, showCarbonBudget, dayEndHour,
+    addExpense, deleteExpense,
+  } = useAppStore();
   const { show } = useToast();
   const { t } = useI18n();
-  const [showShare, setShowShare] = useState(false);
-  const [revealCode, setRevealCode] = useState(false);
+  const [showShare, setShowShare]     = useState(false);
+  const [revealCode, setRevealCode]   = useState(false);
+  const [showExpenses, setShowExpenses] = useState(false);
+  const [expDesc, setExpDesc]         = useState('');
+  const [expAmount, setExpAmount]     = useState('');
+  const [expPaidBy, setExpPaidBy]     = useState('');
+  const [expSplit, setExpSplit]       = useState('2');
+
   if (!trip) return null;
 
   const packedCount = supplies.filter(s => s.checked).length;
@@ -44,11 +57,26 @@ export default function DashboardScreen() {
   const nextEventData = getNextEvent(trip);
   const insights      = generateInsights(trip, packedCount, totalCount);
   const tripBudget    = getTripBudget(trip);
+  const carbonKg      = estimateCarbonKg(trip);
+
+  const dayEndMins = dayEndHour * 60;
 
   const handleDayClick = (day: number) => {
     setActiveDay(day);
     setScreen('day');
   };
+
+  const handleAddExpense = () => {
+    const amount = parseFloat(expAmount);
+    const split  = parseInt(expSplit, 10) || 1;
+    if (!expDesc.trim() || isNaN(amount) || amount <= 0) { show('Enter description and amount'); return; }
+    addExpense({ description: expDesc.trim(), amount, paidBy: expPaidBy.trim() || nickname, splitCount: split });
+    setExpDesc(''); setExpAmount(''); setExpPaidBy('');
+    show('Expense added');
+  };
+
+  const expenses = trip.expenses ?? [];
+  const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -152,8 +180,8 @@ export default function DashboardScreen() {
           </div>
         </motion.div>
 
-        {/* Trip budget card — only shown if any event has a cost */}
-        {tripBudget > 0 && (
+        {/* Trip budget card — hidden when user toggled hideBudget */}
+        {tripBudget > 0 && !hideBudget && (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
@@ -176,12 +204,182 @@ export default function DashboardScreen() {
           </motion.div>
         )}
 
+        {/* Carbon budget widget */}
+        {showCarbonBudget && carbonKg > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.17 }}
+            style={{
+              background: 'rgba(30,140,90,0.08)',
+              border: '1px solid rgba(30,140,90,0.22)',
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 16px',
+              marginBottom: 10,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'oklch(48% 0.16 158)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              🌍 Carbon Footprint
+            </span>
+            <span style={{ fontSize: 15, fontWeight: 800, color: 'oklch(48% 0.16 158)' }}>
+              ~{carbonKg} kg CO₂
+            </span>
+          </motion.div>
+        )}
+
+        {/* Expense splitting widget */}
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18 }}
+          style={{ marginBottom: 10 }}
+        >
+          <motion.div
+            onClick={() => setShowExpenses(v => !v)}
+            className="premium-hover"
+            style={{
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: showExpenses ? 'var(--radius-md) var(--radius-md) 0 0' : 'var(--radius-md)',
+              padding: '10px 16px',
+              cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              🧾 Expenses {expenses.length > 0 && <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>({expenses.length})</span>}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              {totalExpenses > 0 && (
+                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-2)' }}>
+                  ${totalExpenses.toFixed(2)}
+                </span>
+              )}
+              <Icon name={showExpenses ? 'chevL' : 'chevR'} size={13} style={{ color: 'var(--text-3)', transform: showExpenses ? 'rotate(-90deg)' : 'rotate(90deg)' }} />
+            </div>
+          </motion.div>
+
+          <AnimatePresence>
+            {showExpenses && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                style={{ overflow: 'hidden' }}
+              >
+                <div style={{
+                  background: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  borderTop: 'none',
+                  borderRadius: '0 0 var(--radius-md) var(--radius-md)',
+                  padding: '12px 16px',
+                }}>
+                  {/* Add expense form */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <input
+                        value={expDesc}
+                        onChange={e => setExpDesc(e.target.value)}
+                        placeholder="What for?"
+                        className="input-premium"
+                        style={{
+                          flex: 3, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                          fontSize: 12, background: 'var(--bg)',
+                          border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                        }}
+                      />
+                      <input
+                        value={expAmount}
+                        onChange={e => setExpAmount(e.target.value)}
+                        placeholder="$0"
+                        type="number"
+                        min="0"
+                        className="input-premium"
+                        style={{
+                          flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+                          fontSize: 12, background: 'var(--bg)',
+                          border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <input
+                        value={expPaidBy}
+                        onChange={e => setExpPaidBy(e.target.value)}
+                        placeholder={`Paid by (default: ${nickname})`}
+                        className="input-premium"
+                        style={{
+                          flex: 3, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                          fontSize: 12, background: 'var(--bg)',
+                          border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                        }}
+                      />
+                      <select
+                        value={expSplit}
+                        onChange={e => setExpSplit(e.target.value)}
+                        style={{
+                          flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+                          fontSize: 12, background: 'var(--bg)',
+                          border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                        }}
+                      >
+                        {[1,2,3,4,5,6,7,8].map(n => (
+                          <option key={n} value={n}>÷{n}</option>
+                        ))}
+                      </select>
+                      <GlassBtn size="sm" variant="accent" onClick={handleAddExpense} style={{ flexShrink: 0 }}>
+                        <Icon name="plus" size={12} />
+                      </GlassBtn>
+                    </div>
+                  </div>
+
+                  {/* Expense list */}
+                  {expenses.length === 0 ? (
+                    <p style={{ fontSize: 11, color: 'var(--text-3)', fontStyle: 'italic' }}>No expenses logged yet</p>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {expenses.map(exp => (
+                        <div key={exp.id} style={{
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                          background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
+                          border: '1px solid var(--border)', padding: '8px 10px',
+                        }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {exp.description}
+                            </p>
+                            <p style={{ fontSize: 10, color: 'var(--text-3)' }}>
+                              {exp.paidBy} paid · ÷{exp.splitCount} = ${(exp.amount / exp.splitCount).toFixed(2)}/person
+                            </p>
+                          </div>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', flexShrink: 0 }}>
+                            ${exp.amount.toFixed(2)}
+                          </span>
+                          <motion.button
+                            whileTap={{ scale: 0.88 }}
+                            onClick={() => deleteExpense(exp.id)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 2, flexShrink: 0 }}
+                          >
+                            <Icon name="x" size={12} />
+                          </motion.button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+
         {/* Next Event card */}
         {nextEventData && (
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18, type: 'spring', stiffness: 340, damping: 32 }}
+            transition={{ delay: 0.20, type: 'spring', stiffness: 340, damping: 32 }}
             onClick={() => { setActiveDay(nextEventData.dayNum); setScreen('day'); }}
             className="premium-hover"
             style={{
@@ -228,7 +426,7 @@ export default function DashboardScreen() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.22 }}
+            transition={{ delay: 0.24 }}
           >
             <p style={{
               fontSize: 10, fontWeight: 700, color: 'var(--text-3)',
@@ -245,7 +443,7 @@ export default function DashboardScreen() {
                     key={i}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.26 + i * 0.07, type: 'spring', stiffness: 340, damping: 32 }}
+                    transition={{ delay: 0.28 + i * 0.07, type: 'spring', stiffness: 340, damping: 32 }}
                     style={{
                       flexShrink: 0,
                       minWidth: 180, maxWidth: 220,
@@ -286,7 +484,7 @@ export default function DashboardScreen() {
             const dayNum = i + 1;
             const evs    = trip.events[dayNum] ?? [];
             const meta   = trip.dayMeta[i];
-            const gaps   = getGaps(evs);
+            const gaps   = getGaps(evs, dayEndMins);
             const sorted = [...evs].sort((a, b) => toMins(a.time) - toMins(b.time));
             const first  = sorted[0]?.time ?? '—';
             const last   = sorted[sorted.length - 1];
@@ -313,7 +511,6 @@ export default function DashboardScreen() {
                     boxShadow: 'var(--shadow-xs)',
                   }}
                 >
-                  {/* Day badge */}
                   <div style={{
                     width: 48, height: 48, borderRadius: 'var(--radius-md)',
                     flexShrink: 0,

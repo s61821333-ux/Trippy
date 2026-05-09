@@ -9,6 +9,7 @@ import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { fmtDate } from '@/lib/utils';
 import { useI18n, Locale } from '@/lib/i18n';
+import { EmergencyContact } from '@/lib/types';
 
 const sectionVariants = {
   hidden: {},
@@ -20,12 +21,35 @@ const sectionItem = {
     transition: { type: 'spring' as const, stiffness: 340, damping: 32 } },
 };
 
+const EMERGENCY_TYPE_META: Record<EmergencyContact['type'], { icon: string; label: string; color: string }> = {
+  medical:   { icon: '🏥', label: 'Medical',   color: 'var(--danger)'  },
+  embassy:   { icon: '🏛️', label: 'Embassy',   color: 'var(--brand)'   },
+  personal:  { icon: '👤', label: 'Personal',  color: 'var(--text-2)'  },
+  insurance: { icon: '🛡️', label: 'Insurance', color: 'var(--warning)' },
+};
+
 export default function SettingsScreen() {
-  const { trip, nickname, setNickname, logout, darkMode, toggleDarkMode, addTripNote, deleteTripNote } = useAppStore();
+  const {
+    trip, nickname, setNickname, logout,
+    darkMode, toggleDarkMode,
+    highContrast, toggleHighContrast,
+    reducedMotion, toggleReducedMotion,
+    hideBudget, toggleHideBudget,
+    showCarbonBudget, toggleShowCarbonBudget,
+    dayEndHour, setDayEndHour,
+    addTripNote, deleteTripNote,
+    addExpense, deleteExpense,
+    addEmergencyContact, deleteEmergencyContact,
+  } = useAppStore();
   const { show } = useToast();
   const { t, locale, setLocale, isRTL } = useI18n();
   const [nickEdit, setNickEdit] = useState(nickname);
   const [newNote, setNewNote] = useState('');
+
+  // Emergency contact form state
+  const [ecName, setEcName]   = useState('');
+  const [ecPhone, setEcPhone] = useState('');
+  const [ecType, setEcType]   = useState<EmergencyContact['type']>('personal');
 
   if (!trip) return null;
 
@@ -61,6 +85,13 @@ export default function SettingsScreen() {
 
   const totalEvents = Object.values(trip.events).reduce((acc, evs) => acc + evs.length, 0);
 
+  const handleAddEmergencyContact = () => {
+    if (!ecName.trim() || !ecPhone.trim()) { show('Enter name and phone number'); return; }
+    addEmergencyContact({ name: ecName.trim(), phone: ecPhone.trim(), type: ecType });
+    setEcName(''); setEcPhone('');
+    show('Emergency contact saved');
+  };
+
   return (
     <div className="flex flex-col h-full w-full mx-auto">
 
@@ -92,7 +123,8 @@ export default function SettingsScreen() {
             animate="visible"
             className="grid grid-cols-1 md:grid-cols-2 gap-3"
           >
-            {/* Trip info */}
+
+            {/* ── Trip info ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('tripInfo')} />
@@ -106,7 +138,7 @@ export default function SettingsScreen() {
               </Glass>
             </motion.div>
 
-            {/* My profile */}
+            {/* ── My profile ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('myProfile')} />
@@ -135,7 +167,96 @@ export default function SettingsScreen() {
               </Glass>
             </motion.div>
 
-            {/* Language */}
+            {/* ── Appearance ── */}
+            <motion.div variants={sectionItem}>
+              <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
+                <SectionLabel label="Appearance" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <ToggleRow
+                    label={darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
+                    checked={darkMode}
+                    onToggle={toggleDarkMode}
+                  />
+                  <ToggleRow
+                    label="⬛ High Contrast"
+                    sub="Solidifies glass backgrounds, darkens secondary text (WCAG AA)"
+                    checked={highContrast}
+                    onToggle={toggleHighContrast}
+                  />
+                </div>
+              </Glass>
+            </motion.div>
+
+            {/* ── Accessibility ── */}
+            <motion.div variants={sectionItem}>
+              <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
+                <SectionLabel label="Accessibility" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <ToggleRow
+                    label="🐢 Reduce Motion"
+                    sub="Disables spring animations to save battery and ease motion sensitivity"
+                    checked={reducedMotion}
+                    onToggle={toggleReducedMotion}
+                  />
+                </div>
+              </Glass>
+            </motion.div>
+
+            {/* ── Display preferences ── */}
+            <motion.div variants={sectionItem}>
+              <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
+                <SectionLabel label="Display" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <ToggleRow
+                    label="💰 Hide Budget Widget"
+                    sub="Removes the trip budget card from the dashboard"
+                    checked={hideBudget}
+                    onToggle={toggleHideBudget}
+                  />
+                  <ToggleRow
+                    label="🌍 Carbon Budget Widget"
+                    sub="Shows estimated CO₂ footprint from flights and transport"
+                    checked={showCarbonBudget}
+                    onToggle={toggleShowCarbonBudget}
+                  />
+                </div>
+              </Glass>
+            </motion.div>
+
+            {/* ── Night Owl Mode ── */}
+            <motion.div variants={sectionItem}>
+              <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
+                <SectionLabel label="🦉 Night Owl Mode" />
+                <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, marginTop: -8 }}>
+                  Extends the day boundary for gap detection — keeps late-night events on the same day card
+                </p>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {[
+                    { h: 23, label: 'Standard (11 PM)' },
+                    { h: 25, label: 'Late (1 AM)' },
+                    { h: 27, label: 'Night Owl (3 AM)' },
+                  ].map(opt => (
+                    <motion.button
+                      key={opt.h}
+                      whileTap={{ scale: 0.93 }}
+                      onClick={() => { setDayEndHour(opt.h); show('Day boundary updated'); }}
+                      style={{
+                        padding: '8px 14px', borderRadius: 'var(--radius-md)',
+                        fontSize: 12, fontWeight: 600,
+                        background: dayEndHour === opt.h ? 'var(--brand)' : 'var(--bg)',
+                        color: dayEndHour === opt.h ? 'white' : 'var(--text-2)',
+                        border: dayEndHour === opt.h ? 'none' : '1px solid var(--border)',
+                        cursor: 'pointer', transition: 'background 0.2s, color 0.2s',
+                      }}
+                    >
+                      {opt.label}
+                    </motion.button>
+                  ))}
+                </div>
+              </Glass>
+            </motion.div>
+
+            {/* ── Language ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('languageLabel')} />
@@ -161,49 +282,134 @@ export default function SettingsScreen() {
               </Glass>
             </motion.div>
 
-            {/* Dark Mode toggle */}
-            <motion.div variants={sectionItem}>
+            {/* ── Emergency Hub ── */}
+            <motion.div variants={sectionItem} className="md:col-span-2">
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
-                <SectionLabel label={t('darkMode')} />
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 13, color: 'var(--text-2)', fontWeight: 500 }}>
-                    {darkMode ? '🌙 ' + t('darkMode') : '☀️ ' + t('lightMode')}
-                  </span>
-                  <motion.button
-                    whileTap={{ scale: 0.92 }}
-                    onClick={toggleDarkMode}
-                    style={{
-                      width: 52, height: 28, borderRadius: 14,
-                      background: darkMode ? 'var(--brand)' : 'var(--border)',
-                      border: 'none', cursor: 'pointer',
-                      position: 'relative', transition: 'background 0.25s',
-                      flexShrink: 0,
-                    }}
-                  >
-                    <motion.div
-                      animate={{ x: darkMode ? 26 : 2 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 36 }}
-                      style={{
-                        position: 'absolute', top: 2,
-                        width: 24, height: 24, borderRadius: '50%',
-                        background: 'white',
-                        boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
-                      }}
-                    />
-                  </motion.button>
+                <SectionLabel label="🆘 Emergency Hub" />
+                <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, marginTop: -8 }}>
+                  Offline-ready emergency contacts — accessible even without data
+                </p>
+
+                {/* Type selector */}
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+                  {(Object.keys(EMERGENCY_TYPE_META) as EmergencyContact['type'][]).map(type => {
+                    const m = EMERGENCY_TYPE_META[type];
+                    return (
+                      <motion.button
+                        key={type}
+                        whileTap={{ scale: 0.92 }}
+                        onClick={() => setEcType(type)}
+                        style={{
+                          padding: '5px 12px', borderRadius: 'var(--radius-sm)',
+                          fontSize: 11, fontWeight: 600,
+                          background: ecType === type ? 'var(--brand-light)' : 'var(--bg)',
+                          color: ecType === type ? 'var(--brand)' : 'var(--text-2)',
+                          border: ecType === type ? '1.5px solid var(--brand)' : '1px solid var(--border)',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {m.icon} {m.label}
+                      </motion.button>
+                    );
+                  })}
                 </div>
+
+                {/* Add contact row */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+                  <input
+                    value={ecName}
+                    onChange={e => setEcName(e.target.value)}
+                    placeholder="Name or organisation"
+                    className="input-premium"
+                    style={{
+                      flex: 2, minWidth: 120, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                      fontSize: 13, background: 'var(--bg)',
+                      border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                    }}
+                  />
+                  <input
+                    value={ecPhone}
+                    onChange={e => setEcPhone(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleAddEmergencyContact()}
+                    placeholder="+1 555 000 0000"
+                    className="input-premium"
+                    style={{
+                      flex: 2, minWidth: 120, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                      fontSize: 13, background: 'var(--bg)',
+                      border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                    }}
+                  />
+                  <GlassBtn size="sm" variant="accent" onClick={handleAddEmergencyContact} style={{ flexShrink: 0 }}>
+                    <Icon name="plus" size={13} />
+                  </GlassBtn>
+                </div>
+
+                {/* Contact list */}
+                {(!trip.emergencyContacts || trip.emergencyContacts.length === 0) ? (
+                  <p style={{ fontSize: 12, color: 'var(--text-3)', fontStyle: 'italic' }}>
+                    No emergency contacts yet — add at least one before heading out
+                  </p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <AnimatePresence>
+                      {trip.emergencyContacts.map(contact => {
+                        const m = EMERGENCY_TYPE_META[contact.type];
+                        return (
+                          <motion.div
+                            key={contact.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            style={{
+                              display: 'flex', alignItems: 'center', gap: 10,
+                              background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
+                              border: '1px solid var(--border)', padding: '10px 12px',
+                            }}
+                          >
+                            <span style={{ fontSize: 18, flexShrink: 0 }}>{m.icon}</span>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{contact.name}</p>
+                              <a
+                                href={`tel:${contact.phone}`}
+                                style={{ fontSize: 12, color: m.color, fontWeight: 600, textDecoration: 'none' }}
+                              >
+                                {contact.phone}
+                              </a>
+                            </div>
+                            <span style={{
+                              fontSize: 10, fontWeight: 700, color: m.color,
+                              background: 'var(--bg-alt)', borderRadius: 100,
+                              padding: '2px 8px', border: '1px solid var(--border)',
+                              flexShrink: 0,
+                            }}>
+                              {m.label}
+                            </span>
+                            <motion.button
+                              whileTap={{ scale: 0.88 }}
+                              onClick={() => { deleteEmergencyContact(contact.id); show('Contact removed'); }}
+                              style={{
+                                background: 'none', border: 'none', cursor: 'pointer',
+                                color: 'var(--text-3)', padding: '2px 4px', flexShrink: 0,
+                              }}
+                            >
+                              <Icon name="trash" size={13} />
+                            </motion.button>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+                  </div>
+                )}
               </Glass>
             </motion.div>
 
-            {/* Travel Vault / Notes */}
+            {/* ── Travel Vault / Notes ── */}
             <motion.div variants={sectionItem} className="md:col-span-2">
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('travelNotes')} />
                 <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, marginTop: -8 }}>
                   {t('travelNotesSub')}
                 </p>
-
-                {/* Add note row */}
                 <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                   <input
                     value={newNote}
@@ -236,8 +442,6 @@ export default function SettingsScreen() {
                     <Icon name="plus" size={13} />
                   </GlassBtn>
                 </div>
-
-                {/* Notes list */}
                 {(!trip.tripNotes || trip.tripNotes.length === 0) ? (
                   <p style={{ fontSize: 12, color: 'var(--text-3)', fontStyle: 'italic', lineHeight: 1.55 }}>
                     {t('noNotes')}
@@ -258,17 +462,13 @@ export default function SettingsScreen() {
                           }}
                         >
                           <span style={{ fontSize: 14, marginTop: 1 }}>📝</span>
-                          <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>
-                            {note}
-                          </span>
+                          <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>{note}</span>
                           <motion.button
                             whileTap={{ scale: 0.88 }}
                             onClick={() => { deleteTripNote(i); show(t('itemRemoved')); }}
                             style={{
                               background: 'none', border: 'none', cursor: 'pointer',
-                              color: 'var(--text-3)', padding: '2px 4px',
-                              display: 'flex', alignItems: 'center',
-                              flexShrink: 0,
+                              color: 'var(--text-3)', padding: '2px 4px', flexShrink: 0,
                             }}
                           >
                             <Icon name="trash" size={13} />
@@ -281,7 +481,7 @@ export default function SettingsScreen() {
               </Glass>
             </motion.div>
 
-            {/* Export */}
+            {/* ── Export ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('exportTrip')} icon="calExport" />
@@ -293,7 +493,7 @@ export default function SettingsScreen() {
               </Glass>
             </motion.div>
 
-            {/* About */}
+            {/* ── About ── */}
             <motion.div variants={sectionItem}>
               <Glass level={1} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('aboutLabel')} />
@@ -305,18 +505,21 @@ export default function SettingsScreen() {
               </Glass>
             </motion.div>
 
-            {/* Leave trip */}
+            {/* ── Leave trip ── */}
             <motion.div variants={sectionItem}>
               <GlassBtn variant="danger" size="lg" onClick={logout} style={{ width: '100%' }}>
                 {t('leaveTrip')}
               </GlassBtn>
             </motion.div>
+
           </motion.div>
         </div>
       </div>
     </div>
   );
 }
+
+// ── Sub-components ──────────────────────────────────────────────────
 
 function SectionLabel({ label, icon }: { label: string; icon?: string }) {
   return (
@@ -346,6 +549,39 @@ function Row({ label, value }: { label: string; value: string }) {
       }}>
         {value}
       </span>
+    </div>
+  );
+}
+
+function ToggleRow({ label, sub, checked, onToggle }: { label: string; sub?: string; checked: boolean; onToggle: () => void }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>{label}</span>
+        {sub && <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2, lineHeight: 1.4 }}>{sub}</p>}
+      </div>
+      <motion.button
+        whileTap={{ scale: 0.92 }}
+        onClick={onToggle}
+        style={{
+          width: 52, height: 28, borderRadius: 14,
+          background: checked ? 'var(--brand)' : 'var(--border)',
+          border: 'none', cursor: 'pointer',
+          position: 'relative', transition: 'background 0.25s',
+          flexShrink: 0,
+        }}
+      >
+        <motion.div
+          animate={{ x: checked ? 26 : 2 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 36 }}
+          style={{
+            position: 'absolute', top: 2,
+            width: 24, height: 24, borderRadius: '50%',
+            background: 'white',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.25)',
+          }}
+        />
+      </motion.button>
     </div>
   );
 }

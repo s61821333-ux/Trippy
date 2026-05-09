@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { I18nProvider, useI18n } from '@/lib/i18n';
 import NavBar from './NavBar';
@@ -27,7 +27,7 @@ const screenTransition = {
 };
 
 function Shell() {
-  const { screen, setScreen, trip, darkMode } = useAppStore();
+  const { screen, setScreen, trip, darkMode, highContrast, reducedMotion } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
 
@@ -53,50 +53,57 @@ function Shell() {
 
   const showNav = trip && screen !== 'login';
 
+  // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
+  const motionReduced = reducedMotion ? 'always' : 'user';
+
   return (
     <ToastProvider>
-      <div
-        dir={isRTL ? 'rtl' : 'ltr'}
-        data-dark={darkMode ? 'true' : undefined}
-        className="relative flex flex-col w-screen h-[100dvh] overflow-hidden"
-        style={{ background: 'var(--bg)' }}
-      >
-        {showNav && (
-          <NavBar active={screen} onChange={s => setScreen(s)} />
-        )}
+      <MotionConfig reducedMotion={motionReduced}>
+        <div
+          dir={isRTL ? 'rtl' : 'ltr'}
+          data-dark={darkMode ? 'true' : undefined}
+          data-high-contrast={highContrast ? 'true' : undefined}
+          data-reduced-motion={reducedMotion ? 'true' : undefined}
+          className="relative flex flex-col w-screen h-[100dvh] overflow-hidden"
+          style={{ background: 'var(--bg)' }}
+        >
+          {showNav && (
+            <NavBar active={screen} onChange={s => setScreen(s)} />
+          )}
 
-        <div className="flex-1 flex flex-col relative overflow-hidden w-full">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={screen}
-              variants={screenVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={screenTransition}
-              className={`screen-inset${showNav ? ' screen-inset-nav' : ''} flex flex-col overflow-hidden`}
-            >
-              <div className="w-full h-full flex justify-center">
-                <div className="w-full max-w-[1200px] h-full">
-                  {!trip || screen === 'login' ? (
-                    <LoginScreen />
-                  ) : screen === 'dashboard' ? (
-                    <DashboardScreen />
-                  ) : screen === 'day' ? (
-                    <DayScreen />
-                  ) : screen === 'supplies' ? (
-                    <SuppliesScreen />
-                  ) : screen === 'settings' ? (
-                    <SettingsScreen />
-                  ) : screen === 'notes' ? (
-                    <NotesScreen />
-                  ) : null}
+          <div className="flex-1 flex flex-col relative overflow-hidden w-full">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={screen}
+                variants={screenVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={screenTransition}
+                className={`screen-inset${showNav ? ' screen-inset-nav' : ''} flex flex-col overflow-hidden`}
+              >
+                <div className="w-full h-full flex justify-center">
+                  <div className="w-full max-w-[1200px] h-full">
+                    {!trip || screen === 'login' ? (
+                      <LoginScreen />
+                    ) : screen === 'dashboard' ? (
+                      <DashboardScreen />
+                    ) : screen === 'day' ? (
+                      <DayScreen />
+                    ) : screen === 'supplies' ? (
+                      <SuppliesScreen />
+                    ) : screen === 'settings' ? (
+                      <SettingsScreen />
+                    ) : screen === 'notes' ? (
+                      <NotesScreen />
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
+      </MotionConfig>
     </ToastProvider>
   );
 }

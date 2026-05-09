@@ -29,25 +29,38 @@ const itemVariant = {
 };
 
 export default function SuppliesScreen() {
-  const { supplies, toggleSupply, addSupplyItem, deleteSupplyItem } = useAppStore();
+  const { supplies, toggleSupply, addSupplyItem, deleteSupplyItem, toggleSupplyCritical } = useAppStore();
   const { show } = useToast();
   const { t } = useI18n();
 
-  const [filter, setFilter]   = useState<Category | 'All'>('All');
-  const [newName, setNewName] = useState('');
-  const [newCat, setNewCat]   = useState<Category>('Gear');
+  const [filter, setFilter]     = useState<Category | 'All'>('All');
+  const [newName, setNewName]   = useState('');
+  const [newCat, setNewCat]     = useState<Category>('Gear');
+  const [newAssignee, setNewAssignee] = useState('');
+  const [newCritical, setNewCritical] = useState(false);
 
-  const visible = (filter === 'All' ? supplies : supplies.filter(s => s.category === filter))
+  const filtered = (filter === 'All' ? supplies : supplies.filter(s => s.category === filter))
     .slice()
-    .sort((a, b) => Number(a.checked) - Number(b.checked));
+    .sort((a, b) => {
+      // Critical unchecked → first; checked → last
+      if (a.critical && !a.checked && !(b.critical && !b.checked)) return -1;
+      if (b.critical && !b.checked && !(a.critical && !a.checked)) return 1;
+      return Number(a.checked) - Number(b.checked);
+    });
+
   const packed  = supplies.filter(s => s.checked).length;
   const total   = supplies.length;
-  const pct     = total > 0 ? Math.round((packed / total) * 100) : 0;
+  // Progress turns success green only when all critical items are also checked
+  const allCriticalDone = supplies.filter(s => s.critical).every(s => s.checked);
+  const pct = total > 0 ? Math.round((packed / total) * 100) : 0;
+  const progressColor = pct === 100 && allCriticalDone ? 'var(--success)' : pct > 0 && !allCriticalDone ? 'var(--warning)' : 'var(--brand)';
 
   const handleAdd = () => {
     if (!newName.trim()) { show(t('enterItemName')); return; }
-    addSupplyItem(newName.trim(), newCat);
+    addSupplyItem(newName.trim(), newCat, newAssignee.trim() || undefined, newCritical);
     setNewName('');
+    setNewAssignee('');
+    setNewCritical(false);
     show(t('itemAdded'));
   };
 
@@ -65,6 +78,11 @@ export default function SuppliesScreen() {
         <div style={{ marginBottom: 16 }}>
           <p className="eyebrow" style={{ marginBottom: 4 }}>
             {packed} {t('of')} {total} {t('items')} · {pct}%
+            {!allCriticalDone && supplies.some(s => s.critical) && (
+              <span style={{ color: 'var(--danger)', marginLeft: 8, fontWeight: 700 }}>
+                · ⚠️ Critical items unpacked
+              </span>
+            )}
           </p>
           <h1 style={{
             fontSize: 'clamp(1.5rem, 4vw, 2.4rem)',
@@ -86,10 +104,7 @@ export default function SuppliesScreen() {
             initial={{ width: 0 }}
             animate={{ width: `${pct}%` }}
             transition={{ delay: 0.2, duration: 0.55, ease: 'easeOut' }}
-            style={{
-              height: '100%', borderRadius: 4,
-              background: pct === 100 ? 'var(--success)' : 'var(--brand)',
-            }}
+            style={{ height: '100%', borderRadius: 4, background: progressColor }}
           />
         </div>
 
@@ -129,7 +144,7 @@ export default function SuppliesScreen() {
             className="grid grid-cols-1 md:grid-cols-2 gap-2"
           >
             <AnimatePresence>
-              {visible.map(item => (
+              {filtered.map(item => (
                 <motion.div
                   key={item.id}
                   variants={itemVariant}
@@ -138,11 +153,13 @@ export default function SuppliesScreen() {
                 >
                   <div style={{
                     background: 'var(--surface)',
-                    border: '1px solid var(--border)',
+                    border: item.critical && !item.checked
+                      ? '2px solid var(--danger)'
+                      : '1px solid var(--border)',
                     borderRadius: 'var(--radius-md)',
                     padding: '12px 14px',
                     opacity: item.checked ? 0.55 : 1,
-                    transition: 'opacity 0.25s',
+                    transition: 'opacity 0.25s, border 0.2s',
                     display: 'flex', alignItems: 'center', gap: 12,
                   }}>
                     {/* Checkbox */}
@@ -151,7 +168,7 @@ export default function SuppliesScreen() {
                       onClick={() => toggleSupply(item.id)}
                       style={{
                         width: 24, height: 24, borderRadius: 6, flexShrink: 0,
-                        border: item.checked ? 'none' : '1.5px solid var(--border-strong)',
+                        border: item.checked ? 'none' : item.critical ? '1.5px solid var(--danger)' : '1.5px solid var(--border-strong)',
                         background: item.checked ? 'var(--brand)' : 'var(--surface)',
                         cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -173,18 +190,51 @@ export default function SuppliesScreen() {
                     </motion.button>
 
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{
-                        fontSize: 14, fontWeight: 600, color: 'var(--text)',
-                        textDecoration: item.checked ? 'line-through' : 'none',
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>
-                        {item.name}
-                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        <p style={{
+                          fontSize: 14, fontWeight: 600, color: 'var(--text)',
+                          textDecoration: item.checked ? 'line-through' : 'none',
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {item.name}
+                        </p>
+                        {item.critical && !item.checked && (
+                          <span style={{
+                            fontSize: 9, fontWeight: 800, color: 'var(--danger)',
+                            background: 'var(--danger-bg)',
+                            borderRadius: 100, padding: '1px 6px',
+                            letterSpacing: '0.05em',
+                          }}>
+                            CRITICAL
+                          </span>
+                        )}
+                      </div>
+                      {item.assignee && (
+                        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2, fontWeight: 500 }}>
+                          👤 {item.assignee}
+                        </p>
+                      )}
                     </div>
 
                     <Chip v="neutral" style={{ fontSize: 10, flexShrink: 0 }}>
                       {CAT_ICONS[item.category]} {item.category}
                     </Chip>
+
+                    {/* Critical pin toggle */}
+                    <motion.button
+                      whileTap={{ scale: 0.85 }}
+                      title={item.critical ? 'Unmark as critical' : 'Mark as critical'}
+                      onClick={() => toggleSupplyCritical(item.id)}
+                      style={{
+                        background: 'none', border: 'none',
+                        cursor: 'pointer',
+                        color: item.critical ? 'var(--danger)' : 'var(--text-3)',
+                        padding: 4, flexShrink: 0,
+                        fontSize: 14,
+                      }}
+                    >
+                      {item.critical ? '📌' : '📍'}
+                    </motion.button>
 
                     <motion.button
                       whileTap={{ scale: 0.85 }}
@@ -201,7 +251,7 @@ export default function SuppliesScreen() {
               ))}
             </AnimatePresence>
 
-            {visible.length === 0 && (
+            {filtered.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -230,6 +280,22 @@ export default function SuppliesScreen() {
                   onChange={setNewName}
                   onKeyDown={e => e.key === 'Enter' && handleAdd()}
                 />
+
+                {/* Assignee input */}
+                <input
+                  value={newAssignee}
+                  onChange={e => setNewAssignee(e.target.value)}
+                  placeholder="Assignee (e.g. Mom, Mark) — optional"
+                  style={{
+                    width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                    fontSize: 13, fontWeight: 500,
+                    background: 'var(--bg)', color: 'var(--text)',
+                    border: '1px solid var(--border)', outline: 'none',
+                    boxSizing: 'border-box' as const,
+                  }}
+                />
+
+                {/* Category buttons */}
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {CATS.map(c => (
                     <motion.button
@@ -250,6 +316,31 @@ export default function SuppliesScreen() {
                     </motion.button>
                   ))}
                 </div>
+
+                {/* Critical toggle */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <motion.button
+                    whileTap={{ scale: 0.92 }}
+                    onClick={() => setNewCritical(v => !v)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 7,
+                      padding: '6px 12px', borderRadius: 'var(--radius-sm)',
+                      fontSize: 12, fontWeight: 600,
+                      background: newCritical ? 'var(--danger-bg)' : 'var(--bg)',
+                      color: newCritical ? 'var(--danger)' : 'var(--text-2)',
+                      border: newCritical ? '1.5px solid var(--danger)' : '1px solid var(--border)',
+                      cursor: 'pointer', transition: 'all 0.15s',
+                    }}
+                  >
+                    📌 {newCritical ? 'Critical — must pack' : 'Mark as critical'}
+                  </motion.button>
+                  {newCritical && (
+                    <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
+                      Blocks progress bar from going green
+                    </span>
+                  )}
+                </div>
+
                 <GlassBtn variant="accent" onClick={handleAdd} style={{ width: '100%' }}>
                   <Icon name="plus" size={14} /> {t('addItem')}
                 </GlassBtn>

@@ -65,19 +65,19 @@ export const fmtDate = (base: string, offset: number): string => {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
-export const getGaps = (evs: TripEvent[]): Gap[] => {
+// dayEndMins: default 23*60; pass 27*60 for nightlife (3 AM next day)
+export const getGaps = (evs: TripEvent[], dayEndMins = 23 * 60): Gap[] => {
   if (!evs?.length) return [];
   const sorted = [...evs].sort((a, b) => toMins(a.time) - toMins(b.time));
   const gaps: Gap[] = [];
   const dayStart = 7 * 60;
-  const dayEnd   = 23 * 60;
   let cur = dayStart;
   for (const e of sorted) {
     const st = toMins(e.time);
     if (st - cur >= 45) gaps.push({ start: cur, end: st, duration: st - cur });
     cur = Math.max(cur, st + e.duration);
   }
-  if (dayEnd - cur >= 45) gaps.push({ start: cur, end: dayEnd, duration: dayEnd - cur });
+  if (dayEndMins - cur >= 45) gaps.push({ start: cur, end: dayEndMins, duration: dayEndMins - cur });
   return gaps;
 };
 
@@ -181,13 +181,28 @@ export function getNextEvent(trip: Trip): { event: TripEvent; dayNum: number } |
   return null;
 }
 
-// ── Smart trip insights (login analysis) ───────────────────────────
+// ── Carbon footprint estimate ───────────────────────────────────────
+// Rough kg CO₂ per event based on category + duration
+export function estimateCarbonKg(trip: Trip): number {
+  let total = 0;
+  for (const evs of Object.values(trip.events)) {
+    for (const e of evs) {
+      const mins = e.duration;
+      if (e.category === 'flight')     total += mins * 1.53;  // ~800km/h, 115g/km/pax
+      else if (e.category === 'transport') total += mins * 0.10; // ~60km/h, 100g/km
+      else if (e.category === 'food' || e.category === 'cafe') total += 1.5; // avg meal
+    }
+  }
+  return Math.round(total * 10) / 10;
+}
+
+// ── Smart trip insights ─────────────────────────────────────────────
 
 export interface TripInsight {
   icon: string;
   title: string;
   description: string;
-  type: 'gap' | 'tip' | 'balance' | 'ready';
+  type: 'gap' | 'tip' | 'balance' | 'ready' | 'eco' | 'pacing' | 'relax';
 }
 
 export function generateInsights(
@@ -211,6 +226,43 @@ export function generateInsights(
     });
   }
 
+  // Pacing: days with 5+ events and no break >= 30 min
+  const tiredDays: number[] = [];
+  for (let d = 1; d <= trip.days; d++) {
+    const evs = trip.events[d] ?? [];
+    if (evs.length >= 5) {
+      const sorted = [...evs].sort((a, b) => toMins(a.time) - toMins(b.time));
+      let maxBreak = 0;
+      for (let i = 0; i < sorted.length - 1; i++) {
+        const gap = toMins(sorted[i + 1].time) - (toMins(sorted[i].time) + sorted[i].duration);
+        if (gap > maxBreak) maxBreak = gap;
+      }
+      if (maxBreak < 30) tiredDays.push(d);
+    }
+  }
+  if (tiredDays.length > 0 && insights.length < 3) {
+    insights.push({
+      icon: '😮‍💨',
+      title: tiredDays.length === 1 ? `Day ${tiredDays[0]} is packed` : `${tiredDays.length} days are overloaded`,
+      description: `No rest break detected — consider adding breathing room`,
+      type: 'pacing',
+    });
+  }
+
+  // Eco: trip has flights with no train/transit alternative flagged
+  const flightCount = Object.values(trip.events).reduce(
+    (acc, evs) => acc + evs.filter(e => e.category === 'flight').length, 0
+  );
+  if (flightCount > 0 && insights.length < 3) {
+    const carbonKg = estimateCarbonKg(trip);
+    insights.push({
+      icon: '🌍',
+      title: `~${carbonKg} kg CO₂ estimated`,
+      description: `${flightCount} flight${flightCount > 1 ? 's' : ''} logged — consider trains for short legs`,
+      type: 'eco',
+    });
+  }
+
   // Largest gap day
   let worstDay = -1;
   let worstHours = 0;
@@ -223,8 +275,15 @@ export function generateInsights(
       worstDay = d;
     }
   }
-  if (worstDay > 0 && worstHours >= 2) {
-    insights.push({
+  if (worstDay > 0 && worstHours >= 2 && insights.length < 3) {
+    // For luxury/beach themes, celebrate the gap as relaxation time
+    const isRelaxTheme = trip.theme === 'beach' || trip.theme === 'lake' || trip.theme === 'sunset';
+    insights.push(isRelaxTheme ? {
+      icon: '🌴',
+      title: `Day ${worstDay} — relaxation time`,
+      description: `~${Math.round(worstHours)}h of free time — perfect for unwinding`,
+      type: 'relax',
+    } : {
       icon: '⚡',
       title: `Day ${worstDay} has free time`,
       description: `~${Math.round(worstHours)}h unplanned — tap AI suggestions to fill it`,
@@ -240,7 +299,7 @@ export function generateInsights(
       noFoodDays.push(d);
     }
   }
-  if (noFoodDays.length > 0) {
+  if (noFoodDays.length > 0 && insights.length < 3) {
     const label = noFoodDays.length === 1
       ? `Day ${noFoodDays[0]}`
       : `Days ${noFoodDays.slice(0, 2).join(' & ')}`;
@@ -253,7 +312,7 @@ export function generateInsights(
   }
 
   // Packing status
-  if (totalSupplies > 0) {
+  if (totalSupplies > 0 && insights.length < 3) {
     const pct = Math.round((packedCount / totalSupplies) * 100);
     if (pct < 70) {
       insights.push({

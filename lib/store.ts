@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AiSuggestion, Category, DayMeta, Screen, SupplyItem, Trip, TripEvent, TripTheme } from './types';
+import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, Screen, SupplyItem, Trip, TripEvent, TripTheme } from './types';
 import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
 
 interface AppState {
@@ -17,6 +17,11 @@ interface AppState {
   activeGapEnd: number | null;
   aiSuggestions: AiSuggestion[];
   darkMode: boolean;
+  highContrast: boolean;
+  reducedMotion: boolean;
+  hideBudget: boolean;
+  showCarbonBudget: boolean;
+  dayEndHour: number; // default 23; nightlife mode can extend to 27 (= 3 AM next day)
 
   // Actions
   setScreen: (s: Screen) => void;
@@ -28,6 +33,11 @@ interface AppState {
   updateTheme: (theme: TripTheme) => void;
   updateDayMeta: (dayIndex: number, meta: Partial<DayMeta>) => void;
   toggleDarkMode: () => void;
+  toggleHighContrast: () => void;
+  toggleReducedMotion: () => void;
+  toggleHideBudget: () => void;
+  toggleShowCarbonBudget: () => void;
+  setDayEndHour: (h: number) => void;
 
   addEvent: (dayNumber: number, event: Omit<TripEvent, 'id' | 'addedBy'>) => void;
   editEvent: (dayNumber: number, eventId: string, updates: Partial<TripEvent>) => void;
@@ -36,11 +46,18 @@ interface AppState {
   voteEvent: (dayNumber: number, eventId: string, nickname: string, vote: 'up' | 'down') => void;
 
   toggleSupply: (id: string) => void;
-  addSupplyItem: (name: string, category: SupplyItem['category']) => void;
+  addSupplyItem: (name: string, category: SupplyItem['category'], assignee?: string, critical?: boolean) => void;
   deleteSupplyItem: (id: string) => void;
+  toggleSupplyCritical: (id: string) => void;
 
   addTripNote: (note: string) => void;
   deleteTripNote: (index: number) => void;
+
+  addExpense: (exp: Omit<Expense, 'id'>) => void;
+  deleteExpense: (id: string) => void;
+
+  addEmergencyContact: (contact: Omit<EmergencyContact, 'id'>) => void;
+  deleteEmergencyContact: (id: string) => void;
 
   setShowAddEvent: (v: boolean) => void;
   setShowSuggestions: (v: boolean, gapStart?: number, gapEnd?: number) => void;
@@ -65,12 +82,21 @@ export const useAppStore = create<AppState>()(
       activeGapEnd: null,
       aiSuggestions: [],
       darkMode: false,
+      highContrast: false,
+      reducedMotion: false,
+      hideBudget: false,
+      showCarbonBudget: false,
+      dayEndHour: 23,
 
       setScreen: (s) => set({ screen: s }),
       toggleDarkMode: () => set(s => ({ darkMode: !s.darkMode })),
+      toggleHighContrast: () => set(s => ({ highContrast: !s.highContrast })),
+      toggleReducedMotion: () => set(s => ({ reducedMotion: !s.reducedMotion })),
+      toggleHideBudget: () => set(s => ({ hideBudget: !s.hideBudget })),
+      toggleShowCarbonBudget: () => set(s => ({ showCarbonBudget: !s.showCarbonBudget })),
+      setDayEndHour: (h) => set({ dayEndHour: h }),
 
       joinTrip: (name, code, nickname) => {
-        // Demo mode: accept the demo trip
         const normalName = name.trim().toLowerCase();
         const normalCode = code.trim();
         if (
@@ -154,7 +180,7 @@ export const useAppStore = create<AppState>()(
         const dayEvents = (trip.events[dayNumber] || []).map(e => {
           if (e.id !== eventId) return e;
           const votes = { ...(e.votes ?? {}) };
-          if (votes[nickname] === vote) delete votes[nickname]; // toggle off
+          if (votes[nickname] === vote) delete votes[nickname];
           else votes[nickname] = vote;
           return { ...e, votes };
         });
@@ -163,17 +189,35 @@ export const useAppStore = create<AppState>()(
 
       toggleSupply: (id) => set(s => ({ supplies: s.supplies.map(i => i.id === id ? { ...i, checked: !i.checked } : i) })),
 
-      addSupplyItem: (name, category) => set(s => ({
-        supplies: [...s.supplies, { id: uid(), name, category, checked: false }],
+      addSupplyItem: (name, category, assignee, critical) => set(s => ({
+        supplies: [...s.supplies, { id: uid(), name, category, checked: false, assignee, critical: critical ?? false }],
       })),
 
       deleteSupplyItem: (id) => set(s => ({ supplies: s.supplies.filter(i => i.id !== id) })),
+
+      toggleSupplyCritical: (id) => set(s => ({
+        supplies: s.supplies.map(i => i.id === id ? { ...i, critical: !i.critical } : i),
+      })),
 
       addTripNote: (note) => set(s => ({
         trip: s.trip ? { ...s.trip, tripNotes: [...(s.trip.tripNotes ?? []), note] } : null,
       })),
       deleteTripNote: (index) => set(s => ({
         trip: s.trip ? { ...s.trip, tripNotes: (s.trip.tripNotes ?? []).filter((_, i) => i !== index) } : null,
+      })),
+
+      addExpense: (exp) => set(s => ({
+        trip: s.trip ? { ...s.trip, expenses: [...(s.trip.expenses ?? []), { ...exp, id: uid() }] } : null,
+      })),
+      deleteExpense: (id) => set(s => ({
+        trip: s.trip ? { ...s.trip, expenses: (s.trip.expenses ?? []).filter(e => e.id !== id) } : null,
+      })),
+
+      addEmergencyContact: (contact) => set(s => ({
+        trip: s.trip ? { ...s.trip, emergencyContacts: [...(s.trip.emergencyContacts ?? []), { ...contact, id: uid() }] } : null,
+      })),
+      deleteEmergencyContact: (id) => set(s => ({
+        trip: s.trip ? { ...s.trip, emergencyContacts: (s.trip.emergencyContacts ?? []).filter(c => c.id !== id) } : null,
       })),
 
       setShowAddEvent: (v) => set({ showAddEvent: v }),
@@ -201,7 +245,18 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'trippy-storage',
-      partialize: (s) => ({ trip: s.trip, nickname: s.nickname, activeDay: s.activeDay, supplies: s.supplies, darkMode: s.darkMode }),
+      partialize: (s) => ({
+        trip: s.trip,
+        nickname: s.nickname,
+        activeDay: s.activeDay,
+        supplies: s.supplies,
+        darkMode: s.darkMode,
+        highContrast: s.highContrast,
+        reducedMotion: s.reducedMotion,
+        hideBudget: s.hideBudget,
+        showCarbonBudget: s.showCarbonBudget,
+        dayEndHour: s.dayEndHour,
+      }),
     }
   )
 );
