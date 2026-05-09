@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Trippy — Desert Trip Planner</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; width: 100%; overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+:root {
+  --sky-top:    #c8e8f5;
+  --sky-mid:    #e8f4fb;
+  --sky-low:    #f5e8d0;
+  --sand-light: #f2ddb8;
+  --sand-mid:   #e5c98a;
+  --rock-1:     #c9a96e;
+  --rock-2:     #b08040;
+  --dune-1:     #d4b87a;
+  --dune-2:     #c4a05a;
+
+  /* Glass system — iOS 26 Liquid Glass */
+  --glass-white:      rgba(255,255,255,0.55);
+  --glass-white-2:    rgba(255,255,255,0.72);
+  --glass-white-3:    rgba(255,255,255,0.85);
+  --glass-border:     rgba(255,255,255,0.80);
+  --glass-border-sub: rgba(255,255,255,0.45);
+  --glass-shadow:     0 4px 24px rgba(80,60,20,0.12), 0 1px 0 rgba(255,255,255,0.9) inset, 0 -1px 0 rgba(255,255,255,0.3) inset;
+  --glass-shadow-lg:  0 8px 40px rgba(80,60,20,0.16), 0 1px 0 rgba(255,255,255,0.9) inset;
+  --blur:             blur(28px) saturate(1.8) brightness(1.04);
+
+  /* Text on glass */
+  --ink:        rgba(30,20,10,0.88);
+  --ink-2:      rgba(30,20,10,0.55);
+  --ink-3:      rgba(30,20,10,0.35);
+  --ink-teal:   oklch(42% 0.14 195);
+
+  /* Accent */
+  --accent:     oklch(58% 0.16 195);
+  --accent-2:   oklch(65% 0.18 192);
+  --accent-bg:  rgba(40,160,190,0.14);
+  --coral:      oklch(62% 0.17 28);
+  --coral-bg:   rgba(210,90,60,0.12);
+  --gold:       oklch(65% 0.15 75);
+
+  --font-sans:    'DM Sans', system-ui, sans-serif;
+  --font-display: 'DM Serif Display', Georgia, serif;
+}
+
+html, body { font-family: var(--font-sans); }
+
+/* Desktop centering */
+body {
+  display: flex; align-items: center; justify-content: center;
+  background: #c0d8ee;
+}
+
+/* ── Desert landscape background ── */
+#scene {
+  position: fixed; inset: 0; z-index: 0;
+  overflow: hidden;
+}
+
+/* scrollbars */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(30,20,10,0.15); border-radius: 3px; }
+
+/* ── Phone shell ── */
+#root { position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; height: 100%; width: 100%; }
+
+.phone {
+  position: relative;
+  width: 390px; height: 844px;
+  border-radius: 52px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.6),
+    0 0 0 2.5px rgba(180,140,80,0.35),
+    0 40px 80px rgba(80,60,20,0.28),
+    0 12px 30px rgba(80,60,20,0.16);
+  flex-shrink: 0;
+}
+/* dynamic island */
+.phone::before {
+  content:''; position:absolute; top:11px; left:50%; transform:translateX(-50%);
+  width:118px; height:34px; border-radius:20px; background:#111; z-index:60;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+}
+/* home indicator */
+.phone::after {
+  content:''; position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+  width:130px; height:5px; border-radius:100px;
+  background:rgba(30,20,10,0.22); z-index:60; pointer-events:none;
+}
+.phone-label {
+  position:absolute; bottom:-32px; left:50%; transform:translateX(-50%);
+  font-size:11px; font-weight:500; color:rgba(30,20,10,0.32);
+  white-space:nowrap; letter-spacing:0.04em;
+}
+
+/* ── Animations ── */
+@keyframes fadeIn   { from{opacity:0}            to{opacity:1} }
+@keyframes slideUp  { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+@keyframes screenIn { from{opacity:0;transform:translateY(8px)}  to{opacity:1;transform:none} }
+@keyframes shimmer  { from{background-position:-200% center} to{background-position:200% center} }
+@keyframes pulse    { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes cloudDrift { from{transform:translateX(-5px)} to{transform:translateX(5px)} }
+
+.an-screen { animation:screenIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards; }
+.an-up     { animation:slideUp  0.35s cubic-bezier(0.16,1,0.3,1) forwards; }
+.an-fade   { animation:fadeIn 0.25s ease forwards; }
+.an-pulse  { animation:pulse 1.6s ease infinite; }
+
+@media (max-width:600px),(max-height:860px) {
+  body { overflow:auto; }
+  .phone { width:100vw; height:100dvh; border-radius:0; box-shadow:none; }
+  .phone::before { display:none; }
+  .phone-label { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Desert landscape SVG scene (interactive parallax) -->
+<div id="scene">
+  <svg id="bg-svg" width="100%" height="100%" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#a8d4f0"/>
+        <stop offset="45%"  stop-color="#d8eefc"/>
+        <stop offset="75%"  stop-color="#f0e0c0"/>
+        <stop offset="100%" stop-color="#e8c888"/>
+      </linearGradient>
+      <linearGradient id="duneGrad1" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#d4a85a"/>
+        <stop offset="100%" stop-color="#b8843a"/>
+      </linearGradient>
+      <linearGradient id="duneGrad2" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#e8c070"/>
+        <stop offset="100%" stop-color="#c8943e"/>
+      </linearGradient>
+      <linearGradient id="duneGrad3" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%"   stop-color="#f0d090"/>
+        <stop offset="100%" stop-color="#d4a85a"/>
+      </linearGradient>
+      <linearGradient id="rockGrad" x1="0" y1="0" x2="0.2" y2="1">
+        <stop offset="0%"   stop-color="#c09050"/>
+        <stop offset="100%" stop-color="#8a6030"/>
+      </linearGradient>
+      <filter id="blur2"><feGaussianBlur stdDeviation="2"/></filter>
+      <filter id="blur5"><feGaussianBlur stdDeviation="5"/></filter>
+    </defs>
+
+    <!-- Sky -->
+    <rect width="800" height="600" fill="url(#skyGrad)"/>
+
+    <!-- Sun -->
+    <circle id="sun" cx="620" cy="110" r="52" fill="#ffe080" opacity="0.82"/>
+    <circle cx="620" cy="110" r="42" fill="#fff4a0" opacity="0.6"/>
+    <circle cx="620" cy="110" r="30" fill="#fffbe0" opacity="0.85"/>
+
+    <!-- Clouds -->
+    <g id="cloud1" style="animation:cloudDrift 9s ease-in-out infinite alternate">
+      <ellipse cx="140" cy="100" rx="70" ry="24" fill="white" opacity="0.78" filter="url(#blur2)"/>
+      <ellipse cx="110" cy="108" rx="40" ry="16" fill="white" opacity="0.6" filter="url(#blur2)"/>
+      <ellipse cx="175" cy="106" rx="45" ry="14" fill="white" opacity="0.6" filter="url(#blur2)"/>
+    </g>
+    <g id="cloud2" style="animation:cloudDrift 12s ease-in-out infinite alternate-reverse">
+      <ellipse cx="460" cy="70" rx="55" ry="18" fill="white" opacity="0.55" filter="url(#blur2)"/>
+      <ellipse cx="435" cy="76" rx="30" ry="12" fill="white" opacity="0.4" filter="url(#blur2)"/>
+    </g>
+
+    <!-- Far mountains -->
+    <g opacity="0.45" filter="url(#blur5)">
+      <polygon points="0,380 80,240 160,320 240,200 320,310 400,230 480,290 560,210 640,280 720,220 800,270 800,380" fill="#b09060"/>
+    </g>
+
+    <!-- Mid dunes -->
+    <g id="dunes-mid">
+      <ellipse cx="-20"  cy="490" rx="200" ry="80"  fill="url(#duneGrad1)"/>
+      <ellipse cx="220"  cy="510" rx="240" ry="90"  fill="url(#duneGrad2)"/>
+      <ellipse cx="520"  cy="495" rx="220" ry="85"  fill="url(#duneGrad1)"/>
+      <ellipse cx="780"  cy="505" rx="180" ry="78"  fill="url(#duneGrad2)"/>
+    </g>
+
+    <!-- Foreground dunes -->
+    <g id="dunes-fg">
+      <ellipse cx="50"   cy="580" rx="200" ry="100" fill="url(#duneGrad3)"/>
+      <ellipse cx="310"  cy="595" rx="260" ry="110" fill="url(#duneGrad3)"/>
+      <ellipse cx="620"  cy="585" rx="240" ry="100" fill="url(#duneGrad3)"/>
+      <ellipse cx="850"  cy="590" rx="200" ry="95"  fill="url(#duneGrad3)"/>
+    </g>
+
+    <!-- Rock formations -->
+    <g id="rocks">
+      <polygon points="680,450 700,360 730,340 760,355 780,450" fill="url(#rockGrad)"/>
+      <polygon points="700,450 715,380 740,365 760,380 775,450" fill="#a07840" opacity="0.7"/>
+      <polygon points="60,460  80,390  100,375 125,388 140,460" fill="url(#rockGrad)"/>
+      <polygon points="75,460  90,400 108,385 128,398 142,460" fill="#a07840" opacity="0.6"/>
+    </g>
+
+    <!-- Cacti / desert plants -->
+    <g fill="#6a8a4a" opacity="0.7">
+      <rect x="350" y="430" width="6" height="40" rx="3"/>
+      <rect x="334" y="442" width="22" height="5" rx="2.5"/>
+      <rect x="328" y="436" width="6" height="18" rx="3"/>
+      <rect x="350" y="442" width="22" height="5" rx="2.5"/>
+      <rect x="366" y="436" width="6" height="18" rx="3"/>
+    </g>
+
+    <!-- Heat shimmer at horizon -->
+    <rect x="0" y="340" width="800" height="18" fill="url(#skyGrad)" opacity="0.3" filter="url(#blur5)"/>
+  </svg>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+// ── Parallax on mouse move ────────────────────────────────────────────────────
+(function(){
+  const doc = document.getElementById('bg-svg');
+  if(!doc) return;
+  let ticking = false;
+  document.addEventListener('mousemove', e => {
+    if(ticking) return; ticking = true;
+    requestAnimationFrame(() => {
+      const dx = (e.clientX/window.innerWidth  - 0.5) * 1;
+      const dy = (e.clientY/window.innerHeight - 0.5) * 1;
+      const cloud1 = document.getElementById('cloud1');
+      const cloud2 = document.getElementById('cloud2');
+      const mid    = document.getElementById('dunes-mid');
+      const fg     = document.getElementById('dunes-fg');
+      const rocks  = document.getElementById('rocks');
+      const sun    = document.getElementById('sun');
+      if(cloud1) cloud1.style.transform = `translate(${dx*18}px,${dy*6}px)`;
+      if(cloud2) cloud2.style.transform = `translate(${dx*10}px,${dy*4}px)`;
+      if(mid)    mid.style.transform    = `translate(${dx*6}px,${dy*3}px)`;
+      if(fg)     fg.style.transform     = `translate(${dx*12}px,${dy*5}px)`;
+      if(rocks)  rocks.style.transform  = `translate(${dx*4}px,${dy*2}px)`;
+      if(sun)    sun.style.transform    = `translate(${dx*8}px,${dy*5}px)`;
+      ticking = false;
+    });
+  });
+})();
+
+// ── DESIGN TOKENS ─────────────────────────────────────────────────────────────
+const T = {
+  // Glass surfaces
+  glassWeak:   'rgba(255,255,255,0.50)',
+  glassMid:    'rgba(255,255,255,0.65)',
+  glassStrong: 'rgba(255,255,255,0.80)',
+  glassBorder: 'rgba(255,255,255,0.85)',
+  glassBorderSub: 'rgba(255,255,255,0.50)',
+  glassShadow: '0 4px 24px rgba(80,60,20,0.10), 0 1.5px 0 rgba(255,255,255,0.95) inset, 0 -1px 0 rgba(255,255,255,0.35) inset',
+  glassShadowLg: '0 8px 40px rgba(80,60,20,0.14), 0 1.5px 0 rgba(255,255,255,0.95) inset',
+  blur: 'blur(28px) saturate(1.8) brightness(1.03)',
+
+  // Ink (dark text on light glass)
+  ink:   'rgba(28,18,8,0.88)',
+  ink2:  'rgba(28,18,8,0.52)',
+  ink3:  'rgba(28,18,8,0.30)',
+  inkTeal: 'oklch(38% 0.16 195)',
+
+  // Accents
+  accent:   'oklch(52% 0.16 195)',
+  accent2:  'oklch(60% 0.18 192)',
+  accentBg: 'rgba(30,145,175,0.13)',
+  coral:    'oklch(58% 0.17 28)',
+  coralBg:  'rgba(200,80,50,0.11)',
+  gold:     'oklch(60% 0.15 75)',
+  goldBg:   'rgba(180,130,30,0.12)',
+  green:    'oklch(54% 0.15 148)',
+  greenBg:  'rgba(40,160,90,0.11)',
+
+  font: "'DM Sans', system-ui, sans-serif",
+  fontDisplay: "'DM Serif Display', Georgia, serif",
+};
+
+// ── CATEGORIES ────────────────────────────────────────────────────────────────
+const CATS = {
+  food:       { icon:'🍽️', label:'Food',   color:'oklch(58% 0.16 55)',  bg:'rgba(200,120,30,0.12)' },
+  cafe:       { icon:'☕',  label:'Café',   color:'oklch(52% 0.14 65)',  bg:'rgba(160,100,30,0.12)' },
+  attraction: { icon:'📍', label:'Sight',  color:'oklch(52% 0.16 195)', bg:'rgba(30,145,175,0.12)' },
+  rest:       { icon:'⛺', label:'Rest',   color:'oklch(52% 0.15 148)', bg:'rgba(40,160,90,0.11)'  },
+  transport:  { icon:'🚗', label:'Drive',  color:'oklch(50% 0.13 255)', bg:'rgba(60,100,200,0.11)' },
+  other:      { icon:'✦',  label:'Other',  color:'oklch(52% 0.10 30)',  bg:'rgba(180,90,50,0.10)'  },
+};
+
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const TRIP = {
+  name:'Negev Desert Adventure', days:4, startDate:'2026-07-14',
+  participants:[
+    {id:1,name:'Yoav',initials:'YO',color:'oklch(62% 0.15 195)'},
+    {id:2,name:'Dana',initials:'DA',color:'oklch(60% 0.17 28)'},
+    {id:3,name:'Miri',initials:'MI',color:'oklch(60% 0.14 148)'},
+  ],
+  // Each day has a region name + emoji for the journey map
+  dayMeta:[
+    {region:'Mitzpe Ramon',emoji:'🏔️',   lat:30.62, lng:34.82, desc:'Ramon Crater'},
+    {region:'Avdat Valley', emoji:'🏛️',   lat:30.79, lng:34.77, desc:'Ancient Nabatean'},
+    {region:'Dead Sea',     emoji:'🌊',   lat:31.20, lng:35.36, desc:'Lowest point on Earth'},
+    {region:'Timna & Eilat',emoji:'⚓',   lat:29.55, lng:34.95, desc:'Red Sea coast'},
+  ],
+  events:{
+    1:[
+      {id:'e1', time:'07:00',duration:60, name:'Morning camp breakfast',   category:'food',       location:'Ramon Crater Base',  addedBy:'Yoav',notes:'Bring the camping stove'},
+      {id:'e2', time:'09:00',duration:180,name:'Makhtesh Ramon Hike',      category:'attraction', location:'Ramon Crater Rim',   addedBy:'Dana',notes:'Sunrise colors are magical'},
+      {id:'e3', time:'13:30',duration:90, name:'Lunch at Beresheet Hotel', category:'food',       location:'Mitzpe Ramon',       addedBy:'Yoav'},
+      {id:'e4', time:'16:00',duration:120,name:'Desert Jeep Tour',         category:'transport',  location:'Negev Highlands',    addedBy:'Miri'},
+      {id:'e5', time:'19:30',duration:60, name:'Stargazing setup',         category:'rest',       location:'Camp Site Alpha',    addedBy:'Dana'},
+    ],
+    2:[
+      {id:'e6', time:'06:30',duration:45, name:'Sunrise meditation',       category:'rest',       location:'Dune Ridge',         addedBy:'Dana'},
+      {id:'e7', time:'08:00',duration:120,name:'Avdat National Park',      category:'attraction', location:'Avdat',              addedBy:'Yoav',notes:'Nabatean ruins — arrive early'},
+      {id:'e8', time:'12:00',duration:60, name:'Lunch & shade rest',       category:'food',       location:'Ein Avdat Picnic',   addedBy:'Miri'},
+      {id:'e9', time:'15:00',duration:90, name:'Ein Avdat Canyon',         category:'attraction', location:'Ein Avdat',          addedBy:'Dana'},
+    ],
+    3:[
+      {id:'e10',time:'08:00',duration:120,name:'Dead Sea Morning Swim',    category:'attraction', location:'Ein Bokek Beach',    addedBy:'Yoav'},
+      {id:'e11',time:'11:00',duration:60, name:'Masada via cable car',     category:'attraction', location:'Masada',             addedBy:'Dana'},
+      {id:'e12',time:'14:00',duration:90, name:'Lunch — Masada Rest House',category:'food',       location:'Masada',             addedBy:'Miri'},
+    ],
+    4:[
+      {id:'e13',time:'09:00',duration:60, name:'Pack & prep',              category:'transport',  location:'Camp Site Alpha',    addedBy:'Yoav'},
+      {id:'e14',time:'11:00',duration:90, name:'Timna Valley Park',        category:'attraction', location:'Timna',              addedBy:'Dana'},
+      {id:'e15',time:'14:00',duration:60, name:'Final lunch — Eilat',      category:'food',       location:'Eilat Port',         addedBy:'Miri'},
+    ],
+  },
+};
+
+const AI_SUGG = [
+  {id:'s1',name:'Alpaca Farm Mitzpe Ramon',category:'attraction',description:'A charming desert farm — perfect 45-min stop for the whole group.',duration:45,time:'15:00',distance:'2.1 km',open:true},
+  {id:'s2',name:'Desert Bistro & Coffee',  category:'cafe',      description:'Acclaimed café with Bedouin coffee and a crater-view terrace.',  duration:60,time:'15:00',distance:'0.8 km',open:true},
+  {id:'s3',name:'Camel Crossing Viewpoint',category:'attraction',description:'15-min walk to a spectacular vantage over the crater floor.',      duration:30,time:'15:15',distance:'1.4 km',open:true},
+];
+
+const SUPPLIES_DATA = [
+  {id:'sp1', name:'Water (3L/person/day)',    category:'Water',  checked:true },
+  {id:'sp2', name:'Sunscreen SPF50+',          category:'Gear',   checked:true },
+  {id:'sp3', name:'Hat / Buff',                category:'Gear',   checked:false},
+  {id:'sp4', name:'Electrolytes',              category:'Food',   checked:true },
+  {id:'sp5', name:'Snacks (nuts, dates, bars)',category:'Food',   checked:false},
+  {id:'sp6', name:'First aid kit',             category:'Medical',checked:true },
+  {id:'sp7', name:'Emergency blanket',         category:'Gear',   checked:false},
+  {id:'sp8', name:'Headlamp + batteries',      category:'Gear',   checked:false},
+  {id:'sp9', name:'Offline maps downloaded',   category:'Gear',   checked:true },
+  {id:'sp10',name:'Multi-tool',                category:'Gear',   checked:false},
+  {id:'sp11',name:'Power bank',                category:'Gear',   checked:true },
+  {id:'sp12',name:'Trash bags',                category:'Gear',   checked:false},
+];
+
+const toMins = t => { const [h,m]=t.split(':').map(Number); return h*60+m; };
+const toTime = m => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+const fmtDate = (base,off) => { const d=new Date(base); d.setDate(d.getDate()+off); return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); };
+const getGaps = evs => {
+  if(!evs?.length) return [];
+  const s=[...evs].sort((a,b)=>toMins(a.time)-toMins(b.time));
+  const gaps=[]; let cur=8*60;
+  for(const e of s){ const st=toMins(e.time); if(st-cur>=45) gaps.push({start:cur,end:st,duration:st-cur}); cur=Math.max(cur,st+e.duration); }
+  if(20*60-cur>=45) gaps.push({start:cur,end:20*60,duration:20*60-cur});
+  return gaps;
+};
+
+// ── iOS 26 LIQUID GLASS COMPONENTS ────────────────────────────────────────────
+
+// Core glass surface
+const Glass = ({children,level=1,style={},onClick,className=''}) => {
+  const bgs = ['rgba(255,255,255,0.48)','rgba(255,255,255,0.64)','rgba(255,255,255,0.80)'];
+  return (
+    <div onClick={onClick} className={className} style={{
+      background: bgs[level-1]||bgs[1],
+      backdropFilter: T.blur, WebkitBackdropFilter: T.blur,
+      border: `1px solid ${T.glassBorder}`,
+      boxShadow: T.glassShadow,
+      borderRadius: 18,
+      ...style,
+    }}>{children}</div>
+  );
+};
+
+// iOS 26 glass button — capsule with specular shine
+const GlassBtn = ({children,variant='default',size='md',onClick,disabled=false,style={}}) => {
+  const [pressed,setPressed] = useState(false);
+  const sizes = {sm:{h:32,px:14,fs:13}, md:{h:44,px:18,fs:15}, lg:{h:50,px:22,fs:16}};
+  const sz = sizes[size]||sizes.md;
+
+  let bg, color, border, shadow;
+  if(variant==='accent'){
+    bg = pressed ? 'rgba(30,145,175,0.82)' : 'rgba(30,145,175,0.72)';
+    color = 'white'; border = '1px solid rgba(255,255,255,0.5)';
+    shadow = '0 2px 12px rgba(30,145,175,0.30), 0 1px 0 rgba(255,255,255,0.4) inset';
+  } else if(variant==='coral'){
+    bg = pressed ? 'rgba(200,80,50,0.78)' : 'rgba(200,80,50,0.68)';
+    color = 'white'; border = '1px solid rgba(255,255,255,0.4)';
+    shadow = '0 2px 12px rgba(200,80,50,0.25), 0 1px 0 rgba(255,255,255,0.35) inset';
+  } else if(variant==='danger'){
+    bg = 'rgba(220,60,50,0.10)'; color = 'oklch(50% 0.16 22)';
+    border = '1px solid rgba(220,60,50,0.22)'; shadow = 'none';
+  } else {
+    // default: white liquid glass
+    bg = pressed ? 'rgba(255,255,255,0.78)' : T.glassMid;
+    color = T.ink; border = `1px solid ${T.glassBorder}`;
+    shadow = T.glassShadow;
+  }
+
+  return (
+    <button onMouseDown={()=>setPressed(true)} onMouseUp={()=>setPressed(false)} onMouseLeave={()=>setPressed(false)}
+      onClick={onClick} disabled={disabled}
+      style={{
+        height:sz.h, padding:`0 ${sz.px}px`, fontSize:sz.fs, fontFamily:T.font, fontWeight:600,
+        cursor:disabled?'not-allowed':'pointer', border, borderRadius:9999, color,
+        background:bg, backdropFilter:T.blur, WebkitBackdropFilter:T.blur,
+        boxShadow:shadow, display:'inline-flex', alignItems:'center', justifyContent:'center', gap:6,
+        transition:'all 0.15s ease', opacity:disabled?0.45:1,
+        transform: pressed?'scale(0.97)':'scale(1)',
+        ...style,
+      }}
+    >{children}</button>
+  );
+};
+
+// Input field — glass style
+const Field = ({label,type='text',placeholder,value,onChange,onKeyDown,icon,autoFocus,rows,style={}}) => (
+  <div>
+    {label && <label style={{display:'block',fontSize:11,fontWeight:600,color:T.ink2,letterSpacing:'0.06em',textTransform:'uppercase',marginBottom:6}}>{label}</label>}
+    <div style={{position:'relative'}}>
+      {icon && <span style={{position:'absolute',left:12,top:'50%',transform:'translateY(-50%)',color:T.ink3,display:'flex'}}>{icon}</span>}
+      {rows
+        ? <textarea rows={rows} placeholder={placeholder} value={value} onChange={onChange} style={{background:'rgba(255,255,255,0.55)',border:`1px solid ${T.glassBorder}`,borderRadius:14,color:T.ink,fontFamily:T.font,fontSize:14,padding:'11px 14px',width:'100%',outline:'none',resize:'none',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,boxShadow:T.glassShadow,...style}}/>
+        : <input type={type} placeholder={placeholder} value={value} onChange={onChange} onKeyDown={onKeyDown} autoFocus={autoFocus} style={{background:'rgba(255,255,255,0.55)',border:`1px solid ${T.glassBorder}`,borderRadius:14,color:T.ink,fontFamily:T.font,fontSize:14,padding:icon?'11px 14px 11px 40px':'11px 14px',width:'100%',outline:'none',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,boxShadow:T.glassShadow,...style}}/>
+      }
+    </div>
+  </div>
+);
+
+// Badge / chip
+const Chip = ({children,v='neutral',style={}}) => {
+  const vs = {
+    neutral:{bg:'rgba(255,255,255,0.55)', color:T.ink2,       border:`1px solid ${T.glassBorderSub}`},
+    gap:    {bg:'rgba(255,175,30,0.18)',  color:'oklch(48% 0.16 75)',  border:'1px solid rgba(255,175,30,0.4)'},
+    open:   {bg:'rgba(30,160,90,0.14)',   color:'oklch(44% 0.16 148)', border:'1px solid rgba(30,160,90,0.30)'},
+    closed: {bg:'rgba(210,50,50,0.12)',   color:'oklch(48% 0.16 22)',  border:'1px solid rgba(210,50,50,0.25)'},
+    accent: {bg:T.accentBg,              color:T.accent,              border:`1px solid rgba(30,145,175,0.28)`},
+  };
+  const s=vs[v]||vs.neutral;
+  return (
+    <span style={{display:'inline-flex',alignItems:'center',gap:3,padding:'3px 10px',borderRadius:100,fontSize:11,fontWeight:600,backdropFilter:T.blur,WebkitBackdropFilter:T.blur,background:s.bg,color:s.color,border:s.border,...style}}>
+      {children}
+    </span>
+  );
+};
+
+// Bottom sheet modal
+const Sheet = ({children,onClose,title,subtitle}) => (
+  <div onClick={onClose} style={{position:'absolute',inset:0,zIndex:200,background:'rgba(140,110,60,0.22)',backdropFilter:'blur(6px)',WebkitBackdropFilter:'blur(6px)',display:'flex',alignItems:'flex-end',animation:'fadeIn 0.2s ease'}}>
+    <div onClick={e=>e.stopPropagation()} className="an-up" style={{width:'100%',background:T.glassStrong,backdropFilter:T.blur,WebkitBackdropFilter:T.blur,border:`1px solid ${T.glassBorder}`,borderTop:`1.5px solid rgba(255,255,255,0.9)`,borderRadius:'28px 28px 0 0',padding:'8px 20px 32px',maxHeight:'86%',overflowY:'auto',boxShadow:'0 -8px 40px rgba(80,60,20,0.14)'}}>
+      <div style={{width:36,height:4,background:'rgba(28,18,8,0.16)',borderRadius:2,margin:'8px auto 16px'}}/>
+      {(title||subtitle) && <div style={{marginBottom:18}}>
+        {title    && <h3 style={{fontFamily:T.fontDisplay,fontSize:22,color:T.ink,marginBottom:subtitle?4:0}}>{title}</h3>}
+        {subtitle && <p  style={{fontSize:13,color:T.ink2}}>{subtitle}</p>}
+      </div>}
+      {children}
+    </div>
+  </div>
+);
+
+const Shimmer = ({h=80,style={}}) => (
+  <div style={{height:h,borderRadius:14,marginBottom:10,background:'linear-gradient(90deg,rgba(255,255,255,0.4) 25%,rgba(255,255,255,0.7) 50%,rgba(255,255,255,0.4) 75%)',backgroundSize:'200% auto',animation:'shimmer 1.5s linear infinite',...style}}/>
+);
+
+const useToast = () => {
+  const [t,setT]=useState(null);
+  const show=useCallback(msg=>{setT(msg);setTimeout(()=>setT(null),2400);},[]);
+  const el=t?<div className="an-fade" style={{position:'absolute',bottom:90,left:'50%',transform:'translateX(-50%)',zIndex:300,background:'rgba(255,255,255,0.88)',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,border:`1px solid ${T.glassBorder}`,borderRadius:14,padding:'10px 20px',fontSize:13,fontWeight:600,whiteSpace:'nowrap',boxShadow:T.glassShadow,color:T.ink}}>{t}</div>:null;
+  return {show,el};
+};
+
+// SVG icon set
+const Ic = ({name,size=20,style={}}) => {
+  const paths={
+    // Nav — natural / outdoorsy
+    home:      <><path d="M8 20V14h8v6"/><path d="M3 11l9-9 9 9"/><path d="M5 9v11h14V9"/></>, // camp-style house
+    calendar:  <><path d="M12 22c5 0 9-4.5 9-10S17 2 12 2 3 6.5 3 12s4 10 9 10z"/><path d="M12 6v6l4 2"/></>, // sun-clock / natural time
+    checklist: <><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></>,
+    settings:  <><path d="M12 2C8 2 4 5 4 9c0 5 8 13 8 13s8-8 8-13c0-4-4-7-8-7z"/><circle cx="12" cy="9" r="2.5"/></>, // location pin — "my settings / my place"
+    plus:      <><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></>,
+    chevR:     <polyline points="9 18 15 12 9 6"/>,
+    chevL:     <polyline points="15 18 9 12 15 6"/>,
+    share:     <><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></>,
+    map:       <><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></>,
+    sparkle:   <><path d="M12 3l1.68 5.17L19 10l-5.32 1.83L12 17l-1.68-5.17L5 10l5.32-1.83z"/><path d="M5 3l.84 2.58L8 7l-2.16.42L5 10l-.84-2.58L2 7l2.16-.42z" opacity="0.5"/><path d="M19 14l.84 2.58L22 17l-2.16.42L19 20l-.84-2.58L16 17l2.16-.42z" opacity="0.5"/></>,
+    trash:     <><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/><path d="M9 6V4h6v2"/></>,
+    edit:      <><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></>,
+    x:         <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>,
+    check:     <polyline points="20 6 9 17 4 12"/>,
+    sun:       <><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></>,
+    wind:      <><path d="M9.59 4.59A2 2 0 1111 8H2m10.59 11.41A2 2 0 1114 16H2m15.73-8.27A2.5 2.5 0 1119.5 12H2"/></>,
+    lock:      <><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></>,
+    pin:       <><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></>,
+    download:  <><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>,
+    // natural-feel extras
+    compass:   <><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></>,
+    tent:      <><path d="M3 20l9-16 9 16H3z"/><path d="M12 4L7 20m10 0L12 4"/></>,
+    water:     <><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M12 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z" opacity="0.4"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></>,
+    calExport: <><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><polyline points="12 14 12 18"/><line x1="10" y1="16" x2="14" y2="16"/></>,
+  };
+  return (
+    <span style={{display:'inline-flex',alignItems:'center',...style}}>
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        {paths[name]||null}
+      </svg>
+    </span>
+  );
+};
+
+// ── STATUS BAR ────────────────────────────────────────────────────────────────
+function StatusBar() {
+  const [time,setTime]=useState(()=>{const n=new Date();return `${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`;});
+  useEffect(()=>{const iv=setInterval(()=>{const n=new Date();setTime(`${n.getHours()}:${String(n.getMinutes()).padStart(2,'0')}`);},30000);return()=>clearInterval(iv);},[]);
+  return (
+    <div style={{position:'absolute',top:0,left:0,right:0,height:52,zIndex:50,pointerEvents:'none',display:'flex',alignItems:'flex-end',justifyContent:'space-between',padding:'0 22px 7px',color:T.ink,fontFamily:T.font,fontSize:13,fontWeight:600}}>
+      <span>{time}</span>
+      <div style={{display:'flex',alignItems:'center',gap:5}}>
+        <svg width="16" height="11" viewBox="0 0 16 11">{[0,1,2,3].map(i=><rect key={i} x={i*4.2} y={11-(i+1)*2.8} width="2.8" height={(i+1)*2.8} rx="0.6" fill={T.ink}/>)}</svg>
+        <svg width="15" height="11" viewBox="0 0 15 11"><path d="M7.5 7.8a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" fill={T.ink}/><path d="M3.8 5.3a5.3 5.3 0 017.4 0" fill="none" stroke={T.ink} strokeWidth="1.5" strokeLinecap="round"/><path d="M1 2.6a9.3 9.3 0 0113 0" fill="none" stroke={T.ink} strokeWidth="1.5" strokeLinecap="round"/></svg>
+        <svg width="24" height="12" viewBox="0 0 24 12"><rect x="0.5" y="0.5" width="20" height="11" rx="3" stroke={T.ink} strokeOpacity="0.4" fill="none"/><rect x="2" y="2" width="13" height="8" rx="2" fill={T.ink}/><path d="M22 4v4c.8-.3 1.5-1.2 1.5-2s-.7-1.7-1.5-2z" fill={T.ink} fillOpacity="0.35"/></svg>
+      </div>
+    </div>
+  );
+}
+
+// ── NAV BAR ───────────────────────────────────────────────────────────────────
+function NavBar({active,onChange}) {
+  const tabs=[
+    {id:'dashboard', icon:'tent',     label:'Camp'},
+    {id:'day',       icon:'compass',  label:'Explore'},
+    {id:'supplies',  icon:'checklist',label:'Pack'},
+    {id:'settings',  icon:'settings', label:'Setup'},
+  ];
+  return (
+    <div style={{position:'absolute',bottom:0,left:0,right:0,zIndex:100,padding:'6px 14px calc(6px + 20px)'}}>
+      <Glass level={3} style={{borderRadius:26,padding:'8px 6px'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-around'}}>
+          {tabs.map(t=>(
+            <button key={t.id} onClick={()=>onChange(t.id)} style={{
+              display:'flex',flexDirection:'column',alignItems:'center',gap:3,
+              padding:'5px 14px',borderRadius:16,border:'none',
+              background: active===t.id ? T.accentBg : 'transparent',
+              color: active===t.id ? T.accent : T.ink3,
+              fontFamily:T.font,fontSize:10,fontWeight:600,cursor:'pointer',transition:'all 0.2s',
+            }}>
+              <Ic name={t.icon} size={20}/>
+              {t.label}
+            </button>
+          ))}
+        </div>
+      </Glass>
+    </div>
+  );
+}
+
+// ── JOURNEY MAP (Dashboard) ───────────────────────────────────────────────────
+function JourneyMap({days, currentDay, onDaySelect}) {
+  // Render a top-down route with waypoints
+  // Layout: horizontal scroll with a sinuous path connecting day pins
+  const positions = [
+    {x: 42,  y: 130},
+    {x: 148, y: 76},
+    {x: 254, y: 134},
+    {x: 356, y: 78},
+  ];
+
+  return (
+    <div style={{position:'relative',overflow:'hidden',borderRadius:20,marginBottom:16}}>
+      <Glass level={2} style={{borderRadius:20,padding:'16px 14px 12px',overflow:'visible'}}>
+        <p style={{fontSize:10,fontWeight:700,letterSpacing:'0.08em',textTransform:'uppercase',color:T.ink3,marginBottom:12}}>Your Journey</p>
+
+        {/* SVG route */}
+        <div style={{position:'relative',height:190}}>
+          <svg width="100%" height="190" viewBox="0 0 390 190" style={{position:'absolute',inset:0}}>
+            {/* Dashed route line */}
+            <path
+              d={`M ${positions[0].x+18} ${positions[0].y+18} C ${positions[0].x+80} ${positions[0].y+18} ${positions[1].x-50} ${positions[1].y+18} ${positions[1].x+18} ${positions[1].y+18} C ${positions[1].x+80} ${positions[1].y+18} ${positions[2].x-50} ${positions[2].y+18} ${positions[2].x+18} ${positions[2].y+18} C ${positions[2].x+80} ${positions[2].y+18} ${positions[3].x-50} ${positions[3].y+18} ${positions[3].x+18} ${positions[3].y+18}`}
+              fill="none" stroke="rgba(30,145,175,0.35)" strokeWidth="2.5"
+              strokeDasharray="8 5" strokeLinecap="round"
+            />
+            {/* Completed segment */}
+            <path
+              d={`M ${positions[0].x+18} ${positions[0].y+18} C ${positions[0].x+80} ${positions[0].y+18} ${positions[1].x-50} ${positions[1].y+18} ${positions[1].x+18} ${positions[1].y+18}`}
+              fill="none" stroke={T.accent} strokeWidth="2.5" strokeLinecap="round"
+            />
+
+            {/* Distance labels */}
+            {[{x:90, y:85, txt:'~3h drive'},{x:196, y:135, txt:'~2h drive'},{x:300, y:82, txt:'~2.5h drive'}].map((l,i)=>(
+              <text key={i} x={l.x} y={l.y} textAnchor="middle" fontSize="9" fill="rgba(28,18,8,0.38)" fontFamily={T.font} fontWeight="500">{l.txt}</text>
+            ))}
+          </svg>
+
+          {/* Day waypoint cards */}
+          {positions.map((pos, i) => {
+            const d = i+1;
+            const meta = TRIP.dayMeta[i];
+            const evs = TRIP.events[d]||[];
+            const isActive = d === currentDay;
+            const isPast   = d < currentDay;
+            return (
+              <button key={d} onClick={()=>onDaySelect(d)}
+                style={{
+                  position:'absolute', left:pos.x, top:pos.y,
+                  width:72, background:'none', border:'none', cursor:'pointer', padding:0,
+                  display:'flex', flexDirection:'column', alignItems:'center', gap:5,
+                  transform: isActive ? 'scale(1.08)' : 'scale(1)',
+                  transition:'transform 0.2s ease',
+                  zIndex: isActive ? 2 : 1,
+                }}
+              >
+                {/* Pin bubble */}
+                <div style={{
+                  width:44, height:44, borderRadius:14,
+                  background: isActive ? T.accent : isPast ? 'rgba(30,145,175,0.22)' : T.glassMid,
+                  backdropFilter:T.blur, WebkitBackdropFilter:T.blur,
+                  border: isActive ? '2px solid rgba(255,255,255,0.7)' : `1.5px solid ${T.glassBorder}`,
+                  boxShadow: isActive ? `0 6px 20px rgba(30,145,175,0.35), ${T.glassShadow}` : T.glassShadow,
+                  display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                  position:'relative',
+                }}>
+                  <span style={{fontSize:18,lineHeight:1}}>{meta.emoji}</span>
+                  {isActive && (
+                    <div style={{position:'absolute',top:-6,right:-6,width:16,height:16,borderRadius:'50%',background:T.coral,border:'2px solid white',fontSize:9,fontWeight:800,color:'white',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                      {d}
+                    </div>
+                  )}
+                  {isPast && (
+                    <div style={{position:'absolute',top:-4,right:-4,width:14,height:14,borderRadius:'50%',background:T.accent,border:'2px solid white',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                      <Ic name="check" size={8} style={{color:'white'}}/>
+                    </div>
+                  )}
+                </div>
+
+                {/* Label */}
+                <div style={{textAlign:'center'}}>
+                  <div style={{fontSize:9,fontWeight:700,color: isActive ? T.accent : T.ink2, lineHeight:1.2, whiteSpace:'nowrap'}}>{meta.region}</div>
+                  <div style={{fontSize:8,color:T.ink3}}>{evs.length} stops</div>
+                </div>
+
+                {/* Day number pill */}
+                <Glass level={3} style={{borderRadius:100,padding:'2px 9px',border:`1px solid ${isActive ? 'rgba(30,145,175,0.4)' : T.glassBorderSub}`}}>
+                  <span style={{fontSize:9,fontWeight:700,color: isActive ? T.accent : T.ink3}}>Day {d}</span>
+                </Glass>
+              </button>
+            );
+          })}
+        </div>
+      </Glass>
+    </div>
+  );
+}
+
+// ── DAY MAP — per-day terrain map with event pins & route ─────────────────────
+// Each day has unique pin layouts + terrain tones derived from its region
+const DAY_MAP_CONFIG = {
+  1: {
+    // Ramon Crater — rust/ochre desert terrain
+    terrain: ['#c8a060','#d4b070','#b89050','#e0c080'],
+    contourColor: 'rgba(120,70,20,0.12)',
+    // crater shape
+    feature: (W,H) => `<ellipse cx="${W*0.42}" cy="${H*0.52}" rx="${W*0.30}" ry="${H*0.22}" fill="rgba(160,90,30,0.10)" stroke="rgba(140,80,20,0.16)" strokeWidth="1.5"/>
+      <ellipse cx="${W*0.42}" cy="${H*0.52}" rx="${W*0.20}" ry="${H*0.14}" fill="rgba(140,80,20,0.07)" stroke="rgba(120,70,15,0.12)" strokeWidth="1"/>`,
+    pins: [{x:0.30,y:0.38,cat:'food'},{x:0.44,y:0.30,cat:'attraction'},{x:0.58,y:0.48,cat:'transport'},{x:0.38,y:0.62,cat:'rest'}],
+    route: '0.30,0.38 0.44,0.30 0.58,0.48 0.38,0.62',
+    label:'Ramon Crater',
+  },
+  2: {
+    // Avdat — beige/tan ancient plateau
+    terrain: ['#d0b878','#e0cc8a','#c0a860','#d8bc78'],
+    contourColor: 'rgba(100,70,20,0.10)',
+    feature: (W,H) => `<rect x="${W*0.28}" y="${H*0.28}" width="${W*0.42}" height="${H*0.18}" rx="4" fill="rgba(160,120,50,0.09)" stroke="rgba(140,100,40,0.14)" strokeWidth="1"/>
+      <line x1="${W*0.28}" y1="${H*0.46}" x2="${W*0.70}" y2="${H*0.46}" stroke="rgba(120,80,20,0.10)" strokeWidth="1"/>`,
+    pins: [{x:0.26,y:0.34,cat:'rest'},{x:0.46,y:0.26,cat:'attraction'},{x:0.58,y:0.52,cat:'food'},{x:0.68,y:0.40,cat:'attraction'}],
+    route: '0.26,0.34 0.46,0.26 0.58,0.52 0.68,0.40',
+    label:'Avdat Valley',
+  },
+  3: {
+    // Dead Sea — blue-grey, flat, sea shape
+    terrain: ['#a8c8d8','#b8d8e8','#90b8c8','#c8dce8'],
+    contourColor: 'rgba(30,80,120,0.10)',
+    feature: (W,H) => `<ellipse cx="${W*0.50}" cy="${H*0.55}" rx="${W*0.38}" ry="${H*0.20}" fill="rgba(30,120,180,0.12)" stroke="rgba(30,100,160,0.18)" strokeWidth="1.5"/>
+      <ellipse cx="${W*0.50}" cy="${H*0.55}" rx="${W*0.25}" ry="${H*0.12}" fill="rgba(30,140,200,0.08)"/>`,
+    pins: [{x:0.30,y:0.36,cat:'attraction'},{x:0.50,y:0.28,cat:'attraction'},{x:0.65,y:0.46,cat:'food'}],
+    route: '0.30,0.36 0.50,0.28 0.65,0.46',
+    label:'Dead Sea',
+  },
+  4: {
+    // Timna/Eilat — red-rock + blue sea
+    terrain: ['#c08860','#d4a070','#b07850','#e0b880'],
+    contourColor: 'rgba(140,60,20,0.12)',
+    feature: (W,H) => `<path d="M${W*0.60},${H*0.65} Q${W*0.72},${H*0.55} ${W*0.80},${H*0.65} Q${W*0.88},${H*0.75} ${W*0.80},${H*0.80} Q${W*0.65},${H*0.85} ${W*0.60},${H*0.65}z" fill="rgba(30,120,180,0.16)" stroke="rgba(30,100,160,0.22)" strokeWidth="1"/>`,
+    pins: [{x:0.24,y:0.32,cat:'transport'},{x:0.44,y:0.28,cat:'attraction'},{x:0.62,y:0.44,cat:'food'}],
+    route: '0.24,0.32 0.44,0.28 0.62,0.44',
+    label:'Timna & Eilat',
+  },
+};
+
+function DayMap({dayNum, events, style={}}) {
+  const W=360, H=170;
+  const cfg = DAY_MAP_CONFIG[dayNum] || DAY_MAP_CONFIG[1];
+  const [hovered,setHovered] = useState(null);
+
+  // Build route polyline points
+  const routePts = cfg.pins.map(p=>`${p.x*W},${p.y*H}`).join(' ');
+
+  // Terrain gradient stops
+  const [c0,c1,c2,c3] = cfg.terrain;
+
+  return (
+    <div style={{position:'relative',overflow:'hidden',borderRadius:'0 0 0 0',...style}}>
+      <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} style={{display:'block'}} preserveAspectRatio="xMidYMid slice">
+        <defs>
+          <linearGradient id={`dmg${dayNum}`} x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0%"   stopColor={c0}/>
+            <stop offset="35%"  stopColor={c1}/>
+            <stop offset="70%"  stopColor={c2}/>
+            <stop offset="100%" stopColor={c3}/>
+          </linearGradient>
+          {/* subtle texture noise */}
+          <filter id={`dmf${dayNum}`}>
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise"/>
+            <feColorMatrix type="saturate" values="0.2" in="noise" result="colored"/>
+            <feBlend in="SourceGraphic" in2="colored" mode="overlay" result="blend"/>
+            <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+          </filter>
+          <clipPath id={`dmc${dayNum}`}><rect width={W} height={H}/></clipPath>
+        </defs>
+
+        {/* Base terrain */}
+        <rect width={W} height={H} fill={`url(#dmg${dayNum})`}/>
+        <rect width={W} height={H} fill={`url(#dmg${dayNum})`} filter={`url(#dmf${dayNum})`} opacity="0.35"/>
+
+        {/* Contour rings */}
+        <ellipse cx={W*0.45} cy={H*0.6} rx={W*0.45} ry={H*0.35} fill="none" stroke={cfg.contourColor} strokeWidth="1"/>
+        <ellipse cx={W*0.45} cy={H*0.6} rx={W*0.32} ry={H*0.24} fill="none" stroke={cfg.contourColor} strokeWidth="1"/>
+        <ellipse cx={W*0.45} cy={H*0.6} rx={W*0.20} ry={H*0.14} fill="none" stroke={cfg.contourColor} strokeWidth="1"/>
+
+        {/* Geographic feature */}
+        <g dangerouslySetInnerHTML={{__html: cfg.feature(W,H)}}/>
+
+        {/* Route line */}
+        <polyline points={routePts} fill="none" stroke="rgba(30,145,175,0.55)" strokeWidth="2" strokeDasharray="7 4" strokeLinecap="round" strokeLinejoin="round"/>
+        {/* Route glow */}
+        <polyline points={routePts} fill="none" stroke="rgba(30,145,175,0.18)" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+
+        {/* Event pins */}
+        {cfg.pins.map((pin,i)=>{
+          const cat = CATS[pin.cat]||CATS.other;
+          const px=pin.x*W, py=pin.y*H;
+          const isH = hovered===i;
+          return (
+            <g key={i} onMouseEnter={()=>setHovered(i)} onMouseLeave={()=>setHovered(null)} style={{cursor:'pointer'}}>
+              {/* drop shadow */}
+              <circle cx={px} cy={py+2} r={isH?14:11} fill="rgba(0,0,0,0.12)" opacity="0.6"/>
+              {/* pin body */}
+              <circle cx={px} cy={py} r={isH?14:11}
+                fill="rgba(255,255,255,0.82)" stroke={cat.color} strokeWidth={isH?2.5:2}/>
+              {/* icon as text */}
+              <text x={px} y={py+5} textAnchor="middle" fontSize={isH?13:10}>{cat.icon}</text>
+              {/* sequence number */}
+              <circle cx={px+8} cy={py-8} r={5.5} fill={cat.color}/>
+              <text x={px+8} y={py-5} textAnchor="middle" fontSize="7" fontWeight="700" fill="white" fontFamily={T.font}>{i+1}</text>
+            </g>
+          );
+        })}
+
+        {/* Compass rose */}
+        <g transform={`translate(${W-22},22)`} opacity="0.45">
+          <circle r="10" fill="rgba(255,255,255,0.55)" stroke="rgba(28,18,8,0.15)" strokeWidth="0.8"/>
+          <text textAnchor="middle" y="-3" fontSize="6" fontWeight="700" fill="rgba(28,18,8,0.7)" fontFamily={T.font}>N</text>
+          <line x1="0" y1="-7" x2="0" y2="7" stroke="rgba(28,18,8,0.3)" strokeWidth="0.8"/>
+          <line x1="-7" y1="0" x2="7" y2="0" stroke="rgba(28,18,8,0.3)" strokeWidth="0.8"/>
+        </g>
+
+        {/* Scale bar */}
+        <g transform={`translate(12,${H-14})`} opacity="0.5">
+          <line x1="0" y1="0" x2="30" y2="0" stroke="rgba(28,18,8,0.5)" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="0" y1="-3" x2="0" y2="3" stroke="rgba(28,18,8,0.5)" strokeWidth="1.2"/>
+          <line x1="30" y1="-3" x2="30" y2="3" stroke="rgba(28,18,8,0.5)" strokeWidth="1.2"/>
+          <text x="15" y="-5" textAnchor="middle" fontSize="7" fill="rgba(28,18,8,0.55)" fontFamily={T.font}>5 km</text>
+        </g>
+
+        {/* Region label pill */}
+        <g>
+          <rect x="10" y="8" width="90" height="18" rx="9" fill="rgba(255,255,255,0.70)"/>
+          <text x="55" y="20.5" textAnchor="middle" fontSize="9" fontWeight="600" fill={T.ink2} fontFamily={T.font}>{cfg.label}</text>
+        </g>
+      </svg>
+
+      {/* Hover tooltip */}
+      {hovered !== null && (
+        <div className="an-fade" style={{
+          position:'absolute', bottom:8, left:'50%', transform:'translateX(-50%)',
+          background:'rgba(255,255,255,0.88)', backdropFilter:T.blur, WebkitBackdropFilter:T.blur,
+          border:`1px solid ${T.glassBorder}`, borderRadius:10, padding:'4px 12px',
+          fontSize:11, fontWeight:600, color:T.ink, whiteSpace:'nowrap', boxShadow:T.glassShadow,
+          pointerEvents:'none',
+        }}>
+          {events?.[hovered]?.name || `Stop ${hovered+1}`}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── EVENT CARD ────────────────────────────────────────────────────────────────
+function EventCard({event,onDelete,onEdit}) {
+  const [exp,setExp]=useState(false);
+  const cat=CATS[event.category]||CATS.other;
+  const end=toTime(toMins(event.time)+event.duration);
+  const dur=`${Math.floor(event.duration/60)>0?Math.floor(event.duration/60)+'h ':''}${event.duration%60>0?event.duration%60+'m':''}`;
+  return (
+    <Glass level={2} style={{borderRadius:16,padding:'11px 13px',borderLeft:`3px solid ${cat.color}`}}>
+      <div style={{display:'flex',alignItems:'flex-start',gap:9}}>
+        <div style={{minWidth:46,textAlign:'right'}}>
+          <div style={{fontSize:13,fontWeight:700,color:T.ink}}>{event.time}</div>
+          <div style={{fontSize:11,color:T.ink3}}>{end}</div>
+        </div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:2}}>
+            <span style={{fontSize:13}}>{cat.icon}</span>
+            <span style={{fontWeight:600,fontSize:13,flex:1,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',color:T.ink}}>{event.name}</span>
+          </div>
+          {event.location && <div style={{fontSize:11,color:T.ink2,marginBottom:4,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>📍 {event.location}</div>}
+          <div style={{display:'flex',alignItems:'center',gap:5,flexWrap:'wrap'}}>
+            <span style={{padding:'2px 8px',background:cat.bg,borderRadius:6,fontSize:11,fontWeight:600,color:cat.color,backdropFilter:T.blur,WebkitBackdropFilter:T.blur,border:`1px solid ${cat.color}30`}}>{dur}</span>
+            <span style={{fontSize:11,color:T.ink3}}>{event.addedBy}</span>
+            {event.notes && <button onClick={()=>setExp(!exp)} style={{background:'none',border:'none',cursor:'pointer',fontSize:11,color:T.accent,padding:0}}>{exp?'▲':'▼'} notes</button>}
+          </div>
+          {exp && event.notes && <div style={{marginTop:7,padding:'8px 10px',background:'rgba(255,255,255,0.45)',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,borderRadius:10,fontSize:12,color:T.ink2,lineHeight:1.5,border:`1px solid ${T.glassBorderSub}`}}>{event.notes}</div>}
+        </div>
+        <div style={{display:'flex',gap:3,flexShrink:0}}>
+          {onEdit   && <GlassBtn size="sm" onClick={()=>onEdit(event)}    style={{width:28,height:28,padding:0,borderRadius:8}}><Ic name="edit"  size={12} style={{color:T.ink3}}/></GlassBtn>}
+          {onDelete && <GlassBtn size="sm" onClick={()=>onDelete(event.id)} style={{width:28,height:28,padding:0,borderRadius:8,background:'rgba(210,50,50,0.08)',border:'1px solid rgba(210,50,50,0.18)'}}><Ic name="trash" size={12} style={{color:'oklch(50% 0.16 22)'}}/></GlassBtn>}
+        </div>
+      </div>
+    </Glass>
+  );
+}
+
+// ── GAP BLOCK ─────────────────────────────────────────────────────────────────
+function GapBlock({gap,onSuggest}) {
+  const dur=`${Math.floor(gap.duration/60)>0?Math.floor(gap.duration/60)+'h ':''}${gap.duration%60>0?gap.duration%60+'m':''}`;
+  return (
+    <div onClick={onSuggest} style={{borderRadius:12,border:'1.5px dashed rgba(30,145,175,0.30)',background:'rgba(255,255,255,0.32)',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,padding:'9px 13px',display:'flex',alignItems:'center',gap:8,cursor:'pointer',transition:'background 0.15s'}}>
+      <span style={{fontSize:12,color:T.ink3,flex:1}}>⏳ {dur} free · {toTime(gap.start)}–{toTime(gap.end)}</span>
+      <Chip v="accent">Suggestions →</Chip>
+    </div>
+  );
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────────
+function LoginScreen({onLogin}) {
+  const [mode,setMode]=useState('join');
+  const [name,setName]=useState('');
+  const [code,setCode]=useState('');
+  const [days,setDays]=useState('4');
+  const [nick,setNick]=useState('');
+  const [step,setStep]=useState('main');
+
+  const tryJoin=()=>(name&&code)&&setStep('nick');
+  const tryCreate=()=>(name&&code.length>=6)&&setStep('nick');
+  const demo=()=>{setName(TRIP.name);setCode('DESERT24');setStep('nick');};
+
+  if(step==='nick') return (
+    <div style={{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:28}}>
+      <Glass level={3} style={{width:'100%',borderRadius:28,padding:28}}>
+        <div style={{textAlign:'center',marginBottom:22}}>
+          <div style={{fontSize:40,marginBottom:10}}>🏖️</div>
+          <h2 style={{fontFamily:T.fontDisplay,fontSize:22,color:T.ink,marginBottom:4}}>What's your name?</h2>
+          <p style={{color:T.ink2,fontSize:13}}>Others will see this on events you add</p>
+        </div>
+        <Field placeholder="Your nickname — e.g. Dana" value={nick} onChange={e=>setNick(e.target.value)} onKeyDown={e=>e.key==='Enter'&&nick.trim()&&onLogin({nickname:nick})} autoFocus/>
+        <GlassBtn variant="accent" size="lg" onClick={()=>nick.trim()&&onLogin({nickname:nick})} style={{width:'100%',marginTop:14}}>Enter Trip →</GlassBtn>
+      </Glass>
+    </div>
+  );
+
+  return (
+    <div style={{height:'100%',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:22}}>
+      <div style={{textAlign:'center',marginBottom:24}}>
+        <div style={{fontFamily:T.fontDisplay,fontSize:40,letterSpacing:'-0.02em',lineHeight:1,color:T.ink}}>
+          <span style={{color:T.accent}}>Tri</span>ppy
+        </div>
+        <p style={{fontSize:11,color:T.ink3,letterSpacing:'0.10em',textTransform:'uppercase',marginTop:4}}>Desert Trip Planner</p>
+      </div>
+
+      <Glass level={3} style={{width:'100%',borderRadius:28,padding:8}}>
+        <div style={{display:'flex',background:'rgba(28,18,8,0.06)',borderRadius:20,padding:3,marginBottom:16}}>
+          {['join','create'].map(m=>(
+            <button key={m} onClick={()=>setMode(m)} style={{flex:1,padding:'9px 0',borderRadius:16,border:'none',cursor:'pointer',background:mode===m?T.glassMid:'transparent',backdropFilter:mode===m?T.blur:'none',WebkitBackdropFilter:mode===m?T.blur:'none',border:mode===m?`1px solid ${T.glassBorder}`:'1px solid transparent',color:mode===m?T.ink:T.ink3,fontFamily:T.font,fontSize:13,fontWeight:600,transition:'all 0.2s',boxShadow:mode===m?T.glassShadow:'none'}}>
+              {m==='join'?'Join Trip':'Create Trip'}
+            </button>
+          ))}
+        </div>
+        <div style={{padding:'0 10px 10px',display:'flex',flexDirection:'column',gap:11}}>
+          <Field label="Trip Name" placeholder={mode==='join'?'e.g. Negev Desert Adventure':'Name your adventure'} value={name} onChange={e=>setName(e.target.value)}/>
+          {mode==='create' && <Field label="Number of Days" type="number" placeholder="4" value={days} onChange={e=>setDays(e.target.value)}/>}
+          <Field label="Trip Code" type="password" placeholder={mode==='join'?'Enter code':'Min 6 characters'} value={code} onChange={e=>setCode(e.target.value)} icon={<Ic name="lock" size={14} style={{color:T.ink3}}/>}/>
+          <GlassBtn variant="accent" size="lg" onClick={mode==='join'?tryJoin:tryCreate} style={{width:'100%',marginTop:2}}>
+            {mode==='join'?'Join Trip →':'Create Trip ✦'}
+          </GlassBtn>
+          <div style={{textAlign:'center'}}>
+            <button onClick={demo} style={{background:'none',border:'none',cursor:'pointer',color:T.accent,fontSize:12,textDecoration:'underline',fontFamily:T.font}}>Try demo trip</button>
+          </div>
+        </div>
+      </Glass>
+    </div>
+  );
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────────
+function Dashboard({onDaySelect,currentDay,nickname}) {
+  const [shareOpen,setShareOpen]=useState(false);
+  const days=Array.from({length:TRIP.days},(_,i)=>i+1);
+
+  return (
+    <div style={{height:'100%',overflowY:'auto',paddingTop:56,paddingBottom:100}}>
+      {/* Header */}
+      <div style={{padding:'0 18px 14px'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:10}}>
+          <div>
+            <p style={{fontSize:11,color:T.ink3,letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:2}}>Your Adventure</p>
+            <h1 style={{fontFamily:T.fontDisplay,fontSize:24,lineHeight:1.1,color:T.ink}}>{TRIP.name}</h1>
+          </div>
+          <GlassBtn size="sm" onClick={()=>setShareOpen(true)} style={{marginTop:4}}>
+            <Ic name="share" size={13} style={{color:T.ink2}}/> Share
+          </GlassBtn>
+        </div>
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <span style={{fontSize:12,color:T.ink2}}>📅 {TRIP.days} days · Jul 14–17, 2026</span>
+          <div style={{flex:1}}/>
+          <div style={{display:'flex'}}>
+            {TRIP.participants.map((p,i)=>(
+              <div key={p.id} style={{width:26,height:26,minWidth:26,background:p.color,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:9,fontWeight:700,color:'white',border:'2px solid rgba(255,255,255,0.85)',marginLeft:i>0?-8:0,position:'relative',zIndex:10-i,boxShadow:'0 2px 6px rgba(0,0,0,0.12)'}}>{p.initials}</div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Journey map */}
+      <div style={{padding:'0 18px'}}>
+        <JourneyMap days={days} currentDay={currentDay} onDaySelect={onDaySelect}/>
+      </div>
+
+      {/* Day list (compact) */}
+      <div style={{padding:'0 18px',display:'flex',flexDirection:'column',gap:8}}>
+        <p style={{fontSize:11,fontWeight:700,letterSpacing:'0.06em',textTransform:'uppercase',color:T.ink3,marginBottom:2}}>Daily Overview</p>
+        {days.map(d=>{
+          const evs=TRIP.events[d]||[];
+          const gaps=getGaps(evs);
+          const sorted=[...evs].sort((a,b)=>toMins(a.time)-toMins(b.time));
+          const first=sorted[0]?.time;
+          const last=sorted[sorted.length-1];
+          const lastEnd=last?toTime(toMins(last.time)+last.duration):null;
+          const meta=TRIP.dayMeta[d-1];
+
+          return (
+            <Glass key={d} onClick={()=>onDaySelect(d)} level={d===currentDay?3:2}
+              style={{borderRadius:18,padding:'12px 14px',cursor:'pointer',display:'flex',alignItems:'center',gap:11,transition:'all 0.2s',border:d===currentDay?`1.5px solid rgba(30,145,175,0.35)`:undefined}}
+              onMouseEnter={e=>{e.currentTarget.style.background=T.glassStrong;}}
+              onMouseLeave={e=>{e.currentTarget.style.background='';}}
+            >
+              <div style={{width:38,height:38,minWidth:38,borderRadius:12,background:d===currentDay?T.accentBg:'rgba(255,255,255,0.45)',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,border:`1px solid ${d===currentDay?'rgba(30,145,175,0.35)':T.glassBorderSub}`,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',fontSize:16}}>
+                {meta.emoji}
+              </div>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontWeight:600,fontSize:13,marginBottom:1,color:T.ink}}>{fmtDate(TRIP.startDate,d-1)} · {meta.region}</div>
+                <div style={{fontSize:11,color:T.ink2}}>{evs.length} stops{first&&lastEnd?` · ${first}–${lastEnd}`:''}</div>
+              </div>
+              {gaps.length>0 && <Chip v="gap">{gaps.length} gap{gaps.length>1?'s':''}</Chip>}
+              <Ic name="chevR" size={14} style={{color:T.ink3,flexShrink:0}}/>
+            </Glass>
+          );
+        })}
+      </div>
+
+      {shareOpen && (
+        <Sheet onClose={()=>setShareOpen(false)} title="Share Trip" subtitle="Send these details to your group">
+          {[['Trip Name',TRIP.name,false],['Trip Code','DESERT24',true]].map(([label,val,mono])=>(
+            <Glass key={label} level={2} style={{borderRadius:14,padding:'12px 14px',marginBottom:10,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <div>
+                <div style={{fontSize:11,color:T.ink3,marginBottom:2}}>{label}</div>
+                <div style={{fontWeight:600,color:T.ink,fontFamily:mono?'monospace':'inherit',letterSpacing:mono?'0.12em':0}}>{val}</div>
+              </div>
+              <GlassBtn size="sm">Copy</GlassBtn>
+            </Glass>
+          ))}
+          <GlassBtn size="md" style={{width:'100%',marginTop:6}} onClick={()=>setShareOpen(false)}>Close</GlassBtn>
+        </Sheet>
+      )}
+    </div>
+  );
+}
+
+// ── ADD EVENT MODAL ───────────────────────────────────────────────────────────
+function AddEventModal({onAdd,onClose}) {
+  const [form,setForm]=useState({time:'09:00',name:'',category:'attraction',duration:60,location:'',notes:''});
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+  return (
+    <Sheet onClose={onClose} title="Add Event">
+      <div style={{display:'flex',flexDirection:'column',gap:11}}>
+        <div style={{display:'flex',gap:10}}>
+          <div style={{flex:1}}><Field label="Time" type="time" value={form.time} onChange={e=>set('time',e.target.value)}/></div>
+          <div style={{flex:1}}>
+            <label style={{display:'block',fontSize:11,fontWeight:600,color:T.ink2,letterSpacing:'0.06em',textTransform:'uppercase',marginBottom:6}}>Duration</label>
+            <select value={form.duration} onChange={e=>set('duration',+e.target.value)} style={{background:'rgba(255,255,255,0.55)',border:`1px solid ${T.glassBorder}`,borderRadius:14,color:T.ink,fontFamily:T.font,fontSize:14,padding:'11px 14px',width:'100%',outline:'none',backdropFilter:T.blur,WebkitBackdropFilter:T.blur}}>
+              {[30,45,60,90,120,180].map(d=><option key={d} value={d} style={{background:'#f5ead8'}}>{d<60?`${d}m`:`${d/60}h`}</option>)}
+            </select>
+          </div>
+        </div>
+        <Field label="Event Name" placeholder="What are you doing?" value={form.name} onChange={e=>set('name',e.target.value)}/>
+        <div>
+          <label style={{display:'block',fontSize:11,fontWeight:600,color:T.ink2,letterSpacing:'0.06em',textTransform:'uppercase',marginBottom:7}}>Category</label>
+          <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+            {Object.entries(CATS).map(([k,v])=>(
+              <button key={k} onClick={()=>set('category',k)} style={{padding:'5px 11px',borderRadius:9,border:`1.5px solid ${form.category===k?v.color:T.glassBorderSub}`,background:form.category===k?v.bg:'rgba(255,255,255,0.45)',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,color:form.category===k?v.color:T.ink2,cursor:'pointer',fontSize:12,fontFamily:T.font,fontWeight:500,display:'inline-flex',alignItems:'center',gap:4,transition:'all 0.15s'}}>
+                {v.icon} {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <Field label="Location (optional)" placeholder="Place name or address" value={form.location} onChange={e=>set('location',e.target.value)}/>
+        <Field label="Notes (optional)" placeholder="Notes for the group…" value={form.notes} onChange={e=>set('notes',e.target.value)} rows={2}/>
+        <div style={{display:'flex',gap:10}}>
+          <GlassBtn style={{flex:1}} onClick={onClose}>Cancel</GlassBtn>
+          <GlassBtn variant="accent" style={{flex:2}} onClick={()=>form.name&&onAdd(form)}>Add to Day</GlassBtn>
+        </div>
+      </div>
+    </Sheet>
+  );
+}
+
+// ── AI PANEL ──────────────────────────────────────────────────────────────────
+function AIPanel({gap,onAdd,onClose}) {
+  const [loading,setLoading]=useState(true);
+  const [suggs,setSuggs]=useState([]);
+  useEffect(()=>{const t=setTimeout(()=>{setSuggs(AI_SUGG);setLoading(false);},1900);return()=>clearTimeout(t);},[]);
+  const dur=gap?`${Math.floor(gap.duration/60)>0?Math.floor(gap.duration/60)+'h ':''}${gap.duration%60>0?gap.duration%60+'m':''}`:null;
+  return (
+    <Sheet onClose={onClose}>
+      <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:14}}>
+        <Glass level={2} style={{width:36,height:36,borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+          <Ic name="sparkle" size={16} style={{color:T.accent}}/>
+        </Glass>
+        <div>
+          <h3 style={{fontFamily:T.fontDisplay,fontSize:20,color:T.ink,lineHeight:1.1}}>AI Suggestions</h3>
+          {gap && <p style={{fontSize:12,color:T.ink2}}>{dur} free · {toTime(gap.start)}–{toTime(gap.end)}</p>}
+        </div>
+      </div>
+      {loading ? (
+        <div>
+          <div style={{display:'flex',alignItems:'center',gap:8,color:T.ink3,fontSize:13,marginBottom:14}}>
+            <span className="an-pulse">✦</span> Scanning nearby places…
+          </div>
+          <Shimmer h={88}/><Shimmer h={88}/><Shimmer h={88}/>
+        </div>
+      ) : suggs.map(s=>{
+        const cat=CATS[s.category]||CATS.other;
+        return (
+          <Glass key={s.id} level={2} style={{borderRadius:16,padding:'13px 14px',marginBottom:9}}>
+            <div style={{display:'flex',alignItems:'flex-start',gap:9,marginBottom:8}}>
+              <span style={{fontSize:20,flexShrink:0}}>{cat.icon}</span>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:600,fontSize:13,marginBottom:2,color:T.ink}}>{s.name}</div>
+                <p style={{fontSize:12,color:T.ink2,lineHeight:1.4}}>{s.description}</p>
+              </div>
+            </div>
+            <div style={{display:'flex',gap:5,alignItems:'center',flexWrap:'wrap'}}>
+              <Chip style={{background:cat.bg,color:cat.color,border:`1px solid ${cat.color}30`}}>{s.duration}m</Chip>
+              <Chip>⏰ {s.time}</Chip>
+              <Chip>📍 {s.distance}</Chip>
+              <Chip v={s.open?'open':'closed'}>{s.open?'Open':'Closed'}</Chip>
+              <div style={{flex:1}}/>
+              <GlassBtn variant="accent" size="sm" onClick={()=>onAdd(s)}>+ Add</GlassBtn>
+            </div>
+          </Glass>
+        );
+      })}
+    </Sheet>
+  );
+}
+
+// ── DAY SCREEN ────────────────────────────────────────────────────────────────
+function DayScreen({dayNum,onBack,onDayChange,nickname}) {
+  const [events,setEvents]=useState(TRIP.events[dayNum]||[]);
+  const [showAdd,setShowAdd]=useState(false);
+  const [showAI, setShowAI] =useState(false);
+  const [activeGap,setActiveGap]=useState(null);
+  const {show,el:toastEl}=useToast();
+
+  const sorted=[...events].sort((a,b)=>toMins(a.time)-toMins(b.time));
+  const gaps=getGaps(events);
+  const meta=TRIP.dayMeta[dayNum-1];
+
+  const addEvent=f=>{setEvents(p=>[...p,{id:`new_${Date.now()}`,...f,addedBy:nickname}]);setShowAdd(false);show('Event added ✓');};
+  const delEvent=id=>{setEvents(p=>p.filter(e=>e.id!==id));show('Removed');};
+  const addSugg=s=>{setEvents(p=>[...p,{id:`ai_${Date.now()}`,time:s.time,duration:s.duration,name:s.name,category:s.category,location:'',addedBy:nickname}]);setShowAI(false);show(`"${s.name}" added ✓`);};
+
+  return (
+    <div style={{height:'100%',display:'flex',flexDirection:'column'}}>
+      {/* Header */}
+      <Glass level={3} style={{borderRadius:0,padding:'52px 16px 12px',flexShrink:0,boxShadow:'0 2px 16px rgba(80,60,20,0.08), 0 1px 0 rgba(255,255,255,0.9) inset',border:'none',borderBottom:`1px solid rgba(255,255,255,0.6)`}}>
+        <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:9}}>
+          <GlassBtn size="sm" onClick={onBack} style={{height:32,display:'flex',alignItems:'center',gap:4}}>
+            <Ic name="chevL" size={12} style={{color:T.ink2}}/> <span style={{color:T.ink2,fontSize:12}}>Home</span>
+          </GlassBtn>
+          <div style={{flex:1}}/>
+          <GlassBtn size="sm" onClick={()=>onDayChange(dayNum-1)} disabled={dayNum<=1} style={{width:32,height:32,padding:0}}>
+            <Ic name="chevL" size={14} style={{color:T.ink2}}/>
+          </GlassBtn>
+          <span style={{fontWeight:700,fontSize:13,color:T.ink}}>Day {dayNum}</span>
+          <GlassBtn size="sm" onClick={()=>onDayChange(dayNum+1)} disabled={dayNum>=TRIP.days} style={{width:32,height:32,padding:0}}>
+            <Ic name="chevR" size={14} style={{color:T.ink2}}/>
+          </GlassBtn>
+        </div>
+        <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between'}}>
+          <div>
+            <div style={{display:'flex',alignItems:'center',gap:7,marginBottom:2}}>
+              <span style={{fontSize:22}}>{meta.emoji}</span>
+              <h2 style={{fontFamily:T.fontDisplay,fontSize:20,color:T.ink,lineHeight:1}}>{meta.region}</h2>
+            </div>
+            <div style={{display:'flex',gap:8,alignItems:'center'}}>
+              <span style={{fontSize:12,color:T.ink2}}>{fmtDate(TRIP.startDate,dayNum-1)}</span>
+              <span style={{fontSize:12,color:T.ink2,display:'flex',alignItems:'center',gap:3}}><Ic name="sun" size={10} style={{color:T.gold}}/>38°C</span>
+              {gaps.length>0 && <Chip v="gap">{gaps.length} gap{gaps.length>1?'s':''}</Chip>}
+            </div>
+          </div>
+          <div style={{display:'flex',gap:6}}>
+            <GlassBtn variant="accent" size="sm" onClick={()=>setShowAdd(true)} style={{display:'flex',alignItems:'center',gap:4}}>
+              <Ic name="plus" size={13}/>Add
+            </GlassBtn>
+          </div>
+        </div>
+      </Glass>
+
+      {/* Timeline */}
+      <div style={{flex:1,overflowY:'auto',padding:'10px 15px 24px'}}>
+        {/* AI bar */}
+        <Glass level={2} onClick={()=>{setActiveGap(gaps[0]||null);setShowAI(true);}} style={{borderRadius:14,padding:'9px 13px',marginBottom:9,display:'flex',alignItems:'center',gap:9,cursor:'pointer',border:'1.5px dashed rgba(30,145,175,0.28)'}}>
+          <Glass level={3} style={{width:26,height:26,borderRadius:8,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,border:`1px solid rgba(30,145,175,0.25)`}}>
+            <Ic name="sparkle" size={12} style={{color:T.accent}}/>
+          </Glass>
+          <span style={{fontSize:13,flex:1,color:T.ink2}}><span style={{fontWeight:700,color:T.accent}}>AI</span> — {gaps.length} gap{gaps.length!==1?'s':''} · Get suggestions</span>
+          <Ic name="chevR" size={13} style={{color:T.ink3}}/>
+        </Glass>
+
+        <div style={{display:'flex',flexDirection:'column',gap:6}}>
+          {sorted.map((ev,i)=>{
+            const prevEnd=i===0?8*60:toMins(sorted[i-1].time)+sorted[i-1].duration;
+            const gap=gaps.find(g=>g.start===prevEnd&&g.end===toMins(ev.time));
+            return (
+              <React.Fragment key={ev.id}>
+                {gap && <GapBlock gap={gap} onSuggest={()=>{setActiveGap(gap);setShowAI(true);}}/>}
+                <div className="an-up" style={{animationDelay:`${i*0.04}s`}}>
+                  <EventCard event={ev} onDelete={delEvent} onEdit={()=>{}}/>
+                </div>
+              </React.Fragment>
+            );
+          })}
+          {(()=>{
+            if(!sorted.length)return null;
+            const last=sorted[sorted.length-1];
+            const le=toMins(last.time)+last.duration;
+            const tg=gaps.find(g=>g.start===le);
+            return tg?<GapBlock gap={tg} onSuggest={()=>{setActiveGap(tg);setShowAI(true);}}/>:null;
+          })()}
+          {events.length===0 && <div style={{textAlign:'center',padding:'40px 0',color:T.ink3,fontSize:13}}><div style={{fontSize:32,marginBottom:8}}>🏜️</div>No events yet — tap Add to start</div>}
+        </div>
+      </div>
+
+      {showAdd && <AddEventModal onAdd={addEvent} onClose={()=>setShowAdd(false)}/>}
+      {showAI  && <AIPanel gap={activeGap} onAdd={addSugg} onClose={()=>setShowAI(false)}/>}
+      {toastEl}
+    </div>
+  );
+}
+
+// ── SUPPLIES ──────────────────────────────────────────────────────────────────
+function SuppliesScreen() {
+  const [items,setItems]=useState(SUPPLIES_DATA);
+  const [newItem,setNewItem]=useState('');
+  const [filter,setFilter]=useState('All');
+
+  const cats=['All',...new Set(SUPPLIES_DATA.map(s=>s.category))];
+  const checked=items.filter(s=>s.checked).length;
+  const filtered=filter==='All'?items:items.filter(s=>s.category===filter);
+
+  const toggle=id=>setItems(p=>p.map(s=>s.id===id?{...s,checked:!s.checked}:s));
+  const remove=id=>setItems(p=>p.filter(s=>s.id!==id));
+  const add=()=>{if(!newItem.trim())return;setItems(p=>[...p,{id:`sp${Date.now()}`,name:newItem,category:'Gear',checked:false}]);setNewItem('');};
+
+  return (
+    <div style={{height:'100%',overflowY:'auto',paddingTop:56,paddingBottom:100}}>
+      <div style={{padding:'0 18px 12px'}}>
+        <p style={{fontSize:11,color:T.ink3,letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:3}}>Trip Supplies</p>
+        <h1 style={{fontFamily:T.fontDisplay,fontSize:24,color:T.ink,marginBottom:13}}>Checklist</h1>
+
+        <Glass level={2} style={{borderRadius:16,padding:'12px 15px',marginBottom:12}}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:7}}>
+            <span style={{fontSize:13,fontWeight:600,color:T.ink}}>{checked} / {items.length} packed</span>
+            <span style={{fontSize:12,color:checked===items.length?T.green:T.ink2}}>{checked===items.length?'✓ All packed!':`${items.length-checked} remaining`}</span>
+          </div>
+          <div style={{height:5,background:'rgba(28,18,8,0.08)',borderRadius:3,overflow:'hidden'}}>
+            <div style={{height:'100%',width:`${(checked/items.length)*100}%`,background:`linear-gradient(90deg, ${T.accent}, ${T.green})`,borderRadius:3,transition:'width 0.4s cubic-bezier(0.16,1,0.3,1)'}}/>
+          </div>
+        </Glass>
+
+        <div style={{display:'flex',gap:5,overflowX:'auto',paddingBottom:4}}>
+          {cats.map(c=>(
+            <GlassBtn key={c} size="sm" onClick={()=>setFilter(c)}
+              style={{height:30,background:filter===c?T.accentBg:T.glassWeak,border:filter===c?`1.5px solid rgba(30,145,175,0.38)`:`1px solid ${T.glassBorderSub}`,color:filter===c?T.accent:T.ink2,whiteSpace:'nowrap'}}>
+              {c}
+            </GlassBtn>
+          ))}
+        </div>
+      </div>
+
+      <div style={{padding:'0 18px 10px',display:'flex',gap:8}}>
+        <Field placeholder="Add item…" value={newItem} onChange={e=>setNewItem(e.target.value)} onKeyDown={e=>e.key==='Enter'&&add()} style={{flex:1}}/>
+        <GlassBtn variant="accent" onClick={add} style={{width:44,height:44,padding:0,flexShrink:0}}><Ic name="plus" size={17}/></GlassBtn>
+      </div>
+
+      <div style={{padding:'0 18px',display:'flex',flexDirection:'column',gap:6}}>
+        {filtered.map(item=>(
+          <Glass key={item.id} level={2} style={{borderRadius:14,padding:'10px 13px',display:'flex',alignItems:'center',gap:10,opacity:item.checked?0.55:1,transition:'opacity 0.2s'}}>
+            <button onClick={()=>toggle(item.id)} style={{width:22,height:22,minWidth:22,borderRadius:7,border:`2px solid ${item.checked?T.accent:'rgba(28,18,8,0.2)'}`,background:item.checked?T.accent:'rgba(255,255,255,0.55)',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',transition:'all 0.2s',boxShadow:item.checked?`0 2px 8px ${T.accent}40`:T.glassShadow}}>
+              {item.checked && <Ic name="check" size={12} style={{color:'white'}}/>}
+            </button>
+            <span style={{flex:1,fontSize:13,fontWeight:500,color:T.ink,textDecoration:item.checked?'line-through':'none'}}>{item.name}</span>
+            <span style={{fontSize:11,color:T.ink3,background:'rgba(255,255,255,0.5)',padding:'2px 7px',borderRadius:6,border:`1px solid ${T.glassBorderSub}`}}>{item.category}</span>
+            <button onClick={()=>remove(item.id)} style={{background:'none',border:'none',cursor:'pointer',color:'rgba(180,50,40,0.45)',padding:2,display:'flex'}}><Ic name="x" size={13}/></button>
+          </Glass>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── CALENDAR EXPORT ───────────────────────────────────────────────────────────
+function buildICS() {
+  const lines = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Trippy//Desert Trip Planner//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH',
+  ];
+  for(const [dayStr, evs] of Object.entries(TRIP.events)) {
+    const dayIdx = parseInt(dayStr)-1;
+    const base = new Date(TRIP.startDate);
+    base.setDate(base.getDate()+dayIdx);
+    const ymd = base.toISOString().slice(0,10).replace(/-/g,'');
+    for(const ev of evs) {
+      const [h,m] = ev.time.split(':');
+      const endMins = toMins(ev.time)+ev.duration;
+      const eh = String(Math.floor(endMins/60)).padStart(2,'0');
+      const em = String(endMins%60).padStart(2,'0');
+      const uid = `${ev.id}@trippy.app`;
+      lines.push(
+        'BEGIN:VEVENT',
+        `UID:${uid}`,
+        `DTSTART:${ymd}T${h}${m}00`,
+        `DTEND:${ymd}T${eh}${em}00`,
+        `SUMMARY:${ev.name}`,
+        ev.location?`LOCATION:${ev.location}`:'',
+        ev.notes?`DESCRIPTION:${ev.notes}`:'',
+        'END:VEVENT',
+      );
+    }
+  }
+  lines.push('END:VCALENDAR');
+  return lines.filter(Boolean).join('\r\n');
+}
+
+function exportCalendar(type, label) {
+  const ics = buildICS();
+  const blob = new Blob([ics], {type:'text/calendar;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  if(type==='google') {
+    // For Google, open first event; real integration would use Google Calendar API
+    const a=document.createElement('a'); a.href=url; a.download='trippy-negev.ics'; a.click(); URL.revokeObjectURL(url);
+  } else {
+    const a=document.createElement('a'); a.href=url; a.download='trippy-negev.ics'; a.click(); URL.revokeObjectURL(url);
+  }
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────────
+function SettingsScreen({nickname}) {
+  return (
+    <div style={{height:'100%',overflowY:'auto',paddingTop:56,paddingBottom:100}}>
+      <div style={{padding:'0 18px 14px'}}>
+        <p style={{fontSize:11,color:T.ink3,letterSpacing:'0.08em',textTransform:'uppercase',marginBottom:3}}>Configuration</p>
+        <h1 style={{fontFamily:T.fontDisplay,fontSize:24,color:T.ink}}>Settings</h1>
+      </div>
+      <div style={{padding:'0 18px',display:'flex',flexDirection:'column',gap:10}}>
+        <Glass level={3} style={{borderRadius:18,padding:'13px 15px',display:'flex',alignItems:'center',gap:12}}>
+          <div style={{width:40,height:40,borderRadius:13,background:T.accentBg,border:`1px solid rgba(30,145,175,0.3)`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:17,fontWeight:700,color:T.accent,backdropFilter:T.blur,WebkitBackdropFilter:T.blur}}>{nickname?.[0]?.toUpperCase()||'Y'}</div>
+          <div>
+            <div style={{fontWeight:600,fontSize:15,color:T.ink}}>{nickname||'Traveler'}</div>
+            <div style={{fontSize:12,color:T.ink2}}>Nickname · tap to change</div>
+          </div>
+          <GlassBtn size="sm" style={{marginLeft:'auto'}}>Edit</GlassBtn>
+        </Glass>
+
+        <p style={{fontSize:11,fontWeight:700,letterSpacing:'0.06em',textTransform:'uppercase',color:T.ink3,marginTop:4}}>Trip</p>
+        <Glass level={2} style={{borderRadius:18,overflow:'hidden',padding:0}}>
+          {[['🗓️','Trip Duration',`${TRIP.days} days`],['📅','Start Date','Jul 14, 2026'],['👥','Participants',`${TRIP.participants.length} members`],['📍','Map Style','Satellite']].map(([icon,label,val],i,arr)=>(
+            <div key={label}>
+              <div style={{padding:'12px 15px',display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
+                <span style={{fontSize:16,width:24}}>{icon}</span>
+                <span style={{flex:1,fontSize:13,color:T.ink}}>{label}</span>
+                <span style={{fontSize:12,color:T.ink2}}>{val}</span>
+                <Ic name="chevR" size={12} style={{color:T.ink3}}/>
+              </div>
+              {i<arr.length-1 && <div style={{height:1,background:'rgba(28,18,8,0.07)',margin:'0 15px'}}/>}
+            </div>
+          ))}
+        </Glass>
+
+        <p style={{fontSize:11,fontWeight:700,letterSpacing:'0.06em',textTransform:'uppercase',color:T.ink3,marginTop:4}}>Export & Sync</p>
+
+        {/* Calendar Export Card */}
+        <Glass level={3} style={{borderRadius:18,padding:'14px 16px',border:`1.5px solid rgba(30,145,175,0.22)`}}>
+          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+            <Glass level={2} style={{width:36,height:36,borderRadius:11,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+              <Ic name="calExport" size={17} style={{color:T.accent}}/>
+            </Glass>
+            <div>
+              <div style={{fontWeight:600,fontSize:14,color:T.ink}}>Export to Calendar</div>
+              <div style={{fontSize:11,color:T.ink2}}>Add all events to Google, Apple or Outlook</div>
+            </div>
+          </div>
+          <div style={{display:'flex',flexDirection:'column',gap:7}}>
+            {[
+              {label:'Google Calendar',  icon:'📅', desc:'Open & add each day', action:'google'},
+              {label:'Apple Calendar',   icon:'🍎', desc:'Download .ics file',  action:'ics'},
+              {label:'Outlook / iCal',   icon:'📆', desc:'Download .ics file',  action:'ics'},
+            ].map(opt => (
+              <button key={opt.action+opt.label} onClick={() => exportCalendar(opt.action, opt.label)}
+                style={{display:'flex',alignItems:'center',gap:10,padding:'9px 12px',borderRadius:12,background:'rgba(255,255,255,0.45)',backdropFilter:T.blur,WebkitBackdropFilter:T.blur,border:`1px solid ${T.glassBorderSub}`,cursor:'pointer',textAlign:'left',fontFamily:T.font,transition:'all 0.15s'}}
+                onMouseEnter={e=>e.currentTarget.style.background='rgba(255,255,255,0.7)'}
+                onMouseLeave={e=>e.currentTarget.style.background='rgba(255,255,255,0.45)'}
+              >
+                <span style={{fontSize:18,width:24,flexShrink:0}}>{opt.icon}</span>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:13,fontWeight:600,color:T.ink}}>{opt.label}</div>
+                  <div style={{fontSize:11,color:T.ink2}}>{opt.desc}</div>
+                </div>
+                <Ic name="download" size={14} style={{color:T.accent,flexShrink:0}}/>
+              </button>
+            ))}
+          </div>
+        </Glass>
+
+        <Glass level={2} style={{borderRadius:18,overflow:'hidden',padding:0}}>
+          {[['⬇️','Import Google Maps Places'],['📤','Export Itinerary PDF'],['💾','Export JSON Backup']].map(([icon,label],i,arr)=>(
+            <div key={label}>
+              <div style={{padding:'12px 15px',display:'flex',alignItems:'center',gap:10,cursor:'pointer'}}>
+                <span style={{fontSize:16,width:24}}>{icon}</span>
+                <span style={{flex:1,fontSize:13,color:T.ink}}>{label}</span>
+                <Ic name="chevR" size={12} style={{color:T.ink3}}/>
+              </div>
+              {i<arr.length-1 && <div style={{height:1,background:'rgba(28,18,8,0.07)',margin:'0 15px'}}/>}
+            </div>
+          ))}
+        </Glass>
+        <GlassBtn variant="danger" style={{width:'100%',marginTop:4}}>Leave Trip</GlassBtn>
+      </div>
+    </div>
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────────────────────────
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "showParallax": true,
+  "glassLevel": "high",
+  "accentHue": "teal"
+}/*EDITMODE-END*/;
+
+function App() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [nickname, setNickname] = useState('');
+  const [activeTab,setActiveTab]= useState('dashboard');
+  const [activeDay,setActiveDay]= useState(1);
+  const [tweaksVisible,setTV]   = useState(false);
+
+  useEffect(()=>{
+    const h=e=>{
+      if(e.data?.type==='__activate_edit_mode')   setTV(true);
+      if(e.data?.type==='__deactivate_edit_mode') setTV(false);
+    };
+    window.addEventListener('message',h);
+    window.parent.postMessage({type:'__edit_mode_available'},'*');
+    return ()=>window.removeEventListener('message',h);
+  },[]);
+
+  const handleDaySelect=d=>{setActiveDay(d);setActiveTab('day');};
+  const handleDayChange=d=>{ if(d>=1&&d<=TRIP.days) setActiveDay(d); };
+
+  const screen=()=>{
+    if(!loggedIn) return <LoginScreen onLogin={({nickname:n})=>{setNickname(n);setLoggedIn(true);}}/>;
+    switch(activeTab){
+      case 'dashboard': return <Dashboard onDaySelect={handleDaySelect} currentDay={activeDay} nickname={nickname}/>;
+      case 'day':       return <DayScreen key={activeDay} dayNum={activeDay} onBack={()=>setActiveTab('dashboard')} onDayChange={handleDayChange} nickname={nickname}/>;
+      case 'supplies':  return <SuppliesScreen/>;
+      case 'settings':  return <SettingsScreen nickname={nickname}/>;
+    }
+  };
+
+  return (
+    <>
+      <div style={{position:'relative'}}>
+        <div className="phone">
+          {/* glass phone background — lets scene bleed through */}
+          <div style={{position:'absolute',inset:0,backdropFilter:'blur(0px)',WebkitBackdropFilter:'blur(0px)',background:'rgba(245,235,215,0.12)',zIndex:0}}/>
+          <div style={{position:'absolute',inset:0,zIndex:1}}>
+            {loggedIn && <StatusBar/>}
+            <div style={{position:'absolute',inset:0}} className="an-screen">{screen()}</div>
+            {loggedIn && <NavBar active={activeTab} onChange={setActiveTab}/>}
+          </div>
+        </div>
+        <div className="phone-label">Trippy · Desert Trip Planner</div>
+      </div>
+
+      {tweaksVisible && (
+        <div style={{position:'fixed',bottom:24,right:24,zIndex:9999,width:240}}>
+          <Glass level={3} style={{borderRadius:20,padding:'16px 18px',boxShadow:'0 20px 60px rgba(80,60,20,0.22)'}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+              <span style={{fontWeight:700,fontSize:14,color:T.ink}}>Tweaks</span>
+              <GlassBtn size="sm" style={{width:28,height:28,padding:0,borderRadius:8}} onClick={()=>{setTV(false);window.parent.postMessage({type:'__edit_mode_dismissed'},'*');}}>
+                <Ic name="x" size={13} style={{color:T.ink2}}/>
+              </GlassBtn>
+            </div>
+            <p style={{fontSize:11,color:T.ink3,lineHeight:1.6}}>Background reacts to mouse movement. Open the scene in a desktop browser for the full parallax effect.</p>
+          </Glass>
+        </div>
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
