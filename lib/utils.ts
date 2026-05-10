@@ -48,7 +48,9 @@ export function getDayBudget(events: TripEvent[]): number {
 }
 
 export function getTripBudget(trip: Trip): number {
-  return Object.values(trip.events).reduce((sum, evs) => sum + getDayBudget(evs), 0);
+  const eventsBudget = Object.values(trip.events).reduce((sum, evs) => sum + getDayBudget(evs), 0);
+  const expensesBudget = (trip.expenses ?? []).reduce((sum, exp) => sum + exp.amount, 0);
+  return eventsBudget + expensesBudget;
 }
 
 export const toMins = (t: string): number => {

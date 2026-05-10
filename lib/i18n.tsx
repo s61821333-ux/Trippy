@@ -200,6 +200,9 @@ const en = {
   manyDaysEmptyDesc: 'Several days still need activities',
   trackTitle: 'Trip is on track',
   trackDesc: '{events} events planned across {days} days',
+  onePerson: '1 person',
+  people: 'people',
+  everyone: 'Everyone',
 
   estimatingTravel: 'Estimating travel time…',
   estimatedTravelTime: '🚗 Estimated Travel Time',
@@ -490,6 +493,9 @@ const he: typeof en = {
   manyDaysEmptyDesc: 'מספר ימים עדיין דורשים פעילויות',
   trackTitle: 'הטיול במסלול הנכון',
   trackDesc: '{events} אירועים מתוכננים לאורך {days} ימים',
+  onePerson: 'אדם אחד',
+  people: 'אנשים',
+  everyone: 'כולם',
 
   estimatingTravel: 'מחשב זמן נסיעה…',
   estimatedTravelTime: '🚗 זמן נסיעה משוערך',

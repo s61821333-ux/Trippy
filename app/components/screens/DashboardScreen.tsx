@@ -349,9 +349,13 @@ export default function DashboardScreen() {
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}
                         >
-                          {[1,2,3,4,5,6,7,8].map(n => (
-                            <option key={n} value={n}>÷{n}</option>
-                          ))}
+                          {[1,2,3,4,5,6,7,8].map(n => {
+                            let label = `÷${n}`;
+                            if (n === 1) label = t('onePerson');
+                            else if (n === trip.participants.length) label = t('everyone');
+                            else label = `${n} ${t('people')}`;
+                            return <option key={n} value={n}>{label}</option>;
+                          })}
                         </select>
                         <GlassBtn size="sm" variant="accent" onClick={handleAddExpense} style={{ flexShrink: 0 }}>
                           <Icon name="plus" size={12} />
