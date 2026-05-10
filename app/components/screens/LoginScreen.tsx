@@ -35,6 +35,7 @@ export default function LoginScreen() {
   const [tripCode, setTripCode] = useState('');
   const [nickname, setNickname] = useState('');
   const [showCreate, setShowCreate] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [cName,  setCName]  = useState('');
   const [cDays,  setCDays]  = useState('3');
@@ -44,20 +45,24 @@ export default function LoginScreen() {
   const [cTheme, setCTheme] = useState<TripTheme>('desert');
   const [cDate,  setCDate]  = useState(new Date().toISOString().split('T')[0]);
 
-  const handleJoin = () => {
+  const handleJoin = async () => {
     if (!tripName.trim() || !tripCode.trim()) { show(t('enterTripNameCode')); return; }
     if (!nickname.trim())                     { show(t('enterNickname'));      return; }
-    const ok = joinTrip(tripName, tripCode, nickname);
+    setLoading(true);
+    const ok = await joinTrip(tripName, tripCode, nickname);
+    setLoading(false);
     if (!ok) show(t('tripNotFound'));
   };
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!cName.trim())    { show(t('enterTripName'));  return; }
     if (!cNick.trim())    { show(t('enterNickname'));  return; }
     if (cCode.length > 0 && cCode.length < 6) { show(t('codeTooShort')); return; }
     if (cCode && cCode !== cCode2) { show(t('codesNoMatch')); return; }
+    setLoading(true);
     const days = Math.min(30, Math.max(1, parseInt(cDays, 10) || 3));
-    createTrip(cName, days, cCode, cNick, cTheme, cDate);
+    await createTrip(cName, days, cCode, cNick, cTheme, cDate);
+    setLoading(false);
   };
 
   const selectedTheme = THEMES.find(th => th.id === cTheme) ?? THEMES[0];
@@ -158,8 +163,8 @@ export default function LoginScreen() {
                 onKeyDown={e => e.key === 'Enter' && handleJoin()}
                 icon={<Icon name="user" size={15} />}
               />
-              <GlassBtn variant="accent" size="lg" onClick={handleJoin} style={{ width: '100%', marginTop: 4 }}>
-                <Icon name="arrow" size={15} /> {t('joinBtn')}
+              <GlassBtn variant="accent" size="lg" onClick={handleJoin} style={{ width: '100%', marginTop: 4 }} disabled={loading}>
+                <Icon name="arrow" size={15} /> {loading ? '…' : t('joinBtn')}
               </GlassBtn>
             </div>
           </div>
@@ -269,8 +274,8 @@ export default function LoginScreen() {
               {cCode.length > 0 && (
                 <Field label={t('confirmCode')} type="password" placeholder={t('repeatCode')} value={cCode2} onChange={setCCode2} />
               )}
-              <GlassBtn variant="accent" size="lg" onClick={handleCreate} style={{ width: '100%', marginTop: 4 }}>
-                <Icon name="check" size={15} /> {t('createBtn')}
+              <GlassBtn variant="accent" size="lg" onClick={handleCreate} style={{ width: '100%', marginTop: 4 }} disabled={loading}>
+                <Icon name="check" size={15} /> {loading ? '…' : t('createBtn')}
               </GlassBtn>
             </div>
           </Sheet>
