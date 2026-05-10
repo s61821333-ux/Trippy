@@ -5,6 +5,14 @@ function sb() {
   return createClient()
 }
 
+async function hashTripCode(code: string): Promise<string> {
+  const data = new TextEncoder().encode(code.toLowerCase().trim())
+  const buf = await crypto.subtle.digest('SHA-256', data)
+  return Array.from(new Uint8Array(buf))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export async function ensureUser(nickname: string): Promise<string> {
@@ -47,9 +55,11 @@ export async function dbCreateTrip(
 ): Promise<string> {
   const supabase = sb()
 
+  const hashedCode = code ? await hashTripCode(code) : null
+
   const { data: trip, error } = await supabase
     .from('trips')
-    .insert({ name, days, start_date: startDate, code: code || null, theme: theme || null })
+    .insert({ name, days, start_date: startDate, code: hashedCode, theme: theme || null })
     .select('id')
     .single()
   if (error || !trip) throw error
@@ -78,10 +88,11 @@ export async function dbCreateTrip(
 }
 
 export async function dbFindTrip(name: string, code: string) {
-  const { data } = await sb()
+  const hashedCode = await hashTripCode(code)
+  const { data, error } = await sb()
     .from('trips')
     .select(`
-      id, name, days, start_date, theme, code, trip_notes,
+      id, name, days, start_date, theme, trip_notes,
       day_meta ( day_index, region, emoji, lat, lng, description ),
       events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags ),
       expenses ( id, description, amount, split_count ),
@@ -90,8 +101,9 @@ export async function dbFindTrip(name: string, code: string) {
       trip_participants ( user_id, initials, color )
     `)
     .ilike('name', name.trim())
-    .eq('code', code.trim())
-    .single()
+    .eq('code', hashedCode)
+    .maybeSingle()
+  if (error) throw error
   return data
 }
 
@@ -290,7 +302,6 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
     days,
     startDate:         data.start_date ?? new Date().toISOString().split('T')[0],
     theme:             (data.theme ?? 'desert') as TripTheme,
-    code:              data.code ?? undefined,
     tripNotes:         (data.trip_notes as string[]) ?? [],
     participants,
     dayMeta,

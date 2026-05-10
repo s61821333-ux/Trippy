@@ -133,10 +133,11 @@ export const useAppStore = create<AppState>()(
         if (normalCode.length < 6) return false;
 
         try {
-          const userId = await ensureUser(nickname);
+          // Verify trip exists BEFORE creating an anonymous user
           const data = await dbFindTrip(name, normalCode);
           if (!data) return false;
 
+          const userId = await ensureUser(nickname);
           await dbJoinTrip(data.id, userId, nickname.slice(0, 2).toUpperCase());
 
           const { trip, supplies } = rowToTrip(data);
