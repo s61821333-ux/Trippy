@@ -597,7 +597,7 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType>({
   locale: 'en',
   setLocale: () => {},
-  t: (k) => en[k],
+  t: (k) => (en as Record<string, string>)[k as string] ?? (k as string),
   isRTL: false,
 });
 
