@@ -96,11 +96,20 @@ export async function dbCreateTrip(
 
   const hashedCode = code ? await hashTripCode(code) : null
 
-  const { data: trip, error } = await supabase
+  const baseRow = { name, days, start_date: startDate, code: hashedCode, theme: theme || null }
+
+  let result = await supabase
     .from('trips')
-    .insert({ name, days, start_date: startDate, code: hashedCode, theme: theme || null, countries: countries ?? null })
+    .insert(countries?.length ? { ...baseRow, countries } : baseRow)
     .select('id')
     .single()
+
+  // Fallback: if insert failed (likely missing countries column), retry without it
+  if (result.error && countries?.length) {
+    result = await supabase.from('trips').insert(baseRow).select('id').single()
+  }
+
+  const { data: trip, error } = result
   if (error || !trip) throw error
 
   const initials = nickname.slice(0, 2).toUpperCase()
