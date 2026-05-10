@@ -29,6 +29,7 @@ export async function registerUser(username: string, password: string): Promise<
     password,
   })
   if (error || !data.user) throw error ?? new Error('Registration failed')
+  if (!data.session) throw new Error('EMAIL_CONFIRM_REQUIRED')
   return data.user.id
 }
 

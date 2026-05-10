@@ -6,6 +6,7 @@ import GlassBtn from '../ui/GlassBtn';
 import Field from '../ui/Field';
 import Sheet from '../ui/Sheet';
 import Icon from '../ui/Icon';
+import CountriesInput from '../ui/CountriesInput';
 import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
@@ -94,7 +95,7 @@ function AuthStep() {
       else await signIn(username.trim(), password);
     } catch (err: any) {
       const msg = (err?.message ?? '').toLowerCase();
-      if (mode === 'register') show(msg.includes('already') ? t('usernameTaken') : t('registrationFailed'));
+      if (mode === 'register') show(msg.includes('already') ? t('usernameTaken') : msg.includes('email_confirm') ? t('emailConfirmRequired') : t('registrationFailed'));
       else show(t('loginFailed'));
     }
     setLoading(false);
@@ -247,7 +248,7 @@ function TripStep() {
   const [cNick,  setCNick]  = useState(authUser?.username ?? '');
   const [cTheme, setCTheme] = useState<TripTheme>('desert');
   const [cDate,  setCDate]  = useState(new Date().toISOString().split('T')[0]);
-  const [cCountries, setCCountries] = useState('');
+  const [cCountries, setCCountries] = useState<string[]>([]);
 
   const handleJoin = async () => {
     if (!tripName.trim() || !tripCode.trim()) { show(t('enterTripNameCode')); return; }
@@ -266,10 +267,12 @@ function TripStep() {
     setLoading(true);
     try {
       const days = Math.min(30, Math.max(1, parseInt(cDays, 10) || 3));
-      const countries = cCountries.split(',').map(s => s.trim()).filter(Boolean);
+      const countries = cCountries;
       await createTrip(cName, days, cCode, cNick, cTheme, cDate, countries);
-    } catch {
-      show(t('createTripFailed'));
+    } catch (err: any) {
+      const msg = (err?.message ?? '').toLowerCase();
+      if (msg.includes('not authenticated')) show('לא מחובר — נסה להתנתק ולהתחבר מחדש');
+      else show(`${t('createTripFailed')}: ${err?.message ?? ''}`);
     }
     setLoading(false);
   };
@@ -374,12 +377,10 @@ function TripStep() {
               <Field label={t('yourNickname')} placeholder={t('createPlaceholderNick')} value={cNick} onChange={setCNick} icon={<Icon name="user" size={15} />} />
 
               {/* Countries */}
-              <Field
+              <CountriesInput
                 label={t('countriesLabel')}
-                placeholder={t('countriesPlaceholder')}
                 value={cCountries}
                 onChange={setCCountries}
-                icon={<span style={{ fontSize: 15 }}>🌍</span>}
               />
 
               <div style={{ display: 'flex', gap: 10 }}>
