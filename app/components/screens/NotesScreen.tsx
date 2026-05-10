@@ -30,8 +30,8 @@ export default function NotesScreen() {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 340, damping: 32, delay: 0.04 }}
-        className="px-[var(--page-px)] shrink-0"
-        style={{ paddingTop: 'var(--page-pt)', paddingBottom: 20 }}
+        className="shrink-0"
+        style={{ paddingTop: 'var(--page-pt)', paddingBottom: 20, paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}
       >
         <p className="eyebrow" style={{ marginBottom: 4 }}>🔐 {t('navNotes')}</p>
         <h1 style={{
@@ -51,8 +51,8 @@ export default function NotesScreen() {
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="px-[var(--page-px)] shrink-0"
-        style={{ marginBottom: 16 }}
+        className="shrink-0"
+        style={{ marginBottom: 16, paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}
       >
         <div style={{ display: 'flex', gap: 8 }}>
           <textarea
@@ -77,7 +77,7 @@ export default function NotesScreen() {
       </motion.div>
 
       {/* Notes list */}
-      <div className="flex-1 overflow-y-auto px-[var(--page-px)] pb-8">
+      <div className="flex-1 overflow-y-auto pb-8" style={{ paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}>
         {(!trip.tripNotes || trip.tripNotes.length === 0) ? (
           <motion.div
             initial={{ opacity: 0 }}

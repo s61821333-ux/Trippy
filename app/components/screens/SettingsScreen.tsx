@@ -107,8 +107,8 @@ export default function SettingsScreen() {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 340, damping: 32, delay: 0.04 }}
-        className="px-[var(--page-px)] shrink-0"
-        style={{ paddingTop: 'var(--page-pt)', paddingBottom: 20 }}
+        className="shrink-0"
+        style={{ paddingTop: 'var(--page-pt)', paddingBottom: 20, paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}
       >
         <p className="eyebrow" style={{ marginBottom: 4 }}>{t('setupSub')}</p>
         <h1 style={{
@@ -122,7 +122,7 @@ export default function SettingsScreen() {
         </h1>
       </motion.div>
 
-      <div className="flex-1 overflow-y-auto px-[var(--page-px)] pb-8 w-full flex justify-center">
+      <div className="flex-1 overflow-y-auto pb-8 w-full flex justify-center" style={{ paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}>
         <div className="w-full max-w-6xl">
           <motion.div
             variants={sectionVariants}
