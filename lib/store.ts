@@ -89,7 +89,7 @@ export const useAppStore = create<AppState>()(
       trip: null,
       nickname: '',
       activeDay: 1,
-      supplies: MOCK_SUPPLIES,
+      supplies: [],
       showAddEvent: false,
       showSuggestions: false,
       showTour: false,
@@ -122,6 +122,7 @@ export const useAppStore = create<AppState>()(
           set({
             showTour: !localStorage.getItem('trippy-tour-done'),
             trip: MOCK_TRIP,
+            supplies: MOCK_SUPPLIES,
             nickname: nickname || 'Traveler',
             screen: 'dashboard',
             activeDay: 1,
@@ -157,7 +158,6 @@ export const useAppStore = create<AppState>()(
       },
 
       createTrip: async (name, days, _code, nickname, theme = 'desert', startDate) => {
-        const { getThemeSupplies } = require('./mockData');
         const defaultEmoji = theme === 'city' ? '🏙️' : theme === 'beach' ? '🏖️' : theme === 'nature' ? '🌲' : theme === 'mountain' ? '⛰️' : theme === 'snow' ? '❄️' : '🏔️';
 
         const dayMetas: DayMeta[] = Array.from({ length: days }, (_, i) => ({
@@ -168,31 +168,17 @@ export const useAppStore = create<AppState>()(
           name,
           days,
           theme,
-          code: _code || undefined,
           startDate: startDate || new Date().toISOString().split('T')[0],
           participants: [{ id: 1, name: nickname || 'You', initials: (nickname || 'Y').slice(0, 2).toUpperCase(), color: 'oklch(62% 0.15 195)' }],
           dayMeta: dayMetas,
           events: Object.fromEntries(Array.from({ length: days }, (_, i) => [i + 1, []])),
         };
 
-        // Optimistically update UI immediately
-        const themeSupplies = getThemeSupplies(theme);
-        set({ trip: newTrip, nickname: nickname || 'Traveler', screen: 'dashboard', activeDay: 1, supplies: themeSupplies });
+        // Save to DB first — throws on failure so LoginScreen can show a meaningful error
+        const userId = await ensureUser(nickname);
+        const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, _code || undefined, theme, dayMetas, nickname);
 
-        // Persist to DB in background
-        try {
-          const userId = await ensureUser(nickname);
-          const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, _code || undefined, theme, dayMetas, nickname);
-          set({ userId, tripDbId });
-
-          // Sync initial supplies
-          const { tripDbId: id } = get();
-          if (id) {
-            themeSupplies.forEach((s: SupplyItem) => dbAddSupply(id, s));
-          }
-        } catch (e) {
-          console.error('Failed to save trip to DB:', e);
-        }
+        set({ userId, tripDbId, trip: newTrip, nickname: nickname || 'Traveler', screen: 'dashboard', activeDay: 1, supplies: [] });
       },
 
       logout: () => {

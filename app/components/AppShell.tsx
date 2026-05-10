@@ -32,7 +32,15 @@ function Shell() {
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setMounted(true); }, []);
+  useEffect(() => {
+    setMounted(true);
+    // Restore session: if a trip is already persisted from a previous session
+    // and the user did not explicitly log out, go straight to the dashboard.
+    if (trip && screen === 'login') {
+      setScreen('dashboard');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // On first ever visit, apply system dark mode preference
   useEffect(() => {

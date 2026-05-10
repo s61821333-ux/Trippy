@@ -60,8 +60,12 @@ export default function LoginScreen() {
     if (cCode.length > 0 && cCode.length < 6) { show(t('codeTooShort')); return; }
     if (cCode && cCode !== cCode2) { show(t('codesNoMatch')); return; }
     setLoading(true);
-    const days = Math.min(30, Math.max(1, parseInt(cDays, 10) || 3));
-    await createTrip(cName, days, cCode, cNick, cTheme, cDate);
+    try {
+      const days = Math.min(30, Math.max(1, parseInt(cDays, 10) || 3));
+      await createTrip(cName, days, cCode, cNick, cTheme, cDate);
+    } catch {
+      show(t('createTripFailed'));
+    }
     setLoading(false);
   };
 
