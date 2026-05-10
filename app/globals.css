@@ -72,9 +72,13 @@
   --gap-xl: 48px;
 
   /* Page layout */
-  --page-px: 24px;
+  --page-px: 20px;
   --page-pt: 20px;
   --nav-h:   68px;
+  --safe-left:   env(safe-area-inset-left, 0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 
   /* ── Backwards-compatible aliases ── */
   --ink:       var(--text);
@@ -151,10 +155,16 @@
 }
 
 @media (min-width: 640px) {
-  :root { --page-px: 32px; --page-pt: 24px; }
+  :root { --page-px: 28px; --page-pt: 24px; }
 }
 @media (min-width: 1024px) {
   :root { --page-px: 48px; --page-pt: 28px; }
+}
+
+/* Safe-area-aware horizontal padding helper */
+.px-safe {
+  padding-left: max(var(--page-px), env(safe-area-inset-left));
+  padding-right: max(var(--page-px), env(safe-area-inset-right));
 }
 
 @theme {

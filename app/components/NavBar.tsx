@@ -44,12 +44,21 @@ export default function NavBar({ active, onChange }: NavBarProps) {
           height: '100%',
         }}>
           {/* Brand */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            userSelect: 'none',
-          }}>
+          <motion.button
+            onClick={() => onChange('dashboard')}
+            whileTap={{ scale: 0.95 }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              userSelect: 'none',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              outline: 'none',
+              padding: 0,
+            }}
+          >
             <span style={{ fontSize: 22, lineHeight: 1 }}>🌍</span>
             <span style={{
               fontFamily: 'var(--font-sans)',
@@ -60,7 +69,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
             }}>
               Trippy
             </span>
-          </div>
+          </motion.button>
 
           {/* Tabs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

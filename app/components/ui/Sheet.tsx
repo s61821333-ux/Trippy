@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SheetProps {
@@ -11,6 +11,25 @@ interface SheetProps {
 }
 
 export default function Sheet({ children, onClose, title, subtitle }: SheetProps) {
+  const startY = useRef(0);
+  const isDragging = useRef(false);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    startY.current = e.touches[0].clientY;
+    isDragging.current = false;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches[0].clientY - startY.current > 10) {
+      isDragging.current = true;
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const dy = e.changedTouches[0].clientY - startY.current;
+    if (dy > 100) onClose();
+  };
+
   return (
     <AnimatePresence>
       <motion.div
@@ -22,7 +41,7 @@ export default function Sheet({ children, onClose, title, subtitle }: SheetProps
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0, zIndex: 200,
-          background: 'rgba(26, 20, 16, 0.50)',
+          background: 'rgba(26, 20, 16, 0.55)',
           display: 'flex',
           alignItems: 'flex-end',
         }}
@@ -34,25 +53,32 @@ export default function Sheet({ children, onClose, title, subtitle }: SheetProps
           exit={{ y: '100%' }}
           transition={{ type: 'spring', stiffness: 420, damping: 40, mass: 0.85 }}
           onClick={e => e.stopPropagation()}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
           style={{
             width: '100%',
             background: 'var(--surface)',
             borderTop: '1px solid var(--border)',
-            borderRadius: '20px 20px 0 0',
+            borderRadius: '24px 24px 0 0',
             padding: '8px 20px',
-            paddingBottom: 'calc(40px + env(safe-area-inset-bottom, 0px))',
-            maxHeight: '88%',
+            paddingBottom: 'max(40px, env(safe-area-inset-bottom, 40px))',
+            maxHeight: '92dvh',
             overflowY: 'auto',
             boxShadow: 'var(--shadow-xl)',
+            touchAction: 'pan-y',
           }}
         >
-          {/* Handle */}
-          <div style={{
-            width: 36, height: 4,
-            background: 'var(--border-strong)',
-            borderRadius: 2,
-            margin: '10px auto 20px',
-          }} />
+          {/* Drag handle */}
+          <div
+            style={{
+              width: 40, height: 4,
+              background: 'var(--border-strong)',
+              borderRadius: 2,
+              margin: '12px auto 20px',
+              cursor: 'grab',
+            }}
+          />
 
           {(title || subtitle) && (
             <div style={{ marginBottom: 20 }}>

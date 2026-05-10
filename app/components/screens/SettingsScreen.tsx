@@ -40,11 +40,18 @@ export default function SettingsScreen() {
     addTripNote, deleteTripNote,
     addExpense, deleteExpense,
     addEmergencyContact, deleteEmergencyContact,
+    updateTripInfo,
   } = useAppStore();
   const { show } = useToast();
   const { t, locale, setLocale, isRTL } = useI18n();
   const [nickEdit, setNickEdit] = useState(nickname);
   const [newNote, setNewNote] = useState('');
+
+  // Trip info edit state
+  const [tripNameEdit, setTripNameEdit]   = useState(trip?.name ?? '');
+  const [tripDaysEdit, setTripDaysEdit]   = useState(String(trip?.days ?? ''));
+  const [tripDateEdit, setTripDateEdit]   = useState(trip?.startDate ?? '');
+  const [tripInfoDirty, setTripInfoDirty] = useState(false);
 
   // Emergency contact form state
   const [ecName, setEcName]   = useState('');
@@ -86,10 +93,10 @@ export default function SettingsScreen() {
   const totalEvents = Object.values(trip.events).reduce((acc, evs) => acc + evs.length, 0);
 
   const handleAddEmergencyContact = () => {
-    if (!ecName.trim() || !ecPhone.trim()) { show('Enter name and phone number'); return; }
+    if (!ecName.trim() || !ecPhone.trim()) { show(t('enterNamePhone')); return; }
     addEmergencyContact({ name: ecName.trim(), phone: ecPhone.trim(), type: ecType });
     setEcName(''); setEcPhone('');
-    show('Emergency contact saved');
+    show(t('emergencySaved'));
   };
 
   return (
@@ -124,16 +131,90 @@ export default function SettingsScreen() {
             className="grid grid-cols-1 md:grid-cols-2 gap-3"
           >
 
-            {/* ── Trip info ── */}
+            {/* ── Trip info (editable) ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('tripInfo')} />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <Row label={t('nameLabel')}         value={trip.name} />
-                  <Row label={t('daysLabel')}         value={`${trip.days} ${t('days')}`} />
-                  <Row label={t('startLabel')}        value={trip.startDate ?? t('notSet')} />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+                  {/* Trip Name */}
+                  <EditRow label={t('nameLabel')} isRTL={isRTL}>
+                    <input
+                      value={tripNameEdit}
+                      onChange={e => { setTripNameEdit(e.target.value); setTripInfoDirty(true); }}
+                      className="input-premium"
+                      style={inputStyle}
+                      placeholder={t('tripName')}
+                      dir={isRTL ? 'rtl' : 'ltr'}
+                    />
+                  </EditRow>
+
+                  {/* Days */}
+                  <EditRow label={t('daysLabel')} isRTL={isRTL}>
+                    <input
+                      type="number"
+                      min={1}
+                      max={90}
+                      value={tripDaysEdit}
+                      onChange={e => { setTripDaysEdit(e.target.value); setTripInfoDirty(true); }}
+                      className="input-premium"
+                      style={{ ...inputStyle, width: 80 }}
+                    />
+                  </EditRow>
+
+                  {/* Start Date */}
+                  <EditRow label={t('startLabel')} isRTL={isRTL}>
+                    <input
+                      type="date"
+                      value={tripDateEdit}
+                      onChange={e => { setTripDateEdit(e.target.value); setTripInfoDirty(true); }}
+                      className="input-premium"
+                      style={inputStyle}
+                    />
+                  </EditRow>
+
+                  {/* Read-only rows */}
                   <Row label={t('eventsLabel')}       value={`${totalEvents} ${t('total')}`} />
                   <Row label={t('participantsLabel')} value={trip.participants.map(p => p.name).join(', ')} />
+
+                  {/* Save button — only shown when dirty */}
+                  <AnimatePresence>
+                    {tripInfoDirty && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <GlassBtn
+                          variant="accent"
+                          size="sm"
+                          style={{ width: '100%', marginTop: 4 }}
+                          onClick={() => {
+                            const newDays = Math.min(90, Math.max(1, parseInt(tripDaysEdit, 10) || trip.days));
+                            const willLoseData = newDays < trip.days &&
+                              Object.entries(trip.events).some(([d, evs]) => Number(d) > newDays && evs.length > 0);
+                            if (willLoseData && !window.confirm(
+                              t('reduceDaysWarning')
+                                .replace('{newDays}', String(newDays))
+                                .replace('{from}', String(newDays + 1))
+                                .replace('{to}', String(trip.days))
+                            )) return;
+                            updateTripInfo({
+                              name: tripNameEdit.trim() || trip.name,
+                              days: newDays,
+                              startDate: tripDateEdit || trip.startDate,
+                            });
+                            setTripDaysEdit(String(newDays));
+                            setTripInfoDirty(false);
+                            show(t('tripUpdated'));
+                          }}
+                        >
+                          <Icon name="check" size={13} /> {t('saveBtn')}
+                        </GlassBtn>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               </Glass>
             </motion.div>
@@ -170,16 +251,16 @@ export default function SettingsScreen() {
             {/* ── Appearance ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
-                <SectionLabel label="Appearance" />
+                <SectionLabel label={t('appearanceLabel')} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <ToggleRow
-                    label={darkMode ? '🌙 Dark Mode' : '☀️ Light Mode'}
+                    label={darkMode ? `🌙 ${t('darkMode')}` : `☀️ ${t('lightMode')}`}
                     checked={darkMode}
                     onToggle={toggleDarkMode}
                   />
                   <ToggleRow
-                    label="⬛ High Contrast"
-                    sub="Solidifies glass backgrounds, darkens secondary text (WCAG AA)"
+                    label={`⬛ ${t('highContrast')}`}
+                    sub={t('highContrastSub')}
                     checked={highContrast}
                     onToggle={toggleHighContrast}
                   />
@@ -190,11 +271,11 @@ export default function SettingsScreen() {
             {/* ── Accessibility ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
-                <SectionLabel label="Accessibility" />
+                <SectionLabel label={t('accessibilityLabel')} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <ToggleRow
-                    label="🐢 Reduce Motion"
-                    sub="Disables spring animations to save battery and ease motion sensitivity"
+                    label={`🐢 ${t('reduceMotion')}`}
+                    sub={t('reduceMotionSub')}
                     checked={reducedMotion}
                     onToggle={toggleReducedMotion}
                   />
@@ -205,17 +286,17 @@ export default function SettingsScreen() {
             {/* ── Display preferences ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
-                <SectionLabel label="Display" />
+                <SectionLabel label={t('displayLabel')} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <ToggleRow
-                    label="💰 Hide Budget Widget"
-                    sub="Removes the trip budget card from the dashboard"
+                    label={`💰 ${t('hideBudget')}`}
+                    sub={t('hideBudgetSub')}
                     checked={hideBudget}
                     onToggle={toggleHideBudget}
                   />
                   <ToggleRow
-                    label="🌍 Carbon Budget Widget"
-                    sub="Shows estimated CO₂ footprint from flights and transport"
+                    label={`🌍 ${t('carbonBudget')}`}
+                    sub={t('carbonBudgetSub')}
                     checked={showCarbonBudget}
                     onToggle={toggleShowCarbonBudget}
                   />
@@ -226,20 +307,20 @@ export default function SettingsScreen() {
             {/* ── Night Owl Mode ── */}
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
-                <SectionLabel label="🦉 Night Owl Mode" />
+                <SectionLabel label={`🦉 ${t('nightOwlLabel')}`} />
                 <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, marginTop: -8 }}>
-                  Extends the day boundary for gap detection — keeps late-night events on the same day card
+                  {t('nightOwlSub')}
                 </p>
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   {[
-                    { h: 23, label: 'Standard (11 PM)' },
-                    { h: 25, label: 'Late (1 AM)' },
-                    { h: 27, label: 'Night Owl (3 AM)' },
+                    { h: 23, label: t('nightOwlStandard') },
+                    { h: 25, label: t('nightOwlLate') },
+                    { h: 27, label: t('nightOwlExtreme') },
                   ].map(opt => (
                     <motion.button
                       key={opt.h}
                       whileTap={{ scale: 0.93 }}
-                      onClick={() => { setDayEndHour(opt.h); show('Day boundary updated'); }}
+                      onClick={() => { setDayEndHour(opt.h); show(t('dayBoundaryUpdated')); }}
                       style={{
                         padding: '8px 14px', borderRadius: 'var(--radius-md)',
                         fontSize: 12, fontWeight: 600,
@@ -285,9 +366,9 @@ export default function SettingsScreen() {
             {/* ── Emergency Hub ── */}
             <motion.div variants={sectionItem} className="md:col-span-2">
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
-                <SectionLabel label="🆘 Emergency Hub" />
+                <SectionLabel label={`🆘 ${t('emergencyHubLabel')}`} />
                 <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, marginTop: -8 }}>
-                  Offline-ready emergency contacts — accessible even without data
+                  {t('emergencyHubSub')}
                 </p>
 
                 {/* Type selector */}
@@ -308,7 +389,7 @@ export default function SettingsScreen() {
                           cursor: 'pointer',
                         }}
                       >
-                        {m.icon} {m.label}
+                        {m.icon} {t(type as any)}
                       </motion.button>
                     );
                   })}
@@ -319,7 +400,7 @@ export default function SettingsScreen() {
                   <input
                     value={ecName}
                     onChange={e => setEcName(e.target.value)}
-                    placeholder="Name or organisation"
+                    placeholder={t('emergencyNamePlaceholder')}
                     className="input-premium"
                     style={{
                       flex: 2, minWidth: 120, padding: '10px 14px', borderRadius: 'var(--radius-md)',
@@ -331,7 +412,7 @@ export default function SettingsScreen() {
                     value={ecPhone}
                     onChange={e => setEcPhone(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleAddEmergencyContact()}
-                    placeholder="+1 555 000 0000"
+                    placeholder={t('emergencyPhonePlaceholder')}
                     className="input-premium"
                     style={{
                       flex: 2, minWidth: 120, padding: '10px 14px', borderRadius: 'var(--radius-md)',
@@ -347,7 +428,7 @@ export default function SettingsScreen() {
                 {/* Contact list */}
                 {(!trip.emergencyContacts || trip.emergencyContacts.length === 0) ? (
                   <p style={{ fontSize: 12, color: 'var(--text-3)', fontStyle: 'italic' }}>
-                    No emergency contacts yet — add at least one before heading out
+                    {t('noEmergencyContacts')}
                   </p>
                 ) : (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -382,11 +463,11 @@ export default function SettingsScreen() {
                               padding: '2px 8px', border: '1px solid var(--border)',
                               flexShrink: 0,
                             }}>
-                              {m.label}
+                              {t(contact.type as any)}
                             </span>
                             <motion.button
                               whileTap={{ scale: 0.88 }}
-                              onClick={() => { deleteEmergencyContact(contact.id); show('Contact removed'); }}
+                              onClick={() => { deleteEmergencyContact(contact.id); show(t('contactRemoved')); }}
                               style={{
                                 background: 'none', border: 'none', cursor: 'pointer',
                                 color: 'var(--text-3)', padding: '2px 4px', flexShrink: 0,
@@ -498,9 +579,9 @@ export default function SettingsScreen() {
               <Glass level={1} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('aboutLabel')} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                  <Row label="App"     value="Trippy - Friendly Trip Planner" />
-                  <Row label="Version" value={t('appVersion')} />
-                  <Row label="Stack"   value={t('appStack')} />
+                  <Row label={t('aboutApp')}     value={t('appName')} />
+                  <Row label={t('aboutVersion')} value={t('appVersion')} />
+                  <Row label={t('aboutStack')}   value={t('appStack')} />
                 </div>
               </Glass>
             </motion.div>
@@ -520,6 +601,37 @@ export default function SettingsScreen() {
 }
 
 // ── Sub-components ──────────────────────────────────────────────────
+
+const inputStyle: React.CSSProperties = {
+  flex: 1,
+  padding: '8px 12px',
+  borderRadius: 'var(--radius-md)',
+  fontSize: 13,
+  fontWeight: 500,
+  background: 'var(--bg)',
+  border: '1px solid var(--border)',
+  outline: 'none',
+  color: 'var(--text)',
+  fontFamily: 'var(--font-sans)',
+};
+
+function EditRow({ label, children, isRTL }: { label: string; children: React.ReactNode; isRTL?: boolean }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center',
+      justifyContent: 'space-between', gap: 12,
+      padding: '4px 0',
+      borderBottom: '1px solid var(--border)',
+    }}>
+      <span style={{ fontSize: 13, color: 'var(--text-2)', flexShrink: 0, fontWeight: 500, minWidth: 60 }}>
+        {label}
+      </span>
+      <div style={{ flex: 1, display: 'flex', justifyContent: isRTL ? 'flex-start' : 'flex-end' }}>
+        {children}
+      </div>
+    </div>
+  );
+}
 
 function SectionLabel({ label, icon }: { label: string; icon?: string }) {
   return (
@@ -554,6 +666,7 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function ToggleRow({ label, sub, checked, onToggle }: { label: string; sub?: string; checked: boolean; onToggle: () => void }) {
+  const { isRTL } = useI18n();
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -572,10 +685,10 @@ function ToggleRow({ label, sub, checked, onToggle }: { label: string; sub?: str
         }}
       >
         <motion.div
-          animate={{ x: checked ? 26 : 2 }}
+          animate={{ x: checked ? (isRTL ? -26 : 26) : (isRTL ? -2 : 2) }}
           transition={{ type: 'spring', stiffness: 500, damping: 36 }}
           style={{
-            position: 'absolute', top: 2,
+            position: 'absolute', top: 2, [isRTL ? 'right' : 'left']: 0,
             width: 24, height: 24, borderRadius: '50%',
             background: 'white',
             boxShadow: '0 1px 4px rgba(0,0,0,0.25)',

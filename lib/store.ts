@@ -13,6 +13,7 @@ interface AppState {
   supplies: SupplyItem[];
   showAddEvent: boolean;
   showSuggestions: boolean;
+  showTour: boolean;
   activeGapStart: number | null;
   activeGapEnd: number | null;
   aiSuggestions: AiSuggestion[];
@@ -30,6 +31,7 @@ interface AppState {
   logout: () => void;
   setActiveDay: (day: number) => void;
   setNickname: (n: string) => void;
+  updateTripInfo: (updates: { name?: string; days?: number; startDate?: string }) => void;
   updateTheme: (theme: TripTheme) => void;
   updateDayMeta: (dayIndex: number, meta: Partial<DayMeta>) => void;
   toggleDarkMode: () => void;
@@ -61,6 +63,7 @@ interface AppState {
 
   setShowAddEvent: (v: boolean) => void;
   setShowSuggestions: (v: boolean, gapStart?: number, gapEnd?: number) => void;
+  setShowTour: (v: boolean) => void;
   setAiSuggestions: (suggestions: AiSuggestion[]) => void;
   addSuggestionToDay: (dayNumber: number, suggId: string) => void;
 }
@@ -78,6 +81,7 @@ export const useAppStore = create<AppState>()(
       supplies: MOCK_SUPPLIES,
       showAddEvent: false,
       showSuggestions: false,
+      showTour: false,
       activeGapStart: null,
       activeGapEnd: null,
       aiSuggestions: [],
@@ -105,6 +109,7 @@ export const useAppStore = create<AppState>()(
         ) {
           const isDemo = normalName === 'negev desert adventure' && normalCode === 'desert123';
           set({
+            showTour: isDemo && !localStorage.getItem('trippy-tour-done'),
             trip: isDemo ? MOCK_TRIP : {
               name: name.trim(),
               days: 3,
@@ -143,6 +148,37 @@ export const useAppStore = create<AppState>()(
 
       setActiveDay: (day) => set({ activeDay: day }),
       setNickname: (n) => set({ nickname: n }),
+
+      updateTripInfo: ({ name, days, startDate }) => set((s) => {
+        if (!s.trip) return {};
+        const trip = { ...s.trip };
+        if (name !== undefined)      trip.name      = name;
+        if (startDate !== undefined) trip.startDate = startDate;
+        if (days !== undefined && days >= 1 && days <= 90) {
+          const old = trip.days;
+          trip.days = days;
+          if (days > old) {
+            // Extend dayMeta and events with empty slots
+            const defaultEmoji = trip.theme === 'city' ? '🏙️' : trip.theme === 'beach' ? '🏖️' : trip.theme === 'nature' ? '🌲' : '🏔️';
+            const extraMeta = Array.from({ length: days - old }, (_, i) => ({
+              region: `Day ${old + i + 1}`, emoji: defaultEmoji, lat: 31, lng: 35, desc: '',
+            }));
+            trip.dayMeta = [...trip.dayMeta, ...extraMeta];
+            const extraEvents: Record<number, import('./types').TripEvent[]> = {};
+            for (let d = old + 1; d <= days; d++) extraEvents[d] = [];
+            trip.events = { ...trip.events, ...extraEvents };
+          } else if (days < old) {
+            // Trim — keep events that fit within new day count
+            trip.dayMeta = trip.dayMeta.slice(0, days);
+            const trimmedEvents: Record<number, import('./types').TripEvent[]> = {};
+            for (let d = 1; d <= days; d++) trimmedEvents[d] = trip.events[d] ?? [];
+            trip.events = trimmedEvents;
+            if (s.activeDay > days) return { trip, activeDay: days };
+          }
+        }
+        return { trip };
+      }),
+
       updateTheme: (theme) => set((s) => ({ trip: s.trip ? { ...s.trip, theme } : null })),
 
       updateDayMeta: (dayIndex, meta) => set((s) => {
@@ -221,6 +257,10 @@ export const useAppStore = create<AppState>()(
       })),
 
       setShowAddEvent: (v) => set({ showAddEvent: v }),
+      setShowTour: (v) => {
+        if (!v && typeof window !== 'undefined') localStorage.setItem('trippy-tour-done', '1');
+        set({ showTour: v });
+      },
 
       setShowSuggestions: (v, gapStart, gapEnd) => set({ showSuggestions: v, activeGapStart: gapStart ?? null, activeGapEnd: gapEnd ?? null }),
 

@@ -12,6 +12,7 @@ import SuppliesScreen from './screens/SuppliesScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import NotesScreen from './screens/NotesScreen';
 import { ToastProvider } from './ui/Toast';
+import TourOverlay from './TourOverlay';
 
 const screenVariants = {
   initial: { opacity: 0, y: 8 },
@@ -27,11 +28,36 @@ const screenTransition = {
 };
 
 function Shell() {
-  const { screen, setScreen, trip, darkMode, highContrast, reducedMotion } = useAppStore();
+  const { screen, setScreen, trip, darkMode, highContrast, reducedMotion, toggleDarkMode, showTour } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // On first ever visit, apply system dark mode preference
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const key = 'trippy-theme-init';
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, '1');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (prefersDark && !darkMode) toggleDarkMode();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Also react live to OS theme changes
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => {
+      const current = useAppStore.getState().darkMode;
+      if (e.matches !== current) toggleDarkMode();
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -65,7 +91,11 @@ function Shell() {
           data-high-contrast={highContrast ? 'true' : undefined}
           data-reduced-motion={reducedMotion ? 'true' : undefined}
           className="relative flex flex-col w-screen h-[100dvh] overflow-hidden"
-          style={{ background: 'var(--bg)' }}
+          style={{
+            background: 'var(--bg)',
+            paddingLeft: 'env(safe-area-inset-left, 0px)',
+            paddingRight: 'env(safe-area-inset-right, 0px)',
+          }}
         >
           {showNav && (
             <NavBar active={screen} onChange={s => setScreen(s)} />
@@ -102,6 +132,7 @@ function Shell() {
               </motion.div>
             </AnimatePresence>
           </div>
+          {showTour && <TourOverlay />}
         </div>
       </MotionConfig>
     </ToastProvider>

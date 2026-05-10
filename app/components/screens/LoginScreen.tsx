@@ -63,8 +63,28 @@ export default function LoginScreen() {
   const selectedTheme = THEMES.find(th => th.id === cTheme) ?? THEMES[0];
 
   return (
-    <div className="flex h-full items-center justify-center px-6 overflow-y-auto w-full">
-      <div style={{ width: '100%', maxWidth: 440, paddingTop: 32, paddingBottom: 32 }}>
+    <div
+      style={{
+        height: '100%',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '0 24px',
+        WebkitOverflowScrolling: 'touch',
+      }}
+    >
+      <div style={{
+        width: '100%',
+        maxWidth: 440,
+        paddingTop: 'max(40px, env(safe-area-inset-top, 40px))',
+        paddingBottom: 'max(40px, env(safe-area-inset-bottom, 40px))',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      }}>
 
         {/* Logo */}
         <motion.div
@@ -74,7 +94,7 @@ export default function LoginScreen() {
           animate="visible"
           style={{ marginBottom: 32, textAlign: 'center' }}
         >
-          <div style={{ fontSize: '3rem', marginBottom: 12, lineHeight: 1 }}>🌍</div>
+          <div style={{ fontSize: '3.2rem', marginBottom: 12, lineHeight: 1.2 }}>🌍</div>
           <h1 style={{
             fontSize: 'clamp(2rem, 8vw, 3rem)',
             fontWeight: 800,
@@ -117,7 +137,7 @@ export default function LoginScreen() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <Field
                 label={t('tripName')}
-                placeholder="e.g. Negev Desert Adventure"
+                placeholder={t('joinPlaceholderName')}
                 value={tripName}
                 onChange={setTripName}
                 icon={<Icon name="tent" size={15} />}
@@ -125,14 +145,14 @@ export default function LoginScreen() {
               <Field
                 label={t('tripCode')}
                 type="password"
-                placeholder="Shared code"
+                placeholder={t('joinPlaceholderCode')}
                 value={tripCode}
                 onChange={setTripCode}
                 icon={<Icon name="lock" size={15} />}
               />
               <Field
                 label={t('yourNickname')}
-                placeholder="e.g. Dana"
+                placeholder={t('joinPlaceholderNick')}
                 value={nickname}
                 onChange={setNickname}
                 onKeyDown={e => e.key === 'Enter' && handleJoin()}
@@ -190,7 +210,7 @@ export default function LoginScreen() {
                   display: 'block', fontSize: 12, fontWeight: 600,
                   color: 'var(--text-2)', marginBottom: 10,
                 }}>
-                  {locale === 'he' ? 'בחר רקע' : 'Background'}
+                  {t('backgroundLabel')}
                 </label>
                 <div style={{ display: 'flex', gap: 8 }}>
                   {THEMES.map(th => (
@@ -221,15 +241,15 @@ export default function LoginScreen() {
                 </div>
               </div>
 
-              <Field label={t('tripName')} placeholder="e.g. Europe Adventure 2026" value={cName} onChange={setCName} icon={<Icon name="tent" size={15} />} />
-              <Field label={t('yourNickname')} placeholder="e.g. Alex" value={cNick} onChange={setCNick} icon={<Icon name="user" size={15} />} />
+              <Field label={t('tripName')} placeholder={t('createPlaceholderName')} value={cName} onChange={setCName} icon={<Icon name="tent" size={15} />} />
+              <Field label={t('yourNickname')} placeholder={t('createPlaceholderNick')} value={cNick} onChange={setCNick} icon={<Icon name="user" size={15} />} />
               <div style={{ display: 'flex', gap: 10 }}>
                 <div style={{ flex: 1 }}>
                   <Field label={t('numDays')} type="number" placeholder="10" value={cDays} onChange={setCDays} />
                 </div>
                 <div style={{ flex: 2 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
-                    Start date
+                    {t('startDateLabel')}
                   </label>
                   <input
                     type="date"
@@ -245,9 +265,9 @@ export default function LoginScreen() {
                   />
                 </div>
               </div>
-              <Field label={`${t('chooseCode')} (optional)`} type="password" placeholder="Leave blank for personal trip" value={cCode} onChange={setCCode} icon={<Icon name="lock" size={15} />} />
+              <Field label={`${t('chooseCodeOptional')}`} type="password" placeholder={t('leaveBlankCode')} value={cCode} onChange={setCCode} icon={<Icon name="lock" size={15} />} />
               {cCode.length > 0 && (
-                <Field label={t('confirmCode')} type="password" placeholder="Repeat code" value={cCode2} onChange={setCCode2} />
+                <Field label={t('confirmCode')} type="password" placeholder={t('repeatCode')} value={cCode2} onChange={setCCode2} />
               )}
               <GlassBtn variant="accent" size="lg" onClick={handleCreate} style={{ width: '100%', marginTop: 4 }}>
                 <Icon name="check" size={15} /> {t('createBtn')}

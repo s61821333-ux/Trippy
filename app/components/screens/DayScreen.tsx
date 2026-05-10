@@ -15,7 +15,8 @@ import SuggestionsSheet from '../SuggestionsSheet';
 import { useI18n, TranslationKey } from '@/lib/i18n';
 
 const CATEGORIES: Category[] = ['food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other'];
-const DAY_ABBREVS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const DAY_ABBREVS_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+const DAY_ABBREVS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
 const CAT_GRADIENTS: Record<Category, string> = {
   food:       'linear-gradient(135deg, #E8A87C 0%, #C4714A 100%)',
@@ -121,7 +122,7 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
             >
               ⟳
             </motion.span>
-            Estimating travel time…
+            {t('estimatingTravel')}
           </span>
         ) : travelMins !== null ? (
           <span style={{
@@ -134,7 +135,7 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
             display: 'inline-flex', alignItems: 'center', gap: 6,
             letterSpacing: '0.01em',
           }}>
-            🚗 Estimated Travel Time
+            {t('estimatedTravelTime')}
             <span style={{ opacity: 0.45, fontWeight: 400 }}>·</span>
             {fmtDuration(travelMins)}
             {travelKm !== null && (
@@ -210,6 +211,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
   const meta          = CAT_META[event.category];
   const endT          = toTime(toMins(event.time) + event.duration);
   const { voteEvent } = useAppStore();
+  const { t }         = useI18n();
 
   const [rescheduling, setRescheduling] = useState(false);
   const [pendingTime,  setPendingTime]  = useState(event.time);
@@ -236,18 +238,11 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: 24, transition: { duration: 0.16 } }}
       transition={{ type: 'spring', stiffness: 380, damping: 34 }}
-      style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '0 var(--page-px)' }}
+      style={{ display: 'flex', alignItems: 'flex-start', padding: '0 var(--page-px)' }}
     >
-      {/* Timeline dot */}
+      {/* Card — full width, no timeline dot */}
       <div style={{
-        width: 22, height: 22, marginTop: 18, borderRadius: '50%', flexShrink: 0,
-        border: isConflict ? '2px solid var(--danger)' : '2px dashed var(--border-strong)',
-        background: isConflict ? 'var(--danger-bg)' : 'transparent',
-      }} />
-
-      {/* Card */}
-      <div style={{
-        flex: 1,
+        flex: 1, width: '100%',
         background: 'var(--surface)',
         borderRadius: 18,
         boxShadow: rescheduling
@@ -276,7 +271,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
                     background: 'var(--danger-bg)', color: 'var(--danger)',
                     borderRadius: 100, padding: '2px 8px',
                     fontSize: 9, fontWeight: 800, letterSpacing: '0.04em',
-                  }}>⚠️ Overlap</span>
+                  }}>{t('conflictWarning')}</span>
                 )}
                 {goldenHour && (
                   <span style={{
@@ -285,7 +280,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
                     borderRadius: 100, padding: '2px 8px',
                     fontSize: 9, fontWeight: 800, letterSpacing: '0.04em',
                   }}>
-                    {goldenHour === 'sunset' ? '🌅 Golden Hour' : '🌄 Sunrise'}
+                    {goldenHour === 'sunset' ? t('goldenHourSunset') : t('goldenHourSunrise')}
                   </span>
                 )}
               </div>
@@ -469,7 +464,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
 
                 {/* Preview */}
                 <p style={{ fontSize: 12, color: 'var(--text-2)', margin: 0 }}>
-                  Move to{' '}
+                  {t('moveToTime')}{' '}
                   <strong style={{ color: 'var(--brand)' }}>{pendingTime}</strong>
                   {' '}–{' '}
                   <strong style={{ color: 'var(--brand)' }}>{toTime(toMins(pendingTime) + event.duration)}</strong>
@@ -488,7 +483,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
                       background: 'var(--surface)', color: 'var(--text-2)',
                       border: '1px solid var(--border)', cursor: 'pointer',
                     }}>
-                    Cancel
+                    {t('cancel')}
                   </motion.button>
                   <motion.button
                     whileTap={{ scale: 0.96 }}
@@ -501,7 +496,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
                       border: 'none', cursor: pendingTime !== event.time ? 'pointer' : 'default',
                       transition: 'background 0.15s',
                     }}>
-                    ✓ Confirm move
+                    ✓ {t('confirmMove')}
                   </motion.button>
                 </div>
               </div>
@@ -525,8 +520,12 @@ export default function DayScreen() {
     dayEndHour,
   } = useAppStore();
   const { show } = useToast();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const stripRef = useRef<HTMLDivElement>(null);
+
+  // Swipe gesture refs for day navigation
+  const swipeStartX = useRef(0);
+  const swipeStartY = useRef(0);
 
   const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
 
@@ -600,11 +599,11 @@ export default function DayScreen() {
   }, [fName]);
 
   const QUICK_PRESETS: { icon: string; label: string; name: string; cat: Category; dur: number }[] = [
-    { icon: '🚗', label: 'Drive',   name: 'Drive',        cat: 'transport', dur: 30  },
-    { icon: '🍽️', label: 'Meal',    name: 'Meal',         cat: 'food',      dur: 60  },
-    { icon: '☕',  label: 'Coffee',  name: 'Coffee stop',  cat: 'cafe',      dur: 30  },
-    { icon: '⛺', label: 'Rest',    name: 'Rest stop',    cat: 'rest',      dur: 20  },
-    { icon: '⛽', label: 'Gas',     name: 'Gas & fuel',   cat: 'transport', dur: 15  },
+    { icon: '🚗', label: t('quickDriveLabel'),   name: t('quickDriveName'),   cat: 'transport', dur: 30  },
+    { icon: '🍽️', label: t('quickMealLabel'),    name: t('quickMealName'),    cat: 'food',      dur: 60  },
+    { icon: '☕',  label: t('quickCoffeeLabel'),  name: t('quickCoffeeName'),  cat: 'cafe',      dur: 30  },
+    { icon: '⛺', label: t('quickRestLabel'),    name: t('quickRestName'),    cat: 'rest',      dur: 20  },
+    { icon: '⛽', label: t('quickGasLabel'),     name: t('quickGasName'),     cat: 'transport', dur: 15  },
   ];
 
   if (!trip) return null;
@@ -716,10 +715,10 @@ export default function DayScreen() {
       addEvent(activeDay, {
         time: toTime(driveStart),
         duration: mins,
-        name: 'Drive to Airport',
+        name: t('driveToAirportName'),
         category: 'transport',
       });
-      show('Drive to airport added!');
+      show(t('driveAddedToast'));
     }
     setShowDrivePrompt(false);
   };
@@ -728,9 +727,9 @@ export default function DayScreen() {
     const victim = evs.find(e => e.id === id);
     if (!victim) return;
     deleteEvent(activeDay, id);
-    show(`${victim.name} removed`, {
+    show(`${victim.name} ${t('removedSuffix')}`, {
       action: {
-        label: 'Undo',
+        label: t('undoLabel'),
         onClick: () => {
           addEvent(activeDay, {
             time: victim.time, duration: victim.duration, name: victim.name,
@@ -744,14 +743,16 @@ export default function DayScreen() {
 
   const handleReschedule = (e: TripEvent, newTime: string) => {
     editEvent(activeDay, e.id, { time: newTime });
-    show(`${e.name} moved to ${newTime}`);
+    show(`${e.name} ${t('movedToSuffix')} ${newTime}`);
   };
 
   // Day strip helpers
   const getDayInfo = (dayNum: number) => {
     const base = trip.startDate ? new Date(trip.startDate) : new Date();
     base.setDate(base.getDate() + dayNum - 1);
-    return { abbrev: DAY_ABBREVS[base.getDay()], dateNum: base.getDate() };
+    const dow = base.getDay();
+    const abbrev = locale === 'he' ? DAY_ABBREVS_HE[dow] : DAY_ABBREVS_EN[dow];
+    return { abbrev, dateNum: base.getDate() };
   };
 
   return (
@@ -795,7 +796,7 @@ export default function DayScreen() {
           border: `1px solid ${isOnline ? 'rgba(40,160,90,0.25)' : 'var(--border)'}`,
           transition: 'all 0.3s',
         }}>
-          {isOnline ? '● Online' : '○ Offline'}
+          {isOnline ? t('onlineBadge') : t('offlineBadge')}
         </span>
 
         <motion.button
@@ -895,7 +896,7 @@ export default function DayScreen() {
             {trip.startDate ? ` · ${fmtDate(trip.startDate, activeDay - 1)}` : ''}
           </span>
           <span style={{ fontSize: 11, color: 'var(--text-3)', marginLeft: 2 }}>
-            · {evs.length} {evs.length === 1 ? 'stop' : 'stops'}
+            · {evs.length} {evs.length === 1 ? t('stopSingular') : t('stopPlural')}
           </span>
           {dayBudget > 0 && (
             <span style={{
@@ -914,7 +915,7 @@ export default function DayScreen() {
               border: '1px solid rgba(192,57,43,0.2)',
               borderRadius: 100, padding: '1px 8px',
             }}>
-              ⚠️ {conflicts.size / 2 | 0 || 1} overlap
+              ⚠️ {conflicts.size / 2 | 0 || 1} {t('overlapCount')}
             </span>
           )}
           {weather && (
@@ -933,7 +934,23 @@ export default function DayScreen() {
       </AnimatePresence>
 
       {/* ── Itinerary list ───────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto day-list-pb">
+      <div
+        className="flex-1 overflow-y-auto day-list-pb"
+        onTouchStart={e => {
+          swipeStartX.current = e.touches[0].clientX;
+          swipeStartY.current = e.touches[0].clientY;
+        }}
+        onTouchEnd={e => {
+          if (!trip) return;
+          const dx = e.changedTouches[0].clientX - swipeStartX.current;
+          const dy = e.changedTouches[0].clientY - swipeStartY.current;
+          // Only handle clear horizontal swipes (dx dominates and is large enough)
+          if (Math.abs(dx) > Math.abs(dy) * 1.8 && Math.abs(dx) > 55) {
+            if (dx < 0 && activeDay < trip.days) setActiveDay(activeDay + 1);
+            if (dx > 0 && activeDay > 1)         setActiveDay(activeDay - 1);
+          }
+        }}
+      >
         <AnimatePresence>
           {evs.length === 0 ? (
             <motion.div
@@ -1035,34 +1052,34 @@ export default function DayScreen() {
             )}
 
             <Field
-              label={t('eventName')} placeholder="e.g. Masada Hike"
+              label={t('eventName')} placeholder={t('eventNamePlaceholder')}
               value={fName} onChange={setFName} autoFocus
             />
 
-            <div style={{ display: 'flex', gap: 12 }}>
-              <div style={{ flex: 1 }}>
-                <Field label={t('startTime')} type="time" value={fTime} onChange={setFTime} />
-              </div>
-              <div style={{ flex: 1 }}>
+            {/* Start time + Duration — full-width stacked for mobile */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <Field label={t('startTime')} type="time" value={fTime} onChange={setFTime} />
+              <div>
                 <label style={{
                   display: 'block', fontSize: 12, fontWeight: 600,
-                  color: 'var(--text-2)', marginBottom: 6,
+                  color: 'var(--text-2)', marginBottom: 8,
                 }}>
                   {t('duration')}
                 </label>
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                   {[30, 60, 90, 120].map(d => (
                     <motion.button
                       key={d}
                       whileTap={{ scale: 0.92 }}
                       onClick={() => setFDur(String(d))}
                       style={{
-                        padding: '6px 10px', borderRadius: 8,
-                        fontSize: 12, fontWeight: 600,
+                        padding: '8px 14px', borderRadius: 10,
+                        fontSize: 13, fontWeight: 600, flex: '1 1 auto',
                         background: fDur === String(d) ? 'var(--brand)' : 'var(--bg)',
                         color: fDur === String(d) ? 'white' : 'var(--text-2)',
                         border: fDur === String(d) ? 'none' : '1px solid var(--border)',
                         cursor: 'pointer', transition: 'background 0.15s',
+                        minWidth: 52, textAlign: 'center',
                       }}
                     >
                       {fmtDuration(d)}
@@ -1074,10 +1091,11 @@ export default function DayScreen() {
                     value={![30, 60, 90, 120].includes(parseInt(fDur)) ? fDur : ''}
                     onChange={e => setFDur(e.target.value)}
                     style={{
-                      width: 64, padding: '6px 8px', borderRadius: 8,
-                      fontSize: 12, fontWeight: 600,
+                      width: 70, padding: '8px 10px', borderRadius: 10,
+                      fontSize: 13, fontWeight: 600,
                       background: 'var(--bg)', color: 'var(--text)',
                       outline: 'none', border: '1px solid var(--border)',
+                      textAlign: 'center',
                     }}
                   />
                 </div>
@@ -1117,7 +1135,7 @@ export default function DayScreen() {
             </div>
 
             <PlacesInput
-              label={t('locationOpt')} placeholder="e.g. Masada, Dead Sea"
+              label={t('locationOpt')} placeholder={t('locationFullPlaceholder')}
               value={fLoc}
               onChange={name => { setFLoc(name); setFLat(undefined); setFLng(undefined); }}
               onSelect={({ name, lat, lng }) => { setFLoc(name); setFLat(lat); setFLng(lng); }}
@@ -1125,7 +1143,7 @@ export default function DayScreen() {
             <div style={{ display: 'flex', gap: 12 }}>
               <div style={{ flex: 1 }}>
                 <Field
-                  label={t('notesOpt')} placeholder="Any extra info…"
+                  label={t('notesOpt')} placeholder={t('notesFullPlaceholder')}
                   value={fNotes} onChange={setFNotes} rows={2}
                 />
               </div>
@@ -1153,12 +1171,12 @@ export default function DayScreen() {
             {/* Tags input */}
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
-                Tags <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(optional, comma-separated)</span>
+                {t('tagsLabel')} <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>({t('tagsOptional')})</span>
               </label>
               <input
                 value={fTags}
                 onChange={e => setFTags(e.target.value)}
-                placeholder='e.g. "Cash only, Modest dress, Vegan-friendly"'
+                placeholder={t('tagsPlaceholder')}
                 style={{
                   width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
                   fontSize: 13, fontWeight: 500,
@@ -1201,20 +1219,20 @@ export default function DayScreen() {
       {showEditDay && (
         <Sheet
           onClose={() => setShowEditDay(false)}
-          title={`Day ${activeDay} — ${t('editEvent')}`}
-          subtitle="Set a city name and emoji for this day"
+          title={`${t('day')} ${activeDay} — ${t('editEvent')}`}
+          subtitle={t('editDaySubtitle')}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <Field
-              label="City / Location"
-              placeholder="e.g. Paris, Rome, Amsterdam"
+              label={t('editDayCityLabel')}
+              placeholder={t('editDayCityPlaceholder')}
               value={editDayName}
               onChange={setEditDayName}
               autoFocus
             />
             <div>
               <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 8 }}>
-                Emoji
+                {t('emojiLabel')}
               </label>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                 {['🏙️','🗼','🌊','🏖️','🏔️','🌲','✈️','🚂','🛳️','🏛️','🗺️','🎡','🌅','❄️','🍷','🎭','🎨','⛷️'].map(em => (
@@ -1241,13 +1259,13 @@ export default function DayScreen() {
               <GlassBtn
                 variant="accent"
                 onClick={() => {
-                  updateDayMeta(activeDay - 1, { region: editDayName.trim() || `Day ${activeDay}`, emoji: editDayEmoji });
-                  show('Day updated');
+                  updateDayMeta(activeDay - 1, { region: editDayName.trim() || `${t('day')} ${activeDay}`, emoji: editDayEmoji });
+                  show(t('dayUpdated'));
                   setShowEditDay(false);
                 }}
                 style={{ flex: 2 }}
               >
-                <Icon name="check" size={14} /> Save
+                <Icon name="check" size={14} /> {t('saveBtn')}
               </GlassBtn>
             </div>
           </div>
@@ -1258,8 +1276,8 @@ export default function DayScreen() {
       {showDrivePrompt && (
         <Sheet
           onClose={() => setShowDrivePrompt(false)}
-          title="Drive to Airport ✈️"
-          subtitle="How long is the drive? We'll add it before your flight."
+          title={t('driveToAirportTitle')}
+          subtitle={t('driveToAirportSub')}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
@@ -1267,7 +1285,7 @@ export default function DayScreen() {
                 display: 'block', fontSize: 12, fontWeight: 600,
                 color: 'var(--text-2)', marginBottom: 8,
               }}>
-                Driving time (minutes)
+                {t('drivingTimeLabel')}
               </label>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
                 {[20, 30, 45, 60, 90].map(d => (
@@ -1290,7 +1308,7 @@ export default function DayScreen() {
               </div>
               <input
                 type="number"
-                placeholder="Custom minutes…"
+                placeholder={t('customMinutesPlaceholder')}
                 value={driveMinutes}
                 onChange={e => setDriveMinutes(e.target.value)}
                 style={{
@@ -1304,11 +1322,11 @@ export default function DayScreen() {
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <GlassBtn onClick={() => setShowDrivePrompt(false)} style={{ flex: 1 }}>
-                Skip
+                {t('skipBtn')}
               </GlassBtn>
               <GlassBtn variant="accent" onClick={handleDrivePromptSave} style={{ flex: 2 }}>
                 <Icon name="plus" size={14} />
-                Add Drive
+                {t('addDriveBtn')}
               </GlassBtn>
             </div>
           </div>

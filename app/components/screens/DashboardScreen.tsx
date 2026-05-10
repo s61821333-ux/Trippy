@@ -12,14 +12,14 @@ import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
 
 const item = {
-  hidden:  { opacity: 0, y: 12 },
+  hidden:  { opacity: 0, y: 14 },
   visible: { opacity: 1, y: 0,
-    transition: { type: 'spring' as const, stiffness: 360, damping: 32 } },
+    transition: { type: 'spring' as const, stiffness: 340, damping: 30 } },
 };
 
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.055, delayChildren: 0.04 } },
+  visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
 };
 
 const INSIGHT_COLORS: Record<string, { bg: string; border: string; text: string }> = {
@@ -40,13 +40,13 @@ export default function DashboardScreen() {
   } = useAppStore();
   const { show } = useToast();
   const { t } = useI18n();
-  const [showShare, setShowShare]     = useState(false);
-  const [revealCode, setRevealCode]   = useState(false);
+  const [showShare, setShowShare]       = useState(false);
+  const [revealCode, setRevealCode]     = useState(false);
   const [showExpenses, setShowExpenses] = useState(false);
-  const [expDesc, setExpDesc]         = useState('');
-  const [expAmount, setExpAmount]     = useState('');
-  const [expPaidBy, setExpPaidBy]     = useState('');
-  const [expSplit, setExpSplit]       = useState('2');
+  const [expDesc, setExpDesc]           = useState('');
+  const [expAmount, setExpAmount]       = useState('');
+  const [expPaidBy, setExpPaidBy]       = useState('');
+  const [expSplit, setExpSplit]         = useState('2');
 
   if (!trip) return null;
 
@@ -55,11 +55,10 @@ export default function DashboardScreen() {
   const pct = totalCount > 0 ? Math.round((packedCount / totalCount) * 100) : 0;
 
   const nextEventData = getNextEvent(trip);
-  const insights      = generateInsights(trip, packedCount, totalCount);
+  const insights      = generateInsights(trip, packedCount, totalCount, t);
   const tripBudget    = getTripBudget(trip);
   const carbonKg      = estimateCarbonKg(trip);
-
-  const dayEndMins = dayEndHour * 60;
+  const dayEndMins    = dayEndHour * 60;
 
   const handleDayClick = (day: number) => {
     setActiveDay(day);
@@ -69,501 +68,557 @@ export default function DashboardScreen() {
   const handleAddExpense = () => {
     const amount = parseFloat(expAmount);
     const split  = parseInt(expSplit, 10) || 1;
-    if (!expDesc.trim() || isNaN(amount) || amount <= 0) { show('Enter description and amount'); return; }
+    if (!expDesc.trim() || isNaN(amount) || amount <= 0) { show(t('enterDescAmount')); return; }
     addExpense({ description: expDesc.trim(), amount, paidBy: expPaidBy.trim() || nickname, splitCount: split });
     setExpDesc(''); setExpAmount(''); setExpPaidBy('');
-    show('Expense added');
+    show(t('expenseAdded'));
   };
 
-  const expenses = trip.expenses ?? [];
+  const expenses      = trip.expenses ?? [];
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
 
   return (
-    <div className="flex flex-col h-full w-full">
-
-      {/* ── Header ── */}
+    <div
+      className="h-full w-full overflow-y-auto"
+      style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--border-strong) transparent' }}
+    >
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 340, damping: 32, delay: 0.04 }}
-        className="px-[var(--page-px)] shrink-0"
-        style={{ paddingTop: 'var(--page-pt)', paddingBottom: 16 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.25 }}
+        style={{ paddingBottom: 48 }}
       >
-        {/* Trip title row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 14 }}>
-          <div style={{ minWidth: 0 }}>
-            <p className="eyebrow" style={{ marginBottom: 4 }}>{t('activeTrip')}</p>
+
+        {/* ═══ Hero ═══ */}
+        <div style={{
+          position: 'relative',
+          paddingTop: 'var(--page-pt)',
+          paddingBottom: 24,
+          paddingLeft: 'var(--page-px)',
+          paddingRight: 'var(--page-px)',
+          marginBottom: 4,
+        }}>
+
+          {/* Eyebrow + avatars + share */}
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.04, type: 'spring', stiffness: 360, damping: 32 }}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}
+          >
+            <p className="eyebrow">{t('activeTrip')}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex' }}>
+                {trip.participants.slice(0, 4).map((p, i) => (
+                  <motion.div
+                    key={p.id}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.1 + i * 0.05, type: 'spring', stiffness: 440, damping: 26 }}
+                    style={{
+                      width: 30, height: 30, borderRadius: '50%',
+                      background: p.color, color: 'white',
+                      fontSize: 10, fontWeight: 700,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: '2.5px solid var(--bg)',
+                      marginLeft: i > 0 ? -9 : 0,
+                      boxShadow: 'var(--shadow-sm)',
+                    }}
+                  >
+                    {p.initials}
+                  </motion.div>
+                ))}
+              </div>
+              <GlassBtn
+                size="sm"
+                onClick={() => setShowShare(true)}
+                style={{ width: 34, height: 34, padding: 0, borderRadius: 'var(--radius-sm)', minWidth: 0 }}
+              >
+                <Icon name="share" size={14} />
+              </GlassBtn>
+            </div>
+          </motion.div>
+
+          {/* Title + subtitle */}
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.08, type: 'spring', stiffness: 340, damping: 30 }}
+            style={{ marginBottom: 18 }}
+          >
             <h1 style={{
-              fontSize: 'clamp(1.5rem, 4vw, 2.6rem)',
+              fontSize: 'clamp(1.7rem, 5.5vw, 2.8rem)',
               fontWeight: 800,
-              letterSpacing: '-0.025em',
+              letterSpacing: '-0.03em',
               color: 'var(--text)',
-              lineHeight: 1.1,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
+              lineHeight: 1.05,
+              marginBottom: 5,
             }}>
               {trip.name}
             </h1>
-            <p style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 4, fontWeight: 500 }}>
+            <p style={{ fontSize: 14, color: 'var(--text-2)', fontWeight: 500 }}>
               {trip.days} {t('days')} · {t('hi')}, {nickname} 👋
             </p>
-          </div>
+          </motion.div>
 
-          {/* Avatars + share */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, marginTop: 4 }}>
-            <div style={{ display: 'flex' }}>
-              {trip.participants.slice(0, 4).map((p, i) => (
-                <motion.div
-                  key={p.id}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1 + i * 0.05, type: 'spring', stiffness: 440, damping: 26 }}
-                  style={{
-                    width: 32, height: 32, borderRadius: '50%',
-                    background: p.color, color: 'white',
-                    fontSize: 11, fontWeight: 700,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: '2px solid var(--bg)',
-                    marginLeft: i > 0 ? -8 : 0,
-                    boxShadow: 'var(--shadow-xs)',
-                  }}
-                >
-                  {p.initials}
-                </motion.div>
-              ))}
-            </div>
-            <GlassBtn
-              size="sm"
-              onClick={() => setShowShare(true)}
-              style={{ minWidth: 0, width: 36, height: 36, padding: 0, borderRadius: 'var(--radius-sm)' }}
-            >
-              <Icon name="share" size={15} />
-            </GlassBtn>
-          </div>
-        </div>
-
-        {/* Supplies progress strip */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.14 }}
-          onClick={() => setScreen('supplies')}
-          className="premium-hover"
-          style={{
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '12px 16px',
-            cursor: 'pointer',
-            marginBottom: 10,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              🎒 {t('suppliesLabel')}
-            </span>
-            <span style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500 }}>
-              {packedCount}/{totalCount} · {pct}%
-            </span>
-          </div>
-          <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden' }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${pct}%` }}
-              transition={{ delay: 0.4, duration: 0.7, ease: 'easeOut' }}
-              style={{
-                height: '100%', borderRadius: 3,
-                background: pct === 100 ? 'var(--success)' : 'var(--brand)',
-              }}
-            />
-          </div>
-        </motion.div>
-
-        {/* Trip budget card — hidden when user toggled hideBudget */}
-        {tripBudget > 0 && !hideBudget && (
+          {/* Supplies progress */}
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.16 }}
-            style={{
-              background: 'var(--success-bg)',
-              border: '1px solid rgba(40,160,90,0.2)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 16px',
-              marginBottom: 10,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}
-          >
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              💰 {t('tripBudget')}
-            </span>
-            <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--success)' }}>
-              ${tripBudget}
-            </span>
-          </motion.div>
-        )}
-
-        {/* Carbon budget widget */}
-        {showCarbonBudget && carbonKg > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.17 }}
-            style={{
-              background: 'rgba(30,140,90,0.08)',
-              border: '1px solid rgba(30,140,90,0.22)',
-              borderRadius: 'var(--radius-md)',
-              padding: '10px 16px',
-              marginBottom: 10,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}
-          >
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'oklch(48% 0.16 158)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              🌍 Carbon Footprint
-            </span>
-            <span style={{ fontSize: 15, fontWeight: 800, color: 'oklch(48% 0.16 158)' }}>
-              ~{carbonKg} kg CO₂
-            </span>
-          </motion.div>
-        )}
-
-        {/* Expense splitting widget */}
-        <motion.div
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.18 }}
-          style={{ marginBottom: 10 }}
-        >
-          <motion.div
-            onClick={() => setShowExpenses(v => !v)}
+            transition={{ delay: 0.13 }}
+            onClick={() => setScreen('supplies')}
             className="premium-hover"
             style={{
               background: 'var(--surface)',
               border: '1px solid var(--border)',
-              borderRadius: showExpenses ? 'var(--radius-md) var(--radius-md) 0 0' : 'var(--radius-md)',
-              padding: '10px 16px',
-              cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}
-          >
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
-              🧾 Expenses {expenses.length > 0 && <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>({expenses.length})</span>}
-            </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              {totalExpenses > 0 && (
-                <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-2)' }}>
-                  ${totalExpenses.toFixed(2)}
-                </span>
-              )}
-              <Icon name={showExpenses ? 'chevL' : 'chevR'} size={13} style={{ color: 'var(--text-3)', transform: showExpenses ? 'rotate(-90deg)' : 'rotate(90deg)' }} />
-            </div>
-          </motion.div>
-
-          <AnimatePresence>
-            {showExpenses && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
-                style={{ overflow: 'hidden' }}
-              >
-                <div style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  borderTop: 'none',
-                  borderRadius: '0 0 var(--radius-md) var(--radius-md)',
-                  padding: '12px 16px',
-                }}>
-                  {/* Add expense form */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <input
-                        value={expDesc}
-                        onChange={e => setExpDesc(e.target.value)}
-                        placeholder="What for?"
-                        className="input-premium"
-                        style={{
-                          flex: 3, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                          fontSize: 12, background: 'var(--bg)',
-                          border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
-                        }}
-                      />
-                      <input
-                        value={expAmount}
-                        onChange={e => setExpAmount(e.target.value)}
-                        placeholder="$0"
-                        type="number"
-                        min="0"
-                        className="input-premium"
-                        style={{
-                          flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
-                          fontSize: 12, background: 'var(--bg)',
-                          border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
-                        }}
-                      />
-                    </div>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <input
-                        value={expPaidBy}
-                        onChange={e => setExpPaidBy(e.target.value)}
-                        placeholder={`Paid by (default: ${nickname})`}
-                        className="input-premium"
-                        style={{
-                          flex: 3, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                          fontSize: 12, background: 'var(--bg)',
-                          border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
-                        }}
-                      />
-                      <select
-                        value={expSplit}
-                        onChange={e => setExpSplit(e.target.value)}
-                        style={{
-                          flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
-                          fontSize: 12, background: 'var(--bg)',
-                          border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
-                        }}
-                      >
-                        {[1,2,3,4,5,6,7,8].map(n => (
-                          <option key={n} value={n}>÷{n}</option>
-                        ))}
-                      </select>
-                      <GlassBtn size="sm" variant="accent" onClick={handleAddExpense} style={{ flexShrink: 0 }}>
-                        <Icon name="plus" size={12} />
-                      </GlassBtn>
-                    </div>
-                  </div>
-
-                  {/* Expense list */}
-                  {expenses.length === 0 ? (
-                    <p style={{ fontSize: 11, color: 'var(--text-3)', fontStyle: 'italic' }}>No expenses logged yet</p>
-                  ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      {expenses.map(exp => (
-                        <div key={exp.id} style={{
-                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
-                          background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
-                          border: '1px solid var(--border)', padding: '8px 10px',
-                        }}>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {exp.description}
-                            </p>
-                            <p style={{ fontSize: 10, color: 'var(--text-3)' }}>
-                              {exp.paidBy} paid · ÷{exp.splitCount} = ${(exp.amount / exp.splitCount).toFixed(2)}/person
-                            </p>
-                          </div>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', flexShrink: 0 }}>
-                            ${exp.amount.toFixed(2)}
-                          </span>
-                          <motion.button
-                            whileTap={{ scale: 0.88 }}
-                            onClick={() => deleteExpense(exp.id)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 2, flexShrink: 0 }}
-                          >
-                            <Icon name="x" size={12} />
-                          </motion.button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-
-        {/* Next Event card */}
-        {nextEventData && (
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.20, type: 'spring', stiffness: 340, damping: 32 }}
-            onClick={() => { setActiveDay(nextEventData.dayNum); setScreen('day'); }}
-            className="premium-hover"
-            style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-md)',
+              borderRadius: 'var(--radius-lg)',
               padding: '12px 16px',
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              marginBottom: 10,
+              boxShadow: 'var(--shadow-xs)',
             }}
           >
-            <div style={{
-              width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-              background: CAT_META[nextEventData.event.category].bg,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 18,
-            }}>
-              {CAT_META[nextEventData.event.category].icon}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                🎒 {t('suppliesLabel')}
+              </span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: pct === 100 ? 'var(--success)' : 'var(--text-3)' }}>
+                {packedCount}/{totalCount} · {pct}%
+              </span>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 2 }}>
-                {t('nextEvent')} · {t('day')} {nextEventData.dayNum}
-                {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1)}` : ''}
-              </p>
-              <p style={{
-                fontSize: 14, fontWeight: 700, color: 'var(--text)',
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>
-                {nextEventData.event.name}
-              </p>
-              <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1, fontWeight: 500 }}>
-                {nextEventData.event.time} · {fmtDuration(nextEventData.event.duration)}
-              </p>
+            <div style={{ height: 7, background: 'var(--border)', borderRadius: 4, overflow: 'hidden' }}>
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${pct}%` }}
+                transition={{ delay: 0.45, duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  height: '100%', borderRadius: 4,
+                  background: pct === 100
+                    ? 'var(--success)'
+                    : 'linear-gradient(90deg, var(--brand), var(--brand-hover))',
+                }}
+              />
             </div>
-            <Icon name="chevR" size={14} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
           </motion.div>
-        )}
+        </div>
 
-        {/* AI Trip Insights */}
-        {insights.length > 0 && (
+        {/* ═══ Body ═══ */}
+        <div style={{ padding: '16px var(--page-px) 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+
+          {/* Budget + Carbon chips */}
+          {((tripBudget > 0 && !hideBudget) || (showCarbonBudget && carbonKg > 0)) && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.16 }}
+              style={{ display: 'flex', gap: 8 }}
+            >
+              {tripBudget > 0 && !hideBudget && (
+                <div style={{
+                  flex: 1,
+                  background: 'var(--success-bg)',
+                  border: '1px solid rgba(40,160,90,0.22)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '11px 14px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    💰 {t('tripBudget')}
+                  </span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--success)' }}>${tripBudget}</span>
+                </div>
+              )}
+              {showCarbonBudget && carbonKg > 0 && (
+                <div style={{
+                  flex: 1,
+                  background: 'rgba(30,140,90,0.08)',
+                  border: '1px solid rgba(30,140,90,0.22)',
+                  borderRadius: 'var(--radius-md)',
+                  padding: '11px 14px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                }}>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'oklch(48% 0.16 158)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    🌍 CO₂
+                  </span>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: 'oklch(48% 0.16 158)' }}>~{carbonKg}kg</span>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* Expenses */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.24 }}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
           >
-            <p style={{
-              fontSize: 10, fontWeight: 700, color: 'var(--text-3)',
-              letterSpacing: '0.07em', textTransform: 'uppercase',
-              marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5,
-            }}>
-              <Icon name="sparkle" size={10} /> {t('tripInsights')}
-            </p>
-            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, paddingRight: 'var(--page-px)', scrollbarWidth: 'none' }}>
-              {insights.map((ins, i) => {
-                const colors = INSIGHT_COLORS[ins.type] ?? INSIGHT_COLORS.tip;
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.28 + i * 0.07, type: 'spring', stiffness: 340, damping: 32 }}
-                    style={{
-                      flexShrink: 0,
-                      minWidth: 180, maxWidth: 220,
-                      background: colors.bg,
-                      border: `1px solid ${colors.border}`,
-                      borderRadius: 'var(--radius-md)',
-                      padding: '10px 12px',
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <span style={{ fontSize: 15 }}>{ins.icon}</span>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: colors.text }}>
-                        {ins.title}
-                      </span>
+            <motion.div
+              onClick={() => setShowExpenses(v => !v)}
+              className="premium-hover"
+              style={{
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: showExpenses ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
+                padding: '11px 16px',
+                cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                boxShadow: 'var(--shadow-xs)',
+              }}
+            >
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                🧾 {t('expenses')}
+                {expenses.length > 0 && (
+                  <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>({expenses.length})</span>
+                )}
+              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                {totalExpenses > 0 && (
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-2)' }}>
+                    ${totalExpenses.toFixed(2)}
+                  </span>
+                )}
+                <Icon
+                  name={showExpenses ? 'chevL' : 'chevR'}
+                  size={13}
+                  style={{ color: 'var(--text-3)', transform: showExpenses ? 'rotate(-90deg)' : 'rotate(90deg)' }}
+                />
+              </div>
+            </motion.div>
+
+            <AnimatePresence>
+              {showExpenses && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.22, ease: 'easeInOut' }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <div style={{
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderTop: 'none',
+                    borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
+                    padding: '12px 16px',
+                    boxShadow: 'var(--shadow-xs)',
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <input
+                          value={expDesc}
+                          onChange={e => setExpDesc(e.target.value)}
+                          placeholder={t('whatFor')}
+                          className="input-premium"
+                          style={{
+                            flex: 3, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 12, background: 'var(--bg)',
+                            border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                          }}
+                        />
+                        <input
+                          value={expAmount}
+                          onChange={e => setExpAmount(e.target.value)}
+                          placeholder="$0"
+                          type="number"
+                          min="0"
+                          className="input-premium"
+                          style={{
+                            flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 12, background: 'var(--bg)',
+                            border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                          }}
+                        />
+                      </div>
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <input
+                          value={expPaidBy}
+                          onChange={e => setExpPaidBy(e.target.value)}
+                          placeholder={t('paidByDefault').replace('{name}', nickname)}
+                          className="input-premium"
+                          style={{
+                            flex: 3, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 12, background: 'var(--bg)',
+                            border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                          }}
+                        />
+                        <select
+                          value={expSplit}
+                          onChange={e => setExpSplit(e.target.value)}
+                          style={{
+                            flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+                            fontSize: 12, background: 'var(--bg)',
+                            border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                          }}
+                        >
+                          {[1,2,3,4,5,6,7,8].map(n => (
+                            <option key={n} value={n}>÷{n}</option>
+                          ))}
+                        </select>
+                        <GlassBtn size="sm" variant="accent" onClick={handleAddExpense} style={{ flexShrink: 0 }}>
+                          <Icon name="plus" size={12} />
+                        </GlassBtn>
+                      </div>
                     </div>
-                    <p style={{ fontSize: 11, color: 'var(--text-2)', lineHeight: 1.45 }}>
-                      {ins.description}
-                    </p>
+
+                    {expenses.length === 0 ? (
+                      <p style={{ fontSize: 11, color: 'var(--text-3)', fontStyle: 'italic' }}>{t('noExpensesYet')}</p>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {expenses.map(exp => (
+                          <div key={exp.id} style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+                            background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
+                            border: '1px solid var(--border)', padding: '8px 10px',
+                          }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {exp.description}
+                              </p>
+                              <p style={{ fontSize: 10, color: 'var(--text-3)' }}>
+                                {exp.paidBy} {t('paid')} · ÷{exp.splitCount} = ${(exp.amount / exp.splitCount).toFixed(2)}/{t('person')}
+                              </p>
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', flexShrink: 0 }}>
+                              ${exp.amount.toFixed(2)}
+                            </span>
+                            <motion.button
+                              whileTap={{ scale: 0.88 }}
+                              onClick={() => deleteExpense(exp.id)}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 2, flexShrink: 0 }}
+                            >
+                              <Icon name="x" size={12} />
+                            </motion.button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Next Event */}
+          {nextEventData && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.21, type: 'spring', stiffness: 340, damping: 32 }}
+              onClick={() => { setActiveDay(nextEventData.dayNum); setScreen('day'); }}
+              className="premium-hover"
+              style={{
+                background: CAT_META[nextEventData.event.category].bg,
+                border: '1px solid rgba(0,0,0,0.06)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '14px 16px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                boxShadow: 'var(--shadow-xs)',
+              }}
+            >
+              <div style={{
+                width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                background: 'rgba(255,255,255,0.55)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 22,
+              }}>
+                {CAT_META[nextEventData.event.category].icon}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 2 }}>
+                  {t('nextEvent')} · {t('day')} {nextEventData.dayNum}
+                  {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1)}` : ''}
+                </p>
+                <p style={{
+                  fontSize: 15, fontWeight: 700, color: 'var(--text)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
+                  {t(nextEventData.event.name)}
+                </p>
+                <p style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 1, fontWeight: 500 }}>
+                  {nextEventData.event.time} · {fmtDuration(nextEventData.event.duration)}
+                </p>
+              </div>
+              <Icon name="chevR" size={15} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
+            </motion.div>
+          )}
+
+          {/* Insights horizontal scroll */}
+          {insights.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+            >
+              <p style={{
+                fontSize: 10, fontWeight: 700, color: 'var(--text-3)',
+                letterSpacing: '0.08em', textTransform: 'uppercase',
+                marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5,
+              }}>
+                <Icon name="sparkle" size={10} /> {t('tripInsights')}
+              </p>
+              <div style={{
+                display: 'flex', gap: 8,
+                overflowX: 'auto', paddingBottom: 4,
+                marginLeft: `calc(-1 * var(--page-px))`,
+                marginRight: `calc(-1 * var(--page-px))`,
+                paddingLeft: 'var(--page-px)',
+                paddingRight: 'var(--page-px)',
+                scrollbarWidth: 'none',
+              }}>
+                {insights.map((ins, i) => {
+                  const colors = INSIGHT_COLORS[ins.type] ?? INSIGHT_COLORS.tip;
+                  return (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, scale: 0.94 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.29 + i * 0.07, type: 'spring', stiffness: 340, damping: 32 }}
+                      style={{
+                        flexShrink: 0,
+                        minWidth: 172, maxWidth: 210,
+                        background: colors.bg,
+                        border: `1px solid ${colors.border}`,
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '11px 13px',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                        <span style={{ fontSize: 16 }}>{ins.icon}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: colors.text, lineHeight: 1.2 }}>
+                          {ins.title}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 11, color: 'var(--text-2)', lineHeight: 1.5 }}>
+                        {ins.description}
+                      </p>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ── Days ── */}
+          <div style={{ marginTop: 6 }}>
+            <p className="eyebrow" style={{ marginBottom: 12 }}>{t('days')}</p>
+
+            <motion.div
+              variants={stagger}
+              initial="hidden"
+              animate="visible"
+              className="flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-4"
+            >
+              {Array.from({ length: trip.days }, (_, i) => {
+                const dayNum  = i + 1;
+                const evs     = trip.events[dayNum] ?? [];
+                const meta    = trip.dayMeta[i];
+                const gaps    = getGaps(evs, dayEndMins);
+                const sorted  = [...evs].sort((a, b) => toMins(a.time) - toMins(b.time));
+                const first   = sorted[0]?.time ?? '—';
+                const last    = sorted[sorted.length - 1];
+                const lastEnd = last
+                  ? `${Math.floor((toMins(last.time) + last.duration) / 60).toString().padStart(2, '0')}:${String((toMins(last.time) + last.duration) % 60).padStart(2, '0')}`
+                  : '—';
+                const dayIcon = getDayIcon(evs, meta?.emoji ?? '🏔️');
+
+                return (
+                  <motion.div key={dayNum} variants={item}>
+                    <div
+                      onClick={() => handleDayClick(dayNum)}
+                      className="premium-hover"
+                      style={{
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-lg)',
+                        padding: '14px 16px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 14,
+                        boxShadow: 'var(--shadow-xs)',
+                        position: 'relative',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {/* Left accent line */}
+                      <div style={{
+                        position: 'absolute', left: 0, top: 0, bottom: 0,
+                        width: 3,
+                        background: 'linear-gradient(180deg, var(--brand) 0%, var(--brand-hover) 100%)',
+                        opacity: 0.4,
+                        borderRadius: '4px 0 0 4px',
+                      }} />
+
+                      {/* Icon with day badge */}
+                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                        <div style={{
+                          width: 50, height: 50, borderRadius: 14,
+                          background: 'var(--brand-light)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 26,
+                        }}>
+                          {dayIcon}
+                        </div>
+                        <div style={{
+                          position: 'absolute', bottom: -2, right: -2,
+                          background: 'var(--brand)', color: 'white',
+                          fontSize: 8, fontWeight: 800,
+                          width: 16, height: 16, borderRadius: '50%',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          border: '1.5px solid var(--surface)',
+                        }}>
+                          {dayNum}
+                        </div>
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 2 }}>
+                          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
+                            {t('day')} {dayNum}
+                          </span>
+                          {trip.startDate && (
+                            <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>
+                              {fmtDate(trip.startDate, i)}
+                            </span>
+                          )}
+                        </div>
+                        <p style={{
+                          fontSize: 13, color: 'var(--text-2)', marginBottom: 9,
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}>
+                          {t(meta?.region ?? `Day ${dayNum}`)}{meta?.desc ? ` — ${t(meta.desc)}` : ''}
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                          <Chip v="neutral" style={{ fontSize: 10 }}>
+                            {evs.length} {t('events')}
+                          </Chip>
+                          {evs.length > 0 && (
+                            <Chip v="neutral" style={{ fontSize: 10 }}>
+                              {first} – {lastEnd}
+                            </Chip>
+                          )}
+                          {gaps.length > 0 && (
+                            <Chip v="gap" style={{ fontSize: 10 }}>
+                              ⚡ {gaps.length} {gaps.length > 1 ? t('gapsPlural') : t('gaps')}
+                            </Chip>
+                          )}
+                        </div>
+                      </div>
+
+                      <Icon name="chevR" size={15} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
+                    </div>
                   </motion.div>
                 );
               })}
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          </div>
+
+        </div>
       </motion.div>
 
-      {/* ── Day list ── */}
-      <div className="flex-1 overflow-y-auto px-[var(--page-px)] pb-8">
-        <p className="eyebrow" style={{ marginBottom: 12 }}>{t('days')}</p>
-
-        <motion.div
-          variants={stagger}
-          initial="hidden"
-          animate="visible"
-          className="flex flex-col gap-2 md:grid md:grid-cols-2 md:gap-3"
-        >
-          {Array.from({ length: trip.days }, (_, i) => {
-            const dayNum = i + 1;
-            const evs    = trip.events[dayNum] ?? [];
-            const meta   = trip.dayMeta[i];
-            const gaps   = getGaps(evs, dayEndMins);
-            const sorted = [...evs].sort((a, b) => toMins(a.time) - toMins(b.time));
-            const first  = sorted[0]?.time ?? '—';
-            const last   = sorted[sorted.length - 1];
-            const lastEnd = last
-              ? `${Math.floor((toMins(last.time) + last.duration) / 60).toString().padStart(2, '0')}:${String((toMins(last.time) + last.duration) % 60).padStart(2, '0')}`
-              : '—';
-
-            const dayIcon = getDayIcon(evs, meta?.emoji ?? '🏔️');
-
-            return (
-              <motion.div key={dayNum} variants={item}>
-                <div
-                  onClick={() => handleDayClick(dayNum)}
-                  className="premium-hover"
-                  style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
-                    borderRadius: 'var(--radius-lg)',
-                    padding: '14px 16px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 14,
-                    boxShadow: 'var(--shadow-xs)',
-                  }}
-                >
-                  <div style={{
-                    width: 48, height: 48, borderRadius: 'var(--radius-md)',
-                    flexShrink: 0,
-                    background: 'var(--brand-light)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 24,
-                  }}>
-                    {dayIcon}
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
-                      <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
-                        {t('day')} {dayNum}
-                      </span>
-                      {trip.startDate && (
-                        <span style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 400 }}>
-                          {fmtDate(trip.startDate, i)}
-                        </span>
-                      )}
-                    </div>
-                    <p style={{
-                      fontSize: 13, color: 'var(--text-2)', marginBottom: 8,
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
-                      {meta?.region ?? `Day ${dayNum}`}{meta?.desc ? ` — ${meta.desc}` : ''}
-                    </p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                      <Chip v="neutral" style={{ fontSize: 10 }}>
-                        {evs.length} {t('events')}
-                      </Chip>
-                      {evs.length > 0 && (
-                        <Chip v="neutral" style={{ fontSize: 10 }}>
-                          {first} – {lastEnd}
-                        </Chip>
-                      )}
-                      {gaps.length > 0 && (
-                        <Chip v="gap" style={{ fontSize: 10 }}>
-                          ⚡ {gaps.length} {gaps.length > 1 ? t('gapsPlural') : t('gaps')}
-                        </Chip>
-                      )}
-                    </div>
-                  </div>
-
-                  <Icon name="chevR" size={15} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
-                </div>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      </div>
-
-      {/* Share sheet */}
+      {/* ── Share Sheet ── */}
       {showShare && (
         <Sheet
           onClose={() => { setShowShare(false); setRevealCode(false); }}
@@ -603,7 +658,7 @@ export default function DashboardScreen() {
                     cursor: 'pointer',
                   }}
                 >
-                  {revealCode ? 'Hide' : 'Show'}
+                  {revealCode ? t('hideCode') : t('showCode')}
                 </button>
               </div>
             </div>

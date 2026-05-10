@@ -209,6 +209,7 @@ export function generateInsights(
   trip: Trip,
   packedCount: number,
   totalSupplies: number,
+  t: (k: string) => string
 ): TripInsight[] {
   const insights: TripInsight[] = [];
 
@@ -220,8 +221,8 @@ export function generateInsights(
   if (conflictDays.length > 0) {
     insights.push({
       icon: '⚠️',
-      title: conflictDays.length === 1 ? `Day ${conflictDays[0]} has conflicts` : `${conflictDays.length} days have conflicts`,
-      description: `Overlapping events detected — tap the day to review`,
+      title: conflictDays.length === 1 ? t('oneDayConflict').replace('{day}', conflictDays[0].toString()) : t('manyDaysConflict').replace('{count}', conflictDays.length.toString()),
+      description: t('conflictDesc'),
       type: 'gap',
     });
   }
@@ -243,8 +244,8 @@ export function generateInsights(
   if (tiredDays.length > 0 && insights.length < 3) {
     insights.push({
       icon: '😮‍💨',
-      title: tiredDays.length === 1 ? `Day ${tiredDays[0]} is packed` : `${tiredDays.length} days are overloaded`,
-      description: `No rest break detected — consider adding breathing room`,
+      title: tiredDays.length === 1 ? t('oneDayPacked').replace('{day}', tiredDays[0].toString()) : t('manyDaysPacked').replace('{count}', tiredDays.length.toString()),
+      description: t('packedDesc'),
       type: 'pacing',
     });
   }
@@ -257,8 +258,8 @@ export function generateInsights(
     const carbonKg = estimateCarbonKg(trip);
     insights.push({
       icon: '🌍',
-      title: `~${carbonKg} kg CO₂ estimated`,
-      description: `${flightCount} flight${flightCount > 1 ? 's' : ''} logged — consider trains for short legs`,
+      title: t('ecoTitle').replace('{carbon}', carbonKg.toString()),
+      description: t('ecoDesc').replace('{count}', flightCount.toString()),
       type: 'eco',
     });
   }
@@ -280,13 +281,13 @@ export function generateInsights(
     const isRelaxTheme = trip.theme === 'beach' || trip.theme === 'lake' || trip.theme === 'sunset';
     insights.push(isRelaxTheme ? {
       icon: '🌴',
-      title: `Day ${worstDay} — relaxation time`,
-      description: `~${Math.round(worstHours)}h of free time — perfect for unwinding`,
+      title: t('relaxTitle').replace('{day}', worstDay.toString()),
+      description: t('relaxDesc').replace('{hours}', Math.round(worstHours).toString()),
       type: 'relax',
     } : {
       icon: '⚡',
-      title: `Day ${worstDay} has free time`,
-      description: `~${Math.round(worstHours)}h unplanned — tap AI suggestions to fill it`,
+      title: t('gapTitle').replace('{day}', worstDay.toString()),
+      description: t('gapDesc').replace('{hours}', Math.round(worstHours).toString()),
       type: 'gap',
     });
   }
@@ -305,8 +306,8 @@ export function generateInsights(
       : `Days ${noFoodDays.slice(0, 2).join(' & ')}`;
     insights.push({
       icon: '🍽️',
-      title: 'Meals not planned',
-      description: `${label} ${noFoodDays.length > 1 ? 'have' : 'has'} no food stops scheduled`,
+      title: t('foodTitle'),
+      description: t('foodDesc').replace('{days}', label),
       type: 'balance',
     });
   }
@@ -317,8 +318,8 @@ export function generateInsights(
     if (pct < 70) {
       insights.push({
         icon: '🎒',
-        title: `${pct}% packed`,
-        description: `${totalSupplies - packedCount} item${totalSupplies - packedCount !== 1 ? 's' : ''} still unpacked`,
+        title: t('packedTitle').replace('{pct}', pct.toString()),
+        description: t('packedDesc2').replace('{count}', (totalSupplies - packedCount).toString()),
         type: 'ready',
       });
     }
@@ -330,8 +331,8 @@ export function generateInsights(
   if (emptyDays.length > 0 && insights.length < 3) {
     insights.push({
       icon: '🗺️',
-      title: emptyDays.length === 1 ? 'Day not planned' : `${emptyDays.length} days unplanned`,
-      description: `${emptyDays.length === 1 ? `Day ${emptyDays[0]}` : 'Several days'} still need activities`,
+      title: emptyDays.length === 1 ? t('oneDayEmpty') : t('manyDaysEmpty').replace('{count}', emptyDays.length.toString()),
+      description: emptyDays.length === 1 ? t('oneDayEmptyDesc').replace('{day}', emptyDays[0].toString()) : t('manyDaysEmptyDesc'),
       type: 'tip',
     });
   }
@@ -341,8 +342,8 @@ export function generateInsights(
   if (insights.length === 0 && totalEvents > 0) {
     insights.push({
       icon: '✅',
-      title: 'Trip is on track',
-      description: `${totalEvents} events planned across ${trip.days} days`,
+      title: t('trackTitle'),
+      description: t('trackDesc').replace('{events}', totalEvents.toString()).replace('{days}', trip.days.toString()),
       type: 'ready',
     });
   }
