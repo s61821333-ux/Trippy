@@ -16,7 +16,7 @@ async function hashTripCode(code: string): Promise<string> {
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 // Supabase requires an email format — we use a fake domain internally
-const AUTH_DOMAIN = 'trippy.internal'
+const AUTH_DOMAIN = 'trippy-users.com'
 
 function toEmail(username: string) {
   return `${username.toLowerCase().trim()}@${AUTH_DOMAIN}`
