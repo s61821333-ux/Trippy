@@ -101,7 +101,7 @@ export async function dbCreateTrip(
 
   let result = await supabase
     .from('trips')
-    .insert(countries?.length ? { ...baseRow, countries } : baseRow)
+    .insert((countries?.length ? { ...baseRow, countries } : baseRow) as any)
     .select('id')
     .single()
 
