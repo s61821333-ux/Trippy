@@ -13,6 +13,7 @@ import SettingsScreen from './screens/SettingsScreen';
 import NotesScreen from './screens/NotesScreen';
 import { ToastProvider } from './ui/Toast';
 import TourOverlay from './TourOverlay';
+import TripEntryAnimation from './TripEntryAnimation';
 
 const screenVariants = {
   initial: { opacity: 0, y: 8 },
@@ -28,19 +29,39 @@ const screenTransition = {
 };
 
 function Shell() {
-  const { screen, setScreen, trip, darkMode, highContrast, reducedMotion, toggleDarkMode, showTour } = useAppStore();
+  const { screen, setScreen, trip, darkMode, highContrast, reducedMotion, toggleDarkMode, showTour,
+          tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
+  const [showEntryAnim, setShowEntryAnim] = useState(false);
+  const [entryCountries, setEntryCountries] = useState<string[]>([]);
+  const prevScreen = React.useRef(screen);
 
   useEffect(() => {
     setMounted(true);
-    // Restore session: if a trip is already persisted from a previous session
-    // and the user did not explicitly log out, go straight to the dashboard.
     if (trip && screen === 'login') {
       setScreen('dashboard');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Show entry animation when tripEntryCountries is set (trip just entered)
+  useEffect(() => {
+    if (tripEntryCountries) {
+      setEntryCountries(tripEntryCountries);
+      setShowEntryAnim(true);
+      clearTripEntry();
+    }
+  }, [tripEntryCountries]);
+
+  // Track demo clicks (when in demo mode: tripDbId is null and trip exists)
+  const isDemo = !!trip && !tripDbId;
+  useEffect(() => {
+    if (!isDemo) return;
+    const handler = () => recordDemoClick();
+    window.addEventListener('click', handler);
+    return () => window.removeEventListener('click', handler);
+  }, [isDemo]);
 
   // On first ever visit, apply system dark mode preference
   useEffect(() => {
@@ -141,6 +162,15 @@ function Shell() {
             </AnimatePresence>
           </div>
           {showTour && <TourOverlay />}
+
+          <AnimatePresence>
+            {showEntryAnim && (
+              <TripEntryAnimation
+                countries={entryCountries}
+                onDone={() => setShowEntryAnim(false)}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </MotionConfig>
     </ToastProvider>

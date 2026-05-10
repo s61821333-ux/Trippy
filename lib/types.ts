@@ -79,6 +79,7 @@ export interface Trip {
   days: number;
   startDate: string;
   code?: string;
+  countries?: string[];
   participants: Participant[];
   dayMeta: DayMeta[];
   events: Record<number, TripEvent[]>;

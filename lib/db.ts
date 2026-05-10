@@ -15,19 +15,57 @@ async function hashTripCode(code: string): Promise<string> {
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
+// Supabase requires an email format — we use a fake domain internally
+const AUTH_DOMAIN = 'trippy.internal'
+
+function toEmail(username: string) {
+  return `${username.toLowerCase().trim()}@${AUTH_DOMAIN}`
+}
+
+export async function registerUser(username: string, password: string): Promise<string> {
+  const supabase = sb()
+  const { data, error } = await supabase.auth.signUp({
+    email: toEmail(username),
+    password,
+  })
+  if (error || !data.user) throw error ?? new Error('Registration failed')
+  return data.user.id
+}
+
+export async function signInUser(username: string, password: string): Promise<string> {
+  const supabase = sb()
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: toEmail(username),
+    password,
+  })
+  if (error || !data.user) throw error ?? new Error('Login failed')
+  return data.user.id
+}
+
+export async function signInWithGoogle(): Promise<void> {
+  const supabase = sb()
+  await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: `${window.location.origin}/auth/callback` },
+  })
+}
+
+export async function getCurrentUser(): Promise<{ id: string; username: string } | null> {
+  const { data: { session } } = await sb().auth.getSession()
+  if (!session?.user) return null
+  const email = session.user.email ?? ''
+  // Google users have real emails; internal users have @trippy.internal
+  const username = email.endsWith(`@${AUTH_DOMAIN}`)
+    ? email.replace(`@${AUTH_DOMAIN}`, '')
+    : (session.user.user_metadata?.full_name ?? email.split('@')[0])
+  return { id: session.user.id, username }
+}
+
 export async function ensureUser(nickname: string): Promise<string> {
   const supabase = sb()
   const { data: { session } } = await supabase.auth.getSession()
-  let userId: string
-
-  if (session?.user) {
-    userId = session.user.id
-  } else {
-    const { data, error } = await supabase.auth.signInAnonymously()
-    if (error || !data.user) throw error
-    userId = data.user.id
-  }
-
+  if (!session?.user) throw new Error('Not authenticated')
+  const userId = session.user.id
   await supabase.from('profiles').upsert({ id: userId, nickname })
   return userId
 }
@@ -52,6 +90,7 @@ export async function dbCreateTrip(
   theme: TripTheme | undefined,
   dayMetas: DayMeta[],
   nickname: string,
+  countries?: string[],
 ): Promise<string> {
   const supabase = sb()
 
@@ -59,7 +98,7 @@ export async function dbCreateTrip(
 
   const { data: trip, error } = await supabase
     .from('trips')
-    .insert({ name, days, start_date: startDate, code: hashedCode, theme: theme || null })
+    .insert({ name, days, start_date: startDate, code: hashedCode, theme: theme || null, countries: countries ?? null })
     .select('id')
     .single()
   if (error || !trip) throw error
@@ -92,7 +131,7 @@ export async function dbFindTrip(name: string, code: string) {
   const { data, error } = await sb()
     .from('trips')
     .select(`
-      id, name, days, start_date, theme, trip_notes,
+      id, name, days, start_date, theme, trip_notes, countries,
       day_meta ( day_index, region, emoji, lat, lng, description ),
       events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags ),
       expenses ( id, description, amount, split_count ),
@@ -302,6 +341,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
     days,
     startDate:         data.start_date ?? new Date().toISOString().split('T')[0],
     theme:             (data.theme ?? 'desert') as TripTheme,
+    countries:         (data as any).countries as string[] | undefined,
     tripNotes:         (data.trip_notes as string[]) ?? [],
     participants,
     dayMeta,

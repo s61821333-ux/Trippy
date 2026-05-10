@@ -5,7 +5,8 @@ import { persist } from 'zustand/middleware';
 import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, Screen, SupplyItem, Trip, TripEvent, TripTheme } from './types';
 import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
 import {
-  ensureUser, signOut, dbCreateTrip, dbFindTrip, dbJoinTrip, rowToTrip,
+  ensureUser, signOut, registerUser, signInUser, signInWithGoogle as dbSignInWithGoogle, getCurrentUser,
+  dbCreateTrip, dbFindTrip, dbJoinTrip, rowToTrip,
   dbAddEvent, dbEditEvent, dbDeleteEvent,
   dbAddExpense, dbDeleteExpense,
   dbAddSupply, dbToggleSupply, dbDeleteSupply,
@@ -35,11 +36,20 @@ interface AppState {
   // Supabase identity
   userId: string | null;
   tripDbId: string | null;
+  authUser: { id: string; username: string } | null;
+  tripEntryCountries: string[] | null;
+  demoClickCount: number;
 
   // Actions
   setScreen: (s: Screen) => void;
+  checkAuth: () => Promise<void>;
+  register: (username: string, password: string) => Promise<void>;
+  signIn: (username: string, password: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
+  clearTripEntry: () => void;
+  recordDemoClick: () => void;
   joinTrip: (name: string, code: string, nickname: string) => Promise<boolean>;
-  createTrip: (name: string, days: number, code: string, nickname: string, theme?: TripTheme, startDate?: string) => Promise<void>;
+  createTrip: (name: string, days: number, code: string, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[]) => Promise<void>;
   logout: () => void;
   setActiveDay: (day: number) => void;
   setNickname: (n: string) => void;
@@ -104,8 +114,26 @@ export const useAppStore = create<AppState>()(
       dayEndHour: 23,
       userId: null,
       tripDbId: null,
+      authUser: null,
+      tripEntryCountries: null,
+      demoClickCount: 0,
 
       setScreen: (s) => set({ screen: s }),
+      checkAuth: async () => {
+        const user = await getCurrentUser()
+        set({ authUser: user })
+      },
+      register: async (username, password) => {
+        const id = await registerUser(username, password)
+        set({ authUser: { id, username } })
+      },
+      signIn: async (username, password) => {
+        const id = await signInUser(username, password)
+        set({ authUser: { id, username } })
+      },
+      signInWithGoogle: async () => { await dbSignInWithGoogle() },
+      clearTripEntry: () => set({ tripEntryCountries: null }),
+      recordDemoClick: () => set(s => ({ demoClickCount: s.demoClickCount + 1 })),
       toggleDarkMode: () => set(s => ({ darkMode: !s.darkMode })),
       toggleHighContrast: () => set(s => ({ highContrast: !s.highContrast })),
       toggleReducedMotion: () => set(s => ({ reducedMotion: !s.reducedMotion })),
@@ -150,6 +178,7 @@ export const useAppStore = create<AppState>()(
             nickname: nickname || 'Traveler',
             screen: 'dashboard',
             activeDay: 1,
+            tripEntryCountries: trip.countries?.length ? trip.countries : null,
           });
           return true;
         } catch {
@@ -157,7 +186,7 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      createTrip: async (name, days, _code, nickname, theme = 'desert', startDate) => {
+      createTrip: async (name, days, _code, nickname, theme = 'desert', startDate, countries) => {
         const defaultEmoji = theme === 'city' ? '🏙️' : theme === 'beach' ? '🏖️' : theme === 'nature' ? '🌲' : theme === 'mountain' ? '⛰️' : theme === 'snow' ? '❄️' : '🏔️';
 
         const dayMetas: DayMeta[] = Array.from({ length: days }, (_, i) => ({
@@ -168,6 +197,7 @@ export const useAppStore = create<AppState>()(
           name,
           days,
           theme,
+          countries: countries?.length ? countries : undefined,
           startDate: startDate || new Date().toISOString().split('T')[0],
           participants: [{ id: 1, name: nickname || 'You', initials: (nickname || 'Y').slice(0, 2).toUpperCase(), color: 'oklch(62% 0.15 195)' }],
           dayMeta: dayMetas,
@@ -176,14 +206,19 @@ export const useAppStore = create<AppState>()(
 
         // Save to DB first — throws on failure so LoginScreen can show a meaningful error
         const userId = await ensureUser(nickname);
-        const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, _code || undefined, theme, dayMetas, nickname);
+        const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, _code || undefined, theme, dayMetas, nickname, countries);
 
-        set({ userId, tripDbId, trip: newTrip, nickname: nickname || 'Traveler', screen: 'dashboard', activeDay: 1, supplies: [] });
+        set({
+          userId, tripDbId, trip: newTrip,
+          nickname: nickname || 'Traveler',
+          screen: 'dashboard', activeDay: 1, supplies: [],
+          tripEntryCountries: countries?.length ? countries : null,
+        });
       },
 
       logout: () => {
         signOut().catch(() => {});
-        set({ trip: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, tripDbId: null });
+        set({ trip: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, tripDbId: null, authUser: null });
       },
 
       setActiveDay: (day) => set({ activeDay: day }),
