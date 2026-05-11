@@ -110,25 +110,25 @@
   --surface:       #1C1814;
   --surface-warm:  #211D18;
 
-  --border:        #2C2720;
-  --border-strong: #3C3530;
+  --border:        #352C24;
+  --border-strong: #4A3E34;
 
   --brand:         #5CB87A;
   --brand-hover:   #4A9A65;
-  --brand-light:   rgba(92, 184, 122, 0.14);
-  --brand-muted:   rgba(92, 184, 122, 0.09);
+  --brand-light:   rgba(92, 184, 122, 0.18);
+  --brand-muted:   rgba(92, 184, 122, 0.12);
 
   --terra:         #E07252;
   --terra-hover:   #C85C3E;
-  --terra-light:   rgba(224, 114, 82, 0.14);
-  --terra-muted:   rgba(224, 114, 82, 0.09);
+  --terra-light:   rgba(224, 114, 82, 0.18);
+  --terra-muted:   rgba(224, 114, 82, 0.12);
 
   --sand:          #D4A452;
-  --sand-light:    rgba(212, 164, 82, 0.14);
+  --sand-light:    rgba(212, 164, 82, 0.18);
 
   --text:          #EDE8E0;
-  --text-2:        #8A7A6C;
-  --text-3:        #524840;
+  --text-2:        #B09A8A;
+  --text-3:        #8A7868;
   --text-inv:      #0E0C0A;
 
   --success:       #4CB872;

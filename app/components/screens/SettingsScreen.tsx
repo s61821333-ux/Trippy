@@ -395,34 +395,38 @@ export default function SettingsScreen() {
                   })}
                 </div>
 
-                {/* Add contact row */}
-                <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+                {/* Add contact row — stacked for mobile friendliness */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
                   <input
                     value={ecName}
                     onChange={e => setEcName(e.target.value)}
                     placeholder={t('emergencyNamePlaceholder')}
                     className="input-premium"
                     style={{
-                      flex: 2, minWidth: 120, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                      width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)',
                       fontSize: 13, background: 'var(--bg)',
                       border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                      boxSizing: 'border-box',
                     }}
                   />
-                  <input
-                    value={ecPhone}
-                    onChange={e => setEcPhone(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleAddEmergencyContact()}
-                    placeholder={t('emergencyPhonePlaceholder')}
-                    className="input-premium"
-                    style={{
-                      flex: 2, minWidth: 120, padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                      fontSize: 13, background: 'var(--bg)',
-                      border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
-                    }}
-                  />
-                  <GlassBtn size="sm" variant="accent" onClick={handleAddEmergencyContact} style={{ flexShrink: 0 }}>
-                    <Icon name="plus" size={13} />
-                  </GlassBtn>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input
+                      value={ecPhone}
+                      onChange={e => setEcPhone(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleAddEmergencyContact()}
+                      placeholder={t('emergencyPhonePlaceholder')}
+                      className="input-premium"
+                      style={{
+                        flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-md)',
+                        fontSize: 13, background: 'var(--bg)',
+                        border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                        minWidth: 0,
+                      }}
+                    />
+                    <GlassBtn size="sm" variant="accent" onClick={handleAddEmergencyContact} style={{ flexShrink: 0 }}>
+                      <Icon name="plus" size={13} />
+                    </GlassBtn>
+                  </div>
                 </div>
 
                 {/* Contact list */}

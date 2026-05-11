@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useRef } from 'react';
+import React, { ReactNode, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SheetProps {
@@ -12,22 +12,34 @@ interface SheetProps {
 
 export default function Sheet({ children, onClose, title, subtitle }: SheetProps) {
   const startY = useRef(0);
-  const isDragging = useRef(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const scrollAtStart = useRef(0);
+
+  // Lock body scroll while sheet is open (prevents iOS keyboard + scroll jump)
+  useEffect(() => {
+    const scrollY = window.scrollY;
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = '100%';
+    document.body.style.overflowY = 'scroll';
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflowY = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     startY.current = e.touches[0].clientY;
-    isDragging.current = false;
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (e.touches[0].clientY - startY.current > 10) {
-      isDragging.current = true;
-    }
+    scrollAtStart.current = panelRef.current?.scrollTop ?? 0;
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     const dy = e.changedTouches[0].clientY - startY.current;
-    if (dy > 100) onClose();
+    // Only close if panel was at top AND user dragged down significantly
+    if (dy > 80 && scrollAtStart.current === 0) onClose();
   };
 
   return (
@@ -48,13 +60,13 @@ export default function Sheet({ children, onClose, title, subtitle }: SheetProps
       >
         <motion.div
           key="sheet-panel"
+          ref={panelRef}
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', stiffness: 420, damping: 40, mass: 0.85 }}
           onClick={e => e.stopPropagation()}
           onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           style={{
             width: '100%',
@@ -67,6 +79,7 @@ export default function Sheet({ children, onClose, title, subtitle }: SheetProps
             overflowY: 'auto',
             boxShadow: 'var(--shadow-xl)',
             touchAction: 'pan-y',
+            overscrollBehavior: 'contain',
           }}
         >
           {/* Drag handle */}

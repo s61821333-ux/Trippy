@@ -201,13 +201,14 @@ interface EventCardProps {
   onEdit: (e: TripEvent) => void;
   onDelete: (id: string) => void;
   onReschedule: (e: TripEvent, newTime: string) => void;
+  onFocus: (e: TripEvent) => void;
   isConflict: boolean;
   goldenHour: 'sunrise' | 'sunset' | null;
   nickname: string;
   dayNumber: number;
 }
 
-function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHour, nickname, dayNumber }: EventCardProps) {
+function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict, goldenHour, nickname, dayNumber }: EventCardProps) {
   const meta          = CAT_META[event.category];
   const endT          = toTime(toMins(event.time) + event.duration);
   const { voteEvent } = useAppStore();
@@ -258,8 +259,11 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
           <div style={{ width: '100%', height: 4, background: 'var(--danger)' }} />
         )}
 
-        {/* Main content row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px' }}>
+        {/* Main content row — tap to focus event */}
+        <div
+          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', cursor: 'pointer' }}
+          onClick={() => onFocus(event)}
+        >
           <EventThumbnail category={event.category} />
 
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -291,13 +295,13 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               marginBottom: 3, letterSpacing: '-0.01em',
             }}>
-              {event.name}
+              {t(event.name as any)}
             </p>
 
             {/* Time chip — tap to reschedule */}
             <motion.button
               whileTap={{ scale: 0.95 }}
-              onClick={openReschedule}
+              onClick={e => { e.stopPropagation(); openReschedule(); }}
               title="Tap to reschedule"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
@@ -376,7 +380,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
               }}>
                 {meta.icon} {meta.label}
               </span>
-              <motion.button whileTap={{ scale: 0.85 }} onClick={() => voteEvent(dayNumber, event.id, nickname, 'up')}
+              <motion.button whileTap={{ scale: 0.85 }} onClick={e => { e.stopPropagation(); voteEvent(dayNumber, event.id, nickname, 'up'); }}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 3,
                   background: myVote === 'up' ? 'rgba(40,160,90,0.15)' : 'transparent',
@@ -386,7 +390,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
                 }}>
                 👍 {upVotes > 0 ? upVotes : ''}
               </motion.button>
-              <motion.button whileTap={{ scale: 0.85 }} onClick={() => voteEvent(dayNumber, event.id, nickname, 'down')}
+              <motion.button whileTap={{ scale: 0.85 }} onClick={e => { e.stopPropagation(); voteEvent(dayNumber, event.id, nickname, 'down'); }}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 3,
                   background: myVote === 'down' ? 'var(--danger-bg)' : 'transparent',
@@ -400,7 +404,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-            <motion.button whileTap={{ scale: 0.88 }} onClick={() => onEdit(event)}
+            <motion.button whileTap={{ scale: 0.88 }} onClick={e => { e.stopPropagation(); onEdit(event); }}
               style={{
                 width: 32, height: 32, borderRadius: 9, background: 'var(--bg)',
                 border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-2)',
@@ -408,7 +412,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, isConflict, goldenHo
               }}>
               <Icon name="edit" size={13} />
             </motion.button>
-            <motion.button whileTap={{ scale: 0.88 }} onClick={() => onDelete(event.id)}
+            <motion.button whileTap={{ scale: 0.88 }} onClick={e => { e.stopPropagation(); onDelete(event.id); }}
               style={{
                 width: 32, height: 32, borderRadius: 9, background: 'var(--danger-bg)',
                 border: '1px solid rgba(192,57,43,0.15)', cursor: 'pointer', color: 'var(--danger)',
@@ -547,6 +551,7 @@ export default function DayScreen() {
   const [editDayEmoji, setEditDayEmoji]       = useState('');
   const [showDrivePrompt, setShowDrivePrompt] = useState(false);
   const [driveMinutes, setDriveMinutes]   = useState('');
+  const [focusedEvent, setFocusedEvent]   = useState<TripEvent | null>(null);
   const [savedFlightTime, setSavedFlightTime] = useState('');
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
@@ -977,6 +982,7 @@ export default function DayScreen() {
                     onEdit={openEdit}
                     onDelete={handleDelete}
                     onReschedule={handleReschedule}
+                    onFocus={setFocusedEvent}
                     isConflict={conflicts.has(item.ev.id)}
                     goldenHour={getGoldenHourType(toMins(item.ev.time), item.ev.duration, dayLat, dayDate)}
                     nickname={nickname}
@@ -999,6 +1005,126 @@ export default function DayScreen() {
           )}
         </AnimatePresence>
       </div>
+
+      {/* ── Event detail sheet ──────────────────────────────────── */}
+      {focusedEvent && (() => {
+        const ev = focusedEvent;
+        const meta2 = CAT_META[ev.category];
+        const endT2 = toTime(toMins(ev.time) + ev.duration);
+        return (
+          <Sheet
+            onClose={() => setFocusedEvent(null)}
+            title={t(ev.name as any)}
+            subtitle={`${meta2.icon} ${meta2.label} · ${ev.time} – ${endT2}`}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+              {/* Duration */}
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  background: 'var(--bg)', border: '1px solid var(--border)',
+                  borderRadius: 100, padding: '5px 12px',
+                  fontSize: 12, fontWeight: 700, color: 'var(--text-2)',
+                }}>
+                  🕐 {ev.time} – {endT2}
+                </span>
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  background: meta2.bg, color: meta2.color,
+                  borderRadius: 100, padding: '5px 12px',
+                  fontSize: 12, fontWeight: 800,
+                }}>
+                  {meta2.icon} {fmtDuration(ev.duration)}
+                </span>
+                {ev.cost != null && ev.cost > 0 && (
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    background: 'var(--success-bg)', color: 'var(--success)',
+                    borderRadius: 100, padding: '5px 12px',
+                    fontSize: 12, fontWeight: 700,
+                  }}>
+                    💰 ${ev.cost}
+                  </span>
+                )}
+              </div>
+
+              {/* Location */}
+              {ev.location && (
+                <a
+                  href={ev.lat && ev.lng
+                    ? `https://www.google.com/maps/search/?api=1&query=${ev.lat},${ev.lng}`
+                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.location)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
+                    fontSize: 14, color: 'var(--brand)', fontWeight: 600,
+                    textDecoration: 'none',
+                    background: 'var(--brand-muted)',
+                    border: '1px solid rgba(59,110,82,0.22)',
+                    borderRadius: 'var(--radius-md)', padding: '10px 14px',
+                    width: 'fit-content',
+                  }}
+                >
+                  📍 {ev.location}
+                </a>
+              )}
+
+              {/* Notes */}
+              {ev.notes && (
+                <div style={{
+                  background: 'var(--bg)', border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-md)', padding: '12px 14px',
+                }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+                    {locale === 'he' ? 'הערות' : 'Notes'}
+                  </p>
+                  <p style={{ fontSize: 14, color: 'var(--text)', lineHeight: 1.55 }}>{ev.notes}</p>
+                </div>
+              )}
+
+              {/* Tags */}
+              {ev.tags && ev.tags.length > 0 && (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {ev.tags.map((tag, ti) => (
+                    <span key={ti} style={{
+                      display: 'inline-flex', alignItems: 'center',
+                      fontSize: 11, fontWeight: 700,
+                      color: 'oklch(52% 0.16 225)',
+                      background: 'rgba(59,126,212,0.09)',
+                      border: '1px solid rgba(59,126,212,0.22)',
+                      borderRadius: 100, padding: '4px 10px',
+                    }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
+                <GlassBtn
+                  size="sm"
+                  variant="accent"
+                  style={{ flex: 1 }}
+                  onClick={() => { setFocusedEvent(null); openEdit(ev); }}
+                >
+                  <Icon name="edit" size={13} /> {t('editEvent')}
+                </GlassBtn>
+                <GlassBtn
+                  size="sm"
+                  variant="danger"
+                  style={{ flex: 1 }}
+                  onClick={() => { setFocusedEvent(null); handleDelete(ev.id); }}
+                >
+                  <Icon name="trash" size={13} /> {locale === 'he' ? 'מחק' : 'Delete'}
+                </GlassBtn>
+              </div>
+            </div>
+          </Sheet>
+        );
+      })()}
 
       {/* ── Add / Edit sheet ─────────────────────────────────── */}
       {showAdd && (

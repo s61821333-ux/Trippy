@@ -28,7 +28,7 @@ const cardVariant = {
 export default function SuggestionsSheet({ dayNumber }: Props) {
   const { setShowSuggestions, addSuggestionToDay, setAiSuggestions, trip, activeGapStart, activeGapEnd } = useAppStore();
   const { show }  = useToast();
-  const { t }     = useI18n();
+  const { t, locale } = useI18n();
   const [loading, setLoading]         = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError]             = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
     return fetch('/api/ai/suggestions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dayNumber, dayMeta, existingEvents, tripName: trip.name, exclude, gapStart: activeGapStart ?? undefined, gapEnd: activeGapEnd ?? undefined }),
+      body: JSON.stringify({ dayNumber, dayMeta, existingEvents, tripName: trip.name, exclude, gapStart: activeGapStart ?? undefined, gapEnd: activeGapEnd ?? undefined, locale }),
     })
       .then(async res => {
         if (!res.ok) {

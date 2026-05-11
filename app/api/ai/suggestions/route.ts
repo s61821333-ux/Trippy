@@ -13,10 +13,11 @@ interface RequestBody {
   exclude?: string[];
   gapStart?: number; // minutes from midnight
   gapEnd?: number;   // minutes from midnight
+  locale?: string;
 }
 
 export async function POST(request: Request) {
-  const { dayNumber, dayMeta, existingEvents, tripName, exclude = [], gapStart, gapEnd }: RequestBody =
+  const { dayNumber, dayMeta, existingEvents, tripName, exclude = [], gapStart, gapEnd, locale }: RequestBody =
     await request.json();
 
   const toHHMM = (mins: number) =>
@@ -37,13 +38,17 @@ export async function POST(request: Request) {
     ? `\nFree slot to fill: ${toHHMM(gapStart)} – ${toHHMM(gapEnd)} (${gapEnd - gapStart} min available). Every suggestion MUST start at or after ${toHHMM(gapStart)} and finish by ${toHHMM(gapEnd)}. Set "time" to a value within this window and keep "duration" short enough to fit.`
     : '';
 
+  const languageInstruction = locale === 'he'
+    ? '\nRespond in Hebrew. All "name" and "description" fields must be written in Hebrew.'
+    : '';
+
   const prompt = `You are a desert trip planning assistant for "${tripName}".
 
 Day ${dayNumber} — ${regionText}
 Existing schedule:
 ${eventsText}
 ${gapLine}
-Suggest exactly 4 NEW activities that complement this day's existing schedule and fit the desert region.${exclude.length > 0 ? `\nDo NOT suggest any of these already-shown activities: ${exclude.join(', ')}.` : ''}
+Suggest exactly 4 NEW activities that complement this day's existing schedule and fit the desert region.${exclude.length > 0 ? `\nDo NOT suggest any of these already-shown activities: ${exclude.join(', ')}.` : ''}${languageInstruction}
 Return ONLY valid JSON — an array of 4 objects with this exact shape:
 [
   {

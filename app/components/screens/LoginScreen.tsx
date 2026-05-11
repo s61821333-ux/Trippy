@@ -271,8 +271,15 @@ function TripStep() {
       await createTrip(cName, days, cCode, cNick, cTheme, cDate, countries);
     } catch (err: any) {
       const msg = (err?.message ?? '').toLowerCase();
-      if (msg.includes('not authenticated')) show('לא מחובר — נסה להתנתק ולהתחבר מחדש');
-      else show(`${t('createTripFailed')}: ${err?.message ?? ''}`);
+      if (msg.includes('not authenticated')) {
+        show(locale === 'he' ? 'לא מחובר — נסה להתנתק ולהתחבר מחדש' : 'Not signed in — please sign out and sign in again');
+      } else if (msg.includes('row-level security') || msg.includes('violates') || msg.includes('rls')) {
+        show(locale === 'he'
+          ? 'שגיאת הרשאות Supabase — יש להפעיל RLS policy בלוח הניהול'
+          : 'Supabase RLS error — run the INSERT policy in your Supabase dashboard');
+      } else {
+        show(`${t('createTripFailed')}: ${err?.message ?? ''}`);
+      }
     }
     setLoading(false);
   };
