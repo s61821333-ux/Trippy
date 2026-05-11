@@ -313,7 +313,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
   const days = data.days ?? 1
 
   const dayMeta = Array.from({ length: days }, (_, i) => {
-    const row = (data.day_meta as any[]).find((m: any) => m.day_index === i)
+    const row = ((data.day_meta as any[]) ?? []).find((m: any) => m.day_index === i)
     return {
       region: row?.region ?? `Day ${i + 1}`,
       emoji:  row?.emoji  ?? '🏔️',
@@ -325,7 +325,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
 
   const events: Record<number, TripEvent[]> = {}
   for (let d = 1; d <= days; d++) {
-    events[d] = (data.events as any[])
+    events[d] = ((data.events as any[]) ?? [])
       .filter((e: any) => e.day_index === d - 1)
       .map((e: any) => ({
         id:       e.id,
@@ -343,7 +343,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
       }))
   }
 
-  const expenses = (data.expenses as any[]).map((e: any) => ({
+  const expenses = ((data.expenses as any[]) ?? []).map((e: any) => ({
     id:          e.id,
     description: e.description,
     amount:      e.amount,
@@ -351,21 +351,21 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
     splitCount:  e.split_count ?? 1,
   }))
 
-  const emergencyContacts = (data.emergency_contacts as any[]).map((c: any) => ({
+  const emergencyContacts = ((data.emergency_contacts as any[]) ?? []).map((c: any) => ({
     id:    c.id,
     name:  c.name,
     phone: c.phone,
     type:  (c.type ?? 'personal') as EmergencyContact['type'],
   }))
 
-  const participants = (data.trip_participants as any[]).map((p: any, i: number) => ({
+  const participants = ((data.trip_participants as any[]) ?? []).map((p: any, i: number) => ({
     id:       i + 1,
     name:     p.initials ?? '??',
     initials: p.initials ?? '??',
     color:    p.color    ?? 'oklch(62% 0.15 195)',
   }))
 
-  const supplies = (data.supplies as any[]).map((s: any) => ({
+  const supplies = ((data.supplies as any[]) ?? []).map((s: any) => ({
     id:       s.id,
     name:     s.name,
     category: s.category ?? 'Other',
