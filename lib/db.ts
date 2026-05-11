@@ -380,10 +380,19 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
     theme:             (data.theme ?? 'desert') as TripTheme,
     countries:         (() => {
       const raw = (data as any).countries
+      console.log('[trippy] countries raw:', raw, typeof raw)
+      // Case 1: proper text[] column — PostgREST returns JS array directly
       if (Array.isArray(raw)) return (raw as string[]).filter(Boolean)
       if (typeof raw !== 'string' || !raw.trim()) return undefined
       const s = raw.trim()
-      // PostgreSQL array literal: {Israel} or {"United States",Jordan}
+      // Case 2: text column storing JSON string: ["United States","France"]
+      if (s.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(s)
+          if (Array.isArray(parsed)) return (parsed as string[]).map(c => String(c).trim()).filter(Boolean)
+        } catch {}
+      }
+      // Case 3: PostgreSQL array literal: {Israel} or {"United States",Jordan}
       if (s.startsWith('{') && s.endsWith('}')) {
         const inner = s.slice(1, -1)
         if (!inner.trim()) return undefined
@@ -391,7 +400,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
         const result = parts.map(p => p.replace(/^"|"$/g, '').trim()).filter(Boolean)
         return result.length ? result : undefined
       }
-      // Plain comma-separated string
+      // Case 4: plain comma-separated: "United States,France"
       const result = s.split(',').map((c: string) => c.trim()).filter(Boolean)
       return result.length ? result : undefined
     })(),
