@@ -380,8 +380,13 @@ function TripStep() {
                         whileTap={{ scale: 0.97 }}
                         onClick={async () => {
                           setLoadingTripId(trip.id);
-                          await loadTripById(trip.id);
-                          setLoadingTripId(null);
+                          try {
+                            await loadTripById(trip.id);
+                          } catch {
+                            show(t('tripNotFound'));
+                          } finally {
+                            setLoadingTripId(null);
+                          }
                         }}
                         disabled={loadingTripId !== null}
                         style={{

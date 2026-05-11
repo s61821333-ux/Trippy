@@ -190,20 +190,26 @@ export const useAppStore = create<AppState>()(
       loadTripById: async (tripId) => {
         const { authUser } = get();
         const nickname = authUser?.username ?? 'Traveler';
-        const userId = await ensureUser(nickname);
-        const data = await dbLoadTripById(tripId);
-        if (!data) return;
-        const { trip, supplies } = rowToTrip(data);
-        set({
-          userId,
-          tripDbId: data.id,
-          trip,
-          supplies,
-          nickname,
-          screen: 'dashboard',
-          activeDay: 1,
-          tripEntryCountries: trip.countries?.length ? trip.countries : null,
-        });
+        const userId = authUser?.id ?? null;
+        if (!userId) return;
+        try {
+          const data = await dbLoadTripById(tripId);
+          if (!data) return;
+          const { trip, supplies } = rowToTrip(data);
+          set({
+            userId,
+            tripDbId: data.id,
+            trip,
+            supplies,
+            nickname,
+            screen: 'dashboard',
+            activeDay: 1,
+            tripEntryCountries: trip.countries?.length ? trip.countries : null,
+          });
+        } catch {
+          // caller shows the error
+          throw new Error('load_failed');
+        }
       },
 
       createTrip: async (name, days, _code, nickname, theme = 'desert', startDate, countries) => {
