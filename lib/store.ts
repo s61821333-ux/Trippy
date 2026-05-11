@@ -179,7 +179,7 @@ export const useAppStore = create<AppState>()(
             nickname: nickname || 'Traveler',
             screen: 'dashboard',
             activeDay: 1,
-            tripEntryCountries: trip.countries?.length ? trip.countries : [],
+            tripEntryCountries: trip.countries?.length ? trip.countries : null,
           });
           return true;
         } catch {
@@ -204,7 +204,7 @@ export const useAppStore = create<AppState>()(
             nickname,
             screen: 'dashboard',
             activeDay: 1,
-            tripEntryCountries: trip.countries?.length ? trip.countries : [],
+            tripEntryCountries: trip.countries?.length ? trip.countries : null,
           });
         } catch {
           // caller shows the error

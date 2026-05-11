@@ -285,9 +285,6 @@ const en = {
   backgroundLabel: 'Background',
   chooseCodeOptional: 'Trip Code (optional)',
   reduceDaysWarning: 'Reducing days to {newDays} will remove events on days {from}–{to}. Continue?',
-  packingBags: 'Packing your bags... 🎒',
-  headingTo: 'Heading to {country}... ✈️',
-  landing: 'Landing... 🛬',
 
   // Demo Data
   'Morning camp breakfast': 'Morning camp breakfast',
@@ -605,9 +602,6 @@ const he: typeof en = {
   backgroundLabel: 'בחר רקע',
   chooseCodeOptional: 'קוד טיול (אופציונלי)',
   reduceDaysWarning: 'הפחתת הימים ל-{newDays} תסיר אירועים בימים {from}–{to}. להמשיך?',
-  packingBags: 'אורזים מזוודות... 🎒',
-  headingTo: 'בדרך ל-{country}... ✈️',
-  landing: 'נוחתים... 🛬',
 
   // Demo Data
   'Morning camp breakfast': 'ארוחת בוקר במחנה',

@@ -123,7 +123,7 @@ export default function SettingsScreen() {
       </motion.div>
 
       <div className="flex-1 overflow-y-auto pb-8 w-full flex justify-center" style={{ paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}>
-        <div className="w-full">
+        <div className="w-full max-w-6xl">
           <motion.div
             variants={sectionVariants}
             initial="hidden"
