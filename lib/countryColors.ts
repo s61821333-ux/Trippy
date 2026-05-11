@@ -5,7 +5,7 @@ export interface CountryColors {
 }
 
 const COUNTRY_MAP: Record<string, CountryColors> = {
-  israel:        { name: 'Israel',        flag: '🇮🇱', colors: ['#0038b8', '#ffffff', '#0038b8'] },
+  israel:        { name: 'Israel',        flag: '🇮🇱', colors: ['#003DA5', '#ffffff', '#003DA5'] },
   usa:           { name: 'USA',           flag: '🇺🇸', colors: ['#B22234', '#ffffff', '#3C3B6E'] },
   'united states': { name: 'United States', flag: '🇺🇸', colors: ['#B22234', '#ffffff', '#3C3B6E'] },
   france:        { name: 'France',        flag: '🇫🇷', colors: ['#002395', '#ffffff', '#ED2939'] },
@@ -37,8 +37,8 @@ const COUNTRY_MAP: Record<string, CountryColors> = {
   colombia:      { name: 'Colombia',      flag: '🇨🇴', colors: ['#FCD116', '#003087', '#CE1126'] },
   peru:          { name: 'Peru',          flag: '🇵🇪', colors: ['#D91023', '#ffffff', '#D91023'] },
   morocco:       { name: 'Morocco',       flag: '🇲🇦', colors: ['#C1272D', '#006233', '#C1272D'] },
-  uae:           { name: 'UAE',           flag: '🇦🇪', colors: ['#00732F', '#ffffff', '#FF0000'] },
-  'united arab emirates': { name: 'UAE', flag: '🇦🇪', colors: ['#00732F', '#ffffff', '#FF0000'] },
+  uae:           { name: 'UAE',           flag: '🇦🇪', colors: ['#00732F', '#ffffff', '#000000', '#FF0000'] },
+  'united arab emirates': { name: 'UAE', flag: '🇦🇪', colors: ['#00732F', '#ffffff', '#000000', '#FF0000'] },
   czech:         { name: 'Czech Republic',flag: '🇨🇿', colors: ['#D7141A', '#ffffff', '#11457E'] },
   'czech republic': { name: 'Czech Republic', flag: '🇨🇿', colors: ['#D7141A', '#ffffff', '#11457E'] },
   hungary:       { name: 'Hungary',       flag: '🇭🇺', colors: ['#CE2939', '#ffffff', '#477050'] },

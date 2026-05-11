@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { getCountryColors } from '@/lib/countryColors';
 
 interface Props {
@@ -9,15 +9,32 @@ interface Props {
   onDone: () => void;
 }
 
+function GlobeIcon({ size = 128 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="44" stroke="white" strokeWidth="2.5" fill="rgba(255,255,255,0.07)" />
+      {/* Equator */}
+      <line x1="6" y1="50" x2="94" y2="50" stroke="white" strokeWidth="1.6" strokeOpacity="0.75" />
+      {/* Prime meridian */}
+      <line x1="50" y1="6" x2="50" y2="94" stroke="white" strokeWidth="1.6" strokeOpacity="0.75" />
+      {/* Tropic curves */}
+      <path d="M 13 33 Q 50 26 87 33" stroke="white" strokeWidth="1.2" fill="none" strokeOpacity="0.5" />
+      <path d="M 13 67 Q 50 74 87 67" stroke="white" strokeWidth="1.2" fill="none" strokeOpacity="0.5" />
+      {/* Meridian ellipses for 3-D depth */}
+      <ellipse cx="50" cy="50" rx="22" ry="44" stroke="white" strokeWidth="1.6" fill="none" strokeOpacity="0.65" />
+      <ellipse cx="50" cy="50" rx="38" ry="44" stroke="white" strokeWidth="0.9" fill="none" strokeOpacity="0.35" />
+    </svg>
+  );
+}
+
 export default function TripEntryAnimation({ countries, onDone }: Props) {
-  const { colors, flags, names } = getCountryColors(countries);
+  const { colors } = getCountryColors(countries);
 
   useEffect(() => {
     const t = setTimeout(onDone, 4000);
     return () => clearTimeout(t);
   }, [onDone]);
 
-  // Build strips — repeat colors to fill screen nicely
   const STRIPS = 7;
   const strips = Array.from({ length: STRIPS }, (_, i) => colors[i % colors.length]);
 
@@ -34,11 +51,10 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
         pointerEvents: 'all',
       }}
     >
-      {/* Colored strips */}
       {strips.map((color, i) => (
         <motion.div
           key={i}
-          initial={{ scaleX: 0, originX: 0 }}
+          initial={{ scaleX: 0 }}
           animate={{ scaleX: [0, 1, 1, 0] }}
           transition={{
             duration: 4,
@@ -54,51 +70,20 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
         />
       ))}
 
-      {/* Center content */}
+      {/* Globe — no text, pure visual */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: [0, 1, 1, 0] }}
-        transition={{ duration: 4, times: [0.2, 0.35, 0.75, 0.95] }}
+        initial={{ opacity: 0, scale: 0.65 }}
+        animate={{ opacity: [0, 1, 1, 0], scale: [0.65, 1, 1, 0.9] }}
+        transition={{ duration: 4, times: [0.18, 0.32, 0.75, 0.95] }}
         style={{
           position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column',
+          display: 'flex',
           alignItems: 'center', justifyContent: 'center',
-          gap: 16, pointerEvents: 'none',
+          pointerEvents: 'none',
+          filter: 'drop-shadow(0 6px 28px rgba(0,0,0,0.45))',
         }}
       >
-        {/* Flag emojis */}
-        <div style={{ fontSize: flags.length > 2 ? 44 : 64, lineHeight: 1.1, letterSpacing: 4 }}>
-          {flags.slice(0, 4).join(' ')}
-        </div>
-
-        {/* Country names */}
-        <div style={{
-          fontSize: names.length > 2 ? 18 : 24,
-          fontWeight: 800,
-          color: '#ffffff',
-          textShadow: '0 2px 12px rgba(0,0,0,0.5)',
-          textAlign: 'center',
-          letterSpacing: '-0.02em',
-          maxWidth: 280,
-        }}>
-          {names.slice(0, 4).join(' · ')}
-        </div>
-
-        {/* Tagline */}
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: [0, 1, 1, 0] }}
-          transition={{ duration: 4, times: [0.35, 0.5, 0.75, 0.9] }}
-          style={{
-            fontSize: 14,
-            color: 'rgba(255,255,255,0.85)',
-            fontWeight: 500,
-            textShadow: '0 1px 6px rgba(0,0,0,0.4)',
-            letterSpacing: '0.05em',
-          }}
-        >
-          Let the adventure begin ✈️
-        </motion.div>
+        <GlobeIcon size={136} />
       </motion.div>
     </motion.div>
   );
