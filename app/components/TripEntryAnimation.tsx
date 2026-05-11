@@ -10,29 +10,29 @@ interface Props {
 }
 
 function TrippyLogo({ size = 128 }: { size?: number }) {
-  const r = size / 2;
   return (
-    <svg width={size} height={size} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Rounded background */}
-      <rect x="4" y="4" width="112" height="112" rx="28" fill="rgba(255,255,255,0.18)" />
-      <rect x="4" y="4" width="112" height="112" rx="28" stroke="rgba(255,255,255,0.55)" strokeWidth="2" />
-      {/* Tent / mountain shape */}
-      <path d="M60 22 L28 78 L92 78 Z" fill="rgba(255,255,255,0.95)" />
-      {/* Door opening */}
-      <path d="M52 78 Q52 62 60 62 Q68 62 68 78 Z" fill="rgba(255,255,255,0.25)" />
-      {/* Wordmark */}
-      <text
-        x="60" y="100"
-        textAnchor="middle"
-        fontFamily="system-ui, -apple-system, sans-serif"
-        fontWeight="800"
-        fontSize="18"
-        letterSpacing="-0.5"
-        fill="white"
-      >
+    <div style={{
+      width: size, height: size,
+      borderRadius: size * 0.26,
+      background: 'rgba(0,0,0,0.22)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      border: '2px solid rgba(255,255,255,0.45)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      gap: 6,
+    }}>
+      <span style={{ fontSize: size * 0.52, lineHeight: 1, filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.3))' }}>
+        🌍
+      </span>
+      <span style={{
+        fontSize: size * 0.145, fontWeight: 800, color: 'white', letterSpacing: '-0.03em',
+        textShadow: '0 1px 6px rgba(0,0,0,0.4)',
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+      }}>
         trippy
-      </text>
-    </svg>
+      </span>
+    </div>
   );
 }
 
@@ -89,7 +89,6 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
           display: 'flex',
           alignItems: 'center', justifyContent: 'center',
           pointerEvents: 'none',
-          filter: 'drop-shadow(0 6px 28px rgba(0,0,0,0.45))',
         }}
       >
         <TrippyLogo size={136} />
