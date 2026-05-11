@@ -23,9 +23,11 @@ const listVariants = {
   visible: { transition: { staggerChildren: 0.04, delayChildren: 0.06 } },
 };
 const itemVariant = {
-  hidden:  { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0,
-    transition: { type: 'spring' as const, stiffness: 380, damping: 32 } },
+  hidden: { opacity: 0, y: 10 },
+  visible: {
+    opacity: 1, y: 0,
+    transition: { type: 'spring' as const, stiffness: 380, damping: 32 }
+  },
 };
 
 export default function SuppliesScreen() {
@@ -33,9 +35,9 @@ export default function SuppliesScreen() {
   const { show } = useToast();
   const { t } = useI18n();
 
-  const [filter, setFilter]     = useState<Category | 'All'>('All');
-  const [newName, setNewName]   = useState('');
-  const [newCat, setNewCat]     = useState<Category>('Gear');
+  const [filter, setFilter] = useState<Category | 'All'>('All');
+  const [newName, setNewName] = useState('');
+  const [newCat, setNewCat] = useState<Category>('Gear');
   const [newAssignee, setNewAssignee] = useState('');
   const [newCritical, setNewCritical] = useState(false);
 
@@ -48,8 +50,8 @@ export default function SuppliesScreen() {
       return Number(a.checked) - Number(b.checked);
     });
 
-  const packed  = supplies.filter(s => s.checked).length;
-  const total   = supplies.length;
+  const packed = supplies.filter(s => s.checked).length;
+  const total = supplies.length;
   // Progress turns success green only when all critical items are also checked
   const allCriticalDone = supplies.filter(s => s.critical).every(s => s.checked);
   const pct = total > 0 ? Math.round((packed / total) * 100) : 0;

@@ -18,7 +18,7 @@ import TripEntryAnimation from './TripEntryAnimation';
 const screenVariants = {
   initial: { opacity: 0, y: 8 },
   animate: { opacity: 1, y: 0 },
-  exit:    { opacity: 0, y: -4 },
+  exit: { opacity: 0, y: -4 },
 };
 
 const screenTransition = {
@@ -30,7 +30,7 @@ const screenTransition = {
 
 function Shell() {
   const { screen, setScreen, trip, darkMode, highContrast, reducedMotion, toggleDarkMode, showTour,
-          tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick } = useAppStore();
+    tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
@@ -42,7 +42,7 @@ function Shell() {
     if (trip && screen === 'login') {
       setScreen('dashboard');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Show entry animation when tripEntryCountries is set (trip just entered)
@@ -72,7 +72,7 @@ function Shell() {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (prefersDark && !darkMode) toggleDarkMode();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Also react live to OS theme changes
@@ -85,7 +85,7 @@ function Shell() {
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

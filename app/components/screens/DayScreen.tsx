@@ -19,14 +19,14 @@ const DAY_ABBREVS_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const DAY_ABBREVS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
 const CAT_GRADIENTS: Record<Category, string> = {
-  food:       'linear-gradient(135deg, #E8A87C 0%, #C4714A 100%)',
-  cafe:       'linear-gradient(135deg, #D4A96A 0%, #9A6830 100%)',
+  food: 'linear-gradient(135deg, #E8A87C 0%, #C4714A 100%)',
+  cafe: 'linear-gradient(135deg, #D4A96A 0%, #9A6830 100%)',
   attraction: 'linear-gradient(135deg, #7BBCD4 0%, #3B7E9E 100%)',
-  hotel:      'linear-gradient(135deg, #C48AD4 0%, #7A3A9E 100%)',
-  rest:       'linear-gradient(135deg, #8BC48A 0%, #3B6E52 100%)',
-  transport:  'linear-gradient(135deg, #8EA8D4 0%, #4A6EAE 100%)',
-  flight:     'linear-gradient(135deg, #6B9FD4 0%, #1A3F8A 100%)',
-  other:      'linear-gradient(135deg, #C4A87A 0%, #8A6440 100%)',
+  hotel: 'linear-gradient(135deg, #C48AD4 0%, #7A3A9E 100%)',
+  rest: 'linear-gradient(135deg, #8BC48A 0%, #3B6E52 100%)',
+  transport: 'linear-gradient(135deg, #8EA8D4 0%, #4A6EAE 100%)',
+  flight: 'linear-gradient(135deg, #6B9FD4 0%, #1A3F8A 100%)',
+  other: 'linear-gradient(135deg, #C4A87A 0%, #8A6440 100%)',
 };
 
 /* ── Category thumbnail ────────────────────────────────────────── */
@@ -59,11 +59,11 @@ interface ConnectorProps {
 
 function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest, onAdd, t }: ConnectorProps) {
   const [travelMins, setTravelMins] = useState<number | null>(null);
-  const [travelKm,   setTravelKm]   = useState<number | null>(null);
-  const [fetching,   setFetching]   = useState(false);
+  const [travelKm, setTravelKm] = useState<number | null>(null);
+  const [fetching, setFetching] = useState(false);
 
-  const isFree    = gapMins >= 45;
-  const canRoute  = !!(fromEv?.lat && fromEv?.lng && toEv?.lat && toEv?.lng);
+  const isFree = gapMins >= 45;
+  const canRoute = !!(fromEv?.lat && fromEv?.lng && toEv?.lat && toEv?.lng);
 
   useEffect(() => {
     if (!canRoute) return;
@@ -81,10 +81,10 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
           setTravelKm(p.distance != null ? Math.round(p.distance / 100) / 10 : null);
         }
       })
-      .catch(() => {})
+      .catch(() => { })
       .finally(() => setFetching(false));
-  // re-fetch only when coordinates change
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // re-fetch only when coordinates change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromEv?.lat, fromEv?.lng, toEv?.lat, toEv?.lng]);
 
   const dashColor = isFree ? 'var(--warning)' : travelMins !== null ? 'rgba(99,102,241,0.6)' : 'var(--border)';
@@ -209,13 +209,13 @@ interface EventCardProps {
 }
 
 function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict, goldenHour, nickname, dayNumber }: EventCardProps) {
-  const meta          = CAT_META[event.category];
-  const endT          = toTime(toMins(event.time) + event.duration);
+  const meta = CAT_META[event.category];
+  const endT = toTime(toMins(event.time) + event.duration);
   const { voteEvent } = useAppStore();
-  const { t }         = useI18n();
+  const { t } = useI18n();
 
   const [rescheduling, setRescheduling] = useState(false);
-  const [pendingTime,  setPendingTime]  = useState(event.time);
+  const [pendingTime, setPendingTime] = useState(event.time);
 
   // Reset local time whenever the store updates the event
   useEffect(() => { setPendingTime(event.time); }, [event.time]);
@@ -229,9 +229,9 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
     setRescheduling(false);
   };
 
-  const upVotes   = Object.values(event.votes ?? {}).filter(v => v === 'up').length;
+  const upVotes = Object.values(event.votes ?? {}).filter(v => v === 'up').length;
   const downVotes = Object.values(event.votes ?? {}).filter(v => v === 'down').length;
-  const myVote    = (event.votes ?? {})[nickname];
+  const myVote = (event.votes ?? {})[nickname];
 
   return (
     <motion.div
@@ -533,30 +533,30 @@ export default function DayScreen() {
 
   const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
 
-  const [showAdd, setShowAdd]             = useState(false);
-  const [editTarget, setEditTarget]       = useState<TripEvent | null>(null);
-  const [fTime, setFTime]                 = useState('09:00');
-  const [fDur,  setFDur]                  = useState('60');
-  const [fName, setFName]                 = useState('');
-  const [fCat,  setFCat]                  = useState<Category>('attraction');
-  const [fLoc,  setFLoc]                  = useState('');
-  const [fLat,  setFLat]                  = useState<number | undefined>(undefined);
-  const [fLng,  setFLng]                  = useState<number | undefined>(undefined);
-  const [fNotes, setFNotes]               = useState('');
-  const [manualCat, setManualCat]         = useState(false);
-  const [fCost, setFCost]                     = useState('');
-  const [fTags, setFTags]                     = useState(''); // comma-separated tag input
-  const [showEditDay, setShowEditDay]         = useState(false);
-  const [editDayName, setEditDayName]         = useState('');
-  const [editDayEmoji, setEditDayEmoji]       = useState('');
+  const [showAdd, setShowAdd] = useState(false);
+  const [editTarget, setEditTarget] = useState<TripEvent | null>(null);
+  const [fTime, setFTime] = useState('09:00');
+  const [fDur, setFDur] = useState('60');
+  const [fName, setFName] = useState('');
+  const [fCat, setFCat] = useState<Category>('attraction');
+  const [fLoc, setFLoc] = useState('');
+  const [fLat, setFLat] = useState<number | undefined>(undefined);
+  const [fLng, setFLng] = useState<number | undefined>(undefined);
+  const [fNotes, setFNotes] = useState('');
+  const [manualCat, setManualCat] = useState(false);
+  const [fCost, setFCost] = useState('');
+  const [fTags, setFTags] = useState(''); // comma-separated tag input
+  const [showEditDay, setShowEditDay] = useState(false);
+  const [editDayName, setEditDayName] = useState('');
+  const [editDayEmoji, setEditDayEmoji] = useState('');
   const [showDrivePrompt, setShowDrivePrompt] = useState(false);
-  const [driveMinutes, setDriveMinutes]   = useState('');
-  const [focusedEvent, setFocusedEvent]   = useState<TripEvent | null>(null);
+  const [driveMinutes, setDriveMinutes] = useState('');
+  const [focusedEvent, setFocusedEvent] = useState<TripEvent | null>(null);
   const [savedFlightTime, setSavedFlightTime] = useState('');
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
   useEffect(() => {
-    const up   = () => setIsOnline(true);
+    const up = () => setIsOnline(true);
     const down = () => setIsOnline(false);
     window.addEventListener('online', up);
     window.addEventListener('offline', down);
@@ -583,8 +583,8 @@ export default function DayScreen() {
           setWeather({ code: d.daily.weathercode[idx], temp: Math.round(d.daily.temperature_2m_max[idx]) });
         }
       })
-      .catch(() => {});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+      .catch(() => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeDay, trip?.startDate, trip?.dayMeta?.[activeDay - 1]?.lat, trip?.dayMeta?.[activeDay - 1]?.lng]);
 
 
@@ -593,34 +593,34 @@ export default function DayScreen() {
     if (manualCat || editTarget) return;
     const n = fName.toLowerCase();
     let cat: Category = 'attraction';
-    if (/coffee|cafe|espresso|cappuccino|latte|tea|קפה|בית קפה/.test(n))                                                                                          cat = 'cafe';
-    else if (/eat|food|lunch|dinner|breakfast|meal|restaurant|falafel|pizza|burger|אוכל|ארוחה|מסעדה/.test(n))                                                    cat = 'food';
-    else if (/flight|airport|landing|takeoff|take.?off|boarding|terminal|runway|plane|check.?in|טיסה|שדה תעופה/.test(n))                                         cat = 'flight';
-    else if (/drive|driving|car|bus|taxi|uber|train|transport|road|gas|fuel|נסיעה|נהיגה|אוטובוס|רכב/.test(n))                                                   cat = 'transport';
-    else if (/hotel|hostel|airbnb|check.?in|check.?out|accommodation|lodg|inn|resort|apartment|stay|motel|מלון|לינה|צ'ק אין/.test(n))                            cat = 'hotel';
-    else if (/rest|sleep|camp|nap|relax|overnight|חניה|מנוחה|שינה/.test(n))                                                                                      cat = 'rest';
+    if (/coffee|cafe|espresso|cappuccino|latte|tea|קפה|בית קפה/.test(n)) cat = 'cafe';
+    else if (/eat|food|lunch|dinner|breakfast|meal|restaurant|falafel|pizza|burger|אוכל|ארוחה|מסעדה/.test(n)) cat = 'food';
+    else if (/flight|airport|landing|takeoff|take.?off|boarding|terminal|runway|plane|check.?in|טיסה|שדה תעופה/.test(n)) cat = 'flight';
+    else if (/drive|driving|car|bus|taxi|uber|train|transport|road|gas|fuel|נסיעה|נהיגה|אוטובוס|רכב/.test(n)) cat = 'transport';
+    else if (/hotel|hostel|airbnb|check.?in|check.?out|accommodation|lodg|inn|resort|apartment|stay|motel|מלון|לינה|צ'ק אין/.test(n)) cat = 'hotel';
+    else if (/rest|sleep|camp|nap|relax|overnight|חניה|מנוחה|שינה/.test(n)) cat = 'rest';
     setFCat(cat);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fName]);
 
   const QUICK_PRESETS: { icon: string; label: string; name: string; cat: Category; dur: number }[] = [
-    { icon: '🚗', label: t('quickDriveLabel'),   name: t('quickDriveName'),   cat: 'transport', dur: 30  },
-    { icon: '🍽️', label: t('quickMealLabel'),    name: t('quickMealName'),    cat: 'food',      dur: 60  },
-    { icon: '☕',  label: t('quickCoffeeLabel'),  name: t('quickCoffeeName'),  cat: 'cafe',      dur: 30  },
-    { icon: '⛺', label: t('quickRestLabel'),    name: t('quickRestName'),    cat: 'rest',      dur: 20  },
-    { icon: '⛽', label: t('quickGasLabel'),     name: t('quickGasName'),     cat: 'transport', dur: 15  },
+    { icon: '🚗', label: t('quickDriveLabel'), name: t('quickDriveName'), cat: 'transport', dur: 30 },
+    { icon: '🍽️', label: t('quickMealLabel'), name: t('quickMealName'), cat: 'food', dur: 60 },
+    { icon: '☕', label: t('quickCoffeeLabel'), name: t('quickCoffeeName'), cat: 'cafe', dur: 30 },
+    { icon: '⛺', label: t('quickRestLabel'), name: t('quickRestName'), cat: 'rest', dur: 20 },
+    { icon: '⛽', label: t('quickGasLabel'), name: t('quickGasName'), cat: 'transport', dur: 15 },
   ];
 
   if (!trip) return null;
 
-  const evs         = [...(trip.events[activeDay] ?? [])].sort((a, b) => toMins(a.time) - toMins(b.time));
-  const meta        = trip.dayMeta[activeDay - 1];
-  const conflicts   = getConflicts(evs);
-  const dayDate     = trip.startDate
+  const evs = [...(trip.events[activeDay] ?? [])].sort((a, b) => toMins(a.time) - toMins(b.time));
+  const meta = trip.dayMeta[activeDay - 1];
+  const conflicts = getConflicts(evs);
+  const dayDate = trip.startDate
     ? new Date(new Date(trip.startDate).getTime() + (activeDay - 1) * 86_400_000).toISOString().split('T')[0]
     : trip.startDate ?? new Date().toISOString().split('T')[0];
-  const dayLat      = meta?.lat ?? 32;
-  const dayBudget   = getDayBudget(evs);
+  const dayLat = meta?.lat ?? 32;
+  const dayBudget = getDayBudget(evs);
 
   const openMapForDay = () => {
     const firstWithLocation = evs.find(e => e.location);
@@ -630,7 +630,7 @@ export default function DayScreen() {
 
   const weatherEmoji = (code: number) => {
     if (code === 0) return '☀️';
-    if (code <= 3)  return '⛅';
+    if (code <= 3) return '⛅';
     if (code <= 48) return '🌫️';
     if (code <= 67) return '🌧️';
     if (code <= 77) return '🌨️';
@@ -648,14 +648,14 @@ export default function DayScreen() {
   for (let i = 0; i < evs.length; i++) {
     items.push({ type: 'event', ev: evs[i] });
     if (i < evs.length - 1) {
-      const curEnd    = toMins(evs[i].time) + evs[i].duration;
+      const curEnd = toMins(evs[i].time) + evs[i].duration;
       const nextStart = toMins(evs[i + 1].time);
       items.push({ type: 'connector', gapMins: Math.max(0, nextStart - curEnd), gapStart: curEnd, fromEv: evs[i], toEv: evs[i + 1] });
     }
   }
   // Gap after last event (free time before end of day, respects night-owl setting)
   if (evs.length > 0) {
-    const lastEnd  = toMins(evs[evs.length - 1].time) + evs[evs.length - 1].duration;
+    const lastEnd = toMins(evs[evs.length - 1].time) + evs[evs.length - 1].duration;
     const endOfDay = dayEndHour * 60;
     if (endOfDay - lastEnd >= 45) {
       items.push({ type: 'connector', gapMins: endOfDay - lastEnd, gapStart: lastEnd });
@@ -683,7 +683,7 @@ export default function DayScreen() {
 
   const handleSave = () => {
     if (!fName.trim()) { show(t('enterEventName')); return; }
-    const dur  = parseInt(fDur, 10) || 60;
+    const dur = parseInt(fDur, 10) || 60;
     const cost = fCost.trim() ? parseFloat(fCost) : undefined;
     const tags = fTags.split(',').map(t => t.trim()).filter(Boolean);
     if (editTarget) {
@@ -716,7 +716,7 @@ export default function DayScreen() {
     const mins = parseInt(driveMinutes, 10);
     if (mins > 0) {
       const flightStart = toMins(savedFlightTime);
-      const driveStart  = Math.max(0, flightStart - mins);
+      const driveStart = Math.max(0, flightStart - mins);
       addEvent(activeDay, {
         time: toTime(driveStart),
         duration: mins,
@@ -834,7 +834,7 @@ export default function DayScreen() {
         }}
       >
         {Array.from({ length: trip.days }, (_, i) => {
-          const dayNum  = i + 1;
+          const dayNum = i + 1;
           const isActive = dayNum === activeDay;
           const { abbrev, dateNum } = getDayInfo(dayNum);
           return (
@@ -952,7 +952,7 @@ export default function DayScreen() {
           // Only handle clear horizontal swipes (dx dominates and is large enough)
           if (Math.abs(dx) > Math.abs(dy) * 1.8 && Math.abs(dx) > 55) {
             if (dx < 0 && activeDay < trip.days) setActiveDay(activeDay + 1);
-            if (dx > 0 && activeDay > 1)         setActiveDay(activeDay - 1);
+            if (dx > 0 && activeDay > 1) setActiveDay(activeDay - 1);
           }
         }}
       >
@@ -1361,7 +1361,7 @@ export default function DayScreen() {
                 {t('emojiLabel')}
               </label>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {['🏙️','🗼','🌊','🏖️','🏔️','🌲','✈️','🚂','🛳️','🏛️','🗺️','🎡','🌅','❄️','🍷','🎭','🎨','⛷️'].map(em => (
+                {['🏙️', '🗼', '🌊', '🏖️', '🏔️', '🌲', '✈️', '🚂', '🛳️', '🏛️', '🗺️', '🎡', '🌅', '❄️', '🍷', '🎭', '🎨', '⛷️'].map(em => (
                   <motion.button
                     key={em}
                     whileTap={{ scale: 0.88 }}
