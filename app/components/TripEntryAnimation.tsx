@@ -9,20 +9,29 @@ interface Props {
   onDone: () => void;
 }
 
-function GlobeIcon({ size = 128 }: { size?: number }) {
+function TrippyLogo({ size = 128 }: { size?: number }) {
+  const r = size / 2;
   return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="50" cy="50" r="44" stroke="white" strokeWidth="2.5" fill="rgba(255,255,255,0.07)" />
-      {/* Equator */}
-      <line x1="6" y1="50" x2="94" y2="50" stroke="white" strokeWidth="1.6" strokeOpacity="0.75" />
-      {/* Prime meridian */}
-      <line x1="50" y1="6" x2="50" y2="94" stroke="white" strokeWidth="1.6" strokeOpacity="0.75" />
-      {/* Tropic curves */}
-      <path d="M 13 33 Q 50 26 87 33" stroke="white" strokeWidth="1.2" fill="none" strokeOpacity="0.5" />
-      <path d="M 13 67 Q 50 74 87 67" stroke="white" strokeWidth="1.2" fill="none" strokeOpacity="0.5" />
-      {/* Meridian ellipses for 3-D depth */}
-      <ellipse cx="50" cy="50" rx="22" ry="44" stroke="white" strokeWidth="1.6" fill="none" strokeOpacity="0.65" />
-      <ellipse cx="50" cy="50" rx="38" ry="44" stroke="white" strokeWidth="0.9" fill="none" strokeOpacity="0.35" />
+    <svg width={size} height={size} viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* Rounded background */}
+      <rect x="4" y="4" width="112" height="112" rx="28" fill="rgba(255,255,255,0.18)" />
+      <rect x="4" y="4" width="112" height="112" rx="28" stroke="rgba(255,255,255,0.55)" strokeWidth="2" />
+      {/* Tent / mountain shape */}
+      <path d="M60 22 L28 78 L92 78 Z" fill="rgba(255,255,255,0.95)" />
+      {/* Door opening */}
+      <path d="M52 78 Q52 62 60 62 Q68 62 68 78 Z" fill="rgba(255,255,255,0.25)" />
+      {/* Wordmark */}
+      <text
+        x="60" y="100"
+        textAnchor="middle"
+        fontFamily="system-ui, -apple-system, sans-serif"
+        fontWeight="800"
+        fontSize="18"
+        letterSpacing="-0.5"
+        fill="white"
+      >
+        trippy
+      </text>
     </svg>
   );
 }
@@ -83,7 +92,7 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
           filter: 'drop-shadow(0 6px 28px rgba(0,0,0,0.45))',
         }}
       >
-        <GlobeIcon size={136} />
+        <TrippyLogo size={136} />
       </motion.div>
     </motion.div>
   );

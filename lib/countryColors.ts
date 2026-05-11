@@ -59,7 +59,75 @@ const COUNTRY_MAP: Record<string, CountryColors> = {
   'new zealand': { name: 'New Zealand',   flag: '🇳🇿', colors: ['#00247D', '#ffffff', '#CC142B'] },
 }
 
-const DEFAULT_COLORS = ['#2a4a7f', '#e8a020', '#2a4a7f']
+// Hebrew aliases → canonical English key in COUNTRY_MAP
+const HE_ALIASES: Record<string, string> = {
+  'ישראל': 'israel',
+  'ארצות הברית': 'united states',
+  'צרפת': 'france',
+  'גרמניה': 'germany',
+  'איטליה': 'italy',
+  'ספרד': 'spain',
+  'פורטוגל': 'portugal',
+  'יוון': 'greece',
+  'בריטניה': 'united kingdom',
+  'הולנד': 'netherlands',
+  'בלגיה': 'belgium',
+  'שוויץ': 'switzerland',
+  'אוסטריה': 'austria',
+  'שוודיה': 'sweden',
+  'נורווגיה': 'norway',
+  'דנמרק': 'denmark',
+  'פינלנד': 'finland',
+  'אירלנד': 'ireland',
+  'פולין': 'poland',
+  'הונגריה': 'hungary',
+  'טורקיה': 'turkey',
+  'מצרים': 'egypt',
+  'ירדן': 'jordan',
+  'איחוד האמירויות': 'uae',
+  'מרוקו': 'morocco',
+  'יפן': 'japan',
+  'סין': 'china',
+  'הודו': 'india',
+  'תאילנד': 'thailand',
+  'וייטנאם': 'vietnam',
+  'סינגפור': 'singapore',
+  'דרום קוריאה': 'south korea',
+  'אוסטרליה': 'australia',
+  'ניו זילנד': 'new zealand',
+  'קנדה': 'canada',
+  'מקסיקו': 'mexico',
+  'ברזיל': 'brazil',
+  'ארגנטינה': 'argentina',
+}
+
+// Shorthand / code aliases
+const SHORT_ALIASES: Record<string, string> = {
+  'il': 'israel',
+  'us': 'united states',
+  'uk': 'united kingdom',
+  'gb': 'united kingdom',
+  'de': 'germany',
+  'fr': 'france',
+  'it': 'italy',
+  'es': 'spain',
+  'pt': 'portugal',
+  'gr': 'greece',
+  'jp': 'japan',
+  'cn': 'china',
+  'in': 'india',
+  'th': 'thailand',
+  'au': 'australia',
+  'ca': 'canada',
+  'br': 'brazil',
+  'tr': 'turkey',
+  'eg': 'egypt',
+  'jo': 'jordan',
+  'ae': 'uae',
+  'ma': 'morocco',
+}
+
+const DEFAULT_COLORS = ['#3B6E52', '#5CB87A', '#3B6E52']
 
 export function getCountryColors(countries: string[]): { colors: string[]; flags: string[]; names: string[] } {
   const allColors: string[] = []
@@ -67,7 +135,10 @@ export function getCountryColors(countries: string[]): { colors: string[]; flags
   const names: string[] = []
 
   for (const raw of countries) {
-    const key = raw.toLowerCase().trim()
+    const trimmed = raw.trim()
+    const lower = trimmed.toLowerCase()
+    const key = COUNTRY_MAP[lower] ? lower
+      : HE_ALIASES[trimmed] ?? SHORT_ALIASES[lower] ?? lower
     const entry = COUNTRY_MAP[key]
     if (entry) {
       allColors.push(...entry.colors)
