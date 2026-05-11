@@ -378,7 +378,12 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
     days,
     startDate:         data.start_date ?? new Date().toISOString().split('T')[0],
     theme:             (data.theme ?? 'desert') as TripTheme,
-    countries:         (data as any).countries as string[] | undefined,
+    countries:         (() => {
+      const raw = (data as any).countries
+      if (Array.isArray(raw)) return raw as string[]
+      if (typeof raw === 'string' && raw.trim()) return raw.split(',').map((c: string) => c.trim()).filter(Boolean)
+      return undefined
+    })(),
     tripNotes:         (data.trip_notes as string[]) ?? [],
     participants,
     dayMeta,

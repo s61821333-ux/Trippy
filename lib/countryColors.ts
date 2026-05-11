@@ -77,7 +77,7 @@ export function getCountryColors(countries: string[]): { colors: string[]; flags
   }
 
   if (allColors.length === 0) {
-    return { colors: DEFAULT_COLORS, flags: ['🌍'], names: countries }
+    return { colors: DEFAULT_COLORS, flags: ['🌍'], names: Array.isArray(countries) ? countries : [] }
   }
 
   // De-duplicate adjacent identical colors
