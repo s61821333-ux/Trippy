@@ -380,9 +380,20 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip
     theme:             (data.theme ?? 'desert') as TripTheme,
     countries:         (() => {
       const raw = (data as any).countries
-      if (Array.isArray(raw)) return raw as string[]
-      if (typeof raw === 'string' && raw.trim()) return raw.split(',').map((c: string) => c.trim()).filter(Boolean)
-      return undefined
+      if (Array.isArray(raw)) return (raw as string[]).filter(Boolean)
+      if (typeof raw !== 'string' || !raw.trim()) return undefined
+      const s = raw.trim()
+      // PostgreSQL array literal: {Israel} or {"United States",Jordan}
+      if (s.startsWith('{') && s.endsWith('}')) {
+        const inner = s.slice(1, -1)
+        if (!inner.trim()) return undefined
+        const parts = inner.match(/(?:"[^"]*"|[^,]+)/g) ?? []
+        const result = parts.map(p => p.replace(/^"|"$/g, '').trim()).filter(Boolean)
+        return result.length ? result : undefined
+      }
+      // Plain comma-separated string
+      const result = s.split(',').map((c: string) => c.trim()).filter(Boolean)
+      return result.length ? result : undefined
     })(),
     tripNotes:         (data.trip_notes as string[]) ?? [],
     participants,
