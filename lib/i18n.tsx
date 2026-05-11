@@ -276,6 +276,7 @@ const en = {
   codeOptional: '(optional)',
   leaveBlankCode: 'Leave blank for personal trip',
   repeatCode: 'Repeat code',
+  myTrips: 'Your Trips',
   joinPlaceholderName: 'e.g. Negev Desert Adventure',
   joinPlaceholderCode: 'Shared code',
   joinPlaceholderNick: 'e.g. Dana',
@@ -320,7 +321,7 @@ const en = {
 };
 
 const he: typeof en = {
-  appName: 'טריפי - מתכנן טיולים ידידותי',
+  appName: 'Trippy - מתכנן טיולים ידידותי',
   appTagline: 'תכנן. חקור. חווה.',
   joinTrip: 'הצטרף לטיול',
   createNewTrip: 'צור טיול חדש',
@@ -592,6 +593,7 @@ const he: typeof en = {
   codeOptional: '(אופציונלי)',
   leaveBlankCode: 'השאר ריק לטיול אישי',
   repeatCode: 'חזור על הקוד',
+  myTrips: 'הטיולים שלך',
   joinPlaceholderName: 'למשל הנגב — מסע במדבר',
   joinPlaceholderCode: 'קוד משותף',
   joinPlaceholderNick: 'למשל דנה',

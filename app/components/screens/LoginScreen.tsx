@@ -11,6 +11,7 @@ import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
 import { TripTheme } from '@/lib/types';
+import { dbGetUserTrips } from '@/lib/db';
 
 const card = {
   hidden: { opacity: 0, y: 20 },
@@ -230,8 +231,10 @@ function AuthStep() {
 
 // ─── Step 2: Trip ─────────────────────────────────────────────────────────────
 
+type UserTrip = { id: string; name: string; theme: string | null; days: number; start_date: string | null };
+
 function TripStep() {
-  const { joinTrip, createTrip, authUser, logout } = useAppStore();
+  const { joinTrip, loadTripById, createTrip, authUser, logout } = useAppStore();
   const { show } = useToast();
   const { t, locale } = useI18n();
 
@@ -240,6 +243,19 @@ function TripStep() {
   const [nickname, setNickname] = useState(authUser?.username ?? '');
   const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+
+  const [userTrips, setUserTrips] = useState<UserTrip[]>([]);
+  const [tripsLoading, setTripsLoading] = useState(false);
+  const [loadingTripId, setLoadingTripId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!authUser?.id) return;
+    setTripsLoading(true);
+    dbGetUserTrips(authUser.id)
+      .then(trips => setUserTrips(trips))
+      .catch(() => {})
+      .finally(() => setTripsLoading(false));
+  }, [authUser?.id]);
 
   const [cName,  setCName]  = useState('');
   const [cDays,  setCDays]  = useState('3');
@@ -342,8 +358,64 @@ function TripStep() {
           </div>
         </motion.div>
 
+        {/* Your existing trips */}
+        {(tripsLoading || userTrips.length > 0) && (
+          <motion.div custom={2} variants={card} initial="hidden" animate="visible" style={{ marginBottom: 10 }}>
+            <div style={{
+              background: 'var(--surface)', border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-xl)', padding: '20px 24px', boxShadow: 'var(--shadow-md)',
+            }}>
+              <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', marginBottom: 14, letterSpacing: '-0.01em' }}>
+                {t('myTrips')}
+              </h2>
+              {tripsLoading ? (
+                <div style={{ color: 'var(--text-2)', fontSize: 13, textAlign: 'center', padding: '8px 0' }}>…</div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {userTrips.map(trip => {
+                    const themeEmoji = trip.theme === 'city' ? '🌆' : trip.theme === 'beach' ? '🏖️' : trip.theme === 'nature' ? '🌲' : trip.theme === 'mountain' ? '⛰️' : trip.theme === 'snow' ? '❄️' : '🏜️';
+                    return (
+                      <motion.button
+                        key={trip.id}
+                        whileTap={{ scale: 0.97 }}
+                        onClick={async () => {
+                          setLoadingTripId(trip.id);
+                          await loadTripById(trip.id);
+                          setLoadingTripId(null);
+                        }}
+                        disabled={loadingTripId !== null}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '12px 14px', borderRadius: 'var(--radius-lg)',
+                          background: 'var(--bg)', border: '1px solid var(--border)',
+                          cursor: 'pointer', width: '100%', textAlign: locale === 'he' ? 'right' : 'left',
+                          opacity: loadingTripId && loadingTripId !== trip.id ? 0.5 : 1,
+                          transition: 'opacity 0.15s',
+                        }}
+                      >
+                        <span style={{ fontSize: 22, flexShrink: 0 }}>{themeEmoji}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {trip.name}
+                          </div>
+                          <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>
+                            {trip.days} {t('days')}{trip.start_date ? ` · ${trip.start_date}` : ''}
+                          </div>
+                        </div>
+                        <span style={{ color: 'var(--brand)', fontSize: 16, flexShrink: 0 }}>
+                          {loadingTripId === trip.id ? '…' : '→'}
+                        </span>
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+
         {/* Create trip */}
-        <motion.div custom={2} variants={card} initial="hidden" animate="visible">
+        <motion.div custom={3} variants={card} initial="hidden" animate="visible">
           <GlassBtn onClick={() => setShowCreate(true)} style={{ width: '100%' }}>
             <Icon name="plus" size={15} /> {t('createNewTrip')}
           </GlassBtn>

@@ -165,6 +165,33 @@ export async function dbJoinTrip(tripId: string, userId: string, initials: strin
   })
 }
 
+export async function dbGetUserTrips(userId: string): Promise<{ id: string; name: string; theme: string | null; days: number; start_date: string | null }[]> {
+  const { data, error } = await sb()
+    .from('trip_participants')
+    .select('trips ( id, name, theme, days, start_date )')
+    .eq('user_id', userId)
+  if (error) throw error
+  return (data ?? []).map((row: any) => row.trips).filter(Boolean)
+}
+
+export async function dbLoadTripById(tripId: string) {
+  const { data, error } = await sb()
+    .from('trips')
+    .select(`
+      id, name, days, start_date, theme, trip_notes, countries,
+      day_meta ( day_index, region, emoji, lat, lng, description ),
+      events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags ),
+      expenses ( id, description, amount, split_count ),
+      emergency_contacts ( id, name, phone, type ),
+      supplies ( id, name, category, checked, critical ),
+      trip_participants ( user_id, initials, color )
+    `)
+    .eq('id', tripId)
+    .maybeSingle()
+  if (error) throw error
+  return data
+}
+
 // ─── Events ──────────────────────────────────────────────────────────────────
 
 export async function dbAddEvent(tripId: string, dayNumber: number, event: TripEvent, userId: string) {

@@ -6,7 +6,7 @@ import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, Screen, Sup
 import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
 import {
   ensureUser, signOut, registerUser, signInUser, signInWithGoogle as dbSignInWithGoogle, getCurrentUser,
-  dbCreateTrip, dbFindTrip, dbJoinTrip, rowToTrip,
+  dbCreateTrip, dbFindTrip, dbJoinTrip, dbLoadTripById, rowToTrip,
   dbAddEvent, dbEditEvent, dbDeleteEvent,
   dbAddExpense, dbDeleteExpense,
   dbAddSupply, dbToggleSupply, dbDeleteSupply,
@@ -49,6 +49,7 @@ interface AppState {
   clearTripEntry: () => void;
   recordDemoClick: () => void;
   joinTrip: (name: string, code: string, nickname: string) => Promise<boolean>;
+  loadTripById: (tripId: string) => Promise<void>;
   createTrip: (name: string, days: number, code: string, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[]) => Promise<void>;
   logout: () => void;
   setActiveDay: (day: number) => void;
@@ -184,6 +185,25 @@ export const useAppStore = create<AppState>()(
         } catch {
           return false;
         }
+      },
+
+      loadTripById: async (tripId) => {
+        const { authUser } = get();
+        const nickname = authUser?.username ?? 'Traveler';
+        const userId = await ensureUser(nickname);
+        const data = await dbLoadTripById(tripId);
+        if (!data) return;
+        const { trip, supplies } = rowToTrip(data);
+        set({
+          userId,
+          tripDbId: data.id,
+          trip,
+          supplies,
+          nickname,
+          screen: 'dashboard',
+          activeDay: 1,
+          tripEntryCountries: trip.countries?.length ? trip.countries : null,
+        });
       },
 
       createTrip: async (name, days, _code, nickname, theme = 'desert', startDate, countries) => {

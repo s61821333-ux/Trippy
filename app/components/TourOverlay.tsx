@@ -19,7 +19,7 @@ const STEPS: Step[] = [
   {
     emoji: '👋',
     title: "Welcome to Trippy!",
-    titleHe: "ברוכים הבאים לטריפי!",
+    titleHe: "ברוכים הבאים ל-Trippy!",
     body: "This is the demo trip — Negev Desert Adventure. Let's take a quick tour of the main features.",
     bodyHe: "זוהי טיול ההדגמה — מסע מדבר הנגב. בואו נסיין סיור קצר בתכונות העיקריות.",
   },
