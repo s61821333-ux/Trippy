@@ -100,6 +100,38 @@ interface AppState {
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
+// Merges locally-pending events (not yet in DB) and local votes into a DB-loaded trip.
+// Also re-fires dbAddEvent for any pending events so they get synced now.
+function mergeLocalIntoDbTrip(
+  dbTrip: Trip,
+  localTrip: Trip | null,
+  tripDbId: string,
+  userId: string,
+  onSyncError: (msg: string) => void,
+): Trip {
+  if (!localTrip) return dbTrip;
+  const mergedEvents = { ...dbTrip.events };
+  for (const [dayKey, localEvs] of Object.entries(localTrip.events ?? {})) {
+    const day = Number(dayKey);
+    const dbIds = new Set((mergedEvents[day] ?? []).map((e: TripEvent) => e.id));
+    // Events only in localStorage (DB write failed or pending) — re-sync them
+    const pending = (localEvs as TripEvent[]).filter(e => !dbIds.has(e.id));
+    if (pending.length > 0) {
+      mergedEvents[day] = [...(mergedEvents[day] ?? []), ...pending];
+      for (const ev of pending) {
+        dbAddEvent(tripDbId, day, ev, userId)
+          .catch(err => onSyncError(err?.message ?? 'save_failed'));
+      }
+    }
+    // Restore votes (no DB column — votes live in localStorage only)
+    mergedEvents[day] = (mergedEvents[day] ?? []).map((dbEv: TripEvent) => {
+      const localEv = (localEvs as TripEvent[]).find(l => l.id === dbEv.id);
+      return localEv?.votes ? { ...dbEv, votes: localEv.votes } : dbEv;
+    });
+  }
+  return { ...dbTrip, events: mergedEvents };
+}
+
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
@@ -138,25 +170,8 @@ export const useAppStore = create<AppState>()(
               const data = await dbLoadTripById(tripDbId)
               if (data) {
                 const { trip: dbTrip, supplies } = rowToTrip(data)
-                // Merge: re-attach pending local events and preserve local votes (not stored in DB)
-                const mergedEvents = { ...dbTrip.events }
-                for (const [dayKey, localEvs] of Object.entries(localTrip?.events ?? {})) {
-                  const day = Number(dayKey)
-                  const dbIds = new Set((mergedEvents[day] ?? []).map(e => e.id))
-                  const pending = (localEvs as TripEvent[]).filter(e => !dbIds.has(e.id))
-                  if (pending.length > 0) {
-                    mergedEvents[day] = [...(mergedEvents[day] ?? []), ...pending]
-                    for (const ev of pending) {
-                      dbAddEvent(tripDbId, day, ev, user.id).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }))
-                    }
-                  }
-                  // Restore votes from local state (no DB column for votes)
-                  mergedEvents[day] = (mergedEvents[day] ?? []).map(dbEv => {
-                    const localEv = (localEvs as TripEvent[]).find(l => l.id === dbEv.id)
-                    return localEv?.votes ? { ...dbEv, votes: localEv.votes } : dbEv
-                  })
-                }
-                set({ trip: { ...dbTrip, events: mergedEvents }, supplies, userId: user.id })
+                const trip = mergeLocalIntoDbTrip(dbTrip, localTrip, tripDbId, user.id, msg => set({ lastSyncError: msg }))
+                set({ trip, supplies, userId: user.id })
               }
             } catch (err: any) { set({ lastSyncError: err?.message ?? 'load_failed' }) }
           }
@@ -165,10 +180,12 @@ export const useAppStore = create<AppState>()(
       register: async (username, password) => {
         const id = await registerUser(username, password)
         set({ authUser: { id, username } })
+        get().checkAuth()
       },
       signIn: async (username, password) => {
         const id = await signInUser(username, password)
         set({ authUser: { id, username } })
+        get().checkAuth()
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
       clearTripEntry: () => set({ tripEntryCountries: null }),
@@ -226,18 +243,20 @@ export const useAppStore = create<AppState>()(
       },
 
       loadTripById: async (tripId) => {
-        const { authUser } = get();
+        const { authUser, trip: localTrip, tripDbId: localTripDbId } = get();
         const nickname = authUser?.username ?? 'Traveler';
-        // authUser may not be hydrated yet after a Google OAuth redirect — fall back to the live session
         let userId = authUser?.id ?? null;
-        if (!userId) {
-          userId = await getSessionUserId();
-        }
+        if (!userId) userId = await getSessionUserId();
         if (!userId) throw new Error('not_authed');
         try {
           const data = await dbLoadTripById(tripId);
           if (!data) throw new Error('not_found');
-          const { trip, supplies } = rowToTrip(data);
+          const { trip: dbTrip, supplies } = rowToTrip(data);
+          // If this is the same trip we had locally, merge pending events before overwriting
+          const isSameTrip = localTripDbId === data.id;
+          const trip = isSameTrip
+            ? mergeLocalIntoDbTrip(dbTrip, localTrip, data.id, userId, msg => set({ lastSyncError: msg }))
+            : dbTrip;
           set({
             userId,
             tripDbId: data.id,

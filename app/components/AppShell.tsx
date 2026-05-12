@@ -11,9 +11,25 @@ import DayScreen from './screens/DayScreen';
 import SuppliesScreen from './screens/SuppliesScreen';
 import SettingsScreen from './screens/SettingsScreen';
 import NotesScreen from './screens/NotesScreen';
-import { ToastProvider } from './ui/Toast';
+import { ToastProvider, useToast } from './ui/Toast';
 import TourOverlay from './TourOverlay';
 import TripEntryAnimation from './TripEntryAnimation';
+
+// Watches lastSyncError globally and shows a toast — must live inside ToastProvider
+function SyncErrorWatcher() {
+  const { lastSyncError } = useAppStore();
+  const { show } = useToast();
+  const { locale } = useI18n();
+  useEffect(() => {
+    if (!lastSyncError) return;
+    const msg = lastSyncError === 'not_authed'
+      ? (locale === 'he' ? '⚠️ לא מחובר — שינויים נשמרו מקומית בלבד' : '⚠️ Not signed in — changes saved locally only')
+      : (locale === 'he' ? '⚠️ שגיאת שמירה — נסה שוב' : '⚠️ Save failed — will retry on reload');
+    show(msg);
+    useAppStore.setState({ lastSyncError: null });
+  }, [lastSyncError]);
+  return null;
+}
 
 const screenVariants = {
   initial: { opacity: 0, y: 8 },
@@ -114,6 +130,7 @@ function Shell() {
 
   return (
     <ToastProvider>
+      <SyncErrorWatcher />
       <MotionConfig reducedMotion={motionReduced}>
         <div
           dir={isRTL ? 'rtl' : 'ltr'}

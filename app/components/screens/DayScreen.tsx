@@ -534,20 +534,11 @@ export default function DayScreen() {
     setScreen,
     nickname,
     dayEndHour,
-    lastSyncError,
     darkMode,
   } = useAppStore();
   const { show } = useToast();
   const { t, locale } = useI18n();
 
-  useEffect(() => {
-    if (!lastSyncError) return;
-    const msg = lastSyncError === 'not_authed'
-      ? (locale === 'he' ? '⚠️ לא מחובר — ההוספה נשמרה מקומית בלבד' : '⚠️ Not signed in — event saved locally only')
-      : (locale === 'he' ? '⚠️ שגיאת שמירה — נסה שוב' : '⚠️ Save failed — will retry on next load');
-    show(msg);
-    useAppStore.setState({ lastSyncError: null });
-  }, [lastSyncError]);
   const stripRef = useRef<HTMLDivElement>(null);
 
   // Swipe gesture refs for day navigation

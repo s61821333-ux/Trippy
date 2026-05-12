@@ -28,6 +28,8 @@ const EMERGENCY_TYPE_META: Record<EmergencyContact['type'], { icon: string; labe
   insurance: { icon: '🛡️', label: 'Insurance', color: 'var(--warning)' },
 };
 
+type ConfirmState = { message: string; onConfirm: () => void; variant?: 'danger' } | null;
+
 export default function SettingsScreen() {
   const {
     trip, nickname, setNickname, logout, switchTrip, leaveTrip,
@@ -46,6 +48,10 @@ export default function SettingsScreen() {
   const { t, locale, setLocale, isRTL } = useI18n();
   const [nickEdit, setNickEdit] = useState(nickname);
   const [newNote, setNewNote] = useState('');
+  const [confirmState, setConfirmState] = useState<ConfirmState>(null);
+
+  const confirm = (message: string, onConfirm: () => void, variant?: 'danger') =>
+    setConfirmState({ message, onConfirm, variant });
 
   // Trip info edit state
   const [tripNameEdit, setTripNameEdit]   = useState(trip?.name ?? '');
@@ -194,12 +200,26 @@ export default function SettingsScreen() {
                             const newDays = Math.min(90, Math.max(1, parseInt(tripDaysEdit, 10) || trip.days));
                             const willLoseData = newDays < trip.days &&
                               Object.entries(trip.events).some(([d, evs]) => Number(d) > newDays && evs.length > 0);
-                            if (willLoseData && !window.confirm(
-                              t('reduceDaysWarning')
-                                .replace('{newDays}', String(newDays))
-                                .replace('{from}', String(newDays + 1))
-                                .replace('{to}', String(trip.days))
-                            )) return;
+                            if (willLoseData) {
+                              confirm(
+                                t('reduceDaysWarning')
+                                  .replace('{newDays}', String(newDays))
+                                  .replace('{from}', String(newDays + 1))
+                                  .replace('{to}', String(trip.days)),
+                                () => {
+                                  updateTripInfo({
+                                    name: tripNameEdit.trim() || trip.name,
+                                    days: newDays,
+                                    startDate: tripDateEdit || trip.startDate,
+                                  });
+                                  setTripDaysEdit(String(newDays));
+                                  setTripInfoDirty(false);
+                                  show(t('tripUpdated'));
+                                },
+                                'danger',
+                              );
+                              return;
+                            }
                             updateTripInfo({
                               name: tripNameEdit.trim() || trip.name,
                               days: newDays,
@@ -606,7 +626,7 @@ export default function SettingsScreen() {
                 variant="danger"
                 size="lg"
                 style={{ width: '100%' }}
-                onClick={async () => {
+                onClick={() => {
                   const isOwner = trip.participants[0]?.name === nickname;
                   const warning = isOwner
                     ? (locale === 'he'
@@ -615,7 +635,7 @@ export default function SettingsScreen() {
                     : (locale === 'he'
                         ? 'האם אתה בטוח? פעולה זו תסיר אותך מהטיול.'
                         : 'Are you sure? This will remove you from the trip.');
-                  if (window.confirm(warning)) await leaveTrip();
+                  confirm(warning, leaveTrip, 'danger');
                 }}
               >
                 {t('leaveTrip')}
@@ -626,7 +646,7 @@ export default function SettingsScreen() {
                 size="lg"
                 style={{ width: '100%', opacity: 0.75 }}
                 onClick={() => {
-                  if (window.confirm(locale === 'he' ? 'להתנתק?' : 'Sign out?')) logout();
+                  confirm(locale === 'he' ? 'להתנתק?' : 'Sign out?', logout);
                 }}
               >
                 {locale === 'he' ? '↩ התנתק' : '↩ Sign Out'}
@@ -636,6 +656,66 @@ export default function SettingsScreen() {
           </motion.div>
         </div>
       </div>
+
+      {/* ── In-app confirm sheet ── */}
+      <AnimatePresence>
+        {confirmState && (
+          <>
+            <motion.div
+              key="confirm-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setConfirmState(null)}
+              style={{
+                position: 'fixed', inset: 0, zIndex: 80,
+                background: 'rgba(0,0,0,0.35)',
+                backdropFilter: 'blur(2px)',
+              }}
+            />
+            <motion.div
+              key="confirm-sheet"
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 32 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 36 }}
+              style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81,
+                padding: '20px 20px 32px',
+                background: 'var(--glass)',
+                backdropFilter: 'blur(20px)',
+                borderTop: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
+              }}
+            >
+              <p style={{
+                fontSize: 15, fontWeight: 600, color: 'var(--text)',
+                textAlign: 'center', marginBottom: 20, lineHeight: 1.5,
+              }}>
+                {confirmState.message}
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <GlassBtn
+                  size="lg"
+                  style={{ flex: 1 }}
+                  onClick={() => setConfirmState(null)}
+                >
+                  {locale === 'he' ? 'ביטול' : 'Cancel'}
+                </GlassBtn>
+                <GlassBtn
+                  variant={confirmState.variant === 'danger' ? 'danger' : 'accent'}
+                  size="lg"
+                  style={{ flex: 1 }}
+                  onClick={() => { confirmState.onConfirm(); setConfirmState(null); }}
+                >
+                  {locale === 'he' ? 'אישור' : 'Confirm'}
+                </GlassBtn>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
