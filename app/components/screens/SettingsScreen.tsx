@@ -592,7 +592,22 @@ export default function SettingsScreen() {
 
             {/* ── Leave trip ── */}
             <motion.div variants={sectionItem}>
-              <GlassBtn variant="danger" size="lg" onClick={logout} style={{ width: '100%' }}>
+              <GlassBtn
+                variant="danger"
+                size="lg"
+                style={{ width: '100%' }}
+                onClick={() => {
+                  const isOwner = trip.participants[0]?.name === nickname;
+                  const warning = isOwner
+                    ? (locale === 'he'
+                        ? 'אתה בעל הטיול. עזיבתך תסיר אותך מהטיול — הנתונים יישארו לשאר המשתתפים. להמשיך?'
+                        : 'You are the trip owner. Leaving will remove you from the trip — data stays for other participants. Continue?')
+                    : (locale === 'he'
+                        ? 'האם אתה בטוח שברצונך לעזוב את הטיול?'
+                        : 'Are you sure you want to leave this trip?');
+                  if (window.confirm(warning)) logout();
+                }}
+              >
                 {t('leaveTrip')}
               </GlassBtn>
             </motion.div>

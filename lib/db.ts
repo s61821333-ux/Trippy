@@ -287,6 +287,10 @@ export async function dbDeleteEmergencyContact(contactId: string) {
   await sb().from('emergency_contacts').delete().eq('id', contactId)
 }
 
+export async function dbLeaveTrip(tripId: string, userId: string) {
+  await sb().from('trip_participants').delete().eq('trip_id', tripId).eq('user_id', userId)
+}
+
 // ─── Trip notes ──────────────────────────────────────────────────────────────
 
 export async function dbUpdateTripNotes(tripId: string, notes: string[]) {

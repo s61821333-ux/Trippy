@@ -15,6 +15,20 @@ import SuggestionsSheet from '../SuggestionsSheet';
 import { useI18n, TranslationKey } from '@/lib/i18n';
 
 const CATEGORIES: Category[] = ['food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other'];
+
+function getMapsUrl(location: string, lat?: number, lng?: number): string {
+  const isIOS = typeof navigator !== 'undefined' &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+  if (lat && lng) {
+    return isIOS
+      ? `maps://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(location)}`
+      : `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+  }
+  const q = encodeURIComponent(location);
+  return isIOS
+    ? `maps://maps.apple.com/?q=${q}`
+    : `https://www.google.com/maps/search/?api=1&query=${q}`;
+}
 const DAY_ABBREVS_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const DAY_ABBREVS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
@@ -61,6 +75,7 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
   const [travelMins, setTravelMins] = useState<number | null>(null);
   const [travelKm, setTravelKm] = useState<number | null>(null);
   const [fetching, setFetching] = useState(false);
+  const darkMode = useAppStore(s => s.darkMode);
 
   const isFree = gapMins >= 45;
   const canRoute = !!(fromEv?.lat && fromEv?.lng && toEv?.lat && toEv?.lng);
@@ -127,9 +142,9 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
         ) : travelMins !== null ? (
           <span style={{
             fontSize: 11, fontWeight: 700,
-            color: '#4F46E5',
-            background: 'rgba(99,102,241,0.08)',
-            border: '1px solid rgba(99,102,241,0.22)',
+            color: darkMode ? '#818CF8' : '#4F46E5',
+            background: darkMode ? 'rgba(129,140,248,0.14)' : 'rgba(99,102,241,0.08)',
+            border: `1px solid ${darkMode ? 'rgba(129,140,248,0.30)' : 'rgba(99,102,241,0.22)'}`,
             borderRadius: 100,
             padding: '4px 11px',
             display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -212,6 +227,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
   const meta = CAT_META[event.category];
   const endT = toTime(toMins(event.time) + event.duration);
   const { voteEvent } = useAppStore();
+  const darkMode = useAppStore(s => s.darkMode);
   const { t } = useI18n();
 
   const [rescheduling, setRescheduling] = useState(false);
@@ -327,15 +343,11 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
               </span>
             )}
 
-            {/* Location — tappable deep link to maps */}
+            {/* Location — tappable deep link to maps (Apple Maps on iOS, Google Maps elsewhere) */}
             {event.location && (
               <div style={{ marginBottom: 4 }}>
                 <a
-                  href={
-                    event.lat && event.lng
-                      ? `https://www.google.com/maps/search/?api=1&query=${event.lat},${event.lng}`
-                      : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(event.location)}`
-                  }
+                  href={getMapsUrl(event.location, event.lat, event.lng)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={e => e.stopPropagation()}
@@ -360,9 +372,9 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
                   <span key={ti} style={{
                     display: 'inline-flex', alignItems: 'center',
                     fontSize: 10, fontWeight: 700,
-                    color: 'oklch(52% 0.16 225)',
-                    background: 'rgba(59,126,212,0.09)',
-                    border: '1px solid rgba(59,126,212,0.22)',
+                    color: darkMode ? 'oklch(72% 0.16 225)' : 'oklch(52% 0.16 225)',
+                    background: darkMode ? 'rgba(59,126,212,0.18)' : 'rgba(59,126,212,0.09)',
+                    border: `1px solid ${darkMode ? 'rgba(59,126,212,0.38)' : 'rgba(59,126,212,0.22)'}`,
                     borderRadius: 100, padding: '2px 8px',
                   }}>
                     {tag}
@@ -523,6 +535,7 @@ export default function DayScreen() {
     nickname,
     dayEndHour,
     lastSyncError,
+    darkMode,
   } = useAppStore();
   const { show } = useToast();
   const { t, locale } = useI18n();
@@ -1059,9 +1072,7 @@ export default function DayScreen() {
               {/* Location */}
               {ev.location && (
                 <a
-                  href={ev.lat && ev.lng
-                    ? `https://www.google.com/maps/search/?api=1&query=${ev.lat},${ev.lng}`
-                    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.location)}`}
+                  href={getMapsUrl(ev.location, ev.lat, ev.lng)}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -1098,9 +1109,9 @@ export default function DayScreen() {
                     <span key={ti} style={{
                       display: 'inline-flex', alignItems: 'center',
                       fontSize: 11, fontWeight: 700,
-                      color: 'oklch(52% 0.16 225)',
-                      background: 'rgba(59,126,212,0.09)',
-                      border: '1px solid rgba(59,126,212,0.22)',
+                      color: darkMode ? 'oklch(72% 0.16 225)' : 'oklch(52% 0.16 225)',
+                      background: darkMode ? 'rgba(59,126,212,0.18)' : 'rgba(59,126,212,0.09)',
+                      border: `1px solid ${darkMode ? 'rgba(59,126,212,0.38)' : 'rgba(59,126,212,0.22)'}`,
                       borderRadius: 100, padding: '4px 10px',
                     }}>
                       {tag}
@@ -1323,9 +1334,9 @@ export default function DayScreen() {
                   {fTags.split(',').map(t => t.trim()).filter(Boolean).map((tag, i) => (
                     <span key={i} style={{
                       fontSize: 10, fontWeight: 700,
-                      color: 'oklch(52% 0.16 225)',
-                      background: 'rgba(59,126,212,0.09)',
-                      border: '1px solid rgba(59,126,212,0.22)',
+                      color: darkMode ? 'oklch(72% 0.16 225)' : 'oklch(52% 0.16 225)',
+                      background: darkMode ? 'rgba(59,126,212,0.18)' : 'rgba(59,126,212,0.09)',
+                      border: `1px solid ${darkMode ? 'rgba(59,126,212,0.38)' : 'rgba(59,126,212,0.22)'}`,
                       borderRadius: 100, padding: '2px 8px',
                     }}>
                       {tag}

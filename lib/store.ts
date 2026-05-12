@@ -7,7 +7,7 @@ import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
 import {
   ensureUser, signOut, registerUser, signInUser, signInWithGoogle as dbSignInWithGoogle, getCurrentUser,
   dbCreateTrip, dbFindTrip, dbJoinTrip, dbLoadTripById, rowToTrip,
-  dbAddEvent, dbEditEvent, dbDeleteEvent,
+  dbAddEvent, dbEditEvent, dbDeleteEvent, dbLeaveTrip,
   dbAddExpense, dbDeleteExpense,
   dbAddSupply, dbToggleSupply, dbDeleteSupply,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
@@ -127,13 +127,26 @@ export const useAppStore = create<AppState>()(
         const user = await getCurrentUser()
         set({ authUser: user })
         if (user) {
-          const { tripDbId } = get()
+          const { tripDbId, trip: localTrip } = get()
           if (tripDbId) {
             try {
               const data = await dbLoadTripById(tripDbId)
               if (data) {
-                const { trip, supplies } = rowToTrip(data)
-                set({ trip, supplies, userId: user.id })
+                const { trip: dbTrip, supplies } = rowToTrip(data)
+                // Merge: re-attach any locally saved events not yet in the DB (pending sync)
+                const mergedEvents = { ...dbTrip.events }
+                for (const [dayKey, localEvs] of Object.entries(localTrip?.events ?? {})) {
+                  const day = Number(dayKey)
+                  const dbIds = new Set((mergedEvents[day] ?? []).map(e => e.id))
+                  const pending = (localEvs as TripEvent[]).filter(e => !dbIds.has(e.id))
+                  if (pending.length > 0) {
+                    mergedEvents[day] = [...(mergedEvents[day] ?? []), ...pending]
+                    for (const ev of pending) {
+                      dbAddEvent(tripDbId, day, ev, user.id).catch(() => {})
+                    }
+                  }
+                }
+                set({ trip: { ...dbTrip, events: mergedEvents }, supplies, userId: user.id })
               }
             } catch {}
           }
@@ -258,6 +271,8 @@ export const useAppStore = create<AppState>()(
       },
 
       logout: () => {
+        const { tripDbId, userId } = get();
+        if (tripDbId && userId) dbLeaveTrip(tripDbId, userId).catch(() => {});
         signOut().catch(() => {});
         set({ trip: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, tripDbId: null, authUser: null });
       },
