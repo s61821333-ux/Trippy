@@ -522,9 +522,16 @@ export default function DayScreen() {
     setScreen,
     nickname,
     dayEndHour,
+    lastSyncError,
   } = useAppStore();
   const { show } = useToast();
   const { t, locale } = useI18n();
+
+  useEffect(() => {
+    if (!lastSyncError) return;
+    show(locale === 'he' ? '⚠️ שגיאת שמירה — בדוק חיבור לאינטרנט' : '⚠️ Save failed — check your connection');
+    useAppStore.setState({ lastSyncError: null });
+  }, [lastSyncError]);
   const stripRef = useRef<HTMLDivElement>(null);
 
   // Swipe gesture refs for day navigation

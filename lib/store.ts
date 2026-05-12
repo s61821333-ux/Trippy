@@ -12,6 +12,7 @@ import {
   dbAddSupply, dbToggleSupply, dbDeleteSupply,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
   dbUpdateTripNotes, dbUpdateDayMeta,
+  getSessionUserId,
 } from './db';
 
 interface AppState {
@@ -39,6 +40,7 @@ interface AppState {
   authUser: { id: string; username: string } | null;
   tripEntryCountries: string[] | null;
   demoClickCount: number;
+  lastSyncError: string | null;
 
   // Actions
   setScreen: (s: Screen) => void;
@@ -118,11 +120,24 @@ export const useAppStore = create<AppState>()(
       authUser: null,
       tripEntryCountries: null,
       demoClickCount: 0,
+      lastSyncError: null,
 
       setScreen: (s) => set({ screen: s }),
       checkAuth: async () => {
         const user = await getCurrentUser()
         set({ authUser: user })
+        if (user) {
+          const { tripDbId } = get()
+          if (tripDbId) {
+            try {
+              const data = await dbLoadTripById(tripDbId)
+              if (data) {
+                const { trip, supplies } = rowToTrip(data)
+                set({ trip, supplies, userId: user.id })
+              }
+            } catch {}
+          }
+        }
       },
       register: async (username, password) => {
         const id = await registerUser(username, password)
@@ -290,12 +305,21 @@ export const useAppStore = create<AppState>()(
       }),
 
       addEvent: (dayNumber, event) => {
-        const { trip, userId, tripDbId } = get();
+        const { trip, tripDbId } = get();
         if (!trip) return;
         const newEvent: TripEvent = { ...event, id: uid(), addedBy: get().nickname || 'You' };
         const dayEvents = [...(trip.events[dayNumber] || []), newEvent];
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
-        if (tripDbId && userId) dbAddEvent(tripDbId, dayNumber, newEvent, userId).catch(() => {});
+        if (tripDbId) {
+          getSessionUserId().then(sessionUserId => {
+            if (!sessionUserId) { set({ lastSyncError: 'not_authed' }); return; }
+            if (sessionUserId !== get().userId) set({ userId: sessionUserId });
+            return dbAddEvent(tripDbId, dayNumber, newEvent, sessionUserId);
+          }).catch(err => {
+            console.error('[addEvent] DB sync failed:', err);
+            set({ lastSyncError: err?.message ?? 'save_failed' });
+          });
+        }
       },
 
       editEvent: (dayNumber, eventId, updates) => {
@@ -303,7 +327,10 @@ export const useAppStore = create<AppState>()(
         if (!trip) return;
         const dayEvents = (trip.events[dayNumber] || []).map(e => e.id === eventId ? { ...e, ...updates } : e);
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
-        if (tripDbId) dbEditEvent(eventId, updates).catch(() => {});
+        if (tripDbId) dbEditEvent(eventId, updates).catch(err => {
+          console.error('[editEvent] DB sync failed:', err);
+          set({ lastSyncError: err?.message ?? 'sync_failed' });
+        });
       },
 
       deleteEvent: (dayNumber, eventId) => {
@@ -311,7 +338,10 @@ export const useAppStore = create<AppState>()(
         if (!trip) return;
         const dayEvents = (trip.events[dayNumber] || []).filter(e => e.id !== eventId);
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
-        if (tripDbId) dbDeleteEvent(eventId).catch(() => {});
+        if (tripDbId) dbDeleteEvent(eventId).catch(err => {
+          console.error('[deleteEvent] DB sync failed:', err);
+          set({ lastSyncError: err?.message ?? 'sync_failed' });
+        });
       },
 
       voteEvent: (dayNumber, eventId, nickname, vote) => {

@@ -30,7 +30,7 @@ const screenTransition = {
 
 function Shell() {
   const { screen, setScreen, trip, darkMode, highContrast, reducedMotion, toggleDarkMode, showTour,
-    tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick } = useAppStore();
+    tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick, checkAuth } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
@@ -42,6 +42,7 @@ function Shell() {
     if (trip && screen === 'login') {
       setScreen('dashboard');
     }
+    checkAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
