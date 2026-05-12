@@ -286,7 +286,9 @@ export const useAppStore = create<AppState>()(
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later
       logout: () => {
         signOut().catch(() => {});
-        set({ trip: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, tripDbId: null, authUser: null });
+        // Keep trip + tripDbId in localStorage so pending events survive the logout/login cycle.
+        // checkAuth will reload from DB on next login and re-sync any unsynced events.
+        set({ screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '' });
       },
 
       // Keep the Supabase session but go back to the trip picker
