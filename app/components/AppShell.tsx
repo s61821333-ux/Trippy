@@ -24,7 +24,7 @@ function SyncErrorWatcher() {
     if (!lastSyncError) return;
     const msg = lastSyncError === 'not_authed'
       ? (locale === 'he' ? '⚠️ לא מחובר — שינויים נשמרו מקומית בלבד' : '⚠️ Not signed in — changes saved locally only')
-      : (locale === 'he' ? '⚠️ שגיאת שמירה — נסה שוב' : '⚠️ Save failed — will retry on reload');
+      : `⚠️ DB: ${lastSyncError}`;
     show(msg);
     useAppStore.setState({ lastSyncError: null });
   }, [lastSyncError]);

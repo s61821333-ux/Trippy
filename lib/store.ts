@@ -98,7 +98,7 @@ interface AppState {
   addSuggestionToDay: (dayNumber: number, suggId: string) => void;
 }
 
-const uid = () => Math.random().toString(36).slice(2, 9);
+const uid = () => crypto.randomUUID();
 
 // Merges locally-pending events (not yet in DB) and local votes into a DB-loaded trip.
 // Also re-fires dbAddEvent for any pending events so they get synced now.
