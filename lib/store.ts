@@ -2,17 +2,17 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, Screen, SupplyItem, Trip, TripEvent, TripTheme } from './types';
+import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, Screen, SupplyItem, Trip, TripEvent, TripInvitation, TripTheme } from './types';
 import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
 import {
-  ensureUser, signOut, registerUser, signInUser, signInWithGoogle as dbSignInWithGoogle, getCurrentUser,
-  dbCreateTrip, dbFindTrip, dbJoinTrip, dbLoadTripById, rowToTrip,
+  signOut, signInWithGoogle as dbSignInWithGoogle, getCurrentUser, getSessionUserId,
+  dbCreateTrip, dbLoadTripById, rowToTrip,
+  dbGetInvitations, dbInviteToTrip, dbAcceptInvitation, dbRejectInvitation,
   dbAddEvent, dbEditEvent, dbDeleteEvent, dbLeaveTrip,
   dbAddExpense, dbDeleteExpense,
   dbAddSupply, dbToggleSupply, dbDeleteSupply,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
   dbUpdateTripNotes, dbUpdateDayMeta,
-  getSessionUserId,
 } from './db';
 
 interface AppState {
@@ -41,18 +41,21 @@ interface AppState {
   tripEntryCountries: string[] | null;
   demoClickCount: number;
   lastSyncError: string | null;
+  pendingInvitations: TripInvitation[];
 
   // Actions
   setScreen: (s: Screen) => void;
   checkAuth: () => Promise<void>;
-  register: (username: string, password: string) => Promise<void>;
-  signIn: (username: string, password: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   clearTripEntry: () => void;
   recordDemoClick: () => void;
-  joinTrip: (name: string, code: string, nickname: string) => Promise<boolean>;
+  loadDemoTrip: () => void;
   loadTripById: (tripId: string) => Promise<void>;
-  createTrip: (name: string, days: number, code: string, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[]) => Promise<void>;
+  createTrip: (name: string, days: number, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[]) => Promise<void>;
+  loadInvitations: () => Promise<void>;
+  acceptInvitation: (invitationId: string) => Promise<void>;
+  rejectInvitation: (invitationId: string) => Promise<void>;
+  inviteToTrip: (email: string) => Promise<void>;
   /** Sign completely out of Supabase. Does NOT remove the user from the trip. */
   logout: () => void;
   /** Keep auth but unload the current trip so the user can pick another. */
@@ -158,6 +161,7 @@ export const useAppStore = create<AppState>()(
       tripEntryCountries: null,
       demoClickCount: 0,
       lastSyncError: null,
+      pendingInvitations: [],
 
       setScreen: (s) => set({ screen: s }),
       checkAuth: async () => {
@@ -177,17 +181,41 @@ export const useAppStore = create<AppState>()(
           }
         }
       },
-      register: async (username, password) => {
-        const id = await registerUser(username, password)
-        set({ authUser: { id, username } })
-        get().checkAuth()
-      },
-      signIn: async (username, password) => {
-        const id = await signInUser(username, password)
-        set({ authUser: { id, username } })
-        get().checkAuth()
-      },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
+      loadDemoTrip: () => {
+        set({
+          showTour: !localStorage.getItem('trippy-tour-done'),
+          trip: MOCK_TRIP,
+          supplies: MOCK_SUPPLIES,
+          nickname: 'Traveler',
+          screen: 'dashboard',
+          activeDay: 1,
+          tripDbId: null,
+        });
+      },
+      loadInvitations: async () => {
+        try {
+          const invitations = await dbGetInvitations()
+          set({ pendingInvitations: invitations })
+        } catch { /* silently ignore */ }
+      },
+      acceptInvitation: async (invitationId) => {
+        const { authUser } = get()
+        if (!authUser) throw new Error('Not authenticated')
+        const initials = authUser.username.slice(0, 2).toUpperCase()
+        const tripId = await dbAcceptInvitation(invitationId, authUser.id, initials)
+        set(s => ({ pendingInvitations: s.pendingInvitations.filter(i => i.id !== invitationId) }))
+        await get().loadTripById(tripId)
+      },
+      rejectInvitation: async (invitationId) => {
+        await dbRejectInvitation(invitationId)
+        set(s => ({ pendingInvitations: s.pendingInvitations.filter(i => i.id !== invitationId) }))
+      },
+      inviteToTrip: async (email) => {
+        const { tripDbId } = get()
+        if (!tripDbId) throw new Error('No active trip')
+        await dbInviteToTrip(tripDbId, email)
+      },
       clearTripEntry: () => set({ tripEntryCountries: null }),
       recordDemoClick: () => set(s => ({ demoClickCount: s.demoClickCount + 1 })),
       toggleDarkMode: () => set(s => ({ darkMode: !s.darkMode })),
@@ -197,50 +225,6 @@ export const useAppStore = create<AppState>()(
       toggleShowCarbonBudget: () => set(s => ({ showCarbonBudget: !s.showCarbonBudget })),
       setDayEndHour: (h) => set({ dayEndHour: h }),
 
-      joinTrip: async (name, code, nickname) => {
-        const normalName = name.trim().toLowerCase();
-        const normalCode = code.trim();
-
-        // Demo shortcut — stays local
-        if (normalName === 'negev desert adventure' && normalCode === 'desert123') {
-          set({
-            showTour: !localStorage.getItem('trippy-tour-done'),
-            trip: MOCK_TRIP,
-            supplies: MOCK_SUPPLIES,
-            nickname: nickname || 'Traveler',
-            screen: 'dashboard',
-            activeDay: 1,
-            tripDbId: null,
-          });
-          return true;
-        }
-
-        if (normalCode.length < 6) return false;
-
-        try {
-          // Verify trip exists BEFORE creating an anonymous user
-          const data = await dbFindTrip(name, normalCode);
-          if (!data) return false;
-
-          const userId = await ensureUser(nickname);
-          await dbJoinTrip(data.id, userId, nickname.slice(0, 2).toUpperCase());
-
-          const { trip, supplies } = rowToTrip(data);
-          set({
-            userId,
-            tripDbId: data.id,
-            trip,
-            supplies,
-            nickname: nickname || 'Traveler',
-            screen: 'dashboard',
-            activeDay: 1,
-            tripEntryCountries: trip.countries?.length ? trip.countries : null,
-          });
-          return true;
-        } catch {
-          return false;
-        }
-      },
 
       loadTripById: async (tripId) => {
         const { authUser, trip: localTrip, tripDbId: localTripDbId } = get();
@@ -272,7 +256,7 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      createTrip: async (name, days, _code, nickname, theme = 'desert', startDate, countries) => {
+      createTrip: async (name, days, nickname, theme = 'desert', startDate, countries) => {
         const defaultEmoji = theme === 'city' ? '🏙️' : theme === 'beach' ? '🏖️' : theme === 'nature' ? '🌲' : theme === 'mountain' ? '⛰️' : theme === 'snow' ? '❄️' : '🏔️';
 
         const dayMetas: DayMeta[] = Array.from({ length: days }, (_, i) => ({
@@ -291,8 +275,9 @@ export const useAppStore = create<AppState>()(
         };
 
         // Save to DB first — throws on failure so LoginScreen can show a meaningful error
-        const userId = await ensureUser(nickname);
-        const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, _code || undefined, theme, dayMetas, nickname, countries);
+        const userId = await getSessionUserId();
+        if (!userId) throw new Error('Not authenticated');
+        const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, theme, dayMetas, nickname, countries);
 
         set({
           userId, tripDbId, trip: newTrip,

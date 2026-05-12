@@ -1,47 +1,11 @@
 import { createClient } from '@/utils/supabase/client'
-import type { Category, DayMeta, EmergencyContact, Expense, SupplyItem, TripEvent, TripTheme } from './types'
+import type { Category, DayMeta, EmergencyContact, Expense, SupplyItem, TripEvent, TripInvitation, TripTheme } from './types'
 
 function sb() {
   return createClient()
 }
 
-async function hashTripCode(code: string): Promise<string> {
-  const data = new TextEncoder().encode(code.toLowerCase().trim())
-  const buf = await crypto.subtle.digest('SHA-256', data)
-  return Array.from(new Uint8Array(buf))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('')
-}
-
 // ─── Auth ────────────────────────────────────────────────────────────────────
-
-// Supabase requires an email format — we use a fake domain internally
-const AUTH_DOMAIN = 'trippy-users.com'
-
-function toEmail(username: string) {
-  return `${username.toLowerCase().trim()}@${AUTH_DOMAIN}`
-}
-
-export async function registerUser(username: string, password: string): Promise<string> {
-  const supabase = sb()
-  const { data, error } = await supabase.auth.signUp({
-    email: toEmail(username),
-    password,
-  })
-  if (error || !data.user) throw error ?? new Error('Registration failed')
-  if (!data.session) throw new Error('EMAIL_CONFIRM_REQUIRED')
-  return data.user.id
-}
-
-export async function signInUser(username: string, password: string): Promise<string> {
-  const supabase = sb()
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: toEmail(username),
-    password,
-  })
-  if (error || !data.user) throw error ?? new Error('Login failed')
-  return data.user.id
-}
 
 export async function signInWithGoogle(): Promise<void> {
   const supabase = sb()
@@ -55,21 +19,10 @@ export async function getCurrentUser(): Promise<{ id: string; username: string }
   const { data: { session } } = await sb().auth.getSession()
   if (!session?.user) return null
   const email = session.user.email ?? ''
-  // Google users have real emails; internal users have @trippy.internal
-  const username = email.endsWith(`@${AUTH_DOMAIN}`)
-    ? email.replace(`@${AUTH_DOMAIN}`, '')
-    : (session.user.user_metadata?.full_name ?? email.split('@')[0])
+  const username = session.user.user_metadata?.full_name ?? email.split('@')[0]
   return { id: session.user.id, username }
 }
 
-export async function ensureUser(nickname: string): Promise<string> {
-  const supabase = sb()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user) throw new Error('Not authenticated')
-  const userId = session.user.id
-  await supabase.from('profiles').upsert({ id: userId, nickname })
-  return userId
-}
 
 export async function signOut() {
   await sb().auth.signOut()
@@ -87,7 +40,6 @@ export async function dbCreateTrip(
   name: string,
   days: number,
   startDate: string,
-  code: string | undefined,
   theme: TripTheme | undefined,
   dayMetas: DayMeta[],
   nickname: string,
@@ -95,9 +47,7 @@ export async function dbCreateTrip(
 ): Promise<string> {
   const supabase = sb()
 
-  const hashedCode = code ? await hashTripCode(code) : null
-
-  const baseRow = { name, days, start_date: startDate, code: hashedCode, theme: theme || null }
+  const baseRow = { name, days, start_date: startDate, theme: theme || null }
 
   let result = await supabase
     .from('trips')
@@ -136,34 +86,6 @@ export async function dbCreateTrip(
   return trip.id
 }
 
-export async function dbFindTrip(name: string, code: string) {
-  const hashedCode = await hashTripCode(code)
-  const { data, error } = await sb()
-    .from('trips')
-    .select(`
-      id, name, days, start_date, theme, trip_notes, countries,
-      day_meta ( day_index, region, emoji, lat, lng, description ),
-      events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags ),
-      expenses ( id, description, amount, split_count ),
-      emergency_contacts ( id, name, phone, type ),
-      supplies ( id, name, category, checked, critical ),
-      trip_participants ( user_id, initials, color )
-    `)
-    .ilike('name', name.trim())
-    .eq('code', hashedCode)
-    .maybeSingle()
-  if (error) throw error
-  return data
-}
-
-export async function dbJoinTrip(tripId: string, userId: string, initials: string) {
-  await sb().from('trip_participants').upsert({
-    trip_id: tripId,
-    user_id: userId,
-    initials,
-    color: 'oklch(62% 0.15 195)',
-  })
-}
 
 export async function dbGetUserTrips(userId: string): Promise<{ id: string; name: string; theme: string | null; days: number; start_date: string | null }[]> {
   const { data, error } = await sb()
@@ -172,6 +94,66 @@ export async function dbGetUserTrips(userId: string): Promise<{ id: string; name
     .eq('user_id', userId)
   if (error) throw error
   return (data ?? []).map((row: any) => row.trips).filter(Boolean)
+}
+
+// ─── Invitations ─────────────────────────────────────────────────────────────
+
+export async function dbGetInvitations(): Promise<TripInvitation[]> {
+  const supabase = sb()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user?.email) return []
+  const { data, error } = await supabase
+    .from('trip_invitations')
+    .select('id, trip_id, status, created_at, trips ( name, theme )')
+    .eq('invited_email', session.user.email.toLowerCase())
+    .eq('status', 'pending')
+  if (error) throw error
+  return (data ?? []).map((row: any) => ({
+    id: row.id,
+    tripId: row.trip_id,
+    tripName: row.trips?.name ?? 'Unknown Trip',
+    tripTheme: row.trips?.theme ?? null,
+    status: row.status as TripInvitation['status'],
+    createdAt: row.created_at,
+  }))
+}
+
+export async function dbInviteToTrip(tripId: string, invitedEmail: string): Promise<void> {
+  const supabase = sb()
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) throw new Error('Not authenticated')
+  const { error } = await supabase.from('trip_invitations').insert({
+    trip_id: tripId,
+    invited_email: invitedEmail.toLowerCase().trim(),
+    invited_by: session.user.id,
+  })
+  if (error) throw error
+}
+
+export async function dbAcceptInvitation(invitationId: string, userId: string, initials: string): Promise<string> {
+  const supabase = sb()
+  const { data: inv, error: invErr } = await supabase
+    .from('trip_invitations')
+    .select('trip_id')
+    .eq('id', invitationId)
+    .single()
+  if (invErr || !inv) throw invErr ?? new Error('Invitation not found')
+  await supabase.from('trip_invitations').update({ status: 'accepted' }).eq('id', invitationId)
+  await supabase.from('trip_participants').upsert({
+    trip_id: inv.trip_id,
+    user_id: userId,
+    initials,
+    color: 'oklch(62% 0.15 195)',
+  })
+  return inv.trip_id
+}
+
+export async function dbRejectInvitation(invitationId: string): Promise<void> {
+  const { error } = await sb()
+    .from('trip_invitations')
+    .update({ status: 'rejected' })
+    .eq('id', invitationId)
+  if (error) throw error
 }
 
 export async function dbLoadTripById(tripId: string) {
@@ -325,8 +307,8 @@ export async function dbUpdateDayMeta(tripId: string, dayIndex: number, meta: Pa
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-// Reconstruct a Trip + supplies array from a dbFindTrip result
-export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbFindTrip>>>) {
+// Reconstruct a Trip + supplies array from a DB row
+export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTripById>>>) {
   const days = data.days ?? 1
 
   const dayMeta = Array.from({ length: days }, (_, i) => {

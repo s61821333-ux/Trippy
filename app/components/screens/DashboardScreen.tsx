@@ -36,12 +36,13 @@ export default function DashboardScreen() {
   const {
     trip, nickname, setScreen, setActiveDay, logout, supplies,
     hideBudget, showCarbonBudget, dayEndHour,
-    addExpense, deleteExpense,
+    addExpense, deleteExpense, inviteToTrip,
   } = useAppStore();
   const { show } = useToast();
   const { t } = useI18n();
   const [showShare, setShowShare]       = useState(false);
-  const [revealCode, setRevealCode]     = useState(false);
+  const [inviteEmail, setInviteEmail]   = useState('');
+  const [inviteSending, setInviteSending] = useState(false);
   const [showExpenses, setShowExpenses] = useState(false);
   const [expDesc, setExpDesc]           = useState('');
   const [expAmount, setExpAmount]       = useState('');
@@ -625,65 +626,65 @@ export default function DashboardScreen() {
       {/* ── Share Sheet ── */}
       {showShare && (
         <Sheet
-          onClose={() => { setShowShare(false); setRevealCode(false); }}
+          onClose={() => { setShowShare(false); setInviteEmail(''); }}
           title={t('shareTrip')}
           subtitle={t('shareSub')}
         >
+          {/* Trip name badge */}
           <div style={{
-            background: 'var(--bg)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)',
-            padding: '16px',
-            marginBottom: 14,
+            background: 'var(--bg)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 18,
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 12 }}>
-              <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                {t('tripName')}
-              </p>
-              <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{trip.name}</p>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                {t('tripCode')}
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <p style={{
-                  fontSize: 15, fontWeight: 700, color: 'var(--brand)',
-                  letterSpacing: revealCode ? '0.10em' : '0.02em',
-                }}>
-                  {revealCode ? (trip.code ?? '••••••') : '••••••'}
-                </p>
-                <button
-                  onClick={() => setRevealCode(r => !r)}
-                  style={{
-                    background: 'var(--brand-light)', border: 'none',
-                    borderRadius: 'var(--radius-sm)', padding: '4px 10px',
-                    fontSize: 11, fontWeight: 600, color: 'var(--brand)',
-                    cursor: 'pointer',
-                  }}
-                >
-                  {revealCode ? t('hideCode') : t('showCode')}
-                </button>
-              </div>
-            </div>
+            <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              {t('tripName')}
+            </p>
+            <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{trip.name}</p>
+          </div>
+
+          {/* Invite by email */}
+          <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 8 }}>
+            {t('inviteByEmail')}
+          </p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={e => setInviteEmail(e.target.value)}
+              onKeyDown={async e => {
+                if (e.key === 'Enter' && inviteEmail.trim()) {
+                  setInviteSending(true);
+                  try { await inviteToTrip(inviteEmail); show(t('inviteSent')); setInviteEmail(''); }
+                  catch { show(t('inviteFailed')); }
+                  setInviteSending(false);
+                }
+              }}
+              placeholder={t('inviteEmailPlaceholder')}
+              style={{
+                flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
+                border: '1px solid var(--border)', outline: 'none',
+              }}
+            />
+            <GlassBtn
+              variant="accent"
+              onClick={async () => {
+                if (!inviteEmail.trim()) return;
+                setInviteSending(true);
+                try { await inviteToTrip(inviteEmail); show(t('inviteSent')); setInviteEmail(''); }
+                catch { show(t('inviteFailed')); }
+                setInviteSending(false);
+              }}
+              disabled={inviteSending || !inviteEmail.trim()}
+              style={{ padding: '10px 16px', flexShrink: 0 }}
+            >
+              {inviteSending ? '…' : t('sendInvite')}
+            </GlassBtn>
           </div>
 
           <GlassBtn
-            variant="accent" size="lg" style={{ width: '100%' }}
-            onClick={() => {
-              const codeText = trip.code ? `\nCode: ${trip.code}` : '';
-              navigator.clipboard?.writeText(`Trip: ${trip.name}${codeText}`);
-              show(t('copied'));
-              setShowShare(false);
-              setRevealCode(false);
-            }}
-          >
-            <Icon name="share" size={15} /> {t('copyToClipboard')}
-          </GlassBtn>
-          <div style={{ height: 10 }} />
-          <GlassBtn
             variant="danger" size="lg" style={{ width: '100%' }}
-            onClick={() => { setShowShare(false); setRevealCode(false); logout(); }}
+            onClick={() => { setShowShare(false); setInviteEmail(''); logout(); }}
           >
             {t('leaveTrip')}
           </GlassBtn>

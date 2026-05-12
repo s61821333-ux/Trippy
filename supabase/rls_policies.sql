@@ -4,7 +4,6 @@
 -- ============================================================
 -- STEP 1: Enable RLS on every table
 -- ============================================================
-ALTER TABLE profiles           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trips              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trip_participants  ENABLE ROW LEVEL SECURITY;
 ALTER TABLE day_meta           ENABLE ROW LEVEL SECURITY;
@@ -30,46 +29,20 @@ AS $$
 $$;
 
 -- ============================================================
--- profiles
--- ============================================================
--- Users can only read and write their own profile
-DROP POLICY IF EXISTS "profiles_select_own"  ON profiles;
-DROP POLICY IF EXISTS "profiles_insert_own"  ON profiles;
-DROP POLICY IF EXISTS "profiles_update_own"  ON profiles;
-
-CREATE POLICY "profiles_select_own" ON profiles
-  FOR SELECT TO authenticated
-  USING (id = auth.uid());
-
-CREATE POLICY "profiles_insert_own" ON profiles
-  FOR INSERT TO authenticated
-  WITH CHECK (id = auth.uid());
-
-CREATE POLICY "profiles_update_own" ON profiles
-  FOR UPDATE TO authenticated
-  USING (id = auth.uid())
-  WITH CHECK (id = auth.uid());
-
--- ============================================================
 -- trips
 -- ============================================================
 -- Read: only participants can read their trip
 -- Insert: any authenticated user can create a trip
 -- Update/Delete: only participants of that trip
-DROP POLICY IF EXISTS "trips_select"  ON trips;
-DROP POLICY IF EXISTS "trips_insert"  ON trips;
-DROP POLICY IF EXISTS "trips_update"  ON trips;
-DROP POLICY IF EXISTS "trips_delete"  ON trips;
+DROP POLICY IF EXISTS "trips_select"            ON trips;
+DROP POLICY IF EXISTS "trips_select_by_code"    ON trips;
+DROP POLICY IF EXISTS "trips_insert"            ON trips;
+DROP POLICY IF EXISTS "trips_update"            ON trips;
+DROP POLICY IF EXISTS "trips_delete"            ON trips;
 
 CREATE POLICY "trips_select" ON trips
   FOR SELECT TO authenticated
   USING (is_trip_participant(id));
-
--- Allow SELECT during join-attempt (before participant row exists).
--- The code column is hashed so brute-force is impractical.
-CREATE POLICY "trips_select_by_code" ON trips
-  FOR SELECT TO authenticated
-  USING (code IS NOT NULL);
 
 CREATE POLICY "trips_insert" ON trips
   FOR INSERT TO authenticated
@@ -157,29 +130,74 @@ CREATE POLICY "emergency_contacts_all" ON emergency_contacts
   WITH CHECK (is_trip_participant(trip_id));
 
 -- ============================================================
+-- trip_invitations  (NEW — email-based invite system)
+-- ============================================================
+-- Run once to create the table:
+-- CREATE TABLE trip_invitations (
+--   id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+--   trip_id       uuid REFERENCES trips(id) ON DELETE CASCADE NOT NULL,
+--   invited_email text NOT NULL,
+--   invited_by    uuid REFERENCES auth.users(id) NOT NULL,
+--   status        text DEFAULT 'pending' CHECK (status IN ('pending','accepted','rejected')),
+--   created_at    timestamptz DEFAULT now(),
+--   UNIQUE(trip_id, invited_email)
+-- );
+
+ALTER TABLE trip_invitations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "invites_insert"         ON trip_invitations;
+DROP POLICY IF EXISTS "invites_select_invitee" ON trip_invitations;
+DROP POLICY IF EXISTS "invites_select_member"  ON trip_invitations;
+DROP POLICY IF EXISTS "invites_update_invitee" ON trip_invitations;
+
+-- Trip participants can send invitations
+CREATE POLICY "invites_insert" ON trip_invitations
+  FOR INSERT TO authenticated
+  WITH CHECK (is_trip_participant(trip_id));
+
+-- Invited person can see their own invitations
+CREATE POLICY "invites_select_invitee" ON trip_invitations
+  FOR SELECT TO authenticated
+  USING (invited_email = (auth.jwt() ->> 'email'));
+
+-- Trip members can see outgoing invitations for their trip
+CREATE POLICY "invites_select_member" ON trip_invitations
+  FOR SELECT TO authenticated
+  USING (is_trip_participant(trip_id));
+
+-- Only the invitee can update status (accept / reject)
+CREATE POLICY "invites_update_invitee" ON trip_invitations
+  FOR UPDATE TO authenticated
+  USING  (invited_email = (auth.jwt() ->> 'email'))
+  WITH CHECK (invited_email = (auth.jwt() ->> 'email'));
+
+-- Also allow SELECT on trips for the invited user (not yet a participant)
+-- so the invitation query can join to trips.name / trips.theme
+DROP POLICY IF EXISTS "trips_select_for_invite" ON trips;
+CREATE POLICY "trips_select_for_invite" ON trips
+  FOR SELECT TO authenticated
+  USING (
+    EXISTS (
+      SELECT 1 FROM trip_invitations
+      WHERE trip_id = id
+        AND invited_email = (auth.jwt() ->> 'email')
+        AND status = 'pending'
+    )
+  );
+
+-- ============================================================
 -- STEP 3: Indexes for performance at scale
 -- ============================================================
 -- These prevent full-table scans in the is_trip_participant helper
 -- and in all the per-trip queries.
 
-CREATE INDEX IF NOT EXISTS idx_tp_user_id   ON trip_participants (user_id);
-CREATE INDEX IF NOT EXISTS idx_tp_trip_id   ON trip_participants (trip_id);
-CREATE INDEX IF NOT EXISTS idx_events_trip  ON events            (trip_id);
-CREATE INDEX IF NOT EXISTS idx_expenses_trip ON expenses         (trip_id);
-CREATE INDEX IF NOT EXISTS idx_supplies_trip ON supplies         (trip_id);
-CREATE INDEX IF NOT EXISTS idx_ec_trip      ON emergency_contacts(trip_id);
-CREATE INDEX IF NOT EXISTS idx_dm_trip      ON day_meta          (trip_id);
-CREATE INDEX IF NOT EXISTS idx_trips_code   ON trips             (code)    WHERE code IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_tp_user_id      ON trip_participants (user_id);
+CREATE INDEX IF NOT EXISTS idx_tp_trip_id      ON trip_participants (trip_id);
+CREATE INDEX IF NOT EXISTS idx_events_trip     ON events            (trip_id);
+CREATE INDEX IF NOT EXISTS idx_expenses_trip   ON expenses          (trip_id);
+CREATE INDEX IF NOT EXISTS idx_supplies_trip   ON supplies          (trip_id);
+CREATE INDEX IF NOT EXISTS idx_ec_trip         ON emergency_contacts(trip_id);
+CREATE INDEX IF NOT EXISTS idx_dm_trip         ON day_meta          (trip_id);
+CREATE INDEX IF NOT EXISTS idx_invites_email   ON trip_invitations  (invited_email);
+CREATE INDEX IF NOT EXISTS idx_invites_trip    ON trip_invitations  (trip_id);
 
--- ============================================================
--- STEP 4: Migrate existing plain-text codes → SHA-256 hashes
--- NOTE: Run this ONLY if you have existing trips with plain-text
---       codes. After migration all codes in the DB will be hashes.
---       The pgcrypto extension must be enabled first:
---         CREATE EXTENSION IF NOT EXISTS pgcrypto;
---
--- UPDATE trips
--- SET code = encode(digest(lower(trim(code)), 'sha256'), 'hex')
--- WHERE code IS NOT NULL
---   AND length(code) < 64;   -- skip rows already hashed (64 hex chars)
--- ============================================================

@@ -74,11 +74,19 @@ export interface EmergencyContact {
 
 export type TripTheme = 'desert' | 'nature' | 'city' | 'beach' | 'mountain' | 'lake' | 'snow' | 'space' | 'sunset';
 
+export interface TripInvitation {
+  id: string;
+  tripId: string;
+  tripName: string;
+  tripTheme: string | null;
+  status: 'pending' | 'accepted' | 'rejected';
+  createdAt: string;
+}
+
 export interface Trip {
   name: string;
   days: number;
   startDate: string;
-  code?: string;
   countries?: string[];
   participants: Participant[];
   dayMeta: DayMeta[];

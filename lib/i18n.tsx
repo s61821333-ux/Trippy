@@ -285,6 +285,15 @@ const en = {
   backgroundLabel: 'Background',
   chooseCodeOptional: 'Trip Code (optional)',
   reduceDaysWarning: 'Reducing days to {newDays} will remove events on days {from}–{to}. Continue?',
+  invitations: 'Invitations',
+  invitedToJoin: 'You\'ve been invited to join',
+  acceptBtn: 'Accept',
+  rejectBtn: 'Decline',
+  inviteByEmail: 'Invite someone by email',
+  inviteEmailPlaceholder: 'friend@example.com',
+  sendInvite: 'Send',
+  inviteSent: 'Invitation sent ✓',
+  inviteFailed: 'Could not send invitation — try again',
 
   // Demo Data
   'Morning camp breakfast': 'Morning camp breakfast',
@@ -602,6 +611,15 @@ const he: typeof en = {
   backgroundLabel: 'בחר רקע',
   chooseCodeOptional: 'קוד טיול (אופציונלי)',
   reduceDaysWarning: 'הפחתת הימים ל-{newDays} תסיר אירועים בימים {from}–{to}. להמשיך?',
+  invitations: 'הזמנות',
+  invitedToJoin: 'הוזמנת להצטרף',
+  acceptBtn: 'קבל',
+  rejectBtn: 'דחה',
+  inviteByEmail: 'הזמן מישהו לפי אימייל',
+  inviteEmailPlaceholder: 'חבר@example.com',
+  sendInvite: 'שלח',
+  inviteSent: 'הזמנה נשלחה ✓',
+  inviteFailed: 'לא ניתן לשלוח הזמנה — נסה שוב',
 
   // Demo Data
   'Morning camp breakfast': 'ארוחת בוקר במחנה',
