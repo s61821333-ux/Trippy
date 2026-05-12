@@ -46,6 +46,8 @@ export interface AiSuggestion {
   time: string;
   distance: string;
   open: boolean;
+  cost?: number;
+  location?: string;
 }
 
 export interface SupplyItem {

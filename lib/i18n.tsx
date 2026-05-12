@@ -294,6 +294,13 @@ const en = {
   sendInvite: 'Send',
   inviteSent: 'Invitation sent ✓',
   inviteFailed: 'Could not send invitation — try again',
+  quickLinkLabel: 'Quick link — anyone with the link can join',
+  copyLink: '🔗 Copy Invite Link',
+  linkCopied: 'Link copied! ✓',
+  noLink: 'Could not generate link — try again',
+  inviteLimitReached: 'Limit reached — wait for someone to respond before sending more',
+  pendingLabel: 'Pending',
+  estCost: 'Est. Cost',
 
   // Demo Data
   'Morning camp breakfast': 'Morning camp breakfast',
@@ -620,6 +627,13 @@ const he: typeof en = {
   sendInvite: 'שלח',
   inviteSent: 'הזמנה נשלחה ✓',
   inviteFailed: 'לא ניתן לשלוח הזמנה — נסה שוב',
+  quickLinkLabel: 'קישור מהיר — כל מי שיש לו את הקישור יכול להצטרף',
+  copyLink: '🔗 העתק קישור הזמנה',
+  linkCopied: 'הקישור הועתק! ✓',
+  noLink: 'לא ניתן ליצור קישור — נסה שוב',
+  inviteLimitReached: 'הגעת למגבלה — המתן לתגובה לפני שליחת הזמנות נוספות',
+  pendingLabel: 'ממתין',
+  estCost: 'עלות משוערת',
 
   // Demo Data
   'Morning camp breakfast': 'ארוחת בוקר במחנה',

@@ -13,6 +13,7 @@ import {
   dbAddSupply, dbToggleSupply, dbDeleteSupply,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
   dbUpdateTripNotes, dbUpdateDayMeta,
+  dbGetOrCreateInviteToken,
 } from './db';
 
 interface AppState {
@@ -56,6 +57,7 @@ interface AppState {
   acceptInvitation: (invitationId: string) => Promise<void>;
   rejectInvitation: (invitationId: string) => Promise<void>;
   inviteToTrip: (email: string) => Promise<void>;
+  createInviteLink: () => Promise<string>;
   /** Sign completely out of Supabase. Does NOT remove the user from the trip. */
   logout: () => void;
   /** Keep auth but unload the current trip so the user can pick another. */
@@ -219,6 +221,12 @@ export const useAppStore = create<AppState>()(
         const { tripDbId } = get()
         if (!tripDbId) throw new Error('No active trip')
         await dbInviteToTrip(tripDbId, email)
+      },
+      createInviteLink: async () => {
+        const { tripDbId } = get()
+        if (!tripDbId) throw new Error('No active trip')
+        const token = await dbGetOrCreateInviteToken(tripDbId)
+        return `${window.location.origin}/join/${token}`
       },
       clearTripEntry: () => set({ tripEntryCountries: null }),
       recordDemoClick: () => set(s => ({ demoClickCount: s.demoClickCount + 1 })),
@@ -505,6 +513,8 @@ export const useAppStore = create<AppState>()(
           name: sugg.name,
           category: sugg.category as Category,
           addedBy: get().nickname || 'AI',
+          cost: sugg.cost,
+          location: sugg.location,
         };
         const dayEvents = [...(trip.events[dayNumber] || []), newEvent];
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } }, showSuggestions: false });

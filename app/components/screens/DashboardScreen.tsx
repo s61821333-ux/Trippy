@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Chip from '../ui/Chip';
 import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
 import { useAppStore } from '@/lib/store';
+import { dbGetTripEmailInvitations } from '@/lib/db';
 import { fmtDate, getGaps, toMins, getDayIcon, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget, estimateCarbonKg } from '@/lib/utils';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
@@ -34,15 +35,25 @@ const INSIGHT_COLORS: Record<string, { bg: string; border: string; text: string 
 
 export default function DashboardScreen() {
   const {
-    trip, nickname, setScreen, setActiveDay, logout, supplies,
+    trip, nickname, tripDbId, setScreen, setActiveDay, logout, supplies,
     hideBudget, showCarbonBudget, dayEndHour,
-    addExpense, deleteExpense, inviteToTrip,
+    addExpense, deleteExpense, inviteToTrip, createInviteLink,
   } = useAppStore();
   const { show } = useToast();
   const { t } = useI18n();
   const [showShare, setShowShare]       = useState(false);
   const [inviteEmail, setInviteEmail]   = useState('');
   const [inviteSending, setInviteSending] = useState(false);
+  const [linkCopying, setLinkCopying]   = useState(false);
+  const [pendingEmails, setPendingEmails] = useState<{ email: string; status: string }[]>([]);
+  const MAX_INVITES = 4;
+
+  useEffect(() => {
+    if (!showShare || !tripDbId) return;
+    dbGetTripEmailInvitations(tripDbId)
+      .then(invites => setPendingEmails(invites))
+      .catch(() => {});
+  }, [showShare, tripDbId]);
   const [showExpenses, setShowExpenses] = useState(false);
   const [expDesc, setExpDesc]           = useState('');
   const [expAmount, setExpAmount]       = useState('');
@@ -626,65 +637,141 @@ export default function DashboardScreen() {
       {/* ── Share Sheet ── */}
       {showShare && (
         <Sheet
-          onClose={() => { setShowShare(false); setInviteEmail(''); }}
+          onClose={() => { setShowShare(false); setInviteEmail(''); setPendingEmails([]); }}
           title={t('shareTrip')}
           subtitle={t('shareSub')}
         >
-          {/* Trip name badge */}
+          {/* Trip name + current team */}
           <div style={{
             background: 'var(--bg)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 18,
-            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 16,
           }}>
-            <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              {t('tripName')}
-            </p>
-            <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{trip.name}</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                {t('tripName')}
+              </p>
+              <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{trip.name}</p>
+            </div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {trip.participants.map((p, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '4px 10px', borderRadius: 20,
+                  background: p.color, opacity: 0.92,
+                }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'white' }}>{p.initials}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Invite by email */}
+          {/* Quick link share */}
           <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 8 }}>
-            {t('inviteByEmail')}
+            {t('quickLinkLabel')}
           </p>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-            <input
-              type="email"
-              value={inviteEmail}
-              onChange={e => setInviteEmail(e.target.value)}
-              onKeyDown={async e => {
-                if (e.key === 'Enter' && inviteEmail.trim()) {
-                  setInviteSending(true);
-                  try { await inviteToTrip(inviteEmail); show(t('inviteSent')); setInviteEmail(''); }
-                  catch { show(t('inviteFailed')); }
-                  setInviteSending(false);
-                }
-              }}
-              placeholder={t('inviteEmailPlaceholder')}
-              style={{
-                flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
-                border: '1px solid var(--border)', outline: 'none',
-              }}
-            />
-            <GlassBtn
-              variant="accent"
-              onClick={async () => {
-                if (!inviteEmail.trim()) return;
-                setInviteSending(true);
-                try { await inviteToTrip(inviteEmail); show(t('inviteSent')); setInviteEmail(''); }
-                catch { show(t('inviteFailed')); }
-                setInviteSending(false);
-              }}
-              disabled={inviteSending || !inviteEmail.trim()}
-              style={{ padding: '10px 16px', flexShrink: 0 }}
-            >
-              {inviteSending ? '…' : t('sendInvite')}
-            </GlassBtn>
+          <GlassBtn
+            style={{ width: '100%', marginBottom: 18, gap: 8 }}
+            onClick={async () => {
+              setLinkCopying(true);
+              try {
+                const link = await createInviteLink();
+                await navigator.clipboard.writeText(link);
+                show(t('linkCopied'));
+              } catch {
+                show(t('noLink'));
+              }
+              setLinkCopying(false);
+            }}
+            disabled={linkCopying}
+          >
+            <Icon name="share" size={14} />
+            {linkCopying ? '…' : t('copyLink')}
+          </GlassBtn>
+
+          {/* Invite by email — max 4 pending */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)' }}>
+              {t('inviteByEmail')}
+            </p>
+            <span style={{
+              fontSize: 11, fontWeight: 700,
+              color: pendingEmails.length >= MAX_INVITES ? 'var(--danger, #e53e3e)' : 'var(--text-3)',
+            }}>
+              {pendingEmails.length}/{MAX_INVITES}
+            </span>
           </div>
+
+          {pendingEmails.length >= MAX_INVITES ? (
+            <p style={{ fontSize: 12, color: 'var(--text-3)', fontStyle: 'italic', marginBottom: 14 }}>
+              {t('inviteLimitReached')}
+            </p>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+              <input
+                type="email"
+                value={inviteEmail}
+                onChange={e => setInviteEmail(e.target.value)}
+                onKeyDown={async e => {
+                  if (e.key === 'Enter' && inviteEmail.trim()) {
+                    setInviteSending(true);
+                    try {
+                      await inviteToTrip(inviteEmail);
+                      show(t('inviteSent'));
+                      setPendingEmails(prev => [...prev, { email: inviteEmail.toLowerCase().trim(), status: 'pending' }]);
+                      setInviteEmail('');
+                    } catch { show(t('inviteFailed')); }
+                    setInviteSending(false);
+                  }
+                }}
+                placeholder={t('inviteEmailPlaceholder')}
+                style={{
+                  flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                  fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
+                  border: '1px solid var(--border)', outline: 'none',
+                }}
+              />
+              <GlassBtn
+                variant="accent"
+                onClick={async () => {
+                  if (!inviteEmail.trim()) return;
+                  setInviteSending(true);
+                  try {
+                    await inviteToTrip(inviteEmail);
+                    show(t('inviteSent'));
+                    setPendingEmails(prev => [...prev, { email: inviteEmail.toLowerCase().trim(), status: 'pending' }]);
+                    setInviteEmail('');
+                  } catch { show(t('inviteFailed')); }
+                  setInviteSending(false);
+                }}
+                disabled={inviteSending || !inviteEmail.trim()}
+                style={{ padding: '10px 16px', flexShrink: 0 }}
+              >
+                {inviteSending ? '…' : t('sendInvite')}
+              </GlassBtn>
+            </div>
+          )}
+
+          {/* Pending invite list */}
+          {pendingEmails.length > 0 && (
+            <div style={{ marginBottom: 16 }}>
+              {pendingEmails.map((inv, i) => (
+                <div key={i} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                  background: 'var(--bg)', border: '1px solid var(--border)', marginBottom: 6,
+                }}>
+                  <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{inv.email}</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}>
+                    {t('pendingLabel')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
 
           <GlassBtn
             variant="danger" size="lg" style={{ width: '100%' }}
-            onClick={() => { setShowShare(false); setInviteEmail(''); logout(); }}
+            onClick={() => { setShowShare(false); setInviteEmail(''); setPendingEmails([]); logout(); }}
           >
             {t('leaveTrip')}
           </GlassBtn>

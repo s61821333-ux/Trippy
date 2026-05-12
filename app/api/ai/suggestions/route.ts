@@ -59,7 +59,9 @@ Return ONLY valid JSON — an array of 4 objects with this exact shape:
     "duration": 90,
     "time": "10:00",
     "distance": "2.3 km away",
-    "open": true
+    "open": true,
+    "cost": 150,
+    "location": "Address or general location"
   }
 ]
 
@@ -67,6 +69,8 @@ category must be one of: food | cafe | attraction | rest | transport | flight | 
 time must be HH:MM and should not conflict with existing events.
 duration is in minutes (integer).
 open is a boolean indicating whether the place is likely open now.
+cost is an estimated cost in local currency (number).
+location is a string representing the address or place.
 Respond with ONLY the JSON array, no other text.`;
 
   let message: Anthropic.Message;
@@ -100,6 +104,8 @@ Respond with ONLY the JSON array, no other text.`;
       time?: string;
       distance?: string;
       open?: boolean;
+      cost?: number;
+      location?: string;
     }>;
     const validCategories: Category[] = [
       'food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other',
@@ -115,6 +121,8 @@ Respond with ONLY the JSON array, no other text.`;
       time: s.time ?? '10:00',
       distance: s.distance ?? '—',
       open: s.open ?? true,
+      cost: typeof s.cost === 'number' ? s.cost : undefined,
+      location: s.location,
     }));
   } catch {
     return Response.json({ error: 'Failed to parse AI response' }, { status: 502 });

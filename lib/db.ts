@@ -305,6 +305,28 @@ export async function dbUpdateDayMeta(tripId: string, dayIndex: number, meta: Pa
   if (error) throw error
 }
 
+// ─── Invite links ────────────────────────────────────────────────────────────
+
+export async function dbGetOrCreateInviteToken(tripId: string): Promise<string> {
+  const supabase = sb()
+  const { data } = await supabase.from('trips').select('invite_token').eq('id', tripId).single() as any
+  if (data?.invite_token) return data.invite_token as string
+  const token = crypto.randomUUID()
+  await supabase.from('trips').update({ invite_token: token } as any).eq('id', tripId)
+  return token
+}
+
+export async function dbGetTripEmailInvitations(tripId: string): Promise<{ email: string; status: string }[]> {
+  const { data, error } = await sb()
+    .from('trip_invitations')
+    .select('invited_email, status')
+    .eq('trip_id', tripId)
+    .not('invited_email', 'is', null)
+    .eq('status', 'pending')
+  if (error) return []
+  return (data ?? []).map((r: any) => ({ email: r.invited_email, status: r.status }))
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 // Reconstruct a Trip + supplies array from a DB row

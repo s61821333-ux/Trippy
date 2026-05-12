@@ -168,6 +168,16 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
                           <Chip v="neutral" style={{ fontSize: 10 }}>
                             <Icon name="pin" size={10} /> {s.distance}
                           </Chip>
+                          {s.location && (
+                            <Chip v="neutral" style={{ fontSize: 10 }}>
+                              <Icon name="map" size={10} /> {s.location}
+                            </Chip>
+                          )}
+                          {s.cost !== undefined && (
+                            <Chip v="neutral" style={{ fontSize: 10 }}>
+                              {t('estCost')}: ₪{s.cost}
+                            </Chip>
+                          )}
                         </div>
                       </div>
                     </div>

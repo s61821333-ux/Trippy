@@ -46,7 +46,7 @@ const screenTransition = {
 
 function Shell() {
   const { screen, setScreen, trip, darkMode, highContrast, reducedMotion, toggleDarkMode, showTour,
-    tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick, checkAuth } = useAppStore();
+    tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick, checkAuth, loadTripById, authUser } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
@@ -59,8 +59,25 @@ function Shell() {
       setScreen('dashboard');
     }
     checkAuth();
+    // Stash any pending join trip ID from invite link redirect
+    const params = new URLSearchParams(window.location.search);
+    const joinId = params.get('join');
+    if (joinId) {
+      window.history.replaceState({}, '', '/');
+      sessionStorage.setItem('trippy-pending-join', joinId);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // After auth resolves, auto-load a trip joined via invite link
+  useEffect(() => {
+    if (!authUser) return;
+    const pendingJoin = sessionStorage.getItem('trippy-pending-join');
+    if (!pendingJoin) return;
+    sessionStorage.removeItem('trippy-pending-join');
+    loadTripById(pendingJoin).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authUser]);
 
   // Show entry animation when tripEntryCountries is set (trip just entered)
   useEffect(() => {

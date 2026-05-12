@@ -186,6 +186,18 @@ CREATE POLICY "trips_select_for_invite" ON trips
   );
 
 -- ============================================================
+-- trip_invitations — URL share token support
+-- ============================================================
+-- Run once in Supabase SQL Editor to add the invite link column:
+--
+-- ALTER TABLE trips
+--   ADD COLUMN IF NOT EXISTS invite_token UUID UNIQUE DEFAULT NULL;
+--
+-- CREATE INDEX IF NOT EXISTS idx_trips_invite_token ON trips (invite_token);
+--
+-- (No new RLS policies needed — the invite API route uses the service role key.)
+
+-- ============================================================
 -- STEP 3: Indexes for performance at scale
 -- ============================================================
 -- These prevent full-table scans in the is_trip_participant helper
