@@ -195,7 +195,7 @@ export async function dbLoadTripById(tripId: string) {
 // ─── Events ──────────────────────────────────────────────────────────────────
 
 export async function dbAddEvent(tripId: string, dayNumber: number, event: TripEvent, userId: string) {
-  await sb().from('events').insert({
+  const { error } = await sb().from('events').insert({
     id: event.id,
     trip_id: tripId,
     day_index: dayNumber - 1,
@@ -211,6 +211,7 @@ export async function dbAddEvent(tripId: string, dayNumber: number, event: TripE
     cost: event.cost ?? null,
     tags: event.tags ?? null,
   })
+  if (error) throw error
 }
 
 export async function dbEditEvent(eventId: string, updates: Partial<TripEvent>) {
@@ -226,17 +227,19 @@ export async function dbEditEvent(eventId: string, updates: Partial<TripEvent>) 
   if (updates.cost      !== undefined) patch.cost      = updates.cost
   if (updates.tags      !== undefined) patch.tags      = updates.tags
 
-  await sb().from('events').update(patch).eq('id', eventId)
+  const { error } = await sb().from('events').update(patch).eq('id', eventId)
+  if (error) throw error
 }
 
 export async function dbDeleteEvent(eventId: string) {
-  await sb().from('events').delete().eq('id', eventId)
+  const { error } = await sb().from('events').delete().eq('id', eventId)
+  if (error) throw error
 }
 
 // ─── Expenses ────────────────────────────────────────────────────────────────
 
 export async function dbAddExpense(tripId: string, expense: Expense, userId: string) {
-  await sb().from('expenses').insert({
+  const { error } = await sb().from('expenses').insert({
     id: expense.id,
     trip_id: tripId,
     description: expense.description,
@@ -244,16 +247,18 @@ export async function dbAddExpense(tripId: string, expense: Expense, userId: str
     paid_by: userId,
     split_count: expense.splitCount,
   })
+  if (error) throw error
 }
 
 export async function dbDeleteExpense(expenseId: string) {
-  await sb().from('expenses').delete().eq('id', expenseId)
+  const { error } = await sb().from('expenses').delete().eq('id', expenseId)
+  if (error) throw error
 }
 
 // ─── Supplies ────────────────────────────────────────────────────────────────
 
 export async function dbAddSupply(tripId: string, supply: SupplyItem) {
-  await sb().from('supplies').insert({
+  const { error } = await sb().from('supplies').insert({
     id: supply.id,
     trip_id: tripId,
     name: supply.name,
@@ -261,40 +266,47 @@ export async function dbAddSupply(tripId: string, supply: SupplyItem) {
     checked: supply.checked,
     critical: supply.critical ?? false,
   })
+  if (error) throw error
 }
 
 export async function dbToggleSupply(supplyId: string, checked: boolean) {
-  await sb().from('supplies').update({ checked }).eq('id', supplyId)
+  const { error } = await sb().from('supplies').update({ checked }).eq('id', supplyId)
+  if (error) throw error
 }
 
 export async function dbDeleteSupply(supplyId: string) {
-  await sb().from('supplies').delete().eq('id', supplyId)
+  const { error } = await sb().from('supplies').delete().eq('id', supplyId)
+  if (error) throw error
 }
 
 // ─── Emergency contacts ──────────────────────────────────────────────────────
 
 export async function dbAddEmergencyContact(tripId: string, contact: EmergencyContact) {
-  await sb().from('emergency_contacts').insert({
+  const { error } = await sb().from('emergency_contacts').insert({
     id: contact.id,
     trip_id: tripId,
     name: contact.name,
     phone: contact.phone,
     type: contact.type,
   })
+  if (error) throw error
 }
 
 export async function dbDeleteEmergencyContact(contactId: string) {
-  await sb().from('emergency_contacts').delete().eq('id', contactId)
+  const { error } = await sb().from('emergency_contacts').delete().eq('id', contactId)
+  if (error) throw error
 }
 
 export async function dbLeaveTrip(tripId: string, userId: string) {
-  await sb().from('trip_participants').delete().eq('trip_id', tripId).eq('user_id', userId)
+  const { error } = await sb().from('trip_participants').delete().eq('trip_id', tripId).eq('user_id', userId)
+  if (error) throw error
 }
 
 // ─── Trip notes ──────────────────────────────────────────────────────────────
 
 export async function dbUpdateTripNotes(tripId: string, notes: string[]) {
-  await sb().from('trips').update({ trip_notes: notes }).eq('id', tripId)
+  const { error } = await sb().from('trips').update({ trip_notes: notes }).eq('id', tripId)
+  if (error) throw error
 }
 
 // ─── Day meta ────────────────────────────────────────────────────────────────
@@ -307,7 +319,8 @@ export async function dbUpdateDayMeta(tripId: string, dayIndex: number, meta: Pa
   if (meta.lng    !== undefined) patch.lng         = meta.lng
   if (meta.desc   !== undefined) patch.description = meta.desc
 
-  await sb().from('day_meta').update(patch).eq('trip_id', tripId).eq('day_index', dayIndex)
+  const { error } = await sb().from('day_meta').update(patch).eq('trip_id', tripId).eq('day_index', dayIndex)
+  if (error) throw error
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

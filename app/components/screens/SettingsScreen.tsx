@@ -658,37 +658,41 @@ export default function SettingsScreen() {
       </div>
 
       {/* ── In-app confirm sheet ── */}
+      {/* Two separate AnimatePresence blocks — Framer Motion can't track Fragment exit animations */}
       <AnimatePresence>
         {confirmState && (
-          <>
-            <motion.div
-              key="confirm-backdrop"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              onClick={() => setConfirmState(null)}
-              style={{
-                position: 'fixed', inset: 0, zIndex: 80,
-                background: 'rgba(0,0,0,0.35)',
-                backdropFilter: 'blur(2px)',
-              }}
-            />
-            <motion.div
-              key="confirm-sheet"
-              initial={{ opacity: 0, y: 32 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 32 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 36 }}
-              style={{
-                position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81,
-                padding: '20px 20px 32px',
-                background: 'var(--glass)',
-                backdropFilter: 'blur(20px)',
-                borderTop: '1px solid var(--border)',
-                borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
-              }}
-            >
+          <motion.div
+            key="confirm-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            onClick={() => setConfirmState(null)}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 80,
+              background: 'rgba(0,0,0,0.35)',
+              backdropFilter: 'blur(2px)',
+            }}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {confirmState && (
+          <motion.div
+            key="confirm-sheet"
+            initial={{ opacity: 0, y: 32 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 32 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 36 }}
+            style={{
+              position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81,
+              padding: '20px 20px 32px',
+              background: 'var(--glass)',
+              backdropFilter: 'blur(20px)',
+              borderTop: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0',
+            }}
+          >
               <p style={{
                 fontSize: 15, fontWeight: 600, color: 'var(--text)',
                 textAlign: 'center', marginBottom: 20, lineHeight: 1.5,
@@ -713,7 +717,6 @@ export default function SettingsScreen() {
                 </GlassBtn>
               </div>
             </motion.div>
-          </>
         )}
       </AnimatePresence>
     </div>
