@@ -30,7 +30,7 @@ const EMERGENCY_TYPE_META: Record<EmergencyContact['type'], { icon: string; labe
 
 export default function SettingsScreen() {
   const {
-    trip, nickname, setNickname, logout,
+    trip, nickname, setNickname, logout, switchTrip, leaveTrip,
     darkMode, toggleDarkMode,
     highContrast, toggleHighContrast,
     reducedMotion, toggleReducedMotion,
@@ -590,25 +590,46 @@ export default function SettingsScreen() {
               </Glass>
             </motion.div>
 
-            {/* ── Leave trip ── */}
-            <motion.div variants={sectionItem}>
+            {/* ── Trip controls ── */}
+            <motion.div variants={sectionItem} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {/* Switch Trip — stays signed in, just picks another trip */}
+              <GlassBtn
+                size="lg"
+                style={{ width: '100%' }}
+                onClick={switchTrip}
+              >
+                {locale === 'he' ? '🔄 החלף טיול' : '🔄 Switch Trip'}
+              </GlassBtn>
+
+              {/* Leave Trip — permanently removes you from the participant list */}
               <GlassBtn
                 variant="danger"
                 size="lg"
                 style={{ width: '100%' }}
-                onClick={() => {
+                onClick={async () => {
                   const isOwner = trip.participants[0]?.name === nickname;
                   const warning = isOwner
                     ? (locale === 'he'
-                        ? 'אתה בעל הטיול. עזיבתך תסיר אותך מהטיול — הנתונים יישארו לשאר המשתתפים. להמשיך?'
-                        : 'You are the trip owner. Leaving will remove you from the trip — data stays for other participants. Continue?')
+                        ? 'אתה בעל הטיול. עזיבתך תסיר אותך מרשימת המשתתפים. להמשיך?'
+                        : 'You are the trip owner. Leaving will remove you from the participants list. Continue?')
                     : (locale === 'he'
-                        ? 'האם אתה בטוח שברצונך לעזוב את הטיול?'
-                        : 'Are you sure you want to leave this trip?');
-                  if (window.confirm(warning)) logout();
+                        ? 'האם אתה בטוח? פעולה זו תסיר אותך מהטיול.'
+                        : 'Are you sure? This will remove you from the trip.');
+                  if (window.confirm(warning)) await leaveTrip();
                 }}
               >
                 {t('leaveTrip')}
+              </GlassBtn>
+
+              {/* Sign Out — terminates the session, trip membership is preserved */}
+              <GlassBtn
+                size="lg"
+                style={{ width: '100%', opacity: 0.75 }}
+                onClick={() => {
+                  if (window.confirm(locale === 'he' ? 'להתנתק?' : 'Sign out?')) logout();
+                }}
+              >
+                {locale === 'he' ? '↩ התנתק' : '↩ Sign Out'}
               </GlassBtn>
             </motion.div>
 

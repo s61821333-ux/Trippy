@@ -505,9 +505,9 @@ function TripStep() {
 // ─── Root ─────────────────────────────────────────────────────────────────────
 
 export default function LoginScreen() {
-  const { authUser, checkAuth } = useAppStore();
+  const { authUser } = useAppStore();
 
-  useEffect(() => { checkAuth(); }, []);
+  // checkAuth is already called by AppShell on mount — no second call needed here.
 
   return (
     <AnimatePresence mode="wait">

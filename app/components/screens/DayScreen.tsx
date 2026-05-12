@@ -542,7 +542,10 @@ export default function DayScreen() {
 
   useEffect(() => {
     if (!lastSyncError) return;
-    show(locale === 'he' ? '⚠️ שגיאת שמירה — בדוק חיבור לאינטרנט' : '⚠️ Save failed — check your connection');
+    const msg = lastSyncError === 'not_authed'
+      ? (locale === 'he' ? '⚠️ לא מחובר — ההוספה נשמרה מקומית בלבד' : '⚠️ Not signed in — event saved locally only')
+      : (locale === 'he' ? '⚠️ שגיאת שמירה — נסה שוב' : '⚠️ Save failed — will retry on next load');
+    show(msg);
     useAppStore.setState({ lastSyncError: null });
   }, [lastSyncError]);
   const stripRef = useRef<HTMLDivElement>(null);
