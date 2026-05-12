@@ -169,7 +169,10 @@ export const useAppStore = create<AppState>()(
         set({ authUser: user })
         if (user) {
           const { tripDbId, trip: localTrip } = get()
-          if (tripDbId) {
+          const isValidUuid = (v: string | null) => !!v && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
+          if (!isValidUuid(tripDbId)) {
+            if (tripDbId) set({ tripDbId: null, trip: null, supplies: [] })
+          } else if (tripDbId) {
             try {
               const data = await dbLoadTripById(tripDbId)
               if (data) {
@@ -182,6 +185,7 @@ export const useAppStore = create<AppState>()(
         }
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
+
       loadDemoTrip: () => {
         set({
           showTour: !localStorage.getItem('trippy-tour-done'),
