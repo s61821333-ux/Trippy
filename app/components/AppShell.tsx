@@ -112,6 +112,15 @@ function Shell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Block pinch-zoom on iOS Safari (ignores user-scalable=no since iOS 10)
+  useEffect(() => {
+    const handler = (e: TouchEvent) => {
+      if (e.touches.length > 1) e.preventDefault();
+    };
+    document.addEventListener('touchmove', handler, { passive: false });
+    return () => document.removeEventListener('touchmove', handler);
+  }, []);
+
   // Also react live to OS theme changes
   useEffect(() => {
     if (typeof window === 'undefined') return;

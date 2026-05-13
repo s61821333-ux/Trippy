@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Sheet from './ui/Sheet';
 import Glass from './ui/Glass';
@@ -34,6 +34,8 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
   const [error, setError]             = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<AiSuggestion[]>([]);
   const [dismissed, setDismissed]     = useState<string[]>([]);
+  const [elapsed, setElapsed]         = useState(0);
+  const elapsedRef                    = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchSuggestions = (exclude: string[] = []) => {
     if (!trip) return;
@@ -55,6 +57,8 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
   };
 
   useEffect(() => {
+    setElapsed(0);
+    elapsedRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
     fetchSuggestions()
       ?.then(data => {
         setSuggestions(data);
@@ -65,7 +69,11 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
         const msg = err instanceof Error ? err.message : 'Unknown error';
         setError(msg);
         setLoading(false);
+      })
+      .finally(() => {
+        if (elapsedRef.current) clearInterval(elapsedRef.current);
       });
+    return () => { if (elapsedRef.current) clearInterval(elapsedRef.current); };
   }, [dayNumber, trip]);
 
   const handleLoadMore = () => {
@@ -95,13 +103,43 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
             <div key={i} className="shimmer" style={{ height: 82, borderRadius: 16 }} />
           ))}
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 8, marginTop: 8, color: 'var(--ink-3)', fontSize: 12,
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 14,
+            padding: '14px 16px',
+            marginTop: 4,
+            display: 'flex', flexDirection: 'column', gap: 8,
           }}>
-            <span className="an-pulse">
-              <Icon name="sparkle" size={14} style={{ color: 'var(--accent)' }} />
-            </span>
-            {t('scanningNearby')}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <motion.span
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                style={{ display: 'inline-block', fontSize: 18, lineHeight: 1 }}
+              >
+                ✨
+              </motion.span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
+                {locale === 'he' ? 'מחפש פעילויות מומלצות...' : 'Finding great activities for you…'}
+              </span>
+              <span style={{
+                marginLeft: 'auto', fontSize: 11, fontWeight: 700,
+                color: elapsed >= 8 ? 'var(--warning)' : 'var(--text-3)',
+              }}>
+                {elapsed}s
+              </span>
+            </div>
+            <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
+              <motion.div
+                animate={{ width: `${Math.min(95, elapsed * 10)}%` }}
+                transition={{ duration: 0.9, ease: 'easeOut' }}
+                style={{ height: '100%', background: 'linear-gradient(90deg, var(--brand), #5B4FCF)', borderRadius: 2 }}
+              />
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>
+              {locale === 'he'
+                ? '⚡ מופעל על ידי Claude Haiku · בדרך כלל 3–8 שניות'
+                : '⚡ Powered by Claude Haiku · Usually ready in 3–8 sec'}
+            </p>
           </div>
         </div>
       ) : error ? (
