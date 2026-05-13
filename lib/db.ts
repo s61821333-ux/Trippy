@@ -47,33 +47,20 @@ export async function dbCreateTrip(
 ): Promise<string> {
   const supabase = sb()
 
-  const baseRow = { name, days, start_date: startDate, theme: theme || null }
-
-  let result = await supabase
-    .from('trips')
-    .insert((countries?.length ? { ...baseRow, countries } : baseRow) as any)
-    .select('id')
-    .single()
-
-  // Fallback: if insert failed (likely missing countries column), retry without it
-  if (result.error && countries?.length) {
-    result = await supabase.from('trips').insert(baseRow).select('id').single()
-  }
-
-  const { data: trip, error } = result
-  if (error || !trip) throw error
-
-  const initials = nickname.slice(0, 2).toUpperCase()
-  await supabase.from('trip_participants').insert({
-    trip_id: trip.id,
-    user_id: userId,
-    initials,
-    color: 'oklch(62% 0.15 195)',
+  const { data: tripId, error } = await supabase.rpc('create_trip', {
+    p_name: name,
+    p_days: days,
+    p_start_date: startDate,
+    p_theme: theme || null,
+    p_countries: countries?.length ? countries : null,
+    p_nickname: nickname,
   })
+
+  if (error || !tripId) throw error
 
   await supabase.from('day_meta').insert(
     dayMetas.map((m, i) => ({
-      trip_id: trip.id,
+      trip_id: tripId,
       day_index: i,
       region: m.region,
       emoji: m.emoji,
@@ -83,7 +70,7 @@ export async function dbCreateTrip(
     }))
   )
 
-  return trip.id
+  return tripId
 }
 
 
