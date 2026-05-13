@@ -154,9 +154,7 @@ function TripStep() {
       if (msg.includes('not authenticated')) {
         show(locale === 'he' ? 'לא מחובר — נסה להתנתק ולהתחבר מחדש' : 'Not signed in — please sign out and sign in again');
       } else if (msg.includes('row-level security') || msg.includes('violates') || msg.includes('rls')) {
-        show(locale === 'he'
-          ? 'שגיאת הרשאות Supabase — יש להפעיל RLS policy בלוח הניהול'
-          : 'Supabase RLS error — run the INSERT policy in your Supabase dashboard');
+        show(`RLS: ${err?.message ?? ''} | code: ${err?.code ?? ''} | details: ${err?.details ?? ''}`);
       } else {
         show(`${t('createTripFailed')}: ${err?.message ?? ''}`);
       }
