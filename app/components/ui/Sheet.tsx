@@ -71,6 +71,7 @@ export default function Sheet({ children, onClose, title, subtitle }: SheetProps
           style={{
             width: '100%',
             background: 'var(--surface)',
+            color: 'var(--text)',
             borderTop: '1px solid var(--border)',
             borderRadius: '24px 24px 0 0',
             padding: '8px 20px',

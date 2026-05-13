@@ -153,7 +153,7 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 4 }}>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ink)' }}>{s.name}</span>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{s.name}</span>
                           <Chip v={s.open ? 'open' : 'closed'} style={{ fontSize: 10 }}>
                             {s.open ? `● ${t('open')}` : `● ${t('closed')}`}
                           </Chip>

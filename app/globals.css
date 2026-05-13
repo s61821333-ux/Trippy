@@ -192,6 +192,15 @@ h1, h2, h3, h4, .font-display {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
 
+/* ─── Prevent iOS Safari auto-zoom on input focus ─────────────── */
+/* iOS zooms in when an input has font-size < 16px. This rule ensures
+   all inputs on WebKit mobile browsers are at least 16px visually. */
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
 /* ─── Card (replaces .glass) ──────────────────────────────────── */
 .glass {
   background: var(--surface);

@@ -22,9 +22,12 @@ function SyncErrorWatcher() {
   const { locale } = useI18n();
   useEffect(() => {
     if (!lastSyncError) return;
+    const isRLS = lastSyncError.includes('row-level security') || lastSyncError.includes('violates') || lastSyncError.includes('rls');
     const msg = lastSyncError === 'not_authed'
       ? (locale === 'he' ? '⚠️ לא מחובר — שינויים נשמרו מקומית בלבד' : '⚠️ Not signed in — changes saved locally only')
-      : `⚠️ DB: ${lastSyncError}`;
+      : isRLS
+      ? (locale === 'he' ? '⚠️ שגיאת הרשאות DB — הפעל RLS Policy בלוח Supabase' : '⚠️ DB permissions — run RLS policies in Supabase dashboard')
+      : `⚠️ Sync error — changes saved locally`;
     show(msg);
     useAppStore.setState({ lastSyncError: null });
   }, [lastSyncError]);

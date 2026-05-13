@@ -141,13 +141,15 @@ export default function DashboardScreen() {
                   </motion.div>
                 ))}
               </div>
-              <GlassBtn
-                size="sm"
-                onClick={() => setShowShare(true)}
-                style={{ width: 34, height: 34, padding: 0, borderRadius: 'var(--radius-sm)', minWidth: 0 }}
-              >
-                <Icon name="share" size={14} />
-              </GlassBtn>
+              <span data-tour="share-btn" style={{ display: 'inline-flex' }}>
+                <GlassBtn
+                  size="sm"
+                  onClick={() => setShowShare(true)}
+                  style={{ width: 34, height: 34, padding: 0, borderRadius: 'var(--radius-sm)', minWidth: 0 }}
+                >
+                  <Icon name="share" size={14} />
+                </GlassBtn>
+              </span>
             </div>
           </motion.div>
 
@@ -521,6 +523,7 @@ export default function DashboardScreen() {
             <p className="eyebrow" style={{ marginBottom: 12 }}>{t('days')}</p>
 
             <motion.div
+              data-tour="day-cards"
               variants={stagger}
               initial="hidden"
               animate="visible"

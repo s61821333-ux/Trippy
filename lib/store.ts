@@ -8,7 +8,7 @@ import {
   signOut, signInWithGoogle as dbSignInWithGoogle, getCurrentUser, getSessionUserId,
   dbCreateTrip, dbLoadTripById, rowToTrip,
   dbGetInvitations, dbInviteToTrip, dbAcceptInvitation, dbRejectInvitation,
-  dbAddEvent, dbEditEvent, dbDeleteEvent, dbLeaveTrip,
+  dbAddEvent, dbEditEvent, dbDeleteEvent, dbLeaveTrip, dbUpdateEventVotes,
   dbAddExpense, dbDeleteExpense,
   dbAddSupply, dbToggleSupply, dbDeleteSupply,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
@@ -128,10 +128,11 @@ function mergeLocalIntoDbTrip(
           .catch(err => onSyncError(err?.message ?? 'save_failed'));
       }
     }
-    // Restore votes (no DB column — votes live in localStorage only)
+    // Merge votes: prefer DB votes when present, fall back to local votes
     mergedEvents[day] = (mergedEvents[day] ?? []).map((dbEv: TripEvent) => {
       const localEv = (localEvs as TripEvent[]).find(l => l.id === dbEv.id);
-      return localEv?.votes ? { ...dbEv, votes: localEv.votes } : dbEv;
+      const mergedVotes = { ...(localEv?.votes ?? {}), ...(dbEv.votes ?? {}) };
+      return Object.keys(mergedVotes).length > 0 ? { ...dbEv, votes: mergedVotes } : dbEv;
     });
   }
   return { ...dbTrip, events: mergedEvents };
@@ -402,16 +403,23 @@ export const useAppStore = create<AppState>()(
       },
 
       voteEvent: (dayNumber, eventId, nickname, vote) => {
-        const { trip } = get();
+        const { trip, tripDbId } = get();
         if (!trip) return;
+        let updatedVotes: Record<string, 'up' | 'down'> = {};
         const dayEvents = (trip.events[dayNumber] || []).map(e => {
           if (e.id !== eventId) return e;
           const votes = { ...(e.votes ?? {}) };
           if (votes[nickname] === vote) delete votes[nickname];
           else votes[nickname] = vote;
+          updatedVotes = votes;
           return { ...e, votes };
         });
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
+        if (tripDbId) {
+          dbUpdateEventVotes(eventId, updatedVotes).catch(err => {
+            set({ lastSyncError: err?.message ?? 'vote_sync_failed' });
+          });
+        }
       },
 
       toggleSupply: (id) => {

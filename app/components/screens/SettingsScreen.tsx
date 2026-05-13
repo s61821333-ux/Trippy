@@ -243,18 +243,19 @@ export default function SettingsScreen() {
             <motion.div variants={sectionItem}>
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('myProfile')} />
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center', overflow: 'hidden' }}>
                   <input
                     value={nickEdit}
                     onChange={e => setNickEdit(e.target.value)}
                     dir={isRTL ? 'rtl' : 'ltr'}
                     className="input-premium"
                     style={{
-                      flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: 14,
+                      flex: 1, minWidth: 0, padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: 14,
                       background: 'var(--bg)',
                       border: '1px solid var(--border)',
                       outline: 'none', color: 'var(--text)',
                       fontFamily: 'var(--font-sans)',
+                      boxSizing: 'border-box',
                     }}
                     placeholder={t('yourNickname')}
                   />
@@ -727,6 +728,7 @@ export default function SettingsScreen() {
 
 const inputStyle: React.CSSProperties = {
   flex: 1,
+  minWidth: 0,
   padding: '8px 12px',
   borderRadius: 'var(--radius-md)',
   fontSize: 13,
@@ -736,6 +738,8 @@ const inputStyle: React.CSSProperties = {
   outline: 'none',
   color: 'var(--text)',
   fontFamily: 'var(--font-sans)',
+  boxSizing: 'border-box',
+  maxWidth: '100%',
 };
 
 function EditRow({ label, children, isRTL }: { label: string; children: React.ReactNode; isRTL?: boolean }) {
@@ -745,11 +749,12 @@ function EditRow({ label, children, isRTL }: { label: string; children: React.Re
       justifyContent: 'space-between', gap: 12,
       padding: '4px 0',
       borderBottom: '1px solid var(--border)',
+      overflow: 'hidden',
     }}>
       <span style={{ fontSize: 13, color: 'var(--text-2)', flexShrink: 0, fontWeight: 500, minWidth: 60 }}>
         {label}
       </span>
-      <div style={{ flex: 1, display: 'flex', justifyContent: isRTL ? 'flex-start' : 'flex-end' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', justifyContent: isRTL ? 'flex-start' : 'flex-end', overflow: 'hidden' }}>
         {children}
       </div>
     </div>

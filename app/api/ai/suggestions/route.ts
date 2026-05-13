@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     : '';
 
   const languageInstruction = locale === 'he'
-    ? '\nRespond in Hebrew. All "name" and "description" fields must be written in Hebrew.'
+    ? '\nחשוב: השב בעברית בלבד. כל שדות "name" ו-"description" חייבים להיות כתובים בעברית.'
     : '';
 
   const prompt = `You are a desert trip planning assistant for "${tripName}".
@@ -76,10 +76,12 @@ Respond with ONLY the JSON array, no other text.`;
   let message: Anthropic.Message;
   try {
     message = await client.messages.create({
-      model: 'claude-sonnet-4-6',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       system:
-        'You are a desert trip planning assistant. Always respond with valid JSON only — no markdown, no explanation.',
+        locale === 'he'
+          ? 'אתה עוזר תכנון טיולים במדבר. תמיד השב עם JSON תקין בלבד — ללא markdown, ללא הסברים. כל שדות הטקסט חייבים להיות בעברית.'
+          : 'You are a desert trip planning assistant. Always respond with valid JSON only — no markdown, no explanation.',
       messages: [{ role: 'user', content: prompt }],
     });
   } catch (err) {

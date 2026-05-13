@@ -677,7 +677,15 @@ export default function DayScreen() {
   }
 
   const openAdd = (prefillTime?: string) => {
-    setFTime(prefillTime ?? '09:00');
+    // Default start time: after the last event, or 09:00 for first event
+    let defaultStart = '09:00';
+    if (prefillTime) {
+      defaultStart = prefillTime;
+    } else if (evs.length > 0) {
+      const last = evs[evs.length - 1];
+      defaultStart = toTime(toMins(last.time) + last.duration);
+    }
+    setFTime(defaultStart);
     setFDur('60'); setFName(''); setFCat('attraction'); setFLoc(''); setFLat(undefined); setFLng(undefined); setFNotes(''); setFCost(''); setFTags('');
     setEditTarget(null);
     setManualCat(false);
@@ -1223,19 +1231,30 @@ export default function DayScreen() {
                       {fmtDuration(d)}
                     </motion.button>
                   ))}
-                  <input
-                    type="number"
-                    placeholder="min"
-                    value={![30, 60, 90, 120].includes(parseInt(fDur)) ? fDur : ''}
-                    onChange={e => setFDur(e.target.value)}
-                    style={{
-                      width: 70, padding: '8px 10px', borderRadius: 10,
-                      fontSize: 13, fontWeight: 600,
-                      background: 'var(--bg)', color: 'var(--text)',
-                      outline: 'none', border: '1px solid var(--border)',
-                      textAlign: 'center',
-                    }}
-                  />
+                  {/* End-time picker: lets user pick when the event ends instead of typing minutes */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.05em' }}>
+                      {locale === 'he' ? 'סיום' : 'ENDS AT'}
+                    </span>
+                    <input
+                      type="time"
+                      value={toTime(toMins(fTime) + (parseInt(fDur, 10) || 60))}
+                      onChange={e => {
+                        const endMins = toMins(e.target.value);
+                        const startMins = toMins(fTime);
+                        const dur = Math.max(5, endMins > startMins ? endMins - startMins : 24 * 60 - startMins + endMins);
+                        setFDur(String(dur));
+                      }}
+                      style={{
+                        padding: '8px 10px', borderRadius: 10,
+                        fontSize: 13, fontWeight: 700,
+                        background: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'var(--brand)' : 'var(--bg)',
+                        color: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'white' : 'var(--text)',
+                        border: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'none' : '1px solid var(--border)',
+                        outline: 'none', cursor: 'pointer',
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1474,6 +1493,7 @@ export default function DayScreen() {
       {/* ── FABs (mobile) ────────────────────────────────────── */}
       {/* AI suggest FAB — wired to SuggestionsSheet, ready for future AI connection */}
       <motion.button
+        data-tour="ai-fab"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 22, delay: 0.28 }}
@@ -1497,6 +1517,7 @@ export default function DayScreen() {
 
       {/* Add event FAB */}
       <motion.button
+        data-tour="add-event-fab"
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 400, damping: 22, delay: 0.2 }}

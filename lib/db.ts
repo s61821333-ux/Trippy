@@ -162,7 +162,7 @@ export async function dbLoadTripById(tripId: string) {
     .select(`
       id, name, days, start_date, theme, trip_notes, countries,
       day_meta ( day_index, region, emoji, lat, lng, description ),
-      events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags ),
+      events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes ),
       expenses ( id, description, amount, split_count ),
       emergency_contacts ( id, name, phone, type ),
       supplies ( id, name, category, checked, critical ),
@@ -208,8 +208,14 @@ export async function dbEditEvent(eventId: string, updates: Partial<TripEvent>) 
   if (updates.notes     !== undefined) patch.notes     = updates.notes
   if (updates.cost      !== undefined) patch.cost      = updates.cost
   if (updates.tags      !== undefined) patch.tags      = updates.tags
+  if (updates.votes     !== undefined) patch.votes     = updates.votes
 
   const { error } = await sb().from('events').update(patch).eq('id', eventId)
+  if (error) throw error
+}
+
+export async function dbUpdateEventVotes(eventId: string, votes: Record<string, 'up' | 'down'>) {
+  const { error } = await sb().from('events').update({ votes }).eq('id', eventId)
   if (error) throw error
 }
 
@@ -361,6 +367,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
         addedBy:  'Unknown',
         cost:     e.cost     ?? undefined,
         tags:     e.tags     ?? undefined,
+        votes:    (e.votes && typeof e.votes === 'object' ? e.votes : undefined) as Record<string, 'up' | 'down'> | undefined,
       }))
   }
 

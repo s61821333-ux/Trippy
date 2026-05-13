@@ -78,6 +78,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
               return (
                 <motion.button
                   key={tab.id}
+                  data-tour={`nav-${tab.id}`}
                   onClick={() => onChange(tab.id)}
                   whileTap={{ scale: 0.95 }}
                   style={{
@@ -131,6 +132,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
             return (
               <motion.button
                 key={tab.id}
+                data-tour={`nav-${tab.id}`}
                 onClick={() => onChange(tab.id)}
                 whileTap={{ scale: 0.88 }}
                 style={{
