@@ -11,11 +11,10 @@ interface NavBarProps {
   onChange: (s: Screen) => void;
 }
 
-const TABS: { id: Screen; icon: 'grid' | 'compass' | 'checklist' | 'lock' | 'settings'; labelKey: 'navCamp' | 'navExplore' | 'navPack' | 'navNotes' | 'navSetup' }[] = [
+const TABS: { id: Screen; icon: 'grid' | 'compass' | 'checklist' | 'settings'; labelKey: 'navCamp' | 'navExplore' | 'navPack' | 'navSetup' }[] = [
   { id: 'dashboard', icon: 'grid', labelKey: 'navCamp' },
   { id: 'day', icon: 'compass', labelKey: 'navExplore' },
   { id: 'supplies', icon: 'checklist', labelKey: 'navPack' },
-  { id: 'notes', icon: 'lock', labelKey: 'navNotes' },
   { id: 'settings', icon: 'settings', labelKey: 'navSetup' },
 ];
 

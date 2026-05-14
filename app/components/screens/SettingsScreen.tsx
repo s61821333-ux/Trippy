@@ -9,7 +9,6 @@ import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { fmtDate } from '@/lib/utils';
 import { useI18n, Locale } from '@/lib/i18n';
-import { EmergencyContact } from '@/lib/types';
 
 const sectionVariants = {
   hidden: {},
@@ -19,13 +18,6 @@ const sectionItem = {
   hidden:  { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0,
     transition: { type: 'spring' as const, stiffness: 340, damping: 32 } },
-};
-
-const EMERGENCY_TYPE_META: Record<EmergencyContact['type'], { icon: string; label: string; color: string }> = {
-  medical:   { icon: '🏥', label: 'Medical',   color: 'var(--danger)'  },
-  embassy:   { icon: '🏛️', label: 'Embassy',   color: 'var(--brand)'   },
-  personal:  { icon: '👤', label: 'Personal',  color: 'var(--text-2)'  },
-  insurance: { icon: '🛡️', label: 'Insurance', color: 'var(--warning)' },
 };
 
 type ConfirmState = { message: string; onConfirm: () => void; variant?: 'danger' } | null;
@@ -41,7 +33,6 @@ export default function SettingsScreen() {
     dayEndHour, setDayEndHour,
     addTripNote, deleteTripNote,
     addExpense, deleteExpense,
-    addEmergencyContact, deleteEmergencyContact,
     updateTripInfo,
   } = useAppStore();
   const { show } = useToast();
@@ -58,11 +49,6 @@ export default function SettingsScreen() {
   const [tripDaysEdit, setTripDaysEdit]   = useState(String(trip?.days ?? ''));
   const [tripDateEdit, setTripDateEdit]   = useState(trip?.startDate ?? '');
   const [tripInfoDirty, setTripInfoDirty] = useState(false);
-
-  // Emergency contact form state
-  const [ecName, setEcName]   = useState('');
-  const [ecPhone, setEcPhone] = useState('');
-  const [ecType, setEcType]   = useState<EmergencyContact['type']>('personal');
 
   if (!trip) return null;
 
@@ -97,13 +83,6 @@ export default function SettingsScreen() {
   };
 
   const totalEvents = Object.values(trip.events).reduce((acc, evs) => acc + evs.length, 0);
-
-  const handleAddEmergencyContact = () => {
-    if (!ecName.trim() || !ecPhone.trim()) { show(t('enterNamePhone')); return; }
-    addEmergencyContact({ name: ecName.trim(), phone: ecPhone.trim(), type: ecType });
-    setEcName(''); setEcPhone('');
-    show(t('emergencySaved'));
-  };
 
   return (
     <div className="flex flex-col h-full w-full mx-auto">
@@ -381,131 +360,6 @@ export default function SettingsScreen() {
                     </motion.button>
                   ))}
                 </div>
-              </Glass>
-            </motion.div>
-
-            {/* ── Emergency Hub ── */}
-            <motion.div variants={sectionItem} className="md:col-span-2">
-              <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
-                <SectionLabel label={`🆘 ${t('emergencyHubLabel')}`} />
-                <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, marginTop: -8 }}>
-                  {t('emergencyHubSub')}
-                </p>
-
-                {/* Type selector */}
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-                  {(Object.keys(EMERGENCY_TYPE_META) as EmergencyContact['type'][]).map(type => {
-                    const m = EMERGENCY_TYPE_META[type];
-                    return (
-                      <motion.button
-                        key={type}
-                        whileTap={{ scale: 0.92 }}
-                        onClick={() => setEcType(type)}
-                        style={{
-                          padding: '5px 12px', borderRadius: 'var(--radius-sm)',
-                          fontSize: 11, fontWeight: 600,
-                          background: ecType === type ? 'var(--brand-light)' : 'var(--bg)',
-                          color: ecType === type ? 'var(--brand)' : 'var(--text-2)',
-                          border: ecType === type ? '1.5px solid var(--brand)' : '1px solid var(--border)',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        {m.icon} {t(type as any)}
-                      </motion.button>
-                    );
-                  })}
-                </div>
-
-                {/* Add contact row — stacked for mobile friendliness */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
-                  <input
-                    value={ecName}
-                    onChange={e => setEcName(e.target.value)}
-                    placeholder={t('emergencyNamePlaceholder')}
-                    className="input-premium"
-                    style={{
-                      width: '100%', padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                      fontSize: 13, background: 'var(--bg)',
-                      border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
-                      boxSizing: 'border-box',
-                    }}
-                  />
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <input
-                      value={ecPhone}
-                      onChange={e => setEcPhone(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleAddEmergencyContact()}
-                      placeholder={t('emergencyPhonePlaceholder')}
-                      className="input-premium"
-                      style={{
-                        flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                        fontSize: 13, background: 'var(--bg)',
-                        border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
-                        minWidth: 0,
-                      }}
-                    />
-                    <GlassBtn size="sm" variant="accent" onClick={handleAddEmergencyContact} style={{ flexShrink: 0 }}>
-                      <Icon name="plus" size={13} />
-                    </GlassBtn>
-                  </div>
-                </div>
-
-                {/* Contact list */}
-                {(!trip.emergencyContacts || trip.emergencyContacts.length === 0) ? (
-                  <p style={{ fontSize: 12, color: 'var(--text-3)', fontStyle: 'italic' }}>
-                    {t('noEmergencyContacts')}
-                  </p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <AnimatePresence>
-                      {trip.emergencyContacts.map(contact => {
-                        const m = EMERGENCY_TYPE_META[contact.type];
-                        return (
-                          <motion.div
-                            key={contact.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            style={{
-                              display: 'flex', alignItems: 'center', gap: 10,
-                              background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
-                              border: '1px solid var(--border)', padding: '10px 12px',
-                            }}
-                          >
-                            <span style={{ fontSize: 18, flexShrink: 0 }}>{m.icon}</span>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{contact.name}</p>
-                              <a
-                                href={`tel:${contact.phone}`}
-                                style={{ fontSize: 12, color: m.color, fontWeight: 600, textDecoration: 'none' }}
-                              >
-                                {contact.phone}
-                              </a>
-                            </div>
-                            <span style={{
-                              fontSize: 10, fontWeight: 700, color: m.color,
-                              background: 'var(--bg-alt)', borderRadius: 100,
-                              padding: '2px 8px', border: '1px solid var(--border)',
-                              flexShrink: 0,
-                            }}>
-                              {t(contact.type as any)}
-                            </span>
-                            <motion.button
-                              whileTap={{ scale: 0.88 }}
-                              onClick={() => { deleteEmergencyContact(contact.id); show(t('contactRemoved')); }}
-                              style={{
-                                background: 'none', border: 'none', cursor: 'pointer',
-                                color: 'var(--text-3)', padding: '2px 4px', flexShrink: 0,
-                              }}
-                            >
-                              <Icon name="trash" size={13} />
-                            </motion.button>
-                          </motion.div>
-                        );
-                      })}
-                    </AnimatePresence>
-                  </div>
-                )}
               </Glass>
             </motion.div>
 

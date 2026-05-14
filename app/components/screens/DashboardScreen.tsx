@@ -323,7 +323,7 @@ export default function DashboardScreen() {
                           placeholder={t('whatFor')}
                           className="input-premium"
                           style={{
-                            flex: 3, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                            flex: 3, minWidth: 0, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
                             fontSize: 12, background: 'var(--bg)',
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}
@@ -336,7 +336,7 @@ export default function DashboardScreen() {
                           min="0"
                           className="input-premium"
                           style={{
-                            flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+                            flex: 1, minWidth: 0, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
                             fontSize: 12, background: 'var(--bg)',
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}
@@ -349,7 +349,7 @@ export default function DashboardScreen() {
                           placeholder={t('paidByDefault').replace('{name}', nickname)}
                           className="input-premium"
                           style={{
-                            flex: 3, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
+                            flex: 3, minWidth: 0, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
                             fontSize: 12, background: 'var(--bg)',
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}
@@ -358,7 +358,7 @@ export default function DashboardScreen() {
                           value={expSplit}
                           onChange={e => setExpSplit(e.target.value)}
                           style={{
-                            flex: 1, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
+                            flex: 1, minWidth: 0, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
                             fontSize: 12, background: 'var(--bg)',
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}

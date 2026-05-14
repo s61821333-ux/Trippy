@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { I18nProvider, useI18n } from '@/lib/i18n';
+import { createClient } from '@/utils/supabase/client';
 import NavBar from './NavBar';
 import LoginScreen from './screens/LoginScreen';
 import DashboardScreen from './screens/DashboardScreen';
@@ -61,7 +62,7 @@ function Shell() {
     if (trip && screen === 'login') {
       setScreen('dashboard');
     }
-    checkAuth();
+
     // Stash any pending join trip ID from invite link redirect
     const params = new URLSearchParams(window.location.search);
     const joinId = params.get('join');
@@ -69,6 +70,26 @@ function Shell() {
       window.history.replaceState({}, '', '/');
       sessionStorage.setItem('trippy-pending-join', joinId);
     }
+
+    // onAuthStateChange fires immediately with the current session (INITIAL_SESSION event),
+    // so this replaces the manual checkAuth() call and also handles token refresh.
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
+        useAppStore.setState({ authUser: { id: session.user.id, username }, userId: session.user.id });
+        await checkAuth();
+        // Navigate to dashboard once a trip is loaded
+        const { trip: loadedTrip, screen: currentScreen } = useAppStore.getState();
+        if (loadedTrip && currentScreen === 'login') {
+          setScreen('dashboard');
+        }
+      } else if (event === 'SIGNED_OUT') {
+        useAppStore.setState({ authUser: null, userId: null });
+      }
+    });
+
+    return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
