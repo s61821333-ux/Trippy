@@ -84,12 +84,17 @@ export async function POST(request: NextRequest) {
         ? nickname.slice(0, 2).toUpperCase()
         : (session.user.user_metadata?.full_name ?? session.user.email ?? 'U').slice(0, 2).toUpperCase()
 
-      await admin.from('trip_participants').insert({
+      const { error: participantErr } = await admin.from('trip_participants').upsert({
         trip_id: trip.id,
         user_id: session.user.id,
         initials,
         color: 'oklch(62% 0.15 195)',
       })
+      if (participantErr) {
+        // Roll back the trip if participant insert fails — otherwise the trip exists but is inaccessible
+        await admin.from('trips').delete().eq('id', trip.id)
+        return NextResponse.json({ error: 'Failed to add participant' }, { status: 500 })
+      }
 
       if (Array.isArray(dayMetas) && dayMetas.length > 0) {
         await admin.from('day_meta').insert(

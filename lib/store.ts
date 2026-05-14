@@ -183,7 +183,7 @@ export const useAppStore = create<AppState>()(
             if (data) {
               const { trip: dbTrip, supplies } = rowToTrip(data)
               const trip = mergeLocalIntoDbTrip(dbTrip, localTrip, tripDbId, user.id, msg => set({ lastSyncError: msg }))
-              set({ trip, supplies, userId: user.id })
+              set({ trip, supplies, userId: user.id, screen: 'dashboard' })
             }
           } catch (err: any) { set({ lastSyncError: err?.message ?? 'load_failed' }) }
         }
