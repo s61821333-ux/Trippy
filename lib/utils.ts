@@ -61,10 +61,10 @@ export const toMins = (t: string): number => {
 export const toTime = (m: number): string =>
   `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
-export const fmtDate = (base: string, offset: number): string => {
+export const fmtDate = (base: string, offset: number, locale = 'en-US'): string => {
   const d = new Date(base);
   d.setDate(d.getDate() + offset);
-  return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  return d.toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' });
 };
 
 // dayEndMins: default 23*60; pass 27*60 for nightlife (3 AM next day)

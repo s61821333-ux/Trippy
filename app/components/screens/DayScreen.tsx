@@ -762,6 +762,7 @@ export default function DayScreen() {
             time: victim.time, duration: victim.duration, name: victim.name,
             category: victim.category, location: victim.location,
             lat: victim.lat, lng: victim.lng, notes: victim.notes,
+            cost: victim.cost, tags: victim.tags,
           });
         },
       },
@@ -920,7 +921,7 @@ export default function DayScreen() {
           <span style={{ fontSize: 16 }}>{meta?.emoji}</span>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)' }}>
             {meta?.region}
-            {trip.startDate ? ` · ${fmtDate(trip.startDate, activeDay - 1)}` : ''}
+            {trip.startDate ? ` · ${fmtDate(trip.startDate, activeDay - 1, locale)}` : ''}
           </span>
           <span style={{ fontSize: 11, color: 'var(--text-3)', marginLeft: 2 }}>
             · {evs.length} {evs.length === 1 ? t('stopSingular') : t('stopPlural')}

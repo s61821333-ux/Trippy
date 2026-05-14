@@ -222,6 +222,25 @@ export async function dbDeleteEmergencyContact(contactId: string) {
   if (error) throw error
 }
 
+export async function dbUpdateTripInfo(tripId: string, updates: { name?: string; days?: number; startDate?: string }) {
+  const patch: Record<string, unknown> = {}
+  if (updates.name      !== undefined) patch.name       = updates.name
+  if (updates.days      !== undefined) patch.days       = updates.days
+  if (updates.startDate !== undefined) patch.start_date = updates.startDate
+  const { error } = await sb().from('trips').update(patch).eq('id', tripId)
+  if (error) throw error
+}
+
+export async function dbUpdateTripTheme(tripId: string, theme: string) {
+  const { error } = await sb().from('trips').update({ theme }).eq('id', tripId)
+  if (error) throw error
+}
+
+export async function dbUpdateSupplyCritical(supplyId: string, critical: boolean) {
+  const { error } = await sb().from('supplies').update({ critical }).eq('id', supplyId)
+  if (error) throw error
+}
+
 export async function dbLeaveTrip(tripId: string, userId: string) {
   const { error } = await sb().from('trip_participants').delete().eq('trip_id', tripId).eq('user_id', userId)
   if (error) throw error
@@ -276,6 +295,11 @@ export async function dbGetTripEmailInvitations(tripId: string): Promise<{ email
 export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTripById>>>) {
   const days = data.days ?? 1
 
+  // Build user_id → initials map so addedBy / paidBy resolve to display names
+  const userToInitials = new Map<string, string>(
+    ((data.trip_participants as any[]) ?? []).map((p: any) => [p.user_id, p.initials ?? '??'])
+  )
+
   const dayMeta = Array.from({ length: days }, (_, i) => {
     const row = ((data.day_meta as any[]) ?? []).find((m: any) => m.day_index === i)
     return {
@@ -301,7 +325,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
         lat:      e.lat      ?? undefined,
         lng:      e.lng      ?? undefined,
         notes:    e.notes    ?? undefined,
-        addedBy:  'Unknown',
+        addedBy:  userToInitials.get(e.added_by) ?? 'Unknown',
         cost:     e.cost     ?? undefined,
         tags:     e.tags     ?? undefined,
         votes:    (e.votes && typeof e.votes === 'object' ? e.votes : undefined) as Record<string, 'up' | 'down'> | undefined,
@@ -312,7 +336,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     id:          e.id,
     description: e.description,
     amount:      e.amount,
-    paidBy:      'Unknown',
+    paidBy:      userToInitials.get(e.paid_by) ?? 'Unknown',
     splitCount:  e.split_count ?? 1,
   }))
 
@@ -345,7 +369,6 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     theme:             (data.theme ?? 'desert') as TripTheme,
     countries:         (() => {
       const raw = (data as any).countries
-      console.log('[trippy] countries raw:', raw, typeof raw)
       // Case 1: proper text[] column — PostgREST returns JS array directly
       if (Array.isArray(raw)) return (raw as string[]).filter(Boolean)
       if (typeof raw !== 'string' || !raw.trim()) return undefined

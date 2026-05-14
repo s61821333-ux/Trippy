@@ -10,9 +10,10 @@ import {
   dbGetInvitations, dbInviteToTrip, dbAcceptInvitation, dbRejectInvitation,
   dbAddEvent, dbEditEvent, dbDeleteEvent, dbLeaveTrip, dbUpdateEventVotes,
   dbAddExpense, dbDeleteExpense,
-  dbAddSupply, dbToggleSupply, dbDeleteSupply,
+  dbAddSupply, dbToggleSupply, dbDeleteSupply, dbUpdateSupplyCritical,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
   dbUpdateTripNotes, dbUpdateDayMeta,
+  dbUpdateTripInfo as dbSyncTripInfo, dbUpdateTripTheme,
   dbGetOrCreateInviteToken,
 } from './db';
 
@@ -344,13 +345,20 @@ export const useAppStore = create<AppState>()(
             const trimmedEvents: Record<number, TripEvent[]> = {};
             for (let d = 1; d <= days; d++) trimmedEvents[d] = trip.events[d] ?? [];
             trip.events = trimmedEvents;
-            if (s.activeDay > days) return { trip, activeDay: days };
           }
         }
-        return { trip };
+        const { tripDbId } = s;
+        if (tripDbId) dbSyncTripInfo(tripDbId, { name, days, startDate }).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        const newState: Partial<AppState> = { trip };
+        if (days !== undefined && s.activeDay > trip.days) newState.activeDay = trip.days;
+        return newState;
       }),
 
-      updateTheme: (theme) => set((s) => ({ trip: s.trip ? { ...s.trip, theme } : null })),
+      updateTheme: (theme) => set((s) => {
+        const { tripDbId } = s;
+        if (tripDbId) dbUpdateTripTheme(tripDbId, theme).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        return { trip: s.trip ? { ...s.trip, theme } : null };
+      }),
 
       updateDayMeta: (dayIndex, meta) => set((s) => {
         if (!s.trip) return {};
@@ -444,9 +452,12 @@ export const useAppStore = create<AppState>()(
         if (tripDbId) dbDeleteSupply(id).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
       },
 
-      toggleSupplyCritical: (id) => set(s => ({
-        supplies: s.supplies.map(i => i.id === id ? { ...i, critical: !i.critical } : i),
-      })),
+      toggleSupplyCritical: (id) => set(s => {
+        const supplies = s.supplies.map(i => i.id === id ? { ...i, critical: !i.critical } : i);
+        const item = supplies.find(i => i.id === id);
+        if (s.tripDbId && item) dbUpdateSupplyCritical(id, item.critical ?? false).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        return { supplies };
+      }),
 
       addTripNote: (note) => {
         const { tripDbId } = get();

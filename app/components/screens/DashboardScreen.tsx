@@ -35,12 +35,12 @@ const INSIGHT_COLORS: Record<string, { bg: string; border: string; text: string 
 
 export default function DashboardScreen() {
   const {
-    trip, nickname, tripDbId, setScreen, setActiveDay, logout, supplies,
+    trip, nickname, tripDbId, setScreen, setActiveDay, logout, leaveTrip, supplies,
     hideBudget, showCarbonBudget, dayEndHour,
     addExpense, deleteExpense, inviteToTrip, createInviteLink,
   } = useAppStore();
   const { show } = useToast();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [showShare, setShowShare]       = useState(false);
   const [inviteEmail, setInviteEmail]   = useState('');
   const [inviteSending, setInviteSending] = useState(false);
@@ -446,7 +446,7 @@ export default function DashboardScreen() {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 2 }}>
                   {t('nextEvent')} · {t('day')} {nextEventData.dayNum}
-                  {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1)}` : ''}
+                  {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1, locale)}` : ''}
                 </p>
                 <p style={{
                   fontSize: 15, fontWeight: 700, color: 'var(--text)',
@@ -599,7 +599,7 @@ export default function DashboardScreen() {
                           </span>
                           {trip.startDate && (
                             <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>
-                              {fmtDate(trip.startDate, i)}
+                              {fmtDate(trip.startDate, i, locale)}
                             </span>
                           )}
                         </div>
@@ -774,7 +774,7 @@ export default function DashboardScreen() {
 
           <GlassBtn
             variant="danger" size="lg" style={{ width: '100%' }}
-            onClick={() => { setShowShare(false); setInviteEmail(''); setPendingEmails([]); logout(); }}
+            onClick={() => { setShowShare(false); setInviteEmail(''); setPendingEmails([]); leaveTrip(); }}
           >
             {t('leaveTrip')}
           </GlassBtn>
