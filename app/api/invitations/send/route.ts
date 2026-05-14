@@ -50,11 +50,18 @@ export async function POST(request: NextRequest) {
     const admin = tryAdminClient()
     const db = admin ?? supabase
 
-    const { error } = await db.from('trip_invitations').insert({
-      trip_id: tripId,
-      invited_email: invitedEmail.toLowerCase().trim(),
-      invited_by: session.user.id,
-    })
+    // Upsert so that re-inviting someone who previously accepted/rejected works —
+    // without this, the UNIQUE(trip_id, invited_email) constraint would block the insert
+    // even though the old invitation is no longer pending.
+    const { error } = await db.from('trip_invitations').upsert(
+      {
+        trip_id: tripId,
+        invited_email: invitedEmail.toLowerCase().trim(),
+        invited_by: session.user.id,
+        status: 'pending',
+      },
+      { onConflict: 'trip_id,invited_email' }
+    )
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ ok: true })
