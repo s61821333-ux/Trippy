@@ -88,9 +88,9 @@ export async function POST(request: NextRequest) {
         color: 'oklch(62% 0.15 195)',
       })
       if (participantErr) {
-        // Roll back the trip if participant insert fails — otherwise the trip exists but is inaccessible
+        console.error('[create] participant upsert failed:', participantErr)
         await admin.from('trips').delete().eq('id', trip.id)
-        return NextResponse.json({ error: 'Failed to add participant' }, { status: 500 })
+        return NextResponse.json({ error: 'Failed to add participant', detail: participantErr.message, code: (participantErr as any).code }, { status: 500 })
       }
 
       if (Array.isArray(dayMetas) && dayMetas.length > 0) {
