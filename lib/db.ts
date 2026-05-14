@@ -45,32 +45,14 @@ export async function dbCreateTrip(
   nickname: string,
   countries?: string[],
 ): Promise<string> {
-  const supabase = sb()
-
-  const { data: tripId, error } = await supabase.rpc('create_trip', {
-    p_name: name,
-    p_days: days,
-    p_start_date: startDate,
-    p_theme: theme || null,
-    p_countries: countries?.length ? countries : null,
-    p_nickname: nickname,
+  const r = await fetch('/api/trips/create', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, days, startDate, theme, countries, nickname, dayMetas }),
   })
-
-  if (error || !tripId) throw error
-
-  await supabase.from('day_meta').insert(
-    dayMetas.map((m, i) => ({
-      trip_id: tripId,
-      day_index: i,
-      region: m.region,
-      emoji: m.emoji,
-      lat: m.lat,
-      lng: m.lng,
-      description: m.desc,
-    }))
-  )
-
-  return tripId
+  const body = await r.json().catch(() => ({}))
+  if (!r.ok) throw new Error(body.error ?? 'Failed to create trip')
+  return body.tripId
 }
 
 
@@ -147,8 +129,7 @@ export async function dbLoadTripById(tripId: string) {
   // Use the server route so the load works regardless of RLS configuration —
   // the route uses the service role key and verifies participation itself.
   const r = await fetch(`/api/trips/${tripId}`)
-  if (r.status === 404) return null
-  if (!r.ok) throw new Error('load_failed')
+  if (!r.ok) return null
   return await r.json()
 }
 
