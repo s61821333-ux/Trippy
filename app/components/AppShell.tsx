@@ -78,8 +78,11 @@ function Shell() {
       if (session?.user) {
         const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
         useAppStore.setState({ authUser: { id: session.user.id, username }, userId: session.user.id });
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+        // INITIAL_SESSION with no session = persisted authUser is stale (expired).
+        // Clear it and return to login so the user can re-authenticate.
         useAppStore.setState({ authUser: null, userId: null });
+        setScreen('login');
       }
     });
 

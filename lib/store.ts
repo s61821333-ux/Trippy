@@ -550,6 +550,7 @@ export const useAppStore = create<AppState>()(
         dayEndHour: s.dayEndHour,
         userId: s.userId,
         tripDbId: s.tripDbId,
+        authUser: s.authUser,
       }),
     }
   )
