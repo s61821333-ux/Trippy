@@ -57,12 +57,9 @@ export async function dbCreateTrip(
 
 
 export async function dbGetUserTrips(userId: string): Promise<{ id: string; name: string; theme: string | null; days: number; start_date: string | null }[]> {
-  const { data, error } = await sb()
-    .from('trip_participants')
-    .select('trips ( id, name, theme, days, start_date )')
-    .eq('user_id', userId)
-  if (error) throw error
-  return (data ?? []).map((row: any) => row.trips).filter(Boolean)
+  const r = await fetch('/api/trips')
+  if (!r.ok) return []
+  return await r.json()
 }
 
 // ─── Invitations ─────────────────────────────────────────────────────────────
@@ -88,15 +85,15 @@ export async function dbGetInvitations(): Promise<TripInvitation[]> {
 }
 
 export async function dbInviteToTrip(tripId: string, invitedEmail: string): Promise<void> {
-  const supabase = sb()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user) throw new Error('Not authenticated')
-  const { error } = await supabase.from('trip_invitations').insert({
-    trip_id: tripId,
-    invited_email: invitedEmail.toLowerCase().trim(),
-    invited_by: session.user.id,
+  const r = await fetch('/api/invitations/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tripId, invitedEmail }),
   })
-  if (error) throw error
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}))
+    throw new Error(body.error ?? 'Failed to send invitation')
+  }
 }
 
 export async function dbAcceptInvitation(invitationId: string, userId: string, initials: string): Promise<string> {
