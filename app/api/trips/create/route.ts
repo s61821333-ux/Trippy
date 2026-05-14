@@ -58,7 +58,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const admin = tryAdminClient()
-    const hasServiceKey = !!process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (admin) {
       // Admin path — bypasses RLS entirely
@@ -89,9 +88,8 @@ export async function POST(request: NextRequest) {
         color: 'oklch(62% 0.15 195)',
       })
       if (participantErr) {
-        console.error('[create] participant upsert failed:', participantErr)
         await admin.from('trips').delete().eq('id', trip.id)
-        return NextResponse.json({ error: 'Failed to add participant', detail: participantErr.message, code: (participantErr as any).code }, { status: 500 })
+        return NextResponse.json({ error: 'Failed to add participant' }, { status: 500 })
       }
 
       if (Array.isArray(dayMetas) && dayMetas.length > 0) {
@@ -141,7 +139,7 @@ export async function POST(request: NextRequest) {
 
     if (participantErr2) {
       await supabase.from('trips').delete().eq('id', trip2.id)
-      return NextResponse.json({ error: 'Failed to add participant', detail: participantErr2.message, code: (participantErr2 as any).code, hasServiceKey }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to add participant' }, { status: 500 })
     }
 
     if (Array.isArray(dayMetas) && dayMetas.length > 0) {

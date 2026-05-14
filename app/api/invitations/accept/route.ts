@@ -29,9 +29,8 @@ export async function POST(request: NextRequest) {
     }
   )
 
-  const { data: { session }, error: sessionErr } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   if (!session?.user) {
-    console.error('[accept] No session:', sessionErr)
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
@@ -58,7 +57,6 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (invErr || !inv) {
-      console.error('[accept] Invitation lookup failed:', invErr)
       return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
     }
 
@@ -68,8 +66,7 @@ export async function POST(request: NextRequest) {
       .update({ status: 'accepted' })
       .eq('id', invitationId)
     if (updateErr) {
-      console.error('[accept] Update failed:', updateErr)
-      return NextResponse.json({ error: 'Failed to update invitation', detail: updateErr.message }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to update invitation' }, { status: 500 })
     }
 
     // Add user as participant — insert, ignore 23505 if already a member
@@ -81,13 +78,11 @@ export async function POST(request: NextRequest) {
       color: 'oklch(62% 0.15 195)',
     })
     if (participantErr && (participantErr as any).code !== '23505') {
-      console.error('[accept] Participant insert failed:', participantErr)
-      return NextResponse.json({ error: 'Failed to join trip', detail: participantErr.message, code: (participantErr as any).code }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to join trip' }, { status: 500 })
     }
 
     return NextResponse.json({ tripId: inv.trip_id })
-  } catch (err: any) {
-    console.error('[accept] Unexpected error:', err)
-    return NextResponse.json({ error: 'Server error', detail: err?.message }, { status: 500 })
+  } catch {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
