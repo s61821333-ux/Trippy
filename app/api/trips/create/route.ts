@@ -113,24 +113,43 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ tripId: trip.id })
     }
 
-    // Fallback — use the user's JWT via create_trip RPC (subject to RLS)
-    const { data: tripId, error: rpcErr } = await supabase.rpc('create_trip', {
-      p_name: name,
-      p_days: days,
-      p_start_date: startDate,
-      p_theme: theme || null,
-      p_countries: countries?.length ? countries : null,
-      p_nickname: nickname,
+    // Fallback — direct inserts using the user's JWT (subject to RLS)
+    const { data: trip2, error: tripErr2 } = await supabase
+      .from('trips')
+      .insert({
+        name,
+        days,
+        start_date: startDate,
+        theme: theme || null,
+        countries: countries?.length ? countries : null,
+      })
+      .select('id')
+      .single()
+
+    if (tripErr2 || !trip2) {
+      return NextResponse.json({ error: tripErr2?.message ?? 'Failed to create trip' }, { status: 500 })
+    }
+
+    const fallbackInitials = nickname
+      ? nickname.slice(0, 2).toUpperCase()
+      : (session.user.user_metadata?.full_name ?? session.user.email ?? 'U').slice(0, 2).toUpperCase()
+
+    const { error: participantErr2 } = await supabase.from('trip_participants').insert({
+      trip_id: trip2.id,
+      user_id: session.user.id,
+      initials: fallbackInitials,
+      color: 'oklch(62% 0.15 195)',
     })
 
-    if (rpcErr || !tripId) {
-      return NextResponse.json({ error: rpcErr?.message ?? 'Failed to create trip' }, { status: 500 })
+    if (participantErr2) {
+      await supabase.from('trips').delete().eq('id', trip2.id)
+      return NextResponse.json({ error: 'Failed to add participant' }, { status: 500 })
     }
 
     if (Array.isArray(dayMetas) && dayMetas.length > 0) {
       await supabase.from('day_meta').insert(
         dayMetas.map((m: any, i: number) => ({
-          trip_id: tripId,
+          trip_id: trip2.id,
           day_index: i,
           region: m.region,
           emoji: m.emoji,
@@ -141,7 +160,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    return NextResponse.json({ tripId })
+    return NextResponse.json({ tripId: trip2.id })
   } catch (err: any) {
     return NextResponse.json({ error: err.message ?? 'Server error' }, { status: 500 })
   }

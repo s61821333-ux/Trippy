@@ -64,19 +64,25 @@ export async function POST(request: NextRequest) {
     }
 
     // Mark as accepted
-    await db
+    const { error: updateErr } = await db
       .from('trip_invitations')
       .update({ status: 'accepted' })
       .eq('id', invitationId)
+    if (updateErr) {
+      return NextResponse.json({ error: 'Failed to update invitation' }, { status: 500 })
+    }
 
-    // Add user as participant
+    // Add user as participant — insert, ignore 23505 if already a member
     const userInitials = initials ?? session.user.user_metadata?.full_name?.slice(0, 2).toUpperCase() ?? 'U'
-    await db.from('trip_participants').upsert({
+    const { error: participantErr } = await db.from('trip_participants').insert({
       trip_id: inv.trip_id,
       user_id: session.user.id,
       initials: userInitials,
       color: 'oklch(62% 0.15 195)',
     })
+    if (participantErr && (participantErr as any).code !== '23505') {
+      return NextResponse.json({ error: 'Failed to join trip' }, { status: 500 })
+    }
 
     return NextResponse.json({ tripId: inv.trip_id })
   } catch (err: any) {

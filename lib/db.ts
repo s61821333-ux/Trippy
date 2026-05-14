@@ -65,23 +65,10 @@ export async function dbGetUserTrips(userId: string): Promise<{ id: string; name
 // ─── Invitations ─────────────────────────────────────────────────────────────
 
 export async function dbGetInvitations(): Promise<TripInvitation[]> {
-  const supabase = sb()
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user?.email) return []
-  const { data, error } = await supabase
-    .from('trip_invitations')
-    .select('id, trip_id, status, created_at, trips ( name, theme )')
-    .eq('invited_email', session.user.email.toLowerCase())
-    .eq('status', 'pending')
-  if (error) throw error
-  return (data ?? []).map((row: any) => ({
-    id: row.id,
-    tripId: row.trip_id,
-    tripName: row.trips?.name ?? 'Unknown Trip',
-    tripTheme: row.trips?.theme ?? null,
-    status: row.status as TripInvitation['status'],
-    createdAt: row.created_at,
-  }))
+  const r = await fetch('/api/invitations')
+  if (!r.ok) return []
+  const data = await r.json().catch(() => [])
+  return Array.isArray(data) ? data : []
 }
 
 export async function dbInviteToTrip(tripId: string, invitedEmail: string): Promise<void> {

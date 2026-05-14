@@ -101,12 +101,16 @@ export async function POST(
       const rawName = session.user.user_metadata?.full_name ?? session.user.email ?? 'U'
       const initials = rawName.slice(0, 2).toUpperCase()
       const hue = (session.user.id.charCodeAt(0) * 47 + session.user.id.charCodeAt(1) * 13) % 360
-      await db.from('trip_participants').insert({
+      const { error: participantErr } = await db.from('trip_participants').insert({
         trip_id: trip.id,
         user_id: session.user.id,
         initials,
         color: `oklch(62% 0.15 ${hue})`,
       })
+      // 23505 = unique_violation: user somehow already a participant, safe to ignore
+      if (participantErr && (participantErr as any).code !== '23505') {
+        return NextResponse.json({ error: 'Failed to join trip' }, { status: 500 })
+      }
     }
 
     return NextResponse.json({ tripId: trip.id })
