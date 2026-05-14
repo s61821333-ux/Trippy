@@ -144,21 +144,12 @@ export async function dbRejectInvitation(invitationId: string): Promise<void> {
 }
 
 export async function dbLoadTripById(tripId: string) {
-  const { data, error } = await sb()
-    .from('trips')
-    .select(`
-      id, name, days, start_date, theme, trip_notes, countries,
-      day_meta ( day_index, region, emoji, lat, lng, description ),
-      events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes ),
-      expenses ( id, description, amount, split_count ),
-      emergency_contacts ( id, name, phone, type ),
-      supplies ( id, name, category, checked, critical ),
-      trip_participants ( user_id, initials, color )
-    `)
-    .eq('id', tripId)
-    .maybeSingle()
-  if (error) throw error
-  return data
+  // Use the server route so the load works regardless of RLS configuration —
+  // the route uses the service role key and verifies participation itself.
+  const r = await fetch(`/api/trips/${tripId}`)
+  if (r.status === 404) return null
+  if (!r.ok) throw new Error('load_failed')
+  return await r.json()
 }
 
 // ─── Events ──────────────────────────────────────────────────────────────────

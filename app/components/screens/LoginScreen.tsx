@@ -168,8 +168,11 @@ function TripStep() {
     setActionId(invitationId);
     try {
       await acceptInvitation(invitationId);
-    } catch {
-      show(t('tripNotFound'));
+    } catch (err: any) {
+      const msg = err?.message === 'not_found' || err?.message === 'Invitation not found'
+        ? t('tripNotFound')
+        : (locale === 'he' ? '⚠️ שגיאה בקבלת ההזמנה — נסה שוב' : '⚠️ Could not accept invitation — please try again');
+      show(msg);
     }
     setActionId(null);
   };

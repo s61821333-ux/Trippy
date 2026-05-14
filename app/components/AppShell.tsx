@@ -26,6 +26,8 @@ function SyncErrorWatcher() {
     const isRLS = lastSyncError.includes('row-level security') || lastSyncError.includes('violates') || lastSyncError.includes('rls');
     const msg = lastSyncError === 'not_authed'
       ? (locale === 'he' ? '⚠️ לא מחובר — שינויים נשמרו מקומית בלבד' : '⚠️ Not signed in — changes saved locally only')
+      : lastSyncError === 'join_failed'
+      ? (locale === 'he' ? '⚠️ לא ניתן היה לטעון את הטיול — נסה שוב' : '⚠️ Could not load the trip — please try again')
       : isRLS
       ? (locale === 'he' ? '⚠️ שגיאת הרשאות DB — הפעל RLS Policy בלוח Supabase' : '⚠️ DB permissions — run RLS policies in Supabase dashboard')
       : `⚠️ Sync error — changes saved locally`;
@@ -95,7 +97,9 @@ function Shell() {
     const pendingJoin = sessionStorage.getItem('trippy-pending-join');
     if (!pendingJoin) return;
     sessionStorage.removeItem('trippy-pending-join');
-    loadTripById(pendingJoin).catch(() => {});
+    loadTripById(pendingJoin).catch(() => {
+      useAppStore.setState({ lastSyncError: 'join_failed' });
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
 
