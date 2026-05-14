@@ -59,9 +59,6 @@ function Shell() {
 
   useEffect(() => {
     setMounted(true);
-    if (trip && screen === 'login') {
-      setScreen('dashboard');
-    }
 
     // Stash any pending join trip ID from invite link redirect
     const params = new URLSearchParams(window.location.search);
@@ -71,26 +68,22 @@ function Shell() {
       sessionStorage.setItem('trippy-pending-join', joinId);
     }
 
-    // onAuthStateChange sets authUser immediately when a session is detected.
-    // We never call Supabase auth methods inside this callback to avoid re-entrancy issues.
+    // onAuthStateChange fires immediately with INITIAL_SESSION on every page load.
+    // If the session is valid → confirm/update authUser.
+    // If no session (expired or logged out) → clear persisted authUser and go to login.
     const supabase = createClient();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
         useAppStore.setState({ authUser: { id: session.user.id, username }, userId: session.user.id });
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
-        // INITIAL_SESSION with no session = persisted authUser is stale (expired).
-        // Clear it and return to login so the user can re-authenticate.
         useAppStore.setState({ authUser: null, userId: null });
         setScreen('login');
       }
     });
 
-    // Load trip from DB if tripDbId is stored, and navigate to dashboard when done.
-    checkAuth().then(() => {
-      const { trip: loadedTrip, screen: currentScreen } = useAppStore.getState();
-      if (loadedTrip && currentScreen === 'login') setScreen('dashboard');
-    });
+    // Reload trip data from DB if the user has a stored tripDbId (no auto-navigation).
+    checkAuth();
 
     return () => subscription.unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps

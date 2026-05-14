@@ -304,8 +304,17 @@ export const useAppStore = create<AppState>()(
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later
       logout: () => {
         signOut().catch(() => {});
-        // Keep trip + tripDbId in localStorage so pending events survive the logout/login cycle.
-        // checkAuth will reload from DB on next login and re-sync any unsynced events.
+        // Brute-force clear all Supabase auth cookies so onAuthStateChange cannot
+        // re-authenticate the user on next page load (guards against path-mismatch
+        // cookie deletion failures in signOut()).
+        if (typeof document !== 'undefined') {
+          document.cookie.split(';').forEach(c => {
+            const name = c.split('=')[0].trim();
+            if (name.startsWith('sb-')) {
+              document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+            }
+          });
+        }
         set({ screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '' });
       },
 
