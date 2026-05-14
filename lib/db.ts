@@ -100,21 +100,15 @@ export async function dbInviteToTrip(tripId: string, invitedEmail: string): Prom
 }
 
 export async function dbAcceptInvitation(invitationId: string, userId: string, initials: string): Promise<string> {
-  const supabase = sb()
-  const { data: inv, error: invErr } = await supabase
-    .from('trip_invitations')
-    .select('trip_id')
-    .eq('id', invitationId)
-    .single()
-  if (invErr || !inv) throw invErr ?? new Error('Invitation not found')
-  await supabase.from('trip_invitations').update({ status: 'accepted' }).eq('id', invitationId)
-  await supabase.from('trip_participants').upsert({
-    trip_id: inv.trip_id,
-    user_id: userId,
-    initials,
-    color: 'oklch(62% 0.15 195)',
+  const r = await fetch('/api/invitations/accept', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ invitationId, initials }),
   })
-  return inv.trip_id
+  const body = await r.json().catch(() => ({}))
+  if (r.status === 404) throw new Error('Invitation not found')
+  if (!r.ok) throw new Error('Failed to accept invitation')
+  return body.tripId
 }
 
 export async function dbRejectInvitation(invitationId: string): Promise<void> {

@@ -1,0 +1,85 @@
+import { createClient } from '@supabase/supabase-js'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
+
+function tryAdminClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return null
+  return createClient(url, key, { auth: { persistSession: false } })
+}
+
+// POST /api/invitations/accept — authenticated: accept an email invitation
+// Body: { invitationId: string }
+// Returns: { tripId: string }
+export async function POST(request: NextRequest) {
+  const cookieStore = await cookies()
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get: (name) => cookieStore.get(name)?.value,
+        set: (name: string, value: string, options: CookieOptions) => {
+          try { cookieStore.set({ name, value, ...options }) } catch {}
+        },
+        remove: (name: string, options: CookieOptions) => {
+          try { cookieStore.set({ name, value: '', ...options }) } catch {}
+        },
+      },
+    }
+  )
+
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  }
+
+  let body: any
+  try { body = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const { invitationId, initials } = body
+  if (!invitationId) {
+    return NextResponse.json({ error: 'Missing invitationId' }, { status: 400 })
+  }
+
+  try {
+    const admin = tryAdminClient()
+    // Use admin client when available (bypasses RLS), otherwise use user session
+    const db = admin ?? supabase
+
+    // Look up the invitation
+    const { data: inv, error: invErr } = await db
+      .from('trip_invitations')
+      .select('trip_id')
+      .eq('id', invitationId)
+      .maybeSingle()
+
+    if (invErr || !inv) {
+      return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
+    }
+
+    // Mark as accepted
+    await db
+      .from('trip_invitations')
+      .update({ status: 'accepted' })
+      .eq('id', invitationId)
+
+    // Add user as participant
+    const userInitials = initials ?? session.user.user_metadata?.full_name?.slice(0, 2).toUpperCase() ?? 'U'
+    await db.from('trip_participants').upsert({
+      trip_id: inv.trip_id,
+      user_id: session.user.id,
+      initials: userInitials,
+      color: 'oklch(62% 0.15 195)',
+    })
+
+    return NextResponse.json({ tripId: inv.trip_id })
+  } catch (err: any) {
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
+  }
+}

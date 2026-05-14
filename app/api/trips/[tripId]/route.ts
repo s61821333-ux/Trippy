@@ -3,14 +3,26 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-function adminClient() {
+const TRIP_SELECT = `
+  id, name, days, start_date, theme, trip_notes, countries,
+  day_meta ( day_index, region, emoji, lat, lng, description ),
+  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes ),
+  expenses ( id, description, amount, split_count ),
+  emergency_contacts ( id, name, phone, type ),
+  supplies ( id, name, category, checked, critical ),
+  trip_participants ( user_id, initials, color )
+`
+
+function tryAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set')
+  if (!url || !key) return null
   return createClient(url, key, { auth: { persistSession: false } })
 }
 
-// GET /api/trips/[tripId] — authenticated: load full trip data bypassing RLS
+// GET /api/trips/[tripId] — authenticated: load full trip data
+// Uses admin client to bypass RLS when SUPABASE_SERVICE_ROLE_KEY is set,
+// otherwise queries directly via the user's session (subject to RLS).
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
@@ -40,31 +52,38 @@ export async function GET(
   }
 
   try {
-    const admin = adminClient()
+    const admin = tryAdminClient()
 
-    // Verify the user is a participant before returning any data
-    const { data: participant } = await admin
-      .from('trip_participants')
-      .select('user_id')
-      .eq('trip_id', tripId)
-      .eq('user_id', session.user.id)
-      .maybeSingle()
+    if (admin) {
+      // Admin path — verify participation then load, bypassing RLS
+      const { data: participant } = await admin
+        .from('trip_participants')
+        .select('user_id')
+        .eq('trip_id', tripId)
+        .eq('user_id', session.user.id)
+        .maybeSingle()
 
-    if (!participant) {
-      return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+      if (!participant) {
+        return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+      }
+
+      const { data, error } = await admin
+        .from('trips')
+        .select(TRIP_SELECT)
+        .eq('id', tripId)
+        .maybeSingle()
+
+      if (error || !data) {
+        return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+      }
+
+      return NextResponse.json(data)
     }
 
-    const { data, error } = await admin
+    // Fallback — query with user's JWT (subject to RLS)
+    const { data, error } = await supabase
       .from('trips')
-      .select(`
-        id, name, days, start_date, theme, trip_notes, countries,
-        day_meta ( day_index, region, emoji, lat, lng, description ),
-        events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes ),
-        expenses ( id, description, amount, split_count ),
-        emergency_contacts ( id, name, phone, type ),
-        supplies ( id, name, category, checked, critical ),
-        trip_participants ( user_id, initials, color )
-      `)
+      .select(TRIP_SELECT)
       .eq('id', tripId)
       .maybeSingle()
 

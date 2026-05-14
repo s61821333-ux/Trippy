@@ -3,10 +3,10 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
-function adminClient() {
+function tryAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is not set')
+  if (!url || !key) return null
   return createClient(url, key, { auth: { persistSession: false } })
 }
 
@@ -17,18 +17,33 @@ export async function GET(
 ) {
   const { token } = await params
   try {
-    const admin = adminClient()
-    const { data, error } = await admin
+    const admin = tryAdminClient()
+
+    if (admin) {
+      const { data, error } = await admin
+        .from('trips')
+        .select('id, name, theme')
+        .eq('invite_token', token)
+        .single()
+      if (error || !data) return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
+      return NextResponse.json({ tripId: data.id, tripName: data.name, tripTheme: data.theme })
+    }
+
+    // Fallback: query with anon key (works if RLS allows or is not enabled)
+    const { createClient: createAnonClient } = await import('@supabase/supabase-js')
+    const anon = createAnonClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+    const { data, error } = await anon
       .from('trips')
       .select('id, name, theme')
       .eq('invite_token', token)
-      .single()
-    if (error || !data) {
-      return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
-    }
+      .maybeSingle()
+    if (error || !data) return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
     return NextResponse.json({ tripId: data.id, tripName: data.name, tripTheme: data.theme })
   } catch (err: any) {
-    return NextResponse.json({ error: err.message ?? 'Server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
@@ -62,18 +77,20 @@ export async function POST(
   }
 
   try {
-    const admin = adminClient()
-    const { data: trip, error: tripErr } = await admin
+    const admin = tryAdminClient()
+    const db = admin ?? supabase
+
+    const { data: trip, error: tripErr } = await db
       .from('trips')
       .select('id')
       .eq('invite_token', token)
-      .single()
+      .maybeSingle()
     if (tripErr || !trip) {
       return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
     }
 
     // No-op if already a participant
-    const { data: existing } = await admin
+    const { data: existing } = await db
       .from('trip_participants')
       .select('user_id')
       .eq('trip_id', trip.id)
@@ -83,9 +100,8 @@ export async function POST(
     if (!existing) {
       const rawName = session.user.user_metadata?.full_name ?? session.user.email ?? 'U'
       const initials = rawName.slice(0, 2).toUpperCase()
-      // Deterministic color per user
       const hue = (session.user.id.charCodeAt(0) * 47 + session.user.id.charCodeAt(1) * 13) % 360
-      await admin.from('trip_participants').insert({
+      await db.from('trip_participants').insert({
         trip_id: trip.id,
         user_id: session.user.id,
         initials,
@@ -95,6 +111,6 @@ export async function POST(
 
     return NextResponse.json({ tripId: trip.id })
   } catch (err: any) {
-    return NextResponse.json({ error: err.message ?? 'Server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
