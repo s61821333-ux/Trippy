@@ -71,22 +71,22 @@ function Shell() {
       sessionStorage.setItem('trippy-pending-join', joinId);
     }
 
-    // onAuthStateChange fires immediately with the current session (INITIAL_SESSION event),
-    // so this replaces the manual checkAuth() call and also handles token refresh.
+    // onAuthStateChange sets authUser immediately when a session is detected.
+    // We never call Supabase auth methods inside this callback to avoid re-entrancy issues.
     const supabase = createClient();
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
         useAppStore.setState({ authUser: { id: session.user.id, username }, userId: session.user.id });
-        await checkAuth();
-        // Navigate to dashboard once a trip is loaded
-        const { trip: loadedTrip, screen: currentScreen } = useAppStore.getState();
-        if (loadedTrip && currentScreen === 'login') {
-          setScreen('dashboard');
-        }
       } else if (event === 'SIGNED_OUT') {
         useAppStore.setState({ authUser: null, userId: null });
       }
+    });
+
+    // Load trip from DB if tripDbId is stored, and navigate to dashboard when done.
+    checkAuth().then(() => {
+      const { trip: loadedTrip, screen: currentScreen } = useAppStore.getState();
+      if (loadedTrip && currentScreen === 'login') setScreen('dashboard');
     });
 
     return () => subscription.unsubscribe();

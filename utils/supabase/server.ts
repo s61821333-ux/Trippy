@@ -14,12 +14,13 @@ export async function createClient() {
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value, ...options })
+            // Ensure maxAge is always set so session survives browser restarts
+            cookieStore.set({ name, value, ...options, maxAge: options.maxAge ?? 60 * 60 * 24 * 365 })
           } catch (error) {}
         },
         remove(name: string, options: CookieOptions) {
           try {
-            cookieStore.set({ name, value: '', ...options })
+            cookieStore.set({ name, value: '', ...options, maxAge: 0 })
           } catch (error) {}
         },
       },
