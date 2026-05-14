@@ -172,21 +172,10 @@ export const useAppStore = create<AppState>()(
         // Don't reset authUser to null here — sign-out is handled by onAuthStateChange in AppShell.
         // Only update the store when a user is actually found.
         if (!user) return
-        set({ authUser: user, userId: user.id })
-        const { tripDbId, trip: localTrip } = get()
-        const isValidUuid = (v: string | null) => !!v && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)
-        if (!isValidUuid(tripDbId)) {
-          if (tripDbId) set({ tripDbId: null, trip: null, supplies: [] })
-        } else if (tripDbId) {
-          try {
-            const data = await dbLoadTripById(tripDbId)
-            if (data) {
-              const { trip: dbTrip, supplies } = rowToTrip(data)
-              const trip = mergeLocalIntoDbTrip(dbTrip, localTrip, tripDbId, user.id, msg => set({ lastSyncError: msg }))
-              set({ trip, supplies, userId: user.id, screen: 'dashboard' })
-            }
-          } catch (err: any) { set({ lastSyncError: err?.message ?? 'load_failed' }) }
-        }
+        // Always land on the trip picker so the user can choose which trip to open.
+        // Clear any previously loaded trip; the join-link flow (/?join=id) still works
+        // because AppShell's authUser effect handles that separately.
+        set({ authUser: user, userId: user.id, trip: null, tripDbId: null, supplies: [] })
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
 
