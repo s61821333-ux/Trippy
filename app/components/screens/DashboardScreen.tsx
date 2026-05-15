@@ -58,7 +58,7 @@ export default function DashboardScreen() {
   const [expDesc, setExpDesc]           = useState('');
   const [expAmount, setExpAmount]       = useState('');
   const [expPaidBy, setExpPaidBy]       = useState('');
-  const [expSplit, setExpSplit]         = useState('2');
+  const [expSplit, setExpSplit]         = useState(() => String(trip?.participants?.length ?? 2));
 
   if (!trip) return null;
 

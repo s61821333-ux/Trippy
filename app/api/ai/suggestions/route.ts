@@ -13,6 +13,7 @@ interface RequestBody {
   dayMeta?: DayMeta;
   existingEvents: TripEvent[];
   tripName: string;
+  countries?: string[];
   exclude?: string[];
   gapStart?: number; // minutes from midnight
   gapEnd?: number;   // minutes from midnight
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const { dayNumber, dayMeta, existingEvents, tripName, exclude = [], gapStart, gapEnd, locale }: RequestBody =
+  const { dayNumber, dayMeta, existingEvents, tripName, countries = [], exclude = [], gapStart, gapEnd, locale }: RequestBody =
     await request.json();
 
   const toHHMM = (mins: number) =>
@@ -51,8 +52,12 @@ export async function POST(request: NextRequest) {
           .join('\n')
       : '  (no events yet)';
 
+  const destinationText = countries.length > 0
+    ? countries.join(', ')
+    : dayMeta?.region ?? 'the trip destination';
+
   const regionText = dayMeta
-    ? `Region: ${dayMeta.region} — ${dayMeta.desc}`
+    ? `Region: ${dayMeta.region}${dayMeta.desc ? ` — ${dayMeta.desc}` : ''}`
     : `Day ${dayNumber}`;
 
   const gapLine = gapStart != null && gapEnd != null
@@ -63,13 +68,13 @@ export async function POST(request: NextRequest) {
     ? '\nחשוב: השב בעברית בלבד. כל שדות "name" ו-"description" חייבים להיות כתובים בעברית.'
     : '';
 
-  const prompt = `You are a desert trip planning assistant for "${tripName}".
+  const prompt = `You are a trip planning assistant for "${tripName}" — a trip to ${destinationText}.
 
 Day ${dayNumber} — ${regionText}
 Existing schedule:
 ${eventsText}
 ${gapLine}
-Suggest exactly 4 NEW activities that complement this day's existing schedule and fit the desert region.${exclude.length > 0 ? `\nDo NOT suggest any of these already-shown activities: ${exclude.join(', ')}.` : ''}${languageInstruction}
+Suggest exactly 4 NEW activities that complement this day's existing schedule and fit ${destinationText}.${exclude.length > 0 ? `\nDo NOT suggest any of these already-shown activities: ${exclude.join(', ')}.` : ''}${languageInstruction}
 Return ONLY valid JSON — an array of 4 objects with this exact shape:
 [
   {
@@ -101,8 +106,8 @@ Respond with ONLY the JSON array, no other text.`;
       max_tokens: 1024,
       system:
         locale === 'he'
-          ? 'אתה עוזר תכנון טיולים במדבר. תמיד השב עם JSON תקין בלבד — ללא markdown, ללא הסברים. כל שדות הטקסט חייבים להיות בעברית.'
-          : 'You are a desert trip planning assistant. Always respond with valid JSON only — no markdown, no explanation.',
+          ? 'אתה עוזר תכנון טיולים. תמיד השב עם JSON תקין בלבד — ללא markdown, ללא הסברים. כל שדות הטקסט חייבים להיות בעברית.'
+          : 'You are a travel planning assistant. Always respond with valid JSON only — no markdown, no explanation.',
       messages: [{ role: 'user', content: prompt }],
     });
   } catch (err) {

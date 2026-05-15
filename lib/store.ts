@@ -231,8 +231,9 @@ export const useAppStore = create<AppState>()(
 
 
       loadTripById: async (tripId) => {
-        const { authUser, trip: localTrip, tripDbId: localTripDbId } = get();
-        const nickname = authUser?.username ?? 'Traveler';
+        const { authUser, trip: localTrip, tripDbId: localTripDbId, nickname: storedNickname } = get();
+        // Preserve any custom nickname the user already set; only fall back to authUser.username on first load
+        const nickname = storedNickname || authUser?.username ?? 'Traveler';
         let userId = authUser?.id ?? null;
         if (!userId) userId = await getSessionUserId();
         if (!userId) throw new Error('not_authed');

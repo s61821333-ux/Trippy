@@ -29,8 +29,8 @@ function SyncErrorWatcher() {
       : lastSyncError === 'join_failed'
       ? (locale === 'he' ? '⚠️ לא ניתן היה לטעון את הטיול — נסה שוב' : '⚠️ Could not load the trip — please try again')
       : isRLS
-      ? (locale === 'he' ? '⚠️ שגיאת הרשאות DB — הפעל RLS Policy בלוח Supabase' : '⚠️ DB permissions — run RLS policies in Supabase dashboard')
-      : `⚠️ Sync error — changes saved locally`;
+      ? (locale === 'he' ? 'לא ניתן לשמור. נסה שוב.' : "Couldn't save. Please try again.")
+      : (locale === 'he' ? 'שגיאת סנכרון — שינויים נשמרו מקומית' : 'Sync error — changes saved locally');
     show(msg);
     useAppStore.setState({ lastSyncError: null });
   }, [lastSyncError]);

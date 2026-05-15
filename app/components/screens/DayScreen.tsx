@@ -331,7 +331,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
               }}
             >
               <Icon name="clock" size={10} />
-              {event.time} – {endT}
+              <span dir="ltr">{event.time} – {endT}</span>
             </motion.button>
 
             {event.cost != null && event.cost > 0 && (
@@ -481,14 +481,16 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
                 {/* Preview */}
                 <p style={{ fontSize: 12, color: 'var(--text-2)', margin: 0 }}>
                   {t('moveToTime')}{' '}
-                  <strong style={{ color: 'var(--brand)' }}>{pendingTime}</strong>
-                  {' '}–{' '}
-                  <strong style={{ color: 'var(--brand)' }}>{toTime(toMins(pendingTime) + event.duration)}</strong>
-                  {pendingTime !== event.time && (
-                    <span style={{ color: 'var(--text-3)', fontSize: 11 }}>
-                      {' '}({toMins(pendingTime) > toMins(event.time) ? '+' : ''}{toMins(pendingTime) - toMins(event.time)}m)
-                    </span>
-                  )}
+                  <span dir="ltr" style={{ display: 'inline' }}>
+                    <strong style={{ color: 'var(--brand)' }}>{pendingTime}</strong>
+                    {' '}–{' '}
+                    <strong style={{ color: 'var(--brand)' }}>{toTime(toMins(pendingTime) + event.duration)}</strong>
+                    {pendingTime !== event.time && (
+                      <span style={{ color: 'var(--text-3)', fontSize: 11 }}>
+                        {' '}({toMins(pendingTime) > toMins(event.time) ? '+' : ''}{toMins(pendingTime) - toMins(event.time)}m)
+                      </span>
+                    )}
+                  </span>
                 </p>
 
                 {/* Confirm / Cancel */}
@@ -639,7 +641,7 @@ export default function DayScreen() {
   const openMapForDay = () => {
     const firstWithLocation = evs.find(e => e.location);
     const query = firstWithLocation?.location ?? meta?.region ?? 'map';
-    window.open(`https://www.openstreetmap.org/search?query=${encodeURIComponent(query)}`, '_blank');
+    window.open(`https://www.openstreetmap.org/search?query=${encodeURIComponent(query)}`, 'trippy-map');
   };
 
   const weatherEmoji = (code: number) => {
@@ -1050,7 +1052,7 @@ export default function DayScreen() {
                   borderRadius: 100, padding: '5px 12px',
                   fontSize: 12, fontWeight: 700, color: 'var(--text-2)',
                 }}>
-                  🕐 {ev.time} – {endT2}
+                  🕐 <span dir="ltr">{ev.time} – {endT2}</span>
                 </span>
                 <span style={{
                   display: 'inline-flex', alignItems: 'center', gap: 5,

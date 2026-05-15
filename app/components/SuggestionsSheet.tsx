@@ -45,7 +45,7 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
     return fetch('/api/ai/suggestions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dayNumber, dayMeta, existingEvents, tripName: trip.name, exclude, gapStart: activeGapStart ?? undefined, gapEnd: activeGapEnd ?? undefined, locale }),
+      body: JSON.stringify({ dayNumber, dayMeta, existingEvents, tripName: trip.name, countries: trip.countries ?? [], exclude, gapStart: activeGapStart ?? undefined, gapEnd: activeGapEnd ?? undefined, locale }),
     })
       .then(async res => {
         if (!res.ok) {

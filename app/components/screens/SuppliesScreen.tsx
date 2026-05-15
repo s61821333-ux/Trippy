@@ -82,7 +82,7 @@ export default function SuppliesScreen() {
             {packed} {t('of')} {total} {t('items')} · {pct}%
             {!allCriticalDone && supplies.some(s => s.critical) && (
               <span style={{ color: 'var(--danger)', marginLeft: 8, fontWeight: 700 }}>
-                · ⚠️ Critical items unpacked
+                · {t('criticalItemsUnpacked')}
               </span>
             )}
           </p>
@@ -207,7 +207,7 @@ export default function SuppliesScreen() {
                             borderRadius: 100, padding: '1px 6px',
                             letterSpacing: '0.05em',
                           }}>
-                            CRITICAL
+                            {t('criticalBadge')}
                           </span>
                         )}
                       </div>
@@ -287,7 +287,7 @@ export default function SuppliesScreen() {
                 <input
                   value={newAssignee}
                   onChange={e => setNewAssignee(e.target.value)}
-                  placeholder="Assignee (e.g. Mom, Mark) — optional"
+                  placeholder={t('assigneePlaceholder')}
                   style={{
                     width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
                     fontSize: 13, fontWeight: 500,
@@ -334,11 +334,11 @@ export default function SuppliesScreen() {
                       cursor: 'pointer', transition: 'all 0.15s',
                     }}
                   >
-                    📌 {newCritical ? 'Critical — must pack' : 'Mark as critical'}
+                    📌 {newCritical ? t('unmarkCritical') : t('markCritical')}
                   </motion.button>
                   {newCritical && (
                     <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
-                      Blocks progress bar from going green
+                      {t('criticalBlocksBar')}
                     </span>
                   )}
                 </div>

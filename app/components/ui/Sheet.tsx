@@ -31,6 +31,13 @@ export default function Sheet({ children, onClose, title, subtitle }: SheetProps
     };
   }, []);
 
+  // Dismiss on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   const handleTouchStart = (e: React.TouchEvent) => {
     startY.current = e.touches[0].clientY;
     scrollAtStart.current = panelRef.current?.scrollTop ?? 0;
@@ -83,16 +90,31 @@ export default function Sheet({ children, onClose, title, subtitle }: SheetProps
             overscrollBehavior: 'contain',
           }}
         >
-          {/* Drag handle */}
-          <div
-            style={{
-              width: 40, height: 4,
-              background: 'var(--border-strong)',
-              borderRadius: 2,
-              margin: '12px auto 20px',
-              cursor: 'grab',
-            }}
-          />
+          {/* Drag handle + close button row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', margin: '12px 0 20px' }}>
+            <div
+              style={{
+                width: 40, height: 4,
+                background: 'var(--border-strong)',
+                borderRadius: 2,
+                cursor: 'grab',
+              }}
+            />
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              style={{
+                position: 'absolute', right: 0,
+                width: 28, height: 28, borderRadius: '50%',
+                background: 'var(--bg)', border: '1px solid var(--border)',
+                cursor: 'pointer', color: 'var(--text-2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 14, fontWeight: 700, lineHeight: 1,
+              }}
+            >
+              ✕
+            </button>
+          </div>
 
           {(title || subtitle) && (
             <div style={{ marginBottom: 20 }}>

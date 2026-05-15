@@ -301,6 +301,12 @@ const en = {
   inviteLimitReached: 'Limit reached — wait for someone to respond before sending more',
   pendingLabel: 'Pending',
   estCost: 'Est. Cost',
+  assigneePlaceholder: 'Assignee (e.g. Mom, Mark) — optional',
+  criticalItemsUnpacked: 'CRITICAL ITEMS UNPACKED ⚠️',
+  criticalBadge: 'CRITICAL',
+  markCritical: 'Mark as critical',
+  unmarkCritical: 'Critical — must pack',
+  criticalBlocksBar: 'Blocks progress bar from going green',
 
   // Demo Data
   'Morning camp breakfast': 'Morning camp breakfast',
@@ -634,6 +640,12 @@ const he: typeof en = {
   inviteLimitReached: 'הגעת למגבלה — המתן לתגובה לפני שליחת הזמנות נוספות',
   pendingLabel: 'ממתין',
   estCost: 'עלות משוערת',
+  assigneePlaceholder: 'מוטל על (למשל: אמא, מרק) — אופציונלי',
+  criticalItemsUnpacked: '⚠️ פריטים קריטיים לא ארוזים',
+  criticalBadge: 'קריטי',
+  markCritical: 'סמן כקריטי',
+  unmarkCritical: 'קריטי — חייב לארוז',
+  criticalBlocksBar: 'מונע מהפס להפוך לירוק',
 
   // Demo Data
   'Morning camp breakfast': 'ארוחת בוקר במחנה',
