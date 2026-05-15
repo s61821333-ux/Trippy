@@ -218,6 +218,88 @@ export default function DashboardScreen() {
         {/* ═══ Body ═══ */}
         <div style={{ padding: '16px var(--page-px) 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
+          {/* ═══ Next Event ═══ */}
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.16, type: 'spring', stiffness: 340, damping: 32 }}
+          >
+            <p style={{
+              fontSize: 10, fontWeight: 700, color: 'var(--text-3)',
+              letterSpacing: '0.08em', textTransform: 'uppercase',
+              marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5,
+            }}>
+              ⚡ {t('nextEvent')}
+            </p>
+            {nextEventData ? (
+              <div
+                onClick={() => { setActiveDay(nextEventData.dayNum); setScreen('day'); }}
+                className="premium-hover"
+                style={{
+                  background: CAT_META[nextEventData.event.category].bg,
+                  border: '1.5px solid rgba(0,0,0,0.07)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '14px 16px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  boxShadow: 'var(--shadow-sm)',
+                }}
+              >
+                <div style={{
+                  width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                  background: 'rgba(255,255,255,0.6)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 24,
+                }}>
+                  {CAT_META[nextEventData.event.category].icon}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 3 }}>
+                    {t('day')} {nextEventData.dayNum}
+                    {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1, locale)}` : ''}
+                  </p>
+                  <p style={{
+                    fontSize: 16, fontWeight: 800, color: 'var(--text)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2,
+                  }}>
+                    {t(nextEventData.event.name)}
+                  </p>
+                  <p style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    🕐 {nextEventData.event.time} · {fmtDuration(nextEventData.event.duration)}
+                    {nextEventData.event.location && (
+                      <span style={{ color: 'var(--text-3)' }}>· 📍 {nextEventData.event.location}</span>
+                    )}
+                  </p>
+                </div>
+                <Icon name="chevR" size={16} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
+              </div>
+            ) : (
+              <div style={{
+                background: 'var(--surface)',
+                border: '1px dashed var(--border)',
+                borderRadius: 'var(--radius-lg)',
+                padding: '18px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+              }}>
+                <div style={{
+                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                  background: 'var(--brand-light)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 20,
+                }}>
+                  🗓️
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--text-3)', fontStyle: 'italic' }}>
+                  {t('noUpcomingEvents')}
+                </p>
+              </div>
+            )}
+          </motion.div>
+
           {/* Budget + Carbon chips */}
           {((tripBudget > 0 && !hideBudget) || (showCarbonBudget && carbonKg > 0)) && (
             <motion.div
@@ -415,52 +497,6 @@ export default function DashboardScreen() {
             </AnimatePresence>
           </motion.div>
 
-          {/* Next Event */}
-          {nextEventData && (
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.21, type: 'spring', stiffness: 340, damping: 32 }}
-              onClick={() => { setActiveDay(nextEventData.dayNum); setScreen('day'); }}
-              className="premium-hover"
-              style={{
-                background: CAT_META[nextEventData.event.category].bg,
-                border: '1px solid rgba(0,0,0,0.06)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '14px 16px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                boxShadow: 'var(--shadow-xs)',
-              }}
-            >
-              <div style={{
-                width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                background: 'rgba(255,255,255,0.55)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 22,
-              }}>
-                {CAT_META[nextEventData.event.category].icon}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 2 }}>
-                  {t('nextEvent')} · {t('day')} {nextEventData.dayNum}
-                  {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1, locale)}` : ''}
-                </p>
-                <p style={{
-                  fontSize: 15, fontWeight: 700, color: 'var(--text)',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {t(nextEventData.event.name)}
-                </p>
-                <p style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 1, fontWeight: 500 }}>
-                  {nextEventData.event.time} · {fmtDuration(nextEventData.event.duration)}
-                </p>
-              </div>
-              <Icon name="chevR" size={15} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
-            </motion.div>
-          )}
 
           {/* Insights horizontal scroll */}
           {insights.length > 0 && (

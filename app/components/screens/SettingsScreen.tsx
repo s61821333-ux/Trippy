@@ -30,6 +30,7 @@ export default function SettingsScreen() {
     reducedMotion, toggleReducedMotion,
     hideBudget, toggleHideBudget,
     showCarbonBudget, toggleShowCarbonBudget,
+    hideTravelVault, toggleHideTravelVault,
     dayEndHour, setDayEndHour,
     addTripNote, deleteTripNote,
     addExpense, deleteExpense,
@@ -289,6 +290,12 @@ export default function SettingsScreen() {
                 <SectionLabel label={t('displayLabel')} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <ToggleRow
+                    label={`🗄️ ${t('hideTravelVault')}`}
+                    sub={t('hideTravelVaultSub')}
+                    checked={hideTravelVault}
+                    onToggle={toggleHideTravelVault}
+                  />
+                  <ToggleRow
                     label={`💰 ${t('hideBudget')}`}
                     sub={t('hideBudgetSub')}
                     checked={hideBudget}
@@ -364,7 +371,7 @@ export default function SettingsScreen() {
             </motion.div>
 
             {/* ── Travel Vault / Notes ── */}
-            <motion.div variants={sectionItem} className="md:col-span-2">
+            {!hideTravelVault && <motion.div variants={sectionItem} className="md:col-span-2">
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('travelNotes')} />
                 <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, marginTop: -8 }}>
@@ -439,7 +446,7 @@ export default function SettingsScreen() {
                   </div>
                 )}
               </Glass>
-            </motion.div>
+            </motion.div>}
 
             {/* ── Export ── */}
             <motion.div variants={sectionItem}>

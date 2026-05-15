@@ -34,6 +34,7 @@ interface AppState {
   reducedMotion: boolean;
   hideBudget: boolean;
   showCarbonBudget: boolean;
+  hideTravelVault: boolean;
   dayEndHour: number;
 
   // Supabase identity
@@ -44,9 +45,11 @@ interface AppState {
   demoClickCount: number;
   lastSyncError: string | null;
   pendingInvitations: TripInvitation[];
+  termsAccepted: boolean;
 
   // Actions
   setScreen: (s: Screen) => void;
+  acceptTerms: () => void;
   checkAuth: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   clearTripEntry: () => void;
@@ -75,6 +78,7 @@ interface AppState {
   toggleReducedMotion: () => void;
   toggleHideBudget: () => void;
   toggleShowCarbonBudget: () => void;
+  toggleHideTravelVault: () => void;
   setDayEndHour: (h: number) => void;
 
   addEvent: (dayNumber: number, event: Omit<TripEvent, 'id' | 'addedBy'>) => void;
@@ -158,6 +162,7 @@ export const useAppStore = create<AppState>()(
       reducedMotion: false,
       hideBudget: false,
       showCarbonBudget: false,
+      hideTravelVault: false,
       dayEndHour: 23,
       userId: null,
       tripDbId: null,
@@ -166,7 +171,9 @@ export const useAppStore = create<AppState>()(
       demoClickCount: 0,
       lastSyncError: null,
       pendingInvitations: [],
+      termsAccepted: false,
 
+      acceptTerms: () => set({ termsAccepted: true }),
       setScreen: (s) => set({ screen: s }),
       checkAuth: async () => {
         const user = await getCurrentUser()
@@ -227,6 +234,7 @@ export const useAppStore = create<AppState>()(
       toggleReducedMotion: () => set(s => ({ reducedMotion: !s.reducedMotion })),
       toggleHideBudget: () => set(s => ({ hideBudget: !s.hideBudget })),
       toggleShowCarbonBudget: () => set(s => ({ showCarbonBudget: !s.showCarbonBudget })),
+      toggleHideTravelVault: () => set(s => ({ hideTravelVault: !s.hideTravelVault })),
       setDayEndHour: (h) => set({ dayEndHour: h }),
 
 
@@ -557,10 +565,12 @@ export const useAppStore = create<AppState>()(
         reducedMotion: s.reducedMotion,
         hideBudget: s.hideBudget,
         showCarbonBudget: s.showCarbonBudget,
+        hideTravelVault: s.hideTravelVault,
         dayEndHour: s.dayEndHour,
         userId: s.userId,
         tripDbId: s.tripDbId,
         authUser: s.authUser,
+        termsAccepted: s.termsAccepted,
       }),
     }
   )

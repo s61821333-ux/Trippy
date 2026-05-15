@@ -15,6 +15,7 @@ import NotesScreen from './screens/NotesScreen';
 import { ToastProvider, useToast } from './ui/Toast';
 import TourOverlay from './TourOverlay';
 import TripEntryAnimation from './TripEntryAnimation';
+import TermsModal from './TermsModal';
 
 // Watches lastSyncError globally and shows a toast — must live inside ToastProvider
 function SyncErrorWatcher() {
@@ -52,7 +53,8 @@ const screenTransition = {
 
 function Shell() {
   const { screen, setScreen, trip, darkMode, highContrast, reducedMotion, toggleDarkMode, showTour,
-    tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick, checkAuth, loadTripById, authUser } = useAppStore();
+    tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick, checkAuth, loadTripById, authUser,
+    termsAccepted } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
@@ -230,6 +232,9 @@ function Shell() {
             </AnimatePresence>
           </div>
           {showTour && <TourOverlay />}
+
+          {/* Terms modal: shown on first real login (not demo) */}
+          {authUser && !termsAccepted && <TermsModal />}
 
           <AnimatePresence>
             {showEntryAnim && (
