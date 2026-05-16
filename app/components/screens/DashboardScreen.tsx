@@ -74,15 +74,24 @@ export default function DashboardScreen() {
   }, [trip?.startDate, trip?.days, JSON.stringify(trip?.dayMeta?.map(m => [m.lat, m.lng]))]);
 
   useEffect(() => {
-    if (currency !== 'ILS' || !trip) { setLocalRate(null); setLocalCurrency(''); return; }
-    // Find local currency from first country
-    const firstCountry = trip.countries?.[0];
-    const localC = firstCountry ? getCountryCurrency(firstCountry) : 'USD';
-    if (localC === 'ILS') { setLocalRate(null); setLocalCurrency(''); return; }
-    setLocalCurrency(localC);
-    getExchangeRates('ILS').then(rates => {
-      setLocalRate(rates[localC] ?? null);
-    }).catch(() => {});
+    if (!trip) { setLocalRate(null); setLocalCurrency(''); return; }
+
+    if (currency === 'ILS') {
+      // Trip budget is in ILS → show destination local currency equivalent
+      const firstCountry = trip.countries?.[0];
+      const localC = firstCountry ? getCountryCurrency(firstCountry) : 'USD';
+      if (localC === 'ILS') { setLocalRate(null); setLocalCurrency(''); return; }
+      setLocalCurrency(localC);
+      getExchangeRates('ILS').then(rates => {
+        setLocalRate(rates[localC] ?? null);
+      }).catch(() => {});
+    } else {
+      // Trip budget is in foreign currency → show ILS equivalent
+      setLocalCurrency('ILS');
+      getExchangeRates(currency).then(rates => {
+        setLocalRate(rates['ILS'] ?? null);
+      }).catch(() => {});
+    }
   }, [currency, trip?.countries?.join(',')]);
 
 

@@ -1,5 +1,4 @@
-// Weather utilities — uses Open-Meteo (free, no API key needed, HTTPS)
-// Docs: https://open-meteo.com/en/docs
+// Weather utilities — fetches via /api/weather (server-side proxy, no external domain exposed)
 
 export interface WeatherDay {
   tempMax: number;
@@ -9,7 +8,6 @@ export interface WeatherDay {
   label: string;
 }
 
-// WMO Weather interpretation codes → icon + label
 const WMO: Record<number, { icon: string; label: string }> = {
   0:  { icon: '☀️',  label: 'Clear' },
   1:  { icon: '🌤',  label: 'Mainly clear' },
@@ -44,7 +42,6 @@ interface WeatherCache {
   data: WeatherDay[];
   ts: number;
 }
-// key = "lat,lng,startDate"
 const cache = new Map<string, WeatherCache>();
 const CACHE_TTL = 3_600_000; // 1 hour
 
@@ -58,30 +55,22 @@ export async function fetchWeatherForTrip(
   const cached = cache.get(key);
   if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
 
-  // Open-Meteo allows up to 16 forecast days; use forecast API
-  // For past trips we'd use the historical API but that requires a subscription.
-  // We'll gracefully return [] for dates too far in the past or future.
-  const start = new Date(startDateStr);
-  const end = new Date(startDateStr);
-  end.setDate(end.getDate() + days - 1);
-  const toYMD = (d: Date) => d.toISOString().split('T')[0];
-
-  const url = new URL('https://api.open-meteo.com/v1/forecast');
-  url.searchParams.set('latitude',  String(lat));
-  url.searchParams.set('longitude', String(lng));
-  url.searchParams.set('daily',     'temperature_2m_max,temperature_2m_min,weathercode');
-  url.searchParams.set('timezone',  'auto');
-  url.searchParams.set('start_date', toYMD(start));
-  url.searchParams.set('end_date',   toYMD(end));
+  const params = new URLSearchParams({
+    lat:   String(lat),
+    lng:   String(lng),
+    start: startDateStr,
+    days:  String(days),
+  });
 
   try {
-    const res = await fetch(url.toString(), { cache: 'no-store' });
+    const res = await fetch(`/api/weather?${params}`);
     if (!res.ok) return [];
     const data = await res.json();
-    const dates    = data?.daily?.time           as string[] ?? [];
-    const maxTemps = data?.daily?.temperature_2m_max as number[] ?? [];
-    const minTemps = data?.daily?.temperature_2m_min as number[] ?? [];
-    const codes    = data?.daily?.weathercode    as number[] ?? [];
+
+    const dates    = data?.daily?.time                as string[] ?? [];
+    const maxTemps = data?.daily?.temperature_2m_max  as number[] ?? [];
+    const minTemps = data?.daily?.temperature_2m_min  as number[] ?? [];
+    const codes    = data?.daily?.weathercode         as number[] ?? [];
 
     const result: WeatherDay[] = dates.map((_, i) => {
       const code = codes[i] ?? 0;
@@ -103,5 +92,5 @@ export async function fetchWeatherForTrip(
 }
 
 export function getWeatherUrl(location: string): string {
-  return `https://wttr.in/${encodeURIComponent(location)}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(location + ' weather')}`;
 }
