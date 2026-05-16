@@ -214,9 +214,24 @@ h1, h2, h3, h4, .font-display {
   letter-spacing: -0.03em;
 }
 
-[dir="rtl"] { font-family: var(--font-hebrew); }
-[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 { font-family: var(--font-hebrew); letter-spacing: 0; }
-[dir="rtl"] .section-eyebrow, [dir="rtl"] .eyebrow { font-family: var(--font-hebrew); letter-spacing: 0.05em; }
+/* ── RTL / Hebrew: redirect ALL font vars to Huninn ───────────────
+   Inline styles use var(--font-*), so overriding the variable here
+   makes every component pick up the correct font automatically.     */
+[dir="rtl"] {
+  --font-sans:    var(--font-hebrew);
+  --font-display: var(--font-hebrew);
+  --font-mono:    var(--font-hebrew);
+  --font-serif:   var(--font-hebrew);
+  font-family: var(--font-hebrew);
+}
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 {
+  font-family: var(--font-hebrew);
+  letter-spacing: 0;
+}
+[dir="rtl"] .section-eyebrow, [dir="rtl"] .eyebrow {
+  font-family: var(--font-hebrew);
+  letter-spacing: 0.05em;
+}
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
