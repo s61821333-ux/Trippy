@@ -211,6 +211,23 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
                               <Icon name="map" size={10} /> {s.location}
                             </Chip>
                           )}
+                          {s.rating !== undefined && (
+                            <Chip v="neutral" style={{ fontSize: 10 }}>
+                              ★ {s.rating.toFixed(1)}{s.ratingCount ? ` (${s.ratingCount.toLocaleString()})` : ''}
+                            </Chip>
+                          )}
+                          {s.mapsUrl && (
+                            <a
+                              href={s.mapsUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ textDecoration: 'none' }}
+                            >
+                              <Chip v="neutral" style={{ fontSize: 10, cursor: 'pointer', color: 'var(--brand)' }}>
+                                <Icon name="map" size={10} /> {locale === 'he' ? 'מפות Google' : 'Google Maps'}
+                              </Chip>
+                            </a>
+                          )}
                           {s.cost !== undefined && (
                             <Chip v="neutral" style={{ fontSize: 10 }}>
                               {t('estCost')}: ₪{s.cost}

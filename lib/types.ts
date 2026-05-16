@@ -48,6 +48,9 @@ export interface AiSuggestion {
   open: boolean;
   cost?: number;
   location?: string;
+  rating?: number;
+  ratingCount?: number;
+  mapsUrl?: string;
 }
 
 export interface SupplyItem {

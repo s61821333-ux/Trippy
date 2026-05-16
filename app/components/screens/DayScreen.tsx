@@ -641,9 +641,23 @@ export default function DayScreen() {
   const currSym = getCurrencySymbol((tripDbId && currencyByTrip[tripDbId]) || 'USD');
 
   const openMapForDay = () => {
-    const firstWithLocation = evs.find(e => e.location);
-    const query = firstWithLocation?.location ?? meta?.region ?? 'map';
-    window.open(`https://www.openstreetmap.org/search?query=${encodeURIComponent(query)}`, 'trippy-map');
+    const withCoords = evs.filter(e => e.lat && e.lng);
+    if (withCoords.length >= 2) {
+      const stops = withCoords.map(e => `${e.lat},${e.lng}`).join('/');
+      window.open(`https://www.google.com/maps/dir/${stops}/`, 'trippy-map');
+    } else if (withCoords.length === 1) {
+      const e = withCoords[0];
+      window.open(`https://www.google.com/maps/search/?api=1&query=${e.lat},${e.lng}`, 'trippy-map');
+    } else {
+      const withLoc = evs.filter(e => e.location);
+      if (withLoc.length >= 2) {
+        const stops = withLoc.map(e => encodeURIComponent(e.location!)).join('/');
+        window.open(`https://www.google.com/maps/dir/${stops}/`, 'trippy-map');
+      } else {
+        const query = withLoc[0]?.location ?? meta?.region ?? 'map';
+        window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`, 'trippy-map');
+      }
+    }
   };
 
   const weatherEmoji = (code: number) => {

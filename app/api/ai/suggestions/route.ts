@@ -4,6 +4,46 @@ import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import type { TripEvent, DayMeta, AiSuggestion, Category } from '@/lib/types';
 
+const PLACES_API_KEY = process.env.GOOGLE_MAPS_API_KEY ?? '';
+
+async function enrichWithPlaces(
+  suggestions: AiSuggestion[],
+  region: string,
+): Promise<AiSuggestion[]> {
+  if (!PLACES_API_KEY) return suggestions;
+
+  const results = await Promise.allSettled(
+    suggestions.map(async (s) => {
+      const query = s.location ? `${s.name}, ${s.location}` : `${s.name}, ${region}`;
+      try {
+        const res = await fetch('https://places.googleapis.com/v1/places:searchText', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': PLACES_API_KEY,
+            'X-Goog-FieldMask': 'places.rating,places.userRatingCount,places.googleMapsUri',
+          },
+          body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
+        });
+        if (!res.ok) return s;
+        const data = await res.json() as { places?: Array<{ rating?: number; userRatingCount?: number; googleMapsUri?: string }> };
+        const place = data.places?.[0];
+        if (!place) return s;
+        return {
+          ...s,
+          rating: place.rating,
+          ratingCount: place.userRatingCount,
+          mapsUrl: place.googleMapsUri,
+        };
+      } catch {
+        return s;
+      }
+    }),
+  );
+
+  return results.map((r, i) => (r.status === 'fulfilled' ? r.value : suggestions[i]));
+}
+
 export const maxDuration = 30;
 
 const client = new Anthropic();
@@ -156,5 +196,8 @@ Respond with ONLY the JSON array, no other text.`;
     return Response.json({ error: 'Failed to parse AI response' }, { status: 502 });
   }
 
-  return Response.json(suggestions);
+  const region = dayMeta?.region ?? destinationText;
+  const enriched = await enrichWithPlaces(suggestions, region);
+
+  return Response.json(enriched);
 }
