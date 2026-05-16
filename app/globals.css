@@ -60,9 +60,11 @@
   --radius-full: 9999px;
 
   /* Typography */
-  --font-sans:    'Huninn', 'DM Sans', sans-serif;
-  --font-display: 'Huninn', 'DM Sans', sans-serif;
-  --font-hebrew:  'Huninn', 'DM Sans', sans-serif;
+  --font-sans:    'Bricolage Grotesque', -apple-system, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', -apple-system, system-ui, sans-serif;
+  --font-serif:   'Newsreader', Georgia, serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
+  --font-hebrew:  'Bricolage Grotesque', 'DM Sans', sans-serif;
 
   /* Spacing */
   --gap-xs: 8px;
@@ -79,6 +81,24 @@
   --safe-right:  env(safe-area-inset-right, 0px);
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* ── Brand book extended tokens ── */
+  --forest:    #3B6E52;
+  --forest-lt: #8BB39A;
+  --forest-dk: #2B5340;
+  --terra-lt:  #E0916B;
+  --gold-lt:   #E6B574;
+  --paper-hi:  #FBF7F0;
+  --paper-lo:  #ECE5DA;
+  --ink-soft:  #3A2E26;
+  --rule:      rgba(26, 20, 16, 0.12);
+
+  /* ── Compass mark CSS vars (theme-adaptive) ── */
+  --compass-ring: #1A1410;
+  --compass-n:    #C4714A;
+  --compass-s:    #3B6E52;
+  --compass-ew:   #C8944A;
+  --compass-hub:  #1A1410;
 
   /* ── Backwards-compatible aliases ── */
   --ink:       var(--text);
@@ -105,6 +125,12 @@
 
 /* ─── Dark Mode ───────────────────────────────────────────────────── */
 [data-dark="true"] {
+  --compass-ring: #F4EFE8;
+  --compass-n:    #E0916B;
+  --compass-s:    #8BB39A;
+  --compass-ew:   #E6B574;
+  --compass-hub:  #F4EFE8;
+
   --bg:            #0E0C0A;
   --bg-alt:        #17140F;
   --surface:       #1C1814;
@@ -164,6 +190,8 @@
 @theme {
   --font-sans:    var(--font-sans);
   --font-display: var(--font-display);
+  --font-serif:   var(--font-serif);
+  --font-mono:    var(--font-mono);
   --font-hebrew:  var(--font-hebrew);
 }
 
@@ -183,6 +211,7 @@ html, body {
 h1, h2, h3, h4, .font-display {
   font-family: var(--font-sans);
   font-weight: 700;
+  letter-spacing: -0.03em;
 }
 
 [dir="rtl"] { font-family: var(--font-hebrew); }
@@ -247,11 +276,12 @@ h1, h2, h3, h4, .font-display {
 }
 
 .section-eyebrow, .eyebrow {
+  font-family: var(--font-mono);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: 0.10em;
-  color: var(--text-3);
+  letter-spacing: 0.16em;
+  color: var(--terra);
 }
 
 /* ─── Gradient text → plain brand color ──────────────────────── */

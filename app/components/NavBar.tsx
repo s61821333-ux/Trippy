@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Icon from './ui/Icon';
+import CompassMark from './ui/CompassMark';
 import { Screen } from '@/lib/types';
 import { useI18n } from '@/lib/i18n';
 
@@ -49,7 +50,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 8,
+              gap: 10,
               userSelect: 'none',
               background: 'transparent',
               border: 'none',
@@ -58,15 +59,16 @@ export default function NavBar({ active, onChange }: NavBarProps) {
               padding: 0,
             }}
           >
-            <span style={{ fontSize: 22, lineHeight: 1 }}>🌍</span>
+            <CompassMark size={32} />
             <span style={{
               fontFamily: 'var(--font-sans)',
-              fontSize: 18,
-              fontWeight: 800,
-              letterSpacing: '-0.03em',
-              color: 'var(--brand)',
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
+              color: 'var(--text)',
+              lineHeight: 1,
             }}>
-              Trippy
+              Trippy<span style={{ color: 'var(--terra)' }}>.</span>
             </span>
           </motion.button>
 
@@ -87,10 +89,12 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                     padding: '8px 14px',
                     borderRadius: 'var(--radius-md)',
                     border: 'none',
-                    background: isActive ? 'var(--brand-light)' : 'transparent',
-                    fontFamily: 'var(--font-sans)',
-                    fontSize: 14,
-                    fontWeight: isActive ? 700 : 500,
+                    background: isActive ? 'var(--brand-muted)' : 'transparent',
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 12,
+                    fontWeight: 500,
+                    letterSpacing: '0.10em',
+                    textTransform: 'uppercase' as const,
                     color: isActive ? 'var(--brand)' : 'var(--text-2)',
                     cursor: 'pointer',
                     outline: 'none',
@@ -151,10 +155,11 @@ export default function NavBar({ active, onChange }: NavBarProps) {
               >
                 <Icon name={tab.icon} size={22} />
                 <span style={{
-                  fontSize: 11,
-                  fontWeight: isActive ? 700 : 500,
-                  fontFamily: 'var(--font-sans)',
-                  letterSpacing: '0.01em',
+                  fontSize: 9,
+                  fontWeight: 500,
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
                   textAlign: 'center',
                   lineHeight: 1.2,
                 }}>

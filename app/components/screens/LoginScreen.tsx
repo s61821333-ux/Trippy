@@ -6,12 +6,14 @@ import GlassBtn from '../ui/GlassBtn';
 import Field from '../ui/Field';
 import Sheet from '../ui/Sheet';
 import Icon from '../ui/Icon';
+import CompassMark from '../ui/CompassMark';
 import CountriesInput from '../ui/CountriesInput';
 import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
 import { TripTheme } from '@/lib/types';
 import { dbGetUserTrips } from '@/lib/db';
+import { CURRENCIES } from '@/lib/currency';
 
 const card = {
   hidden: { opacity: 0, y: 20 },
@@ -58,14 +60,29 @@ function AuthStep() {
         {/* Logo */}
         <motion.div custom={0} variants={card} initial="hidden" animate="visible"
           style={{ marginBottom: 40, textAlign: 'center' }}>
-          <div style={{ fontSize: '3.2rem', marginBottom: 12, lineHeight: 1.2 }}>🌍</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+            <CompassMark size={72} />
+          </div>
           <h1 style={{
-            fontSize: 'clamp(2rem, 8vw, 3rem)', fontWeight: 800,
-            letterSpacing: '-0.03em', color: 'var(--brand)', lineHeight: 1.05, marginBottom: 8,
+            fontFamily: 'var(--font-sans)',
+            fontSize: 'clamp(2.4rem, 10vw, 3.5rem)',
+            fontWeight: 700,
+            letterSpacing: '-0.04em',
+            color: 'var(--text)',
+            lineHeight: 1,
+            marginBottom: 14,
           }}>
-            {t('appName')}
+            Trippy<span style={{ color: 'var(--terra)' }}>.</span>
           </h1>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-2)', fontWeight: 400, lineHeight: 1.5 }}>
+          <p style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: 'clamp(1rem, 3.5vw, 1.2rem)',
+            fontStyle: 'italic',
+            color: 'var(--text-2)',
+            fontWeight: 400,
+            lineHeight: 1.4,
+            letterSpacing: '-0.01em',
+          }}>
             {t('appTagline')}
           </p>
         </motion.div>
@@ -141,6 +158,7 @@ function TripStep() {
   const [cTheme, setCTheme] = useState<TripTheme>('desert');
   const [cDate,  setCDate]  = useState(new Date().toISOString().split('T')[0]);
   const [cCountries, setCCountries] = useState<string[]>([]);
+  const [cCurrency, setCCurrency] = useState('USD');
 
   const handleCreate = async () => {
     if (!cName.trim()) { show(t('enterTripName')); return; }
@@ -148,7 +166,7 @@ function TripStep() {
     setLoading(true);
     try {
       const days = Math.min(30, Math.max(1, parseInt(cDays, 10) || 3));
-      await createTrip(cName, days, cNick, cTheme, cDate, cCountries);
+      await createTrip(cName, days, cNick, cTheme, cDate, cCountries, cCurrency);
     } catch (err: any) {
       const msg = (err?.message ?? '').toLowerCase();
       if (msg.includes('not authenticated')) {
@@ -198,6 +216,24 @@ function TripStep() {
         paddingTop: 'max(40px, env(safe-area-inset-top, 40px))',
         paddingBottom: 'max(40px, env(safe-area-inset-bottom, 40px))',
       }}>
+
+        {/* Wordmark */}
+        <motion.div custom={-1} variants={card} initial="hidden" animate="visible"
+          style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+            <CompassMark size={28} />
+            <span style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 22,
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
+              color: 'var(--text)',
+              lineHeight: 1,
+            }}>
+              Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+            </span>
+          </div>
+        </motion.div>
 
         {/* User bar */}
         <motion.div custom={0} variants={card} initial="hidden" animate="visible" style={{ marginBottom: 24 }}>
@@ -385,6 +421,28 @@ function TripStep() {
               <Field label={t('yourNickname')} placeholder={t('createPlaceholderNick')} value={cNick} onChange={setCNick} icon={<Icon name="user" size={15} />} />
 
               <CountriesInput label={t('countriesLabel')} value={cCountries} onChange={setCCountries} />
+
+              {/* Currency */}
+              <div>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
+                  {t('currencyLabel')}
+                </label>
+                <select
+                  value={cCurrency}
+                  onChange={e => setCCurrency(e.target.value)}
+                  style={{
+                    width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                    fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
+                    border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box' as const,
+                  }}
+                >
+                  {CURRENCIES.map(c => (
+                    <option key={c.code} value={c.code}>
+                      {c.symbol} {c.code} — {locale === 'he' ? c.labelHe : c.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div style={{ display: 'flex', gap: 10 }}>
                 <div style={{ flex: 1 }}>

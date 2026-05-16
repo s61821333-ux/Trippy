@@ -11,6 +11,8 @@ import { dbGetTripEmailInvitations } from '@/lib/db';
 import { fmtDate, getGaps, toMins, getDayIcon, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget, estimateCarbonKg } from '@/lib/utils';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
+import { getCurrencySymbol, getCountryCurrency, getExchangeRates } from '@/lib/currency';
+import { fetchWeatherForTrip, getWeatherUrl, WeatherDay } from '@/lib/weather';
 
 const item = {
   hidden:  { opacity: 0, y: 14 },
@@ -38,6 +40,7 @@ export default function DashboardScreen() {
     trip, nickname, tripDbId, setScreen, setActiveDay, logout, leaveTrip, supplies,
     hideBudget, showCarbonBudget, dayEndHour,
     addExpense, deleteExpense, inviteToTrip, createInviteLink,
+    currencyByTrip,
   } = useAppStore();
   const { show } = useToast();
   const { t, locale } = useI18n();
@@ -47,6 +50,41 @@ export default function DashboardScreen() {
   const [linkCopying, setLinkCopying]   = useState(false);
   const [pendingEmails, setPendingEmails] = useState<{ email: string; status: string }[]>([]);
   const MAX_INVITES = 4;
+
+  // Currency
+  const currency = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
+  const currSym  = getCurrencySymbol(currency);
+  const [localRate, setLocalRate]       = useState<number | null>(null);
+  const [localCurrency, setLocalCurrency] = useState<string>('');
+
+  // Weather
+  const [weather, setWeather] = useState<WeatherDay[]>([]);
+
+  useEffect(() => {
+    if (!trip) return;
+    // Fetch weather for the trip based on day 1 location (or first available lat/lng)
+    let lat: number | undefined, lng: number | undefined;
+    for (const meta of trip.dayMeta ?? []) {
+      if (meta.lat && meta.lng && meta.lat !== 31 && meta.lng !== 35) { lat = meta.lat; lng = meta.lng; break; }
+    }
+    if (!lat || !lng) return;
+    fetchWeatherForTrip(lat, lng, trip.startDate, trip.days)
+      .then(setWeather)
+      .catch(() => {});
+  }, [trip?.startDate, trip?.days, JSON.stringify(trip?.dayMeta?.map(m => [m.lat, m.lng]))]);
+
+  useEffect(() => {
+    if (currency !== 'ILS' || !trip) { setLocalRate(null); setLocalCurrency(''); return; }
+    // Find local currency from first country
+    const firstCountry = trip.countries?.[0];
+    const localC = firstCountry ? getCountryCurrency(firstCountry) : 'USD';
+    if (localC === 'ILS') { setLocalRate(null); setLocalCurrency(''); return; }
+    setLocalCurrency(localC);
+    getExchangeRates('ILS').then(rates => {
+      setLocalRate(rates[localC] ?? null);
+    }).catch(() => {});
+  }, [currency, trip?.countries?.join(',')]);
+
 
   useEffect(() => {
     if (!showShare || !tripDbId) return;
@@ -162,10 +200,10 @@ export default function DashboardScreen() {
           >
             <h1 style={{
               fontSize: 'clamp(1.7rem, 5.5vw, 2.8rem)',
-              fontWeight: 800,
-              letterSpacing: '-0.03em',
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
               color: 'var(--text)',
-              lineHeight: 1.05,
+              lineHeight: 1.0,
               marginBottom: 5,
             }}>
               {trip.name}
@@ -225,11 +263,12 @@ export default function DashboardScreen() {
             transition={{ delay: 0.16, type: 'spring', stiffness: 340, damping: 32 }}
           >
             <p style={{
-              fontSize: 10, fontWeight: 700, color: 'var(--text-3)',
-              letterSpacing: '0.08em', textTransform: 'uppercase',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 10, fontWeight: 500, color: 'var(--terra)',
+              letterSpacing: '0.16em', textTransform: 'uppercase',
               marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5,
             }}>
-              ⚡ {t('nextEvent')}
+              {t('nextEvent')}
             </p>
             {nextEventData ? (
               <div
@@ -320,7 +359,14 @@ export default function DashboardScreen() {
                   <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 5 }}>
                     💰 {t('tripBudget')}
                   </span>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--success)' }}>${tripBudget}</span>
+                  <div style={{ textAlign: 'right' }}>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--success)' }}>{currSym}{tripBudget}</span>
+                    {localRate && localCurrency && (
+                      <div style={{ fontSize: 10, color: 'var(--success)', opacity: 0.7, fontWeight: 500 }}>
+                        ≈{getCurrencySymbol(localCurrency)}{Math.round(tripBudget * localRate)} {t('localEquiv')}
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
               {showCarbonBudget && carbonKg > 0 && (
@@ -369,7 +415,7 @@ export default function DashboardScreen() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {totalExpenses > 0 && (
                   <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-2)' }}>
-                    ${totalExpenses.toFixed(2)}
+                    {currSym}{totalExpenses.toFixed(2)}
                   </span>
                 )}
                 <Icon
@@ -413,7 +459,7 @@ export default function DashboardScreen() {
                         <input
                           value={expAmount}
                           onChange={e => setExpAmount(e.target.value)}
-                          placeholder="$0"
+                          placeholder={`${currSym}0`}
                           type="number"
                           min="0"
                           className="input-premium"
@@ -474,11 +520,11 @@ export default function DashboardScreen() {
                                 {exp.description}
                               </p>
                               <p style={{ fontSize: 10, color: 'var(--text-3)' }}>
-                                {exp.paidBy} {t('paid')} · ÷{exp.splitCount} = ${(exp.amount / exp.splitCount).toFixed(2)}/{t('person')}
+                                {exp.paidBy} {t('paid')} · ÷{exp.splitCount} = {currSym}{(exp.amount / exp.splitCount).toFixed(2)}/{t('person')}
                               </p>
                             </div>
                             <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', flexShrink: 0 }}>
-                              ${exp.amount.toFixed(2)}
+                              {currSym}{exp.amount.toFixed(2)}
                             </span>
                             <motion.button
                               whileTap={{ scale: 0.88 }}
@@ -506,11 +552,12 @@ export default function DashboardScreen() {
               transition={{ delay: 0.25 }}
             >
               <p style={{
-                fontSize: 10, fontWeight: 700, color: 'var(--text-3)',
-                letterSpacing: '0.08em', textTransform: 'uppercase',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10, fontWeight: 500, color: 'var(--terra)',
+                letterSpacing: '0.16em', textTransform: 'uppercase',
                 marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5,
               }}>
-                <Icon name="sparkle" size={10} /> {t('tripInsights')}
+                {t('tripInsights')}
               </p>
               <div style={{
                 display: 'flex', gap: 8,
@@ -577,6 +624,10 @@ export default function DashboardScreen() {
                   ? `${Math.floor((toMins(last.time) + last.duration) / 60).toString().padStart(2, '0')}:${String((toMins(last.time) + last.duration) % 60).padStart(2, '0')}`
                   : '—';
                 const dayIcon = getDayIcon(evs, meta?.emoji ?? '🏔️');
+                const dayWeather = weather[i] ?? null;
+                // Determine weather location: use longest event's location, fallback to meta region
+                const longestEv = evs.length ? [...evs].sort((a, b) => b.duration - a.duration)[0] : null;
+                const weatherLocation = longestEv?.location ?? meta?.region ?? '';
 
                 return (
                   <motion.div key={dayNum} variants={item}>
@@ -662,7 +713,29 @@ export default function DashboardScreen() {
                         </div>
                       </div>
 
-                      <Icon name="chevR" size={15} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+                        {dayWeather && (
+                          <a
+                            href={getWeatherUrl(weatherLocation || trip.name)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            onClick={e => e.stopPropagation()}
+                            title={`${dayWeather.label} · ${dayWeather.tempMax}°/${dayWeather.tempMin}°C`}
+                            style={{
+                              display: 'flex', flexDirection: 'column', alignItems: 'center',
+                              fontSize: 18, lineHeight: 1, textDecoration: 'none',
+                              background: 'var(--brand-light)', borderRadius: 8,
+                              padding: '4px 6px', gap: 1,
+                            }}
+                          >
+                            <span>{dayWeather.icon}</span>
+                            <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-2)' }}>
+                              {dayWeather.tempMax}°
+                            </span>
+                          </a>
+                        )}
+                        <Icon name="chevR" size={15} style={{ color: 'var(--text-3)' }} />
+                      </div>
                     </div>
                   </motion.div>
                 );

@@ -77,18 +77,27 @@ export default function JoinPage() {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: '#F4EFE8',
       padding: '24px',
-      fontFamily: '"DM Sans", system-ui, sans-serif',
+      fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
     }}>
       <div style={{ width: '100%', maxWidth: 380 }}>
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontSize: '2.8rem', marginBottom: 8 }}>🌍</div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+            <svg width="52" height="52" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="120" cy="120" r="90" stroke="#1A1410" strokeWidth="4" fill="none"/>
+              <path d="M120 36 L138 120 L120 124 L102 120 Z" fill="#C4714A"/>
+              <path d="M120 204 L102 120 L120 116 L138 120 Z" fill="#3B6E52"/>
+              <path d="M204 120 L120 102 L116 120 L120 138 Z" fill="#C8944A" opacity="0.85"/>
+              <path d="M36 120 L120 138 L124 120 L120 102 Z" fill="#C8944A" opacity="0.85"/>
+              <circle cx="120" cy="120" r="6" fill="#1A1410"/>
+            </svg>
+          </div>
           <div style={{
-            fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em',
-            color: 'oklch(52% 0.18 195)',
+            fontSize: '1.6rem', fontWeight: 700, letterSpacing: '-0.04em',
+            color: '#1A1410',
           }}>
-            Trippy
+            Trippy<span style={{ color: '#C4714A' }}>.</span>
           </div>
         </div>
 
