@@ -36,6 +36,7 @@ interface AppState {
   showCarbonBudget: boolean;
   hideTravelVault: boolean;
   dayEndHour: number;
+  currencyByTrip: Record<string, string>; // tripDbId → currency code
 
   // Supabase identity
   userId: string | null;
@@ -56,7 +57,7 @@ interface AppState {
   recordDemoClick: () => void;
   loadDemoTrip: () => void;
   loadTripById: (tripId: string) => Promise<void>;
-  createTrip: (name: string, days: number, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[]) => Promise<void>;
+  createTrip: (name: string, days: number, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[], currency?: string) => Promise<void>;
   loadInvitations: () => Promise<void>;
   acceptInvitation: (invitationId: string) => Promise<void>;
   rejectInvitation: (invitationId: string) => Promise<void>;
@@ -80,6 +81,7 @@ interface AppState {
   toggleShowCarbonBudget: () => void;
   toggleHideTravelVault: () => void;
   setDayEndHour: (h: number) => void;
+  setCurrency: (code: string) => void;
 
   addEvent: (dayNumber: number, event: Omit<TripEvent, 'id' | 'addedBy'>) => void;
   editEvent: (dayNumber: number, eventId: string, updates: Partial<TripEvent>) => void;
@@ -164,6 +166,7 @@ export const useAppStore = create<AppState>()(
       showCarbonBudget: false,
       hideTravelVault: false,
       dayEndHour: 23,
+      currencyByTrip: {},
       userId: null,
       tripDbId: null,
       authUser: null,
@@ -236,6 +239,9 @@ export const useAppStore = create<AppState>()(
       toggleShowCarbonBudget: () => set(s => ({ showCarbonBudget: !s.showCarbonBudget })),
       toggleHideTravelVault: () => set(s => ({ hideTravelVault: !s.hideTravelVault })),
       setDayEndHour: (h) => set({ dayEndHour: h }),
+      setCurrency: (code) => set(s => ({
+        currencyByTrip: { ...s.currencyByTrip, ...(s.tripDbId ? { [s.tripDbId]: code } : {}) },
+      })),
 
 
       loadTripById: async (tripId) => {
@@ -269,7 +275,7 @@ export const useAppStore = create<AppState>()(
         }
       },
 
-      createTrip: async (name, days, nickname, theme = 'desert', startDate, countries) => {
+      createTrip: async (name, days, nickname, theme = 'desert', startDate, countries, currency = 'USD') => {
         const defaultEmoji = theme === 'city' ? '🏙️' : theme === 'beach' ? '🏖️' : theme === 'nature' ? '🌲' : theme === 'mountain' ? '⛰️' : theme === 'snow' ? '❄️' : '🏔️';
 
         const dayMetas: DayMeta[] = Array.from({ length: days }, (_, i) => ({
@@ -292,12 +298,13 @@ export const useAppStore = create<AppState>()(
         if (!userId) throw new Error('Not authenticated');
         const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, theme, dayMetas, nickname, countries);
 
-        set({
+        set(s => ({
           userId, tripDbId, trip: newTrip,
           nickname: nickname || 'Traveler',
           screen: 'dashboard', activeDay: 1, supplies: [],
           tripEntryCountries: countries?.length ? countries : null,
-        });
+          currencyByTrip: { ...s.currencyByTrip, [tripDbId]: currency },
+        }));
       },
 
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later

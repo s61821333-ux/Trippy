@@ -309,6 +309,11 @@ const en = {
   markCritical: 'Mark as critical',
   unmarkCritical: 'Critical — must pack',
   criticalBlocksBar: 'Blocks progress bar from going green',
+  currencyLabel: 'Budget Currency',
+  currencyChanged: 'Currency updated ✓',
+  localEquiv: 'local equiv.',
+  weatherLabel: 'Weather',
+  tapForWeather: 'Tap for forecast',
 
   // Demo Data
   'Morning camp breakfast': 'Morning camp breakfast',
@@ -650,6 +655,11 @@ const he: typeof en = {
   markCritical: 'סמן כקריטי',
   unmarkCritical: 'קריטי — חייב לארוז',
   criticalBlocksBar: 'מונע מהפס להפוך לירוק',
+  currencyLabel: 'מטבע תקציב',
+  currencyChanged: 'מטבע עודכן ✓',
+  localEquiv: 'שווי מקומי',
+  weatherLabel: 'מזג אוויר',
+  tapForWeather: 'לחץ לתחזית',
 
   // Demo Data
   'Morning camp breakfast': 'ארוחת בוקר במחנה',

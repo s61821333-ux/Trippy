@@ -9,6 +9,7 @@ import Sheet from '../ui/Sheet';
 import PlacesInput from '../ui/PlacesInput';
 import { useAppStore } from '@/lib/store';
 import { CAT_META, fmtDate, fmtDuration, toMins, toTime, getConflicts, getGoldenHourType, getDayBudget } from '@/lib/utils';
+import { getCurrencySymbol } from '@/lib/currency';
 import { Category, TripEvent } from '@/lib/types';
 import { useToast } from '../ui/Toast';
 import SuggestionsSheet from '../SuggestionsSheet';
@@ -84,16 +85,14 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
     if (!canRoute) return;
     setFetching(true);
     setTravelMins(null);
-    const key = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ?? '';
     fetch(
-      `https://api.geoapify.com/v1/routing?waypoints=${fromEv!.lat},${fromEv!.lng}|${toEv!.lat},${toEv!.lng}&mode=drive&apiKey=${key}`
+      `/api/route-time?olat=${fromEv!.lat}&olng=${fromEv!.lng}&dlat=${toEv!.lat}&dlng=${toEv!.lng}`
     )
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : null)
       .then(d => {
-        const p = d?.features?.[0]?.properties;
-        if (p?.time != null) {
-          setTravelMins(Math.max(1, Math.round(p.time / 60)));
-          setTravelKm(p.distance != null ? Math.round(p.distance / 100) / 10 : null);
+        if (d?.durationMins != null) {
+          setTravelMins(d.durationMins);
+          setTravelKm(d.distanceKm ?? null);
         }
       })
       .catch(() => { })
@@ -228,6 +227,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
   const endT = toTime(toMins(event.time) + event.duration);
   const { voteEvent } = useAppStore();
   const darkMode = useAppStore(s => s.darkMode);
+  const currSym = useAppStore(s => getCurrencySymbol((s.tripDbId && s.currencyByTrip[s.tripDbId]) || 'USD'));
   const { t } = useI18n();
 
   const [rescheduling, setRescheduling] = useState(false);
@@ -339,7 +339,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
                 display: 'inline-flex', marginLeft: 6,
                 fontSize: 11, color: 'var(--success)', fontWeight: 700,
               }}>
-                💰 ${event.cost}
+                💰 {currSym}{event.cost}
               </span>
             )}
 
@@ -537,6 +537,7 @@ export default function DayScreen() {
     nickname,
     dayEndHour,
     darkMode,
+    currencyByTrip, tripDbId,
   } = useAppStore();
   const { show } = useToast();
   const { t, locale } = useI18n();
@@ -637,6 +638,7 @@ export default function DayScreen() {
     : trip.startDate ?? new Date().toISOString().split('T')[0];
   const dayLat = meta?.lat ?? 32;
   const dayBudget = getDayBudget(evs);
+  const currSym = getCurrencySymbol((tripDbId && currencyByTrip[tripDbId]) || 'USD');
 
   const openMapForDay = () => {
     const firstWithLocation = evs.find(e => e.location);
@@ -935,7 +937,7 @@ export default function DayScreen() {
               border: '1px solid rgba(40,160,90,0.2)',
               borderRadius: 100, padding: '1px 8px', marginLeft: 2,
             }}>
-              💰 ${dayBudget}
+              💰 {currSym}{dayBudget}
             </span>
           )}
           {conflicts.size > 0 && (
@@ -948,17 +950,26 @@ export default function DayScreen() {
               ⚠️ {conflicts.size / 2 | 0 || 1} {t('overlapCount')}
             </span>
           )}
-          {weather && (
-            <span style={{
-              fontSize: 11, fontWeight: 700,
-              color: 'var(--text-2)',
-              background: 'var(--bg-alt)',
-              border: '1px solid var(--border)',
-              borderRadius: 100, padding: '1px 8px', marginLeft: 2,
-            }}>
-              {weatherEmoji(weather.code)} {weather.temp}°C
-            </span>
-          )}
+          {weather && (() => {
+            const loc = evs.find(e => e.location)?.location ?? meta?.region ?? trip?.name ?? '';
+            return (
+              <a
+                href={`https://wttr.in/${encodeURIComponent(loc)}`}
+                target="_blank" rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                style={{
+                  fontSize: 11, fontWeight: 700,
+                  color: 'var(--text-2)',
+                  background: 'var(--bg-alt)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 100, padding: '1px 8px', marginLeft: 2,
+                  textDecoration: 'none', cursor: 'pointer',
+                }}
+              >
+                {weatherEmoji(weather.code)} {weather.temp}°C
+              </a>
+            );
+          })()}
           <Icon name="edit" size={11} style={{ color: 'var(--text-3)', marginLeft: 2 }} />
         </motion.div>
       </AnimatePresence>
@@ -1069,7 +1080,7 @@ export default function DayScreen() {
                     borderRadius: 100, padding: '5px 12px',
                     fontSize: 12, fontWeight: 700,
                   }}>
-                    💰 ${ev.cost}
+                    💰 {currSym}{ev.cost}
                   </span>
                 )}
               </div>

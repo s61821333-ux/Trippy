@@ -163,6 +163,7 @@ export function getNextEvent(trip: Trip): { event: TripEvent; dayNum: number } |
     currentDayNum = diffDays + 1;
   }
 
+  // Find next upcoming event from today onward
   for (let d = Math.max(1, currentDayNum); d <= trip.days; d++) {
     const evs = [...(trip.events[d] ?? [])].sort((a, b) => toMins(a.time) - toMins(b.time));
     for (const ev of evs) {
@@ -172,12 +173,10 @@ export function getNextEvent(trip: Trip): { event: TripEvent; dayNum: number } |
     }
   }
 
-  // Trip is in the future — return first event of the trip
-  if (currentDayNum < 1) {
-    for (let d = 1; d <= trip.days; d++) {
-      const evs = [...(trip.events[d] ?? [])].sort((a, b) => toMins(a.time) - toMins(b.time));
-      if (evs.length > 0) return { event: evs[0], dayNum: d };
-    }
+  // Fallback: trip in future, trip ended, or all today's events passed — show first event
+  for (let d = 1; d <= trip.days; d++) {
+    const evs = [...(trip.events[d] ?? [])].sort((a, b) => toMins(a.time) - toMins(b.time));
+    if (evs.length > 0) return { event: evs[0], dayNum: d };
   }
 
   return null;

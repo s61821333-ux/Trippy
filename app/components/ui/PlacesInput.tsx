@@ -9,14 +9,10 @@ export interface PlaceResult {
   lng: number;
 }
 
-interface GeoapifyFeature {
-  properties: {
-    formatted: string;
-    name?: string;
-  };
-  geometry: {
-    coordinates: [number, number]; // [lng, lat]
-  };
+interface Prediction {
+  place_id: string;
+  description: string;
+  structured_formatting?: { main_text: string };
 }
 
 interface Props {
@@ -27,11 +23,10 @@ interface Props {
   onSelect: (place: PlaceResult) => void;
 }
 
-const API_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ?? '';
-
 export default function PlacesInput({ label, placeholder, value, onChange, onSelect }: Props) {
-  const [suggestions, setSuggestions] = useState<GeoapifyFeature[]>([]);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [open, setOpen] = useState(false);
+  const [resolving, setResolving] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -49,31 +44,38 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
     onChange(text);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (!text.trim()) {
-      setSuggestions([]);
+      setPredictions([]);
       setOpen(false);
       return;
     }
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(
-          `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(text)}&apiKey=${API_KEY}&limit=5`
-        );
+        const res = await fetch(`/api/places?input=${encodeURIComponent(text)}`);
+        if (!res.ok) { setPredictions([]); return; }
         const data = await res.json();
-        setSuggestions(data.features ?? []);
-        setOpen(true);
+        if (Array.isArray(data)) {
+          setPredictions(data);
+          setOpen(data.length > 0);
+        }
       } catch {
-        setSuggestions([]);
+        setPredictions([]);
       }
     }, 300);
   };
 
-  const handleSelect = (feature: GeoapifyFeature) => {
-    const name = feature.properties.name ?? feature.properties.formatted;
-    const [lng, lat] = feature.geometry.coordinates;
-    onChange(feature.properties.formatted);
-    onSelect({ name, lat, lng });
-    setSuggestions([]);
+  const handleSelect = async (pred: Prediction) => {
+    onChange(pred.description);
+    setPredictions([]);
     setOpen(false);
+    setResolving(true);
+    try {
+      const res = await fetch(`/api/places/details?place_id=${encodeURIComponent(pred.place_id)}`);
+      if (res.ok) {
+        const detail = await res.json();
+        onSelect({ name: detail.name ?? pred.description, lat: detail.lat, lng: detail.lng });
+      }
+    } catch {}
+    setResolving(false);
   };
 
   return (
@@ -92,14 +94,18 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
           transform: 'translateY(-50%)',
           color: 'var(--text-3)', display: 'flex', pointerEvents: 'none',
         }}>
-          <Icon name="pin" size={14} />
+          {resolving ? (
+            <span style={{ fontSize: 12, animation: 'spin 1s linear infinite' }}>⟳</span>
+          ) : (
+            <Icon name="pin" size={14} />
+          )}
         </span>
         <input
           type="text"
           placeholder={placeholder}
           value={value}
           onChange={e => handleChange(e.target.value)}
-          onFocus={() => suggestions.length > 0 && setOpen(true)}
+          onFocus={() => predictions.length > 0 && setOpen(true)}
           className="input-premium"
           style={{
             background: 'var(--surface)',
@@ -115,7 +121,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
             boxSizing: 'border-box',
           }}
         />
-        {open && suggestions.length > 0 && (
+        {open && predictions.length > 0 && (
           <ul style={{
             position: 'absolute',
             top: '100%',
@@ -131,21 +137,26 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
             boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
             overflow: 'hidden',
           }}>
-            {suggestions.map((feature, i) => (
+            {predictions.map((pred, i) => (
               <li
-                key={i}
-                onMouseDown={() => handleSelect(feature)}
+                key={pred.place_id}
+                onMouseDown={() => handleSelect(pred)}
                 style={{
                   padding: '10px 14px',
                   cursor: 'pointer',
                   fontSize: 14,
                   color: 'var(--text)',
-                  borderBottom: i < suggestions.length - 1 ? '1px solid var(--border)' : 'none',
+                  borderBottom: i < predictions.length - 1 ? '1px solid var(--border)' : 'none',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
-                {feature.properties.formatted}
+                <span style={{ fontWeight: 600 }}>
+                  {pred.structured_formatting?.main_text ?? pred.description.split(',')[0]}
+                </span>
+                <span style={{ fontSize: 12, color: 'var(--text-3)', marginLeft: 4 }}>
+                  {pred.description.split(',').slice(1).join(',').trim()}
+                </span>
               </li>
             ))}
           </ul>

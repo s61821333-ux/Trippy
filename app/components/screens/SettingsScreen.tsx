@@ -9,6 +9,7 @@ import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { fmtDate } from '@/lib/utils';
 import { useI18n, Locale } from '@/lib/i18n';
+import { CURRENCIES } from '@/lib/currency';
 
 const sectionVariants = {
   hidden: {},
@@ -35,6 +36,7 @@ export default function SettingsScreen() {
     addTripNote, deleteTripNote,
     addExpense, deleteExpense,
     updateTripInfo,
+    currencyByTrip, tripDbId, setCurrency,
   } = useAppStore();
   const { show } = useToast();
   const { t, locale, setLocale, isRTL } = useI18n();
@@ -281,6 +283,29 @@ export default function SettingsScreen() {
                     onToggle={toggleReducedMotion}
                   />
                 </div>
+              </Glass>
+            </motion.div>
+
+            {/* ── Currency ── */}
+            <motion.div variants={sectionItem}>
+              <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
+                <SectionLabel label={`💱 ${t('currencyLabel')}`} />
+                <select
+                  value={(tripDbId && currencyByTrip[tripDbId]) || 'USD'}
+                  onChange={e => { setCurrency(e.target.value); show(t('currencyChanged')); }}
+                  style={{
+                    width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                    fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
+                    border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box' as const,
+                    marginTop: 4,
+                  }}
+                >
+                  {CURRENCIES.map(c => (
+                    <option key={c.code} value={c.code}>
+                      {c.symbol} {c.code} — {locale === 'he' ? c.labelHe : c.label}
+                    </option>
+                  ))}
+                </select>
               </Glass>
             </motion.div>
 
