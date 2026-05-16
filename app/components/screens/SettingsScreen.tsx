@@ -31,9 +31,7 @@ export default function SettingsScreen() {
     reducedMotion, toggleReducedMotion,
     hideBudget, toggleHideBudget,
     showCarbonBudget, toggleShowCarbonBudget,
-    hideTravelVault, toggleHideTravelVault,
     dayEndHour, setDayEndHour,
-    addTripNote, deleteTripNote,
     addExpense, deleteExpense,
     updateTripInfo,
     currencyByTrip, tripDbId, setCurrency,
@@ -41,7 +39,6 @@ export default function SettingsScreen() {
   const { show } = useToast();
   const { t, locale, setLocale, isRTL } = useI18n();
   const [nickEdit, setNickEdit] = useState(nickname);
-  const [newNote, setNewNote] = useState('');
   const [confirmState, setConfirmState] = useState<ConfirmState>(null);
 
   const confirm = (message: string, onConfirm: () => void, variant?: 'danger') =>
@@ -315,12 +312,6 @@ export default function SettingsScreen() {
                 <SectionLabel label={t('displayLabel')} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <ToggleRow
-                    label={`🗄️ ${t('hideTravelVault')}`}
-                    sub={t('hideTravelVaultSub')}
-                    checked={hideTravelVault}
-                    onToggle={toggleHideTravelVault}
-                  />
-                  <ToggleRow
                     label={`💰 ${t('hideBudget')}`}
                     sub={t('hideBudgetSub')}
                     checked={hideBudget}
@@ -395,83 +386,6 @@ export default function SettingsScreen() {
               </Glass>
             </motion.div>
 
-            {/* ── Travel Vault / Notes ── */}
-            {!hideTravelVault && <motion.div variants={sectionItem} className="md:col-span-2">
-              <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
-                <SectionLabel label={t('travelNotes')} />
-                <p style={{ fontSize: 12, color: 'var(--text-3)', marginBottom: 12, marginTop: -8 }}>
-                  {t('travelNotesSub')}
-                </p>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
-                  <input
-                    value={newNote}
-                    onChange={e => setNewNote(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' && newNote.trim()) {
-                        addTripNote(newNote.trim());
-                        setNewNote('');
-                        show(t('itemAdded'));
-                      }
-                    }}
-                    placeholder={t('notePlaceholder')}
-                    className="input-premium"
-                    style={{
-                      flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-md)',
-                      fontSize: 13, background: 'var(--bg)',
-                      border: '1px solid var(--border)', outline: 'none',
-                      color: 'var(--text)', fontFamily: 'var(--font-sans)',
-                    }}
-                  />
-                  <GlassBtn
-                    size="sm" variant="accent"
-                    onClick={() => {
-                      if (!newNote.trim()) return;
-                      addTripNote(newNote.trim());
-                      setNewNote('');
-                      show(t('itemAdded'));
-                    }}
-                  >
-                    <Icon name="plus" size={13} />
-                  </GlassBtn>
-                </div>
-                {(!trip.tripNotes || trip.tripNotes.length === 0) ? (
-                  <p style={{ fontSize: 12, color: 'var(--text-3)', fontStyle: 'italic', lineHeight: 1.55 }}>
-                    {t('noNotes')}
-                  </p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <AnimatePresence>
-                      {trip.tripNotes.map((note, i) => (
-                        <motion.div
-                          key={i}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: 20 }}
-                          style={{
-                            display: 'flex', alignItems: 'flex-start', gap: 10,
-                            background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
-                            border: '1px solid var(--border)', padding: '10px 12px',
-                          }}
-                        >
-                          <span style={{ fontSize: 14, marginTop: 1 }}>📝</span>
-                          <span style={{ flex: 1, fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>{note}</span>
-                          <motion.button
-                            whileTap={{ scale: 0.88 }}
-                            onClick={() => { deleteTripNote(i); show(t('itemRemoved')); }}
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              color: 'var(--text-3)', padding: '2px 4px', flexShrink: 0,
-                            }}
-                          >
-                            <Icon name="trash" size={13} />
-                          </motion.button>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                )}
-              </Glass>
-            </motion.div>}
 
             {/* ── Export ── */}
             <motion.div variants={sectionItem}>

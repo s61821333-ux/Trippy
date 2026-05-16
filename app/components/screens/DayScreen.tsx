@@ -548,7 +548,7 @@ export default function DayScreen() {
   const swipeStartX = useRef(0);
   const swipeStartY = useRef(0);
 
-  const [weather, setWeather] = useState<{ temp: number; code: number } | null>(null);
+  const [weather, setWeather] = useState<{ temp: number; code: number; icon?: string; label?: string } | null>(null);
 
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<TripEvent | null>(null);
@@ -580,24 +580,32 @@ export default function DayScreen() {
     return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down); };
   }, []);
 
-  // Fetch weather for the active day's location via Open-Meteo (free, no key)
+  // Fetch weather for the active day via our /api/weather proxy (Google → Open-Meteo fallback)
   useEffect(() => {
     if (!trip) return;
     const meta = trip.dayMeta[activeDay - 1];
     const lat = meta?.lat;
     const lng = meta?.lng;
     if (!lat || !lng) return;
-    const dayDate = trip.startDate
-      ? new Date(new Date(trip.startDate).getTime() + (activeDay - 1) * 86_400_000).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0];
-    fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max&timezone=auto&forecast_days=14`
-    )
+    const startDate = trip.startDate ?? new Date().toISOString().split('T')[0];
+    const params = new URLSearchParams({
+      lat: String(lat), lng: String(lng), start: startDate, days: String(trip.days),
+    });
+    fetch(`/api/weather?${params}`)
       .then(r => r.json())
       .then(d => {
-        const idx = (d?.daily?.time ?? []).indexOf(dayDate);
+        const times: string[] = d?.daily?.time ?? [];
+        const dayDate = new Date(new Date(startDate).getTime() + (activeDay - 1) * 86_400_000).toISOString().split('T')[0];
+        const idx = times.indexOf(dayDate);
         if (idx >= 0) {
-          setWeather({ code: d.daily.weathercode[idx], temp: Math.round(d.daily.temperature_2m_max[idx]) });
+          const icons: string[] = d?.daily?.icon ?? [];
+          const labels: string[] = d?.daily?.label ?? [];
+          setWeather({
+            code: d.daily.weathercode?.[idx] ?? 0,
+            temp: Math.round(d.daily.temperature_2m_max?.[idx] ?? 0),
+            icon: icons[idx],
+            label: labels[idx],
+          });
         }
       })
       .catch(() => { });
@@ -845,18 +853,6 @@ export default function DayScreen() {
           {isOnline ? t('onlineBadge') : t('offlineBadge')}
         </span>
 
-        <motion.button
-          whileTap={{ scale: 0.88 }}
-          onClick={openMapForDay}
-          title="Open in Google Maps"
-          style={{
-            background: 'transparent', border: 'none',
-            cursor: 'pointer', color: 'var(--text-2)',
-            display: 'flex', alignItems: 'center', padding: 4,
-          }}
-        >
-          <Icon name="map" size={21} />
-        </motion.button>
       </motion.div>
 
       {/* ── Day strip ────────────────────────────────────────── */}
@@ -966,9 +962,10 @@ export default function DayScreen() {
           )}
           {weather && (() => {
             const loc = evs.find(e => e.location)?.location ?? meta?.region ?? trip?.name ?? '';
+            const icon = weather.icon ?? weatherEmoji(weather.code);
             return (
               <a
-                href={`https://wttr.in/${encodeURIComponent(loc)}`}
+                href={`https://www.google.com/search?q=${encodeURIComponent(loc + ' weather')}`}
                 target="_blank" rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
                 style={{
@@ -978,9 +975,11 @@ export default function DayScreen() {
                   border: '1px solid var(--border)',
                   borderRadius: 100, padding: '1px 8px', marginLeft: 2,
                   textDecoration: 'none', cursor: 'pointer',
+                  display: 'inline-flex', alignItems: 'center', gap: 3,
                 }}
+                title={weather.label}
               >
-                {weatherEmoji(weather.code)} {weather.temp}°C
+                {icon} {weather.temp}°C
               </a>
             );
           })()}

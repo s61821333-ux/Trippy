@@ -71,10 +71,15 @@ export async function fetchWeatherForTrip(
     const maxTemps = data?.daily?.temperature_2m_max  as number[] ?? [];
     const minTemps = data?.daily?.temperature_2m_min  as number[] ?? [];
     const codes    = data?.daily?.weathercode         as number[] ?? [];
+    const icons    = data?.daily?.icon                as string[] | undefined;
+    const labels   = data?.daily?.label               as string[] | undefined;
 
     const result: WeatherDay[] = dates.map((_, i) => {
       const code = codes[i] ?? 0;
-      const { icon, label } = wmoToWeather(code);
+      // Prefer server-resolved icon/label (from Google); fall back to WMO
+      const { icon, label } = (icons?.[i] && labels?.[i])
+        ? { icon: icons[i], label: labels[i] }
+        : wmoToWeather(code);
       return {
         tempMax: Math.round(maxTemps[i] ?? 0),
         tempMin: Math.round(minTemps[i] ?? 0),

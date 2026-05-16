@@ -67,6 +67,8 @@ export default function NavBar({ active, onChange }: NavBarProps) {
               letterSpacing: '-0.04em',
               color: 'var(--text)',
               lineHeight: 1,
+              direction: 'ltr',
+              unicodeBidi: 'isolate',
             }}>
               Trippy<span style={{ color: 'var(--terra)' }}>.</span>
             </span>

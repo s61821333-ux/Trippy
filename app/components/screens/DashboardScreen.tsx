@@ -123,6 +123,18 @@ export default function DashboardScreen() {
   const carbonKg      = estimateCarbonKg(trip);
   const dayEndMins    = dayEndHour * 60;
 
+  const totalEvents = Object.values(trip.events).reduce((s, evs) => s + evs.length, 0);
+
+  // Trip countdown
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const startDate = trip.startDate ? new Date(trip.startDate) : null;
+  if (startDate) startDate.setHours(0, 0, 0, 0);
+  const endDate = startDate ? new Date(startDate.getTime() + (trip.days - 1) * 86400000) : null;
+  const daysUntil = startDate ? Math.round((startDate.getTime() - today.getTime()) / 86400000) : null;
+  const currentTripDay = (startDate && endDate && today >= startDate && today <= endDate)
+    ? Math.round((today.getTime() - startDate.getTime()) / 86400000) + 1
+    : null;
+
   const handleDayClick = (day: number) => {
     setActiveDay(day);
     setScreen('day');
@@ -160,7 +172,15 @@ export default function DashboardScreen() {
           paddingLeft: 'var(--page-px)',
           paddingRight: 'var(--page-px)',
           marginBottom: 4,
+          overflow: 'hidden',
         }}>
+          {/* Decorative gradient blob */}
+          <div style={{
+            position: 'absolute', top: -40, right: -60,
+            width: 220, height: 220, borderRadius: '50%',
+            background: 'radial-gradient(circle, var(--brand-muted) 0%, transparent 70%)',
+            opacity: 0.55, pointerEvents: 'none', zIndex: 0,
+          }} />
 
           {/* Eyebrow + avatars + share */}
           <motion.div
@@ -209,20 +229,57 @@ export default function DashboardScreen() {
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08, type: 'spring', stiffness: 340, damping: 30 }}
-            style={{ marginBottom: 18 }}
+            style={{ marginBottom: 18, position: 'relative', zIndex: 1 }}
           >
-            <h1 style={{
-              fontSize: 'clamp(1.7rem, 5.5vw, 2.8rem)',
-              fontWeight: 700,
-              letterSpacing: '-0.04em',
-              color: 'var(--text)',
-              lineHeight: 1.0,
-              marginBottom: 5,
-            }}>
-              {trip.name}
-            </h1>
-            <p style={{ fontSize: 14, color: 'var(--text-2)', fontWeight: 500 }}>
-              {trip.days} {t('days')} · {t('hi')}, {nickname} 👋
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+              <h1 style={{
+                fontSize: 'clamp(1.7rem, 5.5vw, 2.8rem)',
+                fontWeight: 700,
+                letterSpacing: '-0.04em',
+                color: 'var(--text)',
+                lineHeight: 1.0,
+              }}>
+                {trip.name}
+              </h1>
+              {currentTripDay !== null && (
+                <motion.span
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.3, type: 'spring', stiffness: 440, damping: 24 }}
+                  style={{
+                    fontSize: 11, fontWeight: 800,
+                    background: 'var(--brand)', color: 'white',
+                    borderRadius: 20, padding: '3px 10px',
+                    letterSpacing: '0.06em', textTransform: 'uppercase',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    flexShrink: 0,
+                  }}
+                >
+                  {t('day')} {currentTripDay}
+                </motion.span>
+              )}
+              {daysUntil !== null && daysUntil > 0 && (
+                <motion.span
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.3, type: 'spring', stiffness: 440, damping: 24 }}
+                  style={{
+                    fontSize: 11, fontWeight: 800,
+                    background: 'var(--terra)', color: 'white',
+                    borderRadius: 20, padding: '3px 10px',
+                    letterSpacing: '0.06em',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+                    flexShrink: 0,
+                  }}
+                >
+                  🗓 {daysUntil}d
+                </motion.span>
+              )}
+            </div>
+            <p style={{ fontSize: 14, color: 'var(--text-2)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+              {trip.days} {t('days')}
+              {totalEvents > 0 && <span style={{ color: 'var(--text-3)' }}>· {totalEvents} events</span>}
+              <span>· {t('hi')}, {nickname} 👋</span>
             </p>
           </motion.div>
 
@@ -283,51 +340,109 @@ export default function DashboardScreen() {
             }}>
               {t('nextEvent')}
             </p>
-            {nextEventData ? (
-              <div
-                onClick={() => { setActiveDay(nextEventData.dayNum); setScreen('day'); }}
-                className="premium-hover"
-                style={{
-                  background: CAT_META[nextEventData.event.category].bg,
-                  border: '1.5px solid rgba(0,0,0,0.07)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: '14px 16px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  boxShadow: 'var(--shadow-sm)',
-                }}
-              >
-                <div style={{
-                  width: 48, height: 48, borderRadius: 14, flexShrink: 0,
-                  background: 'rgba(255,255,255,0.6)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 24,
-                }}>
-                  {CAT_META[nextEventData.event.category].icon}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 3 }}>
-                    {t('day')} {nextEventData.dayNum}
-                    {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1, locale)}` : ''}
-                  </p>
-                  <p style={{
-                    fontSize: 16, fontWeight: 800, color: 'var(--text)',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2,
-                  }}>
-                    {t(nextEventData.event.name)}
-                  </p>
-                  <p style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6 }}>
-                    🕐 {nextEventData.event.time} · {fmtDuration(nextEventData.event.duration)}
-                    {nextEventData.event.location && (
-                      <span style={{ color: 'var(--text-3)' }}>· 📍 {nextEventData.event.location}</span>
+            {nextEventData ? (() => {
+              const nextWeather = weather[nextEventData.dayNum - 1] ?? null;
+              const weatherLocation = nextEventData.event.location
+                ?? trip.dayMeta?.[nextEventData.dayNum - 1]?.region
+                ?? trip.name;
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+                  <div
+                    onClick={() => { setActiveDay(nextEventData.dayNum); setScreen('day'); }}
+                    className="premium-hover"
+                    style={{
+                      background: CAT_META[nextEventData.event.category].bg,
+                      border: '1.5px solid rgba(0,0,0,0.07)',
+                      borderRadius: nextWeather ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
+                      padding: '14px 16px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 12,
+                      boxShadow: 'var(--shadow-sm)',
+                    }}
+                  >
+                    <div style={{
+                      width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                      background: 'rgba(255,255,255,0.6)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 24,
+                    }}>
+                      {CAT_META[nextEventData.event.category].icon}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 3 }}>
+                        {t('day')} {nextEventData.dayNum}
+                        {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1, locale)}` : ''}
+                      </p>
+                      <p style={{
+                        fontSize: 16, fontWeight: 800, color: 'var(--text)',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2,
+                      }}>
+                        {t(nextEventData.event.name)}
+                      </p>
+                      <p style={{ fontSize: 12, color: 'var(--text-2)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                        🕐 {nextEventData.event.time} · {fmtDuration(nextEventData.event.duration)}
+                        {nextEventData.event.location && (
+                          <span style={{ color: 'var(--text-3)' }}>· 📍 {nextEventData.event.location}</span>
+                        )}
+                      </p>
+                    </div>
+                    {nextWeather && (
+                      <div style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center',
+                        background: 'rgba(255,255,255,0.55)', borderRadius: 12,
+                        padding: '6px 10px', gap: 1, flexShrink: 0,
+                        backdropFilter: 'blur(4px)',
+                        border: '1px solid rgba(255,255,255,0.7)',
+                      }}>
+                        <span style={{ fontSize: 22, lineHeight: 1 }}>{nextWeather.icon}</span>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', lineHeight: 1.2 }}>
+                          {nextWeather.tempMax}°
+                        </span>
+                        <span style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 500 }}>
+                          {nextWeather.tempMin}°
+                        </span>
+                        <span style={{ fontSize: 8, color: 'var(--text-3)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', textAlign: 'center', maxWidth: 52, lineHeight: 1.2, marginTop: 1 }}>
+                          {nextWeather.label}
+                        </span>
+                      </div>
                     )}
-                  </p>
+                    <Icon name="chevR" size={16} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
+                  </div>
+
+                  {/* Weather footer strip for next event location */}
+                  {nextWeather && (
+                    <a
+                      href={`https://www.google.com/search?q=${encodeURIComponent(weatherLocation + ' weather forecast')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={e => e.stopPropagation()}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '8px 14px',
+                        background: 'rgba(0,0,0,0.04)',
+                        border: '1.5px solid rgba(0,0,0,0.07)',
+                        borderTop: 'none',
+                        borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
+                        textDecoration: 'none',
+                        gap: 8,
+                      }}
+                    >
+                      <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        🌍 {weatherLocation}
+                      </span>
+                      <span style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        {nextWeather.icon} {nextWeather.label} · {nextWeather.tempMax}°/{nextWeather.tempMin}°C
+                        <Icon name="chevR" size={10} style={{ color: 'var(--text-3)' }} />
+                      </span>
+                    </a>
+                  )}
                 </div>
-                <Icon name="chevR" size={16} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
-              </div>
-            ) : (
+              );
+            })() : (
               <div style={{
                 background: 'var(--surface)',
                 border: '1px dashed var(--border)',
@@ -351,6 +466,72 @@ export default function DashboardScreen() {
               </div>
             )}
           </motion.div>
+
+          {/* ═══ Weather Forecast Strip ═══ */}
+          {weather.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.20 }}
+            >
+              <p style={{
+                fontFamily: 'var(--font-mono)',
+                fontSize: 10, fontWeight: 500, color: 'var(--terra)',
+                letterSpacing: '0.16em', textTransform: 'uppercase',
+                marginBottom: 8,
+              }}>
+                {t('forecast') || 'Forecast'}
+              </p>
+              <div style={{
+                display: 'flex', gap: 6,
+                overflowX: 'auto',
+                marginLeft: `calc(-1 * var(--page-px))`,
+                marginRight: `calc(-1 * var(--page-px))`,
+                paddingLeft: 'var(--page-px)',
+                paddingRight: 'var(--page-px)',
+                paddingBottom: 4,
+                scrollbarWidth: 'none',
+              }}>
+                {weather.slice(0, 7).map((w, i) => {
+                  const dayNum = i + 1;
+                  const dateLabel = trip.startDate ? fmtDate(trip.startDate, i, locale) : `${t('day')} ${dayNum}`;
+                  const isNextEventDay = nextEventData?.dayNum === dayNum;
+                  return (
+                    <motion.a
+                      key={i}
+                      href={`https://www.google.com/search?q=${encodeURIComponent((trip.dayMeta?.[i]?.region ?? trip.name) + ' weather')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.22 + i * 0.05, type: 'spring', stiffness: 340, damping: 30 }}
+                      onClick={e => e.stopPropagation()}
+                      style={{
+                        flexShrink: 0,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                        padding: '10px 12px',
+                        borderRadius: 'var(--radius-md)',
+                        background: isNextEventDay ? 'var(--brand-muted)' : 'var(--surface)',
+                        border: `1px solid ${isNextEventDay ? 'var(--brand)' : 'var(--border)'}`,
+                        minWidth: 58,
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        boxShadow: isNextEventDay ? '0 0 0 2px var(--brand-muted)' : 'none',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <span style={{ fontSize: 10, fontWeight: 700, color: isNextEventDay ? 'var(--brand)' : 'var(--text-3)', letterSpacing: '0.04em' }}>
+                        {dateLabel.split(' ').slice(0, 2).join(' ')}
+                      </span>
+                      <span style={{ fontSize: 20, lineHeight: 1 }}>{w.icon}</span>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>{w.tempMax}°</span>
+                      <span style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 500 }}>{w.tempMin}°</span>
+                    </motion.a>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
 
           {/* Budget + Carbon chips */}
           {((tripBudget > 0 && !hideBudget) || (showCarbonBudget && carbonKg > 0)) && (
@@ -638,9 +819,10 @@ export default function DashboardScreen() {
                   : '—';
                 const dayIcon = getDayIcon(evs, meta?.emoji ?? '🏔️');
                 const dayWeather = weather[i] ?? null;
-                // Determine weather location: use longest event's location, fallback to meta region
                 const longestEv = evs.length ? [...evs].sort((a, b) => b.duration - a.duration)[0] : null;
                 const weatherLocation = longestEv?.location ?? meta?.region ?? '';
+                const isToday = currentTripDay === dayNum;
+                const isNextEventDayCard = nextEventData?.dayNum === dayNum;
 
                 return (
                   <motion.div key={dayNum} variants={item}>
@@ -648,25 +830,28 @@ export default function DashboardScreen() {
                       onClick={() => handleDayClick(dayNum)}
                       className="premium-hover"
                       style={{
-                        background: 'var(--surface)',
-                        border: '1px solid var(--border)',
+                        background: isToday ? 'var(--brand-muted)' : 'var(--surface)',
+                        border: `1px solid ${isToday ? 'var(--brand)' : 'var(--border)'}`,
                         borderRadius: 'var(--radius-lg)',
                         padding: '14px 16px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 14,
-                        boxShadow: 'var(--shadow-xs)',
+                        boxShadow: isToday ? '0 0 0 3px var(--brand-muted)' : 'var(--shadow-xs)',
                         position: 'relative',
                         overflow: 'hidden',
+                        transition: 'box-shadow 0.2s',
                       }}
                     >
                       {/* Left accent line */}
                       <div style={{
                         position: 'absolute', left: 0, top: 0, bottom: 0,
                         width: 3,
-                        background: 'linear-gradient(180deg, var(--brand) 0%, var(--brand-hover) 100%)',
-                        opacity: 0.4,
+                        background: isToday
+                          ? 'linear-gradient(180deg, var(--brand) 0%, var(--terra) 100%)'
+                          : 'linear-gradient(180deg, var(--brand) 0%, var(--brand-hover) 100%)',
+                        opacity: isToday ? 0.9 : 0.4,
                         borderRadius: '4px 0 0 4px',
                       }} />
 
@@ -674,7 +859,7 @@ export default function DashboardScreen() {
                       <div style={{ position: 'relative', flexShrink: 0 }}>
                         <div style={{
                           width: 50, height: 50, borderRadius: 14,
-                          background: 'var(--brand-light)',
+                          background: isToday ? 'rgba(var(--brand-rgb, 59,126,212),0.15)' : 'var(--brand-light)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 26,
                         }}>
@@ -682,7 +867,7 @@ export default function DashboardScreen() {
                         </div>
                         <div style={{
                           position: 'absolute', bottom: -2, right: -2,
-                          background: 'var(--brand)', color: 'white',
+                          background: isToday ? 'var(--terra)' : 'var(--brand)', color: 'white',
                           fontSize: 8, fontWeight: 800,
                           width: 16, height: 16, borderRadius: '50%',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -693,13 +878,31 @@ export default function DashboardScreen() {
                       </div>
 
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 2 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
                           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
                             {t('day')} {dayNum}
                           </span>
                           {trip.startDate && (
                             <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>
                               {fmtDate(trip.startDate, i, locale)}
+                            </span>
+                          )}
+                          {isToday && (
+                            <span style={{
+                              fontSize: 9, fontWeight: 800, letterSpacing: '0.08em',
+                              background: 'var(--terra)', color: 'white',
+                              borderRadius: 10, padding: '1px 6px', textTransform: 'uppercase',
+                            }}>
+                              Today
+                            </span>
+                          )}
+                          {!isToday && isNextEventDayCard && (
+                            <span style={{
+                              fontSize: 9, fontWeight: 800, letterSpacing: '0.08em',
+                              background: 'var(--brand)', color: 'white',
+                              borderRadius: 10, padding: '1px 6px', textTransform: 'uppercase',
+                            }}>
+                              Up Next
                             </span>
                           )}
                         </div>
@@ -737,8 +940,9 @@ export default function DashboardScreen() {
                             style={{
                               display: 'flex', flexDirection: 'column', alignItems: 'center',
                               fontSize: 18, lineHeight: 1, textDecoration: 'none',
-                              background: 'var(--brand-light)', borderRadius: 8,
-                              padding: '4px 6px', gap: 1,
+                              background: isToday ? 'rgba(255,255,255,0.6)' : 'var(--brand-light)',
+                              borderRadius: 8, padding: '4px 6px', gap: 1,
+                              border: isToday ? '1px solid rgba(255,255,255,0.8)' : 'none',
                             }}
                           >
                             <span>{dayWeather.icon}</span>
