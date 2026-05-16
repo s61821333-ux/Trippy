@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
@@ -79,11 +79,11 @@ export async function POST(request: NextRequest) {
 
       const initials = nickname
         ? nickname.slice(0, 2).toUpperCase()
-        : (session.user.user_metadata?.full_name ?? session.user.email ?? 'U').slice(0, 2).toUpperCase()
+        : (user.user_metadata?.full_name ?? user.email ?? 'U').slice(0, 2).toUpperCase()
 
       const { error: participantErr } = await admin.from('trip_participants').upsert({
         trip_id: trip.id,
-        user_id: session.user.id,
+        user_id: user.id,
         initials,
         color: 'oklch(62% 0.15 195)',
       })
@@ -128,11 +128,11 @@ export async function POST(request: NextRequest) {
 
     const fallbackInitials = nickname
       ? nickname.slice(0, 2).toUpperCase()
-      : (session.user.user_metadata?.full_name ?? session.user.email ?? 'U').slice(0, 2).toUpperCase()
+      : (user.user_metadata?.full_name ?? user.email ?? 'U').slice(0, 2).toUpperCase()
 
     const { error: participantErr2 } = await supabase.from('trip_participants').insert({
       trip_id: trip2.id,
-      user_id: session.user.id,
+      user_id: user.id,
       initials: fallbackInitials,
       color: 'oklch(62% 0.15 195)',
     })

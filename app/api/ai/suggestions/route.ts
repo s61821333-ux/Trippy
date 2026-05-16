@@ -34,8 +34,8 @@ export async function POST(request: NextRequest) {
       },
     }
   );
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.user) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
     return Response.json({ error: 'Not authenticated' }, { status: 401 });
   }
 

@@ -29,12 +29,12 @@ export async function GET(_request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user?.email) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) {
     return NextResponse.json([])
   }
 
-  const email = session.user.email.toLowerCase()
+  const email = user.email.toLowerCase()
   const admin = tryAdminClient()
 
   try {

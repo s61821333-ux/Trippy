@@ -68,8 +68,8 @@ export async function POST(
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
@@ -91,16 +91,16 @@ export async function POST(
       .from('trip_participants')
       .select('user_id')
       .eq('trip_id', trip.id)
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .maybeSingle()
 
     if (!existing) {
-      const rawName = session.user.user_metadata?.full_name ?? session.user.email ?? 'U'
+      const rawName = user.user_metadata?.full_name ?? user.email ?? 'U'
       const initials = rawName.slice(0, 2).toUpperCase()
-      const hue = (session.user.id.charCodeAt(0) * 47 + session.user.id.charCodeAt(1) * 13) % 360
+      const hue = (user.id.charCodeAt(0) * 47 + user.id.charCodeAt(1) * 13) % 360
       const { error: participantErr } = await db.from('trip_participants').insert({
         trip_id: trip.id,
-        user_id: session.user.id,
+        user_id: user.id,
         initials,
         color: `oklch(62% 0.15 ${hue})`,
       })

@@ -43,8 +43,8 @@ export async function GET(
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
@@ -57,7 +57,7 @@ export async function GET(
         .from('trip_participants')
         .select('user_id')
         .eq('trip_id', tripId)
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .maybeSingle()
 
       if (!participant) {

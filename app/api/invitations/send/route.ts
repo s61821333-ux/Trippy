@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       {
         trip_id: tripId,
         invited_email: invitedEmail.toLowerCase().trim(),
-        invited_by: session.user.id,
+        invited_by: user.id,
         status: 'pending',
       },
       { onConflict: 'trip_id,invited_email' }

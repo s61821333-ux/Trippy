@@ -29,8 +29,8 @@ export async function POST(request: NextRequest) {
     }
   )
 
-  const { data: { session } } = await supabase.auth.getSession()
-  if (!session?.user) {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
@@ -70,11 +70,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Add user as participant — insert, ignore 23505 if already a member
-    const userInitials = initials ?? session.user.user_metadata?.full_name?.slice(0, 2).toUpperCase() ?? 'U'
-    const hue = (session.user.id.charCodeAt(0) * 47 + session.user.id.charCodeAt(1) * 13) % 360
+    const userInitials = initials ?? user.user_metadata?.full_name?.slice(0, 2).toUpperCase() ?? 'U'
+    const hue = (user.id.charCodeAt(0) * 47 + user.id.charCodeAt(1) * 13) % 360
     const { error: participantErr } = await db.from('trip_participants').insert({
       trip_id: inv.trip_id,
-      user_id: session.user.id,
+      user_id: user.id,
       initials: userInitials,
       color: `oklch(62% 0.15 ${hue})`,
     })
