@@ -13,6 +13,7 @@ import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
 import { getCurrencySymbol, getCountryCurrency, getExchangeRates } from '@/lib/currency';
 import { fetchWeatherForTrip, getWeatherUrl, WeatherDay } from '@/lib/weather';
+import { getCapitalCoords } from '@/lib/capitals';
 
 function fmtAmt(n: number, decimals = 2): string {
   return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -66,16 +67,40 @@ export default function DashboardScreen() {
 
   useEffect(() => {
     if (!trip) return;
-    // Fetch weather for the trip based on day 1 location (or first available lat/lng)
+    const isDefaultIsrael = (lat: number, lng: number) =>
+      Math.abs(lat - 31) < 3 && Math.abs(lng - 35) < 3;
+
     let lat: number | undefined, lng: number | undefined;
+
+    // Try dayMeta coords (skip Israel-default)
     for (const meta of trip.dayMeta ?? []) {
-      if (meta.lat && meta.lng && !(meta.lat === 31 && meta.lng === 35)) { lat = meta.lat; lng = meta.lng; break; }
+      if (meta.lat && meta.lng && !isDefaultIsrael(meta.lat, meta.lng)) {
+        lat = meta.lat; lng = meta.lng; break;
+      }
     }
+
+    // Try events with coords
+    if (!lat) {
+      outer: for (let d = 1; d <= trip.days; d++) {
+        for (const ev of trip.events[d] ?? []) {
+          if (ev.lat && ev.lng && !isDefaultIsrael(ev.lat, ev.lng)) {
+            lat = ev.lat; lng = ev.lng; break outer;
+          }
+        }
+      }
+    }
+
+    // Fall back to destination country capital
+    if (!lat && trip.countries?.length) {
+      const capital = getCapitalCoords(trip.countries[0]);
+      if (capital) { lat = capital.lat; lng = capital.lng; }
+    }
+
     if (!lat || !lng) return;
     fetchWeatherForTrip(lat, lng, trip.startDate, trip.days)
       .then(setWeather)
       .catch(() => {});
-  }, [trip?.startDate, trip?.days, JSON.stringify(trip?.dayMeta?.map(m => [m.lat, m.lng]))]);
+  }, [trip?.startDate, trip?.days, JSON.stringify(trip?.dayMeta?.map(m => [m.lat, m.lng])), trip?.countries?.join(',')]);
 
   useEffect(() => {
     if (!trip) { setLocalRate(null); setLocalCurrency(''); return; }

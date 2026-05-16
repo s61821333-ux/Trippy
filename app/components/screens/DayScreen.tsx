@@ -9,6 +9,7 @@ import Sheet from '../ui/Sheet';
 import PlacesInput from '../ui/PlacesInput';
 import { useAppStore } from '@/lib/store';
 import { CAT_META, fmtDate, fmtDuration, toMins, toTime, getConflicts, getGoldenHourType, getDayBudget } from '@/lib/utils';
+import { getCapitalCoords } from '@/lib/capitals';
 import { getCurrencySymbol } from '@/lib/currency';
 import { Category, TripEvent } from '@/lib/types';
 import { useToast } from '../ui/Toast';
@@ -581,12 +582,53 @@ export default function DayScreen() {
   }, []);
 
   // Fetch weather for the active day via our /api/weather proxy (Google → Open-Meteo fallback)
+  // Coordinate resolution order:
+  //   1. Events on this day with valid coords
+  //   2. dayMeta for this day (only if not in the Israel-default ~31,35 area)
+  //   3. Any other day's dayMeta with valid non-default coords
+  //   4. Capital of the first destination country
   useEffect(() => {
     if (!trip) return;
-    const meta = trip.dayMeta[activeDay - 1];
-    const lat = meta?.lat;
-    const lng = meta?.lng;
+
+    const isDefaultIsrael = (lat: number, lng: number) =>
+      Math.abs(lat - 31) < 3 && Math.abs(lng - 35) < 3;
+
+    const dayEvs = trip.events[activeDay] ?? [];
+    let lat: number | undefined;
+    let lng: number | undefined;
+
+    // 1. Events on this day
+    for (const ev of dayEvs) {
+      if (ev.lat && ev.lng && !isDefaultIsrael(ev.lat, ev.lng)) {
+        lat = ev.lat; lng = ev.lng; break;
+      }
+    }
+
+    // 2. dayMeta for this day
+    if (!lat) {
+      const m = trip.dayMeta[activeDay - 1];
+      if (m?.lat && m?.lng && !isDefaultIsrael(m.lat, m.lng)) {
+        lat = m.lat; lng = m.lng;
+      }
+    }
+
+    // 3. Any other day's dayMeta
+    if (!lat) {
+      for (const m of trip.dayMeta ?? []) {
+        if (m?.lat && m?.lng && !isDefaultIsrael(m.lat, m.lng)) {
+          lat = m.lat; lng = m.lng; break;
+        }
+      }
+    }
+
+    // 4. Capital of the destination country
+    if (!lat && trip.countries?.length) {
+      const capital = getCapitalCoords(trip.countries[0]);
+      if (capital) { lat = capital.lat; lng = capital.lng; }
+    }
+
     if (!lat || !lng) return;
+
     const startDate = trip.startDate ?? new Date().toISOString().split('T')[0];
     const params = new URLSearchParams({
       lat: String(lat), lng: String(lng), start: startDate, days: String(trip.days),
@@ -610,7 +652,7 @@ export default function DayScreen() {
       })
       .catch(() => { });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDay, trip?.startDate, trip?.dayMeta?.[activeDay - 1]?.lat, trip?.dayMeta?.[activeDay - 1]?.lng]);
+  }, [activeDay, trip?.startDate, JSON.stringify(trip?.dayMeta), JSON.stringify((trip?.events[activeDay] ?? []).map(e => [e.lat, e.lng]))]);
 
 
   // Auto-detect category from event name when user hasn't manually chosen one
