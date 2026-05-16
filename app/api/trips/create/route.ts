@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
           start_date: startDate,
           theme: theme || null,
           countries: countries?.length ? countries : null,
+          created_by: user.id,
         })
         .select('id')
         .single()
@@ -118,6 +119,7 @@ export async function POST(request: NextRequest) {
         start_date: startDate,
         theme: theme || null,
         countries: countries?.length ? countries : null,
+        created_by: user.id,
       })
       .select('id')
       .single()
