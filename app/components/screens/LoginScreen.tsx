@@ -63,7 +63,7 @@ function AuthStep() {
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
             <CompassMark size={72} />
           </div>
-          <h1 style={{
+          <h1 dir="ltr" style={{
             fontFamily: 'var(--font-sans)',
             fontSize: 'clamp(2.4rem, 10vw, 3.5rem)',
             fontWeight: 700,

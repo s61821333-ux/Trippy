@@ -16,6 +16,7 @@ By accessing or using Trippy ("the App", "the Service"), you agree to these Term
 
 2. DESCRIPTION OF SERVICE
 Trippy is a collaborative trip-planning tool that allows users to organize itineraries, track expenses, manage packing lists, and share trip details with invited participants. The Service is provided for personal, non-commercial use only.
+The Service is provided free of charge and is subject to change at the sole discretion of the operator.
 
 3. ELIGIBILITY
 You must be at least 16 years of age to use this Service. By using the App, you confirm that you meet this requirement. If you are under 18, you confirm that a parent or legal guardian has reviewed and agreed to these Terms on your behalf.
@@ -93,6 +94,7 @@ const TERMS_HE = `תנאי שימוש ומדיניות פרטיות
 
 2. תיאור השירות
 Trippy הוא כלי לתכנון טיולים שיתופי המאפשר למשתמשים לארגן לוחות זמנים, לעקוב אחר הוצאות, לנהל רשימות ציוד ולשתף פרטי טיול עם משתתפים מוזמנים. השירות מיועד לשימוש אישי ולא מסחרי בלבד.
+השירות ניתן בחינם ונתון לשינוי לשיקול דעתו של המפעיל.
 
 3. כשירות לשימוש
 עליך להיות בן 16 לפחות כדי להשתמש בשירות זה. בשימוש באפליקציה, אתה מאשר כי אתה עומד בדרישה זו. אם אתה מתחת לגיל 18, אתה מאשר כי הורה או אפוטרופוס קרא ואישר תנאים אלה בשמך.

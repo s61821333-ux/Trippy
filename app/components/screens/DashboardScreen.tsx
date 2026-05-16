@@ -14,6 +14,10 @@ import { useI18n } from '@/lib/i18n';
 import { getCurrencySymbol, getCountryCurrency, getExchangeRates } from '@/lib/currency';
 import { fetchWeatherForTrip, getWeatherUrl, WeatherDay } from '@/lib/weather';
 
+function fmtAmt(n: number, decimals = 2): string {
+  return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+}
+
 const item = {
   hidden:  { opacity: 0, y: 14 },
   visible: { opacity: 1, y: 0,
@@ -65,7 +69,7 @@ export default function DashboardScreen() {
     // Fetch weather for the trip based on day 1 location (or first available lat/lng)
     let lat: number | undefined, lng: number | undefined;
     for (const meta of trip.dayMeta ?? []) {
-      if (meta.lat && meta.lng && meta.lat !== 31 && meta.lng !== 35) { lat = meta.lat; lng = meta.lng; break; }
+      if (meta.lat && meta.lng && !(meta.lat === 31 && meta.lng === 35)) { lat = meta.lat; lng = meta.lng; break; }
     }
     if (!lat || !lng) return;
     fetchWeatherForTrip(lat, lng, trip.startDate, trip.days)
@@ -369,10 +373,10 @@ export default function DashboardScreen() {
                     💰 {t('tripBudget')}
                   </span>
                   <div style={{ textAlign: 'right' }}>
-                    <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--success)' }}>{currSym}{tripBudget}</span>
+                    <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--success)' }}>{currSym}{fmtAmt(tripBudget, 0)}</span>
                     {localRate && localCurrency && (
                       <div style={{ fontSize: 10, color: 'var(--success)', opacity: 0.7, fontWeight: 500 }}>
-                        ≈{getCurrencySymbol(localCurrency)}{Math.round(tripBudget * localRate)} {t('localEquiv')}
+                        ≈{getCurrencySymbol(localCurrency)}{fmtAmt(Math.round(tripBudget * localRate), 0)} {t('localEquiv')}
                       </div>
                     )}
                   </div>
@@ -424,7 +428,7 @@ export default function DashboardScreen() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {totalExpenses > 0 && (
                   <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-2)' }}>
-                    {currSym}{totalExpenses.toFixed(2)}
+                    {currSym}{fmtAmt(totalExpenses)}
                   </span>
                 )}
                 <Icon
@@ -529,11 +533,11 @@ export default function DashboardScreen() {
                                 {exp.description}
                               </p>
                               <p style={{ fontSize: 10, color: 'var(--text-3)' }}>
-                                {exp.paidBy} {t('paid')} · ÷{exp.splitCount} = {currSym}{(exp.amount / exp.splitCount).toFixed(2)}/{t('person')}
+                                {exp.paidBy} {t('paid')} · ÷{exp.splitCount} = {currSym}{fmtAmt(exp.amount / exp.splitCount)}/{t('person')}
                               </p>
                             </div>
                             <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', flexShrink: 0 }}>
-                              {currSym}{exp.amount.toFixed(2)}
+                              {currSym}{fmtAmt(exp.amount)}
                             </span>
                             <motion.button
                               whileTap={{ scale: 0.88 }}
@@ -738,8 +742,11 @@ export default function DashboardScreen() {
                             }}
                           >
                             <span>{dayWeather.icon}</span>
-                            <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-2)' }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>
                               {dayWeather.tempMax}°
+                            </span>
+                            <span style={{ fontSize: 9, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
+                              {dayWeather.tempMin}°
                             </span>
                           </a>
                         )}
