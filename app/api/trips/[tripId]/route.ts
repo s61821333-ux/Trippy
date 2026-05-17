@@ -9,7 +9,7 @@ const TRIP_SELECT = `
   events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes ),
   expenses ( id, description, amount, split_count ),
   emergency_contacts ( id, name, phone, type ),
-  supplies ( id, name, category, checked, critical ),
+  supplies ( id, name, category, checked, critical, assignee ),
   trip_participants ( user_id, initials, color )
 `
 

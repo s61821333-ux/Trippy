@@ -7,7 +7,7 @@ import Chip from '../ui/Chip';
 import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
 import { useAppStore } from '@/lib/store';
-import { dbGetTripEmailInvitations } from '@/lib/db';
+import { dbGetTripEmailInvitations, dbCancelInvitation } from '@/lib/db';
 import { fmtDate, getGaps, toMins, getDayIcon, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget, estimateCarbonKg } from '@/lib/utils';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
@@ -44,7 +44,7 @@ export default function DashboardScreen() {
   const {
     trip, nickname, tripDbId, setScreen, setActiveDay, logout, leaveTrip, supplies,
     hideBudget, showCarbonBudget, dayEndHour,
-    addExpense, deleteExpense, inviteToTrip, createInviteLink,
+    addExpense, deleteExpense, inviteToTrip,
     currencyByTrip,
   } = useAppStore();
   const { show } = useToast();
@@ -52,8 +52,7 @@ export default function DashboardScreen() {
   const [showShare, setShowShare]       = useState(false);
   const [inviteEmail, setInviteEmail]   = useState('');
   const [inviteSending, setInviteSending] = useState(false);
-  const [linkCopying, setLinkCopying]   = useState(false);
-  const [pendingEmails, setPendingEmails] = useState<{ email: string; status: string }[]>([]);
+  const [pendingEmails, setPendingEmails] = useState<{ id: string; email: string; status: string }[]>([]);
   const MAX_INVITES = 4;
 
   // Currency
@@ -1022,29 +1021,6 @@ export default function DashboardScreen() {
             </div>
           </div>
 
-          {/* Quick link share */}
-          <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 8 }}>
-            {t('quickLinkLabel')}
-          </p>
-          <GlassBtn
-            style={{ width: '100%', marginBottom: 18, gap: 8 }}
-            onClick={async () => {
-              setLinkCopying(true);
-              try {
-                const link = await createInviteLink();
-                await navigator.clipboard.writeText(link);
-                show(t('linkCopied'));
-              } catch {
-                show(t('noLink'));
-              }
-              setLinkCopying(false);
-            }}
-            disabled={linkCopying}
-          >
-            <Icon name="share" size={14} />
-            {linkCopying ? '…' : t('copyLink')}
-          </GlassBtn>
-
           {/* Invite by email — max 4 pending */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)' }}>
@@ -1074,8 +1050,8 @@ export default function DashboardScreen() {
                     try {
                       await inviteToTrip(inviteEmail);
                       show(t('inviteSent'));
-                      setPendingEmails(prev => [...prev, { email: inviteEmail.toLowerCase().trim(), status: 'pending' }]);
                       setInviteEmail('');
+                      if (tripDbId) dbGetTripEmailInvitations(tripDbId).then(setPendingEmails).catch(() => {});
                     } catch { show(t('inviteFailed')); }
                     setInviteSending(false);
                   }
@@ -1095,8 +1071,8 @@ export default function DashboardScreen() {
                   try {
                     await inviteToTrip(inviteEmail);
                     show(t('inviteSent'));
-                    setPendingEmails(prev => [...prev, { email: inviteEmail.toLowerCase().trim(), status: 'pending' }]);
                     setInviteEmail('');
+                    if (tripDbId) dbGetTripEmailInvitations(tripDbId).then(setPendingEmails).catch(() => {});
                   } catch { show(t('inviteFailed')); }
                   setInviteSending(false);
                 }}
@@ -1118,9 +1094,27 @@ export default function DashboardScreen() {
                   background: 'var(--bg)', border: '1px solid var(--border)', marginBottom: 6,
                 }}>
                   <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{inv.email}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}>
-                    {t('pendingLabel')}
-                  </span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}>
+                      {t('pendingLabel')}
+                    </span>
+                    {inv.id && (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await dbCancelInvitation(inv.id);
+                            setPendingEmails(prev => prev.filter((_, j) => j !== i));
+                          } catch { show(t('inviteFailed')); }
+                        }}
+                        style={{
+                          fontSize: 11, color: 'var(--danger, #e53e3e)', fontWeight: 600,
+                          background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
+                        }}
+                      >
+                        {t('cancelInvite')}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

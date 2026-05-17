@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   url.searchParams.set('key', key)
 
   try {
-    const res = await fetch(url.toString(), { next: { revalidate: 0 } })
+    const res = await fetch(url.toString(), { next: { revalidate: 86400 } })
     const data = await res.json()
     if (data.status !== 'OK') {
       return NextResponse.json({ error: data.status }, { status: 502 })

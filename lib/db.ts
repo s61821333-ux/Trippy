@@ -190,6 +190,7 @@ export async function dbAddSupply(tripId: string, supply: SupplyItem) {
     category: supply.category,
     checked: supply.checked,
     critical: supply.critical ?? false,
+    assignee: supply.assignee ?? null,
   })
   if (error) throw error
 }
@@ -278,15 +279,23 @@ export async function dbGetOrCreateInviteToken(tripId: string): Promise<string> 
   return token
 }
 
-export async function dbGetTripEmailInvitations(tripId: string): Promise<{ email: string; status: string }[]> {
+export async function dbGetTripEmailInvitations(tripId: string): Promise<{ id: string; email: string; status: string }[]> {
   const { data, error } = await sb()
     .from('trip_invitations')
-    .select('invited_email, status')
+    .select('id, invited_email, status')
     .eq('trip_id', tripId)
     .not('invited_email', 'is', null)
     .eq('status', 'pending')
   if (error) return []
-  return (data ?? []).map((r: any) => ({ email: r.invited_email, status: r.status }))
+  return (data ?? []).map((r: any) => ({ id: r.id, email: r.invited_email, status: r.status }))
+}
+
+export async function dbCancelInvitation(invitationId: string): Promise<void> {
+  const { error } = await sb()
+    .from('trip_invitations')
+    .delete()
+    .eq('id', invitationId)
+  if (error) throw error
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -360,6 +369,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     category: s.category ?? 'Other',
     checked:  s.checked  ?? false,
     critical: s.critical ?? false,
+    assignee: s.assignee ?? undefined,
   }))
 
   const trip = {

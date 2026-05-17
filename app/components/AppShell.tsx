@@ -5,17 +5,19 @@ import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { I18nProvider, useI18n } from '@/lib/i18n';
 import { createClient } from '@/utils/supabase/client';
+import dynamic from 'next/dynamic';
 import NavBar from './NavBar';
 import LoginScreen from './screens/LoginScreen';
-import DashboardScreen from './screens/DashboardScreen';
-import DayScreen from './screens/DayScreen';
-import SuppliesScreen from './screens/SuppliesScreen';
-import SettingsScreen from './screens/SettingsScreen';
-import NotesScreen from './screens/NotesScreen';
 import { ToastProvider, useToast } from './ui/Toast';
-import TourOverlay from './TourOverlay';
-import TripEntryAnimation from './TripEntryAnimation';
-import TermsModal from './TermsModal';
+
+const DashboardScreen   = dynamic(() => import('./screens/DashboardScreen'));
+const DayScreen         = dynamic(() => import('./screens/DayScreen'));
+const SuppliesScreen    = dynamic(() => import('./screens/SuppliesScreen'));
+const SettingsScreen    = dynamic(() => import('./screens/SettingsScreen'));
+const NotesScreen       = dynamic(() => import('./screens/NotesScreen'));
+const TourOverlay       = dynamic(() => import('./TourOverlay'));
+const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
+const TermsModal        = dynamic(() => import('./TermsModal'));
 
 // Watches lastSyncError globally and shows a toast — must live inside ToastProvider
 function SyncErrorWatcher() {
