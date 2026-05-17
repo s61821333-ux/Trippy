@@ -6,6 +6,7 @@ import Glass from '../ui/Glass';
 import GlassBtn from '../ui/GlassBtn';
 import Chip from '../ui/Chip';
 import Icon from '../ui/Icon';
+import { SupplyIcon } from '../ui/EventIcon';
 import Field from '../ui/Field';
 import { useAppStore } from '@/lib/store';
 import { SupplyItem } from '@/lib/types';
@@ -14,9 +15,6 @@ import { useI18n } from '@/lib/i18n';
 
 type Category = SupplyItem['category'];
 const CATS: Category[] = ['Water', 'Food', 'Gear', 'Medical', 'Documents', 'Other'];
-const CAT_ICONS: Record<Category, string> = {
-  Water: '💧', Food: '🥜', Gear: '🎒', Medical: '🩺', Documents: '📄', Other: '📦',
-};
 
 const listVariants = {
   hidden: {},
@@ -129,7 +127,7 @@ export default function SuppliesScreen() {
                 transition: 'all 0.15s ease',
               }}
             >
-              {c !== 'All' && CAT_ICONS[c as Category]} {c}
+              {c !== 'All' && <SupplyIcon category={c as Category} size={13} />} {c}
             </motion.button>
           ))}
         </div>
@@ -219,7 +217,7 @@ export default function SuppliesScreen() {
                     </div>
 
                     <Chip v="neutral" style={{ fontSize: 10, flexShrink: 0 }}>
-                      {CAT_ICONS[item.category]} {item.category}
+                      <SupplyIcon category={item.category} size={11} /> {item.category}
                     </Chip>
 
                     {/* Critical pin toggle */}
@@ -314,7 +312,7 @@ export default function SuppliesScreen() {
                         transition: 'all 0.15s ease',
                       }}
                     >
-                      {CAT_ICONS[c]} {c}
+                      <SupplyIcon category={c} size={13} /> {c}
                     </motion.button>
                   ))}
                 </div>

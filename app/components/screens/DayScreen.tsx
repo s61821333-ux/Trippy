@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
+import { EventIcon } from '../ui/EventIcon';
 import Field from '../ui/Field';
 import Sheet from '../ui/Sheet';
 import PlacesInput from '../ui/PlacesInput';
@@ -54,10 +55,10 @@ function EventThumbnail({ category }: { category: Category }) {
       borderRadius: 14,
       background: CAT_GRADIENTS[category],
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 28,
       flexShrink: 0,
+      color: meta.color,
     }}>
-      {meta.icon}
+      <EventIcon category={category as any} size={30} />
     </div>
   );
 }
@@ -391,7 +392,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
                 borderRadius: 100, padding: '3px 9px',
                 fontSize: 10, fontWeight: 800, letterSpacing: '0.02em',
               }}>
-                {meta.icon} {meta.label}
+                <EventIcon category={event.category as any} size={10} /> {meta.label}
               </span>
               <motion.button whileTap={{ scale: 0.85 }} onClick={e => { e.stopPropagation(); voteEvent(dayNumber, event.id, nickname, 'up'); }}
                 style={{
@@ -1106,7 +1107,7 @@ export default function DayScreen() {
           <Sheet
             onClose={() => setFocusedEvent(null)}
             title={t(ev.name as any)}
-            subtitle={`${meta2.icon} ${meta2.label} · ${ev.time} – ${endT2}`}
+            subtitle={`${meta2.label} · ${ev.time} – ${endT2}`}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
@@ -1126,7 +1127,7 @@ export default function DayScreen() {
                   borderRadius: 100, padding: '5px 12px',
                   fontSize: 12, fontWeight: 800,
                 }}>
-                  {meta2.icon} {fmtDuration(ev.duration)}
+                  <EventIcon category={ev.category as any} size={12} /> {fmtDuration(ev.duration)}
                 </span>
                 {ev.cost != null && ev.cost > 0 && (
                   <span style={{
@@ -1353,7 +1354,7 @@ export default function DayScreen() {
                         cursor: 'pointer', transition: 'all 0.15s',
                       }}
                     >
-                      {m.icon} {m.label}
+                      <EventIcon category={c as any} size={12} /> {m.label}
                     </motion.button>
                   );
                 })}
