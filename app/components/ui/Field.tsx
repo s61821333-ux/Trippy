@@ -60,7 +60,7 @@ export default function Field({ label, type = 'text', placeholder, value, onChan
             value={value}
             onChange={e => onChange(e.target.value)}
             className="input-premium"
-            style={{ ...INPUT_STYLE, resize: 'none', ...style }}
+            style={{ ...INPUT_STYLE, resize: 'none', minHeight: 44, ...style }}
           />
         ) : (
           <input

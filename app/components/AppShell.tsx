@@ -206,7 +206,7 @@ function Shell() {
           data-dark={darkMode ? 'true' : undefined}
           data-high-contrast={highContrast ? 'true' : undefined}
           data-reduced-motion={reducedMotion ? 'true' : undefined}
-          className="relative flex flex-col w-screen h-[100dvh] overflow-hidden"
+          className="fixed inset-0 flex flex-col overflow-hidden"
           style={{
             background: 'var(--bg)',
             paddingLeft: 'env(safe-area-inset-left, 0px)',

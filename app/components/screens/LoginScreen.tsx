@@ -431,9 +431,11 @@ function TripStep() {
                   value={cCurrency}
                   onChange={e => setCCurrency(e.target.value)}
                   style={{
-                    width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                    fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
+                    width: '100%', padding: '11px 12px', borderRadius: 'var(--radius-md)',
+                    fontSize: 15, fontWeight: 500, minHeight: 44,
+                    background: 'var(--bg)', color: 'var(--text)',
                     border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box' as const,
+                    fontFamily: 'var(--font-sans)',
                   }}
                 >
                   {CURRENCIES.map(c => (
@@ -454,9 +456,11 @@ function TripStep() {
                   </label>
                   <input
                     type="date" value={cDate} onChange={e => setCDate(e.target.value)}
+                    className="input-premium"
                     style={{
-                      width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                      fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
+                      width: '100%', padding: '11px 12px', borderRadius: 'var(--radius-md)',
+                      fontSize: 15, fontWeight: 500, minHeight: 44,
+                      background: 'var(--bg)', color: 'var(--text)',
                       border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box' as const,
                     }}
                   />

@@ -141,14 +141,16 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
               <li
                 key={pred.place_id}
                 onMouseDown={() => handleSelect(pred)}
+                onTouchEnd={e => { e.preventDefault(); handleSelect(pred); }}
                 style={{
-                  padding: '10px 14px',
+                  padding: '12px 14px', minHeight: 48,
                   cursor: 'pointer',
                   fontSize: 14,
                   color: 'var(--text)',
                   borderBottom: i < predictions.length - 1 ? '1px solid var(--border)' : 'none',
+                  touchAction: 'manipulation',
                 }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-alt)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
               >
                 <span style={{ fontWeight: 600 }}>

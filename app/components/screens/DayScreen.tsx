@@ -459,10 +459,12 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
                   {([-60, -30, +30, +60] as const).map(d => (
                     <motion.button key={d} whileTap={{ scale: 0.9 }} onClick={() => shift(d)}
                       style={{
-                        padding: '5px 11px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                        padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700,
+                        minHeight: 44, minWidth: 52,
                         background: 'var(--surface)', cursor: 'pointer',
                         color: d < 0 ? 'var(--danger)' : 'var(--brand)',
                         border: `1px solid ${d < 0 ? 'rgba(192,57,43,0.2)' : 'rgba(59,110,82,0.25)'}`,
+                        touchAction: 'manipulation',
                       }}>
                       {d > 0 ? `+${d}m` : `${d}m`}
                     </motion.button>
@@ -472,10 +474,11 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
                     value={pendingTime}
                     onChange={e => setPendingTime(e.target.value)}
                     style={{
-                      padding: '5px 10px', borderRadius: 8,
-                      fontSize: 13, fontWeight: 800,
+                      padding: '8px 10px', borderRadius: 8, minHeight: 44,
+                      fontSize: 15, fontWeight: 800,
                       background: 'var(--surface)', color: 'var(--text)',
                       border: '1px solid var(--border)', outline: 'none', marginLeft: 'auto',
+                      boxSizing: 'border-box' as const,
                     }}
                   />
                 </div>
@@ -1316,12 +1319,13 @@ export default function DayScreen() {
                         setFDur(String(dur));
                       }}
                       style={{
-                        padding: '8px 10px', borderRadius: 10,
-                        fontSize: 13, fontWeight: 700,
+                        padding: '8px 10px', borderRadius: 10, minHeight: 44,
+                        fontSize: 15, fontWeight: 700,
                         background: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'var(--brand)' : 'var(--bg)',
                         color: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'white' : 'var(--text)',
                         border: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'none' : '1px solid var(--border)',
                         outline: 'none', cursor: 'pointer',
+                        boxSizing: 'border-box' as const,
                       }}
                     />
                   </div>
@@ -1367,32 +1371,31 @@ export default function DayScreen() {
               onChange={name => { setFLoc(name); setFLat(undefined); setFLng(undefined); }}
               onSelect={({ name, lat, lng }) => { setFLoc(name); setFLat(lat); setFLng(lng); }}
             />
-            <div style={{ display: 'flex', gap: 12 }}>
-              <div style={{ flex: 1 }}>
-                <Field
-                  label={t('notesOpt')} placeholder={t('notesFullPlaceholder')}
-                  value={fNotes} onChange={setFNotes} rows={2}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
-                  {t('costLabel')}
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  placeholder={t('costPlaceholder')}
-                  value={fCost}
-                  onChange={e => setFCost(e.target.value)}
-                  style={{
-                    width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                    fontSize: 14, fontWeight: 500,
-                    background: 'var(--bg)', color: 'var(--text)',
-                    border: '1px solid var(--border)', outline: 'none',
-                    boxSizing: 'border-box' as const,
-                  }}
-                />
-              </div>
+            <Field
+              label={t('notesOpt')} placeholder={t('notesFullPlaceholder')}
+              value={fNotes} onChange={setFNotes} rows={2}
+            />
+            <div>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
+                {t('costLabel')}
+              </label>
+              <input
+                type="number"
+                min="0"
+                inputMode="decimal"
+                placeholder={t('costPlaceholder')}
+                value={fCost}
+                onChange={e => setFCost(e.target.value)}
+                className="input-premium"
+                style={{
+                  width: '100%', padding: '11px 14px', borderRadius: 'var(--radius-md)',
+                  fontSize: 15, fontWeight: 500, minHeight: 44,
+                  background: 'var(--bg)', color: 'var(--text)',
+                  border: '1px solid var(--border)', outline: 'none',
+                  boxSizing: 'border-box' as const,
+                  fontFamily: 'var(--font-sans)',
+                }}
+              />
             </div>
 
             {/* Tags input */}
@@ -1404,12 +1407,14 @@ export default function DayScreen() {
                 value={fTags}
                 onChange={e => setFTags(e.target.value)}
                 placeholder={t('tagsPlaceholder')}
+                className="input-premium"
                 style={{
-                  width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                  fontSize: 13, fontWeight: 500,
+                  width: '100%', padding: '11px 14px', borderRadius: 'var(--radius-md)',
+                  fontSize: 15, fontWeight: 500, minHeight: 44,
                   background: 'var(--bg)', color: 'var(--text)',
                   border: '1px solid var(--border)', outline: 'none',
                   boxSizing: 'border-box' as const,
+                  fontFamily: 'var(--font-sans)',
                 }}
               />
               {fTags.trim() && (
@@ -1535,15 +1540,18 @@ export default function DayScreen() {
               </div>
               <input
                 type="number"
+                inputMode="numeric"
                 placeholder={t('customMinutesPlaceholder')}
                 value={driveMinutes}
                 onChange={e => setDriveMinutes(e.target.value)}
+                className="input-premium"
                 style={{
-                  width: '100%', padding: '10px 12px', borderRadius: 10,
-                  fontSize: 14, fontWeight: 600,
+                  width: '100%', padding: '11px 14px', borderRadius: 10,
+                  fontSize: 15, fontWeight: 600, minHeight: 44,
                   background: 'var(--bg)', color: 'var(--text)',
                   outline: 'none', border: '1px solid var(--border)',
                   boxSizing: 'border-box' as const,
+                  fontFamily: 'var(--font-sans)',
                 }}
               />
             </div>

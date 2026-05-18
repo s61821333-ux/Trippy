@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     : '';
 
   const languageInstruction = locale === 'he'
-    ? '\nחשוב: השב בעברית בלבד. כל שדות "name" ו-"description" חייבים להיות כתובים בעברית.'
+    ? '\nחשוב: השב בעברית בלבד. כל שדות "name" ו-"description" חייבים להיות בעברית. כתוב בשפה יומיומית וטבעית — קצר, ישיר, כמו שחבר היה ממליץ בע"פ. אל תכתוב בסגנון רשמי או שיווקי. שמות פרטיים של מקומות, מסעדות, אתרים ומותגים — השאר בשמם המקורי באנגלית, אל תתרגם אותם. אל תשתמש בשום אות ערבית — גם לא בתוך מילה עברית. כתוב אך ורק באותיות עבריות ואנגליות.'
     : '';
 
   const prompt = `You are a trip planning assistant for "${tripName}" — a trip to ${destinationText}.
@@ -121,7 +121,7 @@ Return ONLY valid JSON — an array of 4 objects with this exact shape:
     "id": "ai-1",
     "name": "Activity name",
     "category": "attraction",
-    "description": "Two-sentence description of why this fits the trip.",
+    "description": "One or two short sentences — casual and direct, like a friend recommending it.",
     "duration": 90,
     "time": "10:00",
     "distance": "2.3 km away",
@@ -146,7 +146,7 @@ Respond with ONLY the JSON array, no other text.`;
       max_tokens: 1024,
       system:
         locale === 'he'
-          ? 'אתה עוזר תכנון טיולים. תמיד השב עם JSON תקין בלבד — ללא markdown, ללא הסברים. כל שדות הטקסט חייבים להיות בעברית.'
+          ? 'אתה עוזר טיולים. תמיד השב עם JSON תקין בלבד — ללא markdown, ללא הסברים. כל שדות הטקסט בעברית. כתוב בשפה יומיומית ורגועה — קצר, ישיר, לא פורמלי ולא שיווקי. כאילו מסביר לחבר. שמות פרטיים של מקומות, מסעדות, אתרים ומותגים — השאר בשמם המקורי באנגלית, אל תתרגם אותם. חשוב מאוד: אל תשתמש בשום אות ערבית — גם לא בתוך מילה עברית. כתוב אך ורק באותיות עבריות ואנגליות.'
           : 'You are a travel planning assistant. Always respond with valid JSON only — no markdown, no explanation.',
       messages: [{ role: 'user', content: prompt }],
     });

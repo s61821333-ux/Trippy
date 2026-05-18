@@ -229,7 +229,8 @@ export default function SettingsScreen() {
                     dir={isRTL ? 'rtl' : 'ltr'}
                     className="input-premium"
                     style={{
-                      flex: 1, minWidth: 0, padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: 14,
+                      flex: 1, minWidth: 0, padding: '11px 14px', borderRadius: 'var(--radius-md)', fontSize: 15,
+                      minHeight: 44,
                       background: 'var(--bg)',
                       border: '1px solid var(--border)',
                       outline: 'none', color: 'var(--text)',
@@ -291,10 +292,11 @@ export default function SettingsScreen() {
                   value={(tripDbId && currencyByTrip[tripDbId]) || 'USD'}
                   onChange={e => { setCurrency(e.target.value); show(t('currencyChanged')); }}
                   style={{
-                    width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                    fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
+                    width: '100%', padding: '11px 12px', borderRadius: 'var(--radius-md)',
+                    fontSize: 15, fontWeight: 500, minHeight: 44,
+                    background: 'var(--bg)', color: 'var(--text)',
                     border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box' as const,
-                    marginTop: 4,
+                    marginTop: 4, fontFamily: 'var(--font-sans)',
                   }}
                 >
                   {CURRENCIES.map(c => (
@@ -529,10 +531,11 @@ export default function SettingsScreen() {
 const inputStyle: React.CSSProperties = {
   flex: 1,
   minWidth: 0,
-  padding: '8px 12px',
+  padding: '10px 12px',
   borderRadius: 'var(--radius-md)',
-  fontSize: 13,
+  fontSize: 15,
   fontWeight: 500,
+  minHeight: 44,
   background: 'var(--bg)',
   border: '1px solid var(--border)',
   outline: 'none',

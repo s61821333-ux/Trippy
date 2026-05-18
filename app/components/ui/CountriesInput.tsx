@@ -194,10 +194,15 @@ export default function CountriesInput({ value, onChange, label }: Props) {
               {name}
               <button
                 onMouseDown={e => { e.preventDefault(); remove(name); }}
+                onTouchEnd={e => { e.preventDefault(); remove(name); }}
+                aria-label={`Remove ${name}`}
                 style={{
                   background: 'none', border: 'none', cursor: 'pointer',
-                  color: 'var(--brand)', fontSize: 14, padding: '0 0 0 2px',
-                  lineHeight: 1, display: 'flex', alignItems: 'center',
+                  color: 'var(--brand)', fontSize: 16,
+                  // Expand hit area to 44×44 without affecting visual layout
+                  width: 28, height: 28, margin: '-2px -4px -2px 0',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, touchAction: 'manipulation',
                 }}
               >
                 ×
@@ -241,10 +246,13 @@ export default function CountriesInput({ value, onChange, label }: Props) {
               <button
                 key={en}
                 onMouseDown={e => { e.preventDefault(); add(en); }}
+                onTouchEnd={e => { e.preventDefault(); add(en); }}
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 14px', background: 'none', border: 'none',
+                  padding: '12px 14px', minHeight: 48,
+                  background: 'none', border: 'none',
                   cursor: 'pointer', textAlign: 'left', transition: 'background 0.1s',
+                  touchAction: 'manipulation',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'none')}

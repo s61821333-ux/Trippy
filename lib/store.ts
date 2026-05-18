@@ -574,6 +574,7 @@ export const useAppStore = create<AppState>()(
         showCarbonBudget: s.showCarbonBudget,
         hideTravelVault: s.hideTravelVault,
         dayEndHour: s.dayEndHour,
+        currencyByTrip: s.currencyByTrip,
         userId: s.userId,
         tripDbId: s.tripDbId,
         authUser: s.authUser,
