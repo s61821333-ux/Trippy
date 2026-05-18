@@ -387,10 +387,14 @@ export default function DashboardScreen() {
                     }}
                   >
                     <div style={{
-                      width: 48, height: 48, borderRadius: 14, flexShrink: 0,
-                      background: 'rgba(255,255,255,0.6)',
+                      width: 52, height: 52, borderRadius: 18, flexShrink: 0,
+                      background: 'rgba(255,255,255,0.72)',
+                      backdropFilter: 'blur(10px)',
+                      WebkitBackdropFilter: 'blur(10px)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 24,
+                      fontSize: 26,
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.95), 0 2px 10px rgba(0,0,0,0.10)',
+                      border: '1px solid rgba(255,255,255,0.88)',
                     }}>
                       {CAT_META[nextEventData.event.category].icon}
                     </div>
@@ -882,20 +886,34 @@ export default function DashboardScreen() {
                       {/* Icon with day badge */}
                       <div style={{ position: 'relative', flexShrink: 0 }}>
                         <div style={{
-                          width: 50, height: 50, borderRadius: 14,
-                          background: isToday ? 'rgba(var(--brand-rgb, 59,126,212),0.15)' : 'var(--brand-light)',
+                          width: 52, height: 52, borderRadius: 18,
+                          background: isToday
+                            ? 'linear-gradient(150deg, var(--brand-hover) 0%, var(--brand) 100%)'
+                            : 'linear-gradient(150deg, var(--surface) 0%, var(--brand-light) 100%)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 26,
+                          position: 'relative',
+                          overflow: 'hidden',
+                          boxShadow: isToday
+                            ? '0 4px 16px rgba(92,184,122,0.38), inset 0 1px 0 rgba(255,255,255,0.25)'
+                            : 'inset 0 1px 0 rgba(255,255,255,0.85), 0 1px 4px rgba(0,0,0,0.07)',
+                          border: isToday ? 'none' : '1px solid var(--border)',
                         }}>
-                          {dayIcon}
+                          <div style={{
+                            position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%)',
+                            pointerEvents: 'none',
+                          }} />
+                          <span style={{ position: 'relative', zIndex: 1 }}>{dayIcon}</span>
                         </div>
                         <div style={{
-                          position: 'absolute', bottom: -2, right: -2,
+                          position: 'absolute', bottom: -3, right: -3,
                           background: isToday ? 'var(--terra)' : 'var(--brand)', color: 'white',
                           fontSize: 8, fontWeight: 800,
-                          width: 16, height: 16, borderRadius: '50%',
+                          width: 18, height: 18, borderRadius: '50%',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          border: '1.5px solid var(--surface)',
+                          border: '2px solid var(--surface)',
+                          boxShadow: '0 1px 4px rgba(0,0,0,0.22)',
                         }}>
                           {dayNum}
                         </div>

@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
+import { TERMS_VERSION } from '@/lib/db';
 import GlassBtn from './ui/GlassBtn';
 
 const TERMS_EN = `TERMS OF USE & PRIVACY POLICY
@@ -167,7 +168,16 @@ export default function TermsModal() {
   const { locale } = useI18n();
   const isHe = locale === 'he';
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+
+  async function handleAccept() {
+    if (submitting) return;
+    setSubmitting(true);
+    const content = TERMS_EN + '\n\n---\n\n' + TERMS_HE;
+    await acceptTerms(TERMS_VERSION, content);
+    setSubmitting(false);
+  }
 
   useEffect(() => {
     const el = bodyRef.current;
@@ -335,8 +345,8 @@ export default function TermsModal() {
             )}
             <motion.button
               whileTap={{ scale: 0.97 }}
-              disabled={!scrolledToBottom}
-              onClick={acceptTerms}
+              disabled={!scrolledToBottom || submitting}
+              onClick={handleAccept}
               style={{
                 width: '100%',
                 padding: '14px 20px',
@@ -353,7 +363,9 @@ export default function TermsModal() {
                 boxShadow: scrolledToBottom ? 'var(--shadow-md)' : 'none',
               }}
             >
-              {isHe ? '✓ אני מסכים לתנאים ולמדיניות הפרטיות' : '✓ I agree to the Terms & Privacy Policy'}
+              {submitting
+                ? (isHe ? '…שומר' : 'Saving…')
+                : (isHe ? '✓ אני מסכים לתנאים ולמדיניות הפרטיות' : '✓ I agree to the Terms & Privacy Policy')}
             </motion.button>
             <p style={{ fontSize: 10, color: 'var(--text-3)', textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
               {isHe

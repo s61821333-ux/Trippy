@@ -88,19 +88,22 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '8px 14px',
+                    padding: '8px 16px',
                     borderRadius: 'var(--radius-md)',
-                    border: 'none',
-                    background: isActive ? 'var(--brand-muted)' : 'transparent',
+                    border: isActive ? '1px solid var(--brand-border, rgba(92,184,122,0.3))' : '1px solid transparent',
+                    background: isActive
+                      ? 'linear-gradient(135deg, var(--brand-muted) 0%, rgba(92,184,122,0.06) 100%)'
+                      : 'transparent',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 12,
-                    fontWeight: 500,
+                    fontWeight: isActive ? 600 : 500,
                     letterSpacing: '0.10em',
                     textTransform: 'uppercase' as const,
                     color: isActive ? 'var(--brand)' : 'var(--text-2)',
                     cursor: 'pointer',
                     outline: 'none',
-                    transition: 'background 0.15s ease, color 0.15s ease',
+                    transition: 'background 0.18s ease, color 0.18s ease, border-color 0.18s ease',
+                    boxShadow: isActive ? 'inset 0 1px 0 rgba(255,255,255,0.5)' : 'none',
                   }}
                 >
                   <Icon name={tab.icon} size={16} />
@@ -153,17 +156,39 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                   cursor: 'pointer',
                   color: isActive ? 'var(--brand)' : 'var(--text-3)',
                   minHeight: 48,
+                  position: 'relative',
                 }}
               >
-                <Icon name={tab.icon} size={22} />
+                {/* Active pill behind icon */}
+                {isActive && (
+                  <motion.div
+                    layoutId="nav-active-pill"
+                    style={{
+                      position: 'absolute',
+                      top: '50%',
+                      left: '50%',
+                      transform: 'translate(-50%, -60%)',
+                      width: 42,
+                      height: 30,
+                      borderRadius: 10,
+                      background: 'var(--brand-muted)',
+                      border: '1px solid rgba(92,184,122,0.22)',
+                      zIndex: 0,
+                    }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
+                  />
+                )}
+                <Icon name={tab.icon} size={isActive ? 21 : 20} style={{ position: 'relative', zIndex: 1 }} />
                 <span style={{
                   fontSize: 9,
-                  fontWeight: 500,
+                  fontWeight: isActive ? 700 : 500,
                   fontFamily: 'var(--font-mono)',
                   letterSpacing: '0.14em',
                   textTransform: 'uppercase',
                   textAlign: 'center',
                   lineHeight: 1.2,
+                  position: 'relative',
+                  zIndex: 1,
                 }}>
                   {t(tab.labelKey)}
                 </span>

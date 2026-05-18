@@ -24,8 +24,10 @@ const sectionItem = {
 type ConfirmState = { message: string; onConfirm: () => void; variant?: 'danger' } | null;
 
 export default function SettingsScreen() {
+  const [deletingAccount, setDeletingAccount] = useState(false);
+
   const {
-    trip, nickname, setNickname, logout, switchTrip, leaveTrip,
+    trip, nickname, setNickname, logout, switchTrip, leaveTrip, deleteAccount,
     darkMode, toggleDarkMode,
     highContrast, toggleHighContrast,
     reducedMotion, toggleReducedMotion,
@@ -52,34 +54,96 @@ export default function SettingsScreen() {
 
   if (!trip) return null;
 
-  const handleExportJSON = () => {
-    const data = JSON.stringify({ trip }, null, 2);
-    const blob = new Blob([data], { type: 'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = `${trip.name.replace(/\s+/g,'_')}.json`;
-    a.click(); URL.revokeObjectURL(url);
-    show(t('tripExportedJSON'));
-  };
+  const handleExportPDF = () => {
+    const esc = (s: string) => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const dateLocale = locale === 'he' ? 'he-IL' : 'en-US';
+    // skip region when it's just the default "Day N" / "יום N" placeholder
+    const isDefaultRegion = (r: string) => /^(Day|יום)\s+\d+$/i.test(r.trim());
 
-  const handleExportMarkdown = () => {
-    const lines = [`# ${trip.name}\n`];
-    for (let d = 1; d <= trip.days; d++) {
-      const meta = trip.dayMeta[d - 1];
-      lines.push(`## Day ${d} — ${meta?.region ?? ''} ${trip.startDate ? `(${fmtDate(trip.startDate, d - 1)})` : ''}`);
-      const evs = [...(trip.events[d] ?? [])].sort((a, b) => a.time.localeCompare(b.time));
-      if (evs.length === 0) { lines.push('No events scheduled.\n'); continue; }
-      for (const e of evs) {
-        lines.push(`- **${e.time}** ${e.name} (${e.duration}min)${e.location ? ` @ ${e.location}` : ''}${e.notes ? `\n  > ${e.notes}` : ''}`);
-      }
-      lines.push('');
-    }
-    const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = `${trip.name.replace(/\s+/g,'_')}.md`;
-    a.click(); URL.revokeObjectURL(url);
-    show(t('tripExportedMD'));
+    const dayRows = Array.from({ length: trip.days }, (_, i) => {
+      const d = i + 1;
+      const meta   = trip.dayMeta[i];
+      const region = meta?.region && !isDefaultRegion(meta.region) ? meta.region.trim() : '';
+      const date   = trip.startDate ? fmtDate(trip.startDate, i, dateLocale) : '';
+      const heading = [region, date].filter(Boolean).join(' · ');
+      const evs    = [...(trip.events[d] ?? [])].sort((a, b) => a.time.localeCompare(b.time));
+
+      const evRows = evs.length === 0
+        ? `<p class="empty">${t('pdfNoEvents')}</p>`
+        : evs.map(e => `
+            <div class="ev">
+              <span class="time" dir="ltr">${esc(e.time)}</span>
+              <span class="name">${esc(e.name)}<span class="dur"> (${e.duration}min)</span>${e.location ? `<span class="loc"> @ ${esc(e.location)}</span>` : ''}</span>
+            </div>
+            ${e.notes ? `<div class="notes">${esc(e.notes)}</div>` : ''}`).join('');
+
+      return `
+        <div class="day">
+          <div class="day-header">
+            <span class="day-num">${t('day')} ${d}</span>${heading ? `<span class="day-sep"> — </span><span class="day-region">${esc(heading)}</span>` : ''}
+          </div>
+          ${evRows}
+        </div>`;
+    }).join('');
+
+    const participants = trip.participants.length > 0
+      ? `<div class="footer"><strong>${t('participantsLabel')}:</strong> ${trip.participants.map(p => esc(p.name)).join(', ')}</div>`
+      : '';
+
+    const subtitle = trip.startDate
+      ? `${trip.days} ${t('days')} · ${t('pdfStarts')} ${fmtDate(trip.startDate, 0, dateLocale)}`
+      : `${trip.days} ${t('days')}`;
+
+    const rtlCSS = isRTL ? `
+    body { direction: rtl; }
+    .ev { flex-direction: row-reverse; padding: 4px 4px 2px 0; }
+    .notes { padding: 2px 62px 6px 4px; }
+    .empty { padding: 4px 8px 4px 4px; }` : '';
+
+    const html = `<!DOCTYPE html>
+<html dir="${isRTL ? 'rtl' : 'ltr'}" lang="${locale}">
+<head>
+  <meta charset="UTF-8">
+  <title>${esc(trip.name)}</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; color: #1a1a1a; padding: 32px 40px; font-size: 13px; line-height: 1.5; max-width: 760px; margin: 0 auto; }
+    h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.03em; color: #111; margin-bottom: 4px; }
+    .subtitle { color: #999; font-size: 12px; margin-bottom: 24px; }
+    hr { border: none; border-top: 1px solid #e8e8e8; margin-bottom: 24px; }
+    .day { margin-bottom: 20px; page-break-inside: avoid; }
+    .day-header { background: #f5f5f7; border-radius: 6px; padding: 7px 12px; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: #333; }
+    .day-num { color: #555; }
+    .day-sep { color: #bbb; }
+    .day-region { color: #111; }
+    .ev { display: flex; gap: 14px; padding: 4px 0 2px 4px; align-items: baseline; }
+    .time { font-weight: 700; color: #555; min-width: 44px; font-size: 12px; flex-shrink: 0; }
+    .name { color: #1a1a1a; font-size: 13px; }
+    .dur { color: #999; font-size: 11px; }
+    .loc { color: #888; font-size: 11px; }
+    .notes { padding: 2px 4px 6px 62px; font-style: italic; color: #aaa; font-size: 11px; }
+    .empty { padding: 4px 4px 4px 8px; font-style: italic; color: #ccc; font-size: 11px; }
+    .footer { border-top: 1px solid #eee; margin-top: 32px; padding-top: 12px; color: #888; font-size: 11px; }
+    @page { margin: 20mm; }
+    @media print { body { padding: 0; } }
+    ${rtlCSS}
+  </style>
+</head>
+<body>
+  <h1>${esc(trip.name)}</h1>
+  <p class="subtitle">${esc(subtitle)}</p>
+  <hr />
+  ${dayRows}
+  ${participants}
+  <script>window.onload = () => { window.print(); }<\/script>
+</body>
+</html>`;
+
+    const w = window.open('', '_blank');
+    if (!w) { show(t('pdfPopupBlocked')); return; }
+    w.document.write(html);
+    w.document.close();
+    show(t('tripExportedPDF'));
   };
 
   const totalEvents = Object.values(trip.events).reduce((acc, evs) => acc + evs.length, 0);
@@ -394,9 +458,7 @@ export default function SettingsScreen() {
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('exportTrip')} icon="calExport" />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <ExportBtn label={t('exportJSON')} sub={t('exportJSONSub')} onClick={handleExportJSON} />
-                  <ExportBtn label={t('exportMD')}   sub={t('exportMDSub')}   onClick={handleExportMarkdown} />
-                  <ExportBtn label={t('exportPDF')}  sub={t('exportPDFSub')}  onClick={() => show(t('pdfComingSoon'))} disabled />
+                  <ExportBtn label={t('exportPDF')} sub={t('exportPDFSub')} onClick={handleExportPDF} />
                 </div>
               </Glass>
             </motion.div>
@@ -453,6 +515,34 @@ export default function SettingsScreen() {
                 }}
               >
                 {locale === 'he' ? '↩ התנתק' : '↩ Sign Out'}
+              </GlassBtn>
+
+              {/* Delete My Data — removes account & personal data, shared trip content stays */}
+              <GlassBtn
+                variant="danger"
+                size="lg"
+                style={{ width: '100%', opacity: deletingAccount ? 0.6 : 1 }}
+                onClick={() => {
+                  confirm(
+                    t('deleteAccountConfirm'),
+                    async () => {
+                      setDeletingAccount(true);
+                      try {
+                        await deleteAccount();
+                        show(t('deleteAccountSuccess'));
+                      } catch {
+                        show(t('deleteAccountFailed'));
+                      } finally {
+                        setDeletingAccount(false);
+                      }
+                    },
+                    'danger',
+                  );
+                }}
+              >
+                {deletingAccount
+                  ? (locale === 'he' ? '…מוחק' : 'Deleting…')
+                  : `🗑 ${t('deleteAccount')}`}
               </GlassBtn>
             </motion.div>
 

@@ -1,17 +1,51 @@
 import { createClient } from '@/utils/supabase/client'
 import type { Category, DayMeta, EmergencyContact, Expense, SupplyItem, TripEvent, TripInvitation, TripTheme } from './types'
 
+// Bump this string whenever the terms/privacy text changes materially.
+// Users who accepted a previous version will be shown the modal again.
+export const TERMS_VERSION = '2026-05-v1'
+
 function sb() {
   return createClient()
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
+function isWebView(): boolean {
+  const ua = navigator.userAgent
+  if (/FBAN|FBAV|FB_IAB|Instagram|Twitter\/|Line\/|WhatsApp|Snapchat/i.test(ua)) return true
+  if (/Android/.test(ua) && /wv/.test(ua)) return true
+  if (/iPhone|iPad/.test(ua) && !/Safari\//.test(ua) && /AppleWebKit/.test(ua)) return true
+  return false
+}
+
 export async function signInWithGoogle(): Promise<void> {
   const supabase = sb()
+  const redirectTo = `${window.location.origin}/auth/callback`
+
+  // In embedded WebViews (Instagram, Facebook, etc.) Google blocks OAuth.
+  // Get the URL first and open it in the system browser.
+  if (isWebView()) {
+    const { data } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo, skipBrowserRedirect: true },
+    })
+    if (data?.url) {
+      // Try Chrome intent on Android, fall back to window.open
+      const ua = navigator.userAgent
+      if (/Android/.test(ua)) {
+        const intent = `intent://${data.url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(data.url)};end`
+        window.location.href = intent
+      } else {
+        window.open(data.url, '_blank', 'noopener,noreferrer')
+      }
+    }
+    return
+  }
+
   await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${window.location.origin}/auth/callback` },
+    options: { redirectTo },
   })
 }
 
@@ -296,6 +330,37 @@ export async function dbCancelInvitation(invitationId: string): Promise<void> {
     .delete()
     .eq('id', invitationId)
   if (error) throw error
+}
+
+// ─── Privacy consents ────────────────────────────────────────────────────────
+
+export async function dbGetPrivacyConsent(userId: string): Promise<{ content_hash: string; content: string } | null> {
+  const { data } = await sb()
+    .from('privacy_consents')
+    .select('content_hash, content')
+    .eq('user_id', userId)
+    .maybeSingle()
+  return (data as { content_hash: string; content: string } | null) ?? null
+}
+
+export async function dbSavePrivacyConsent(contentHash: string, content: string): Promise<void> {
+  const { data: { user } } = await sb().auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+  const { error } = await sb().from('privacy_consents').upsert(
+    { user_id: user.id, accepted_at: new Date().toISOString(), content_hash: contentHash, content },
+    { onConflict: 'user_id' },
+  )
+  if (error) throw error
+}
+
+// ─── Account deletion ────────────────────────────────────────────────────────
+
+export async function dbDeleteAccount(): Promise<void> {
+  const r = await fetch('/api/account/delete', { method: 'DELETE' })
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}))
+    throw new Error(body.error ?? 'Failed to delete account')
+  }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────

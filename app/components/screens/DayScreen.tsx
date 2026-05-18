@@ -36,29 +36,56 @@ const DAY_ABBREVS_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const DAY_ABBREVS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
 const CAT_GRADIENTS: Record<Category, string> = {
-  food: 'linear-gradient(135deg, #E8A87C 0%, #C4714A 100%)',
-  cafe: 'linear-gradient(135deg, #D4A96A 0%, #9A6830 100%)',
-  attraction: 'linear-gradient(135deg, #7BBCD4 0%, #3B7E9E 100%)',
-  hotel: 'linear-gradient(135deg, #C48AD4 0%, #7A3A9E 100%)',
-  rest: 'linear-gradient(135deg, #8BC48A 0%, #3B6E52 100%)',
-  transport: 'linear-gradient(135deg, #8EA8D4 0%, #4A6EAE 100%)',
-  flight: 'linear-gradient(135deg, #6B9FD4 0%, #1A3F8A 100%)',
-  other: 'linear-gradient(135deg, #C4A87A 0%, #8A6440 100%)',
+  food:       'linear-gradient(150deg, #FFAA78 0%, #E05530 55%, #B82C0A 100%)',
+  cafe:       'linear-gradient(150deg, #F2CC72 0%, #C67A20 55%, #8A5010 100%)',
+  attraction: 'linear-gradient(150deg, #62CCFA 0%, #1A8EDA 55%, #0858B0 100%)',
+  hotel:      'linear-gradient(150deg, #DC9EF4 0%, #9042CA 55%, #601A9A 100%)',
+  rest:       'linear-gradient(150deg, #72E09A 0%, #22A85A 55%, #0C6E38 100%)',
+  transport:  'linear-gradient(150deg, #7CBAF2 0%, #3272CA 55%, #1045A0 100%)',
+  flight:     'linear-gradient(150deg, #68AAEE 0%, #1252C2 55%, #062A7A 100%)',
+  other:      'linear-gradient(150deg, #F2CA92 0%, #C07A42 55%, #885020 100%)',
+};
+
+const CAT_GLOW: Record<Category, string> = {
+  food:       '0 6px 22px rgba(224,85,48,0.44)',
+  cafe:       '0 6px 22px rgba(155,100,16,0.38)',
+  attraction: '0 6px 22px rgba(26,142,218,0.44)',
+  hotel:      '0 6px 22px rgba(144,66,202,0.42)',
+  rest:       '0 6px 22px rgba(34,168,90,0.42)',
+  transport:  '0 6px 22px rgba(50,114,202,0.40)',
+  flight:     '0 6px 22px rgba(18,82,194,0.48)',
+  other:      '0 6px 22px rgba(140,80,32,0.32)',
 };
 
 /* ── Category thumbnail ────────────────────────────────────────── */
 function EventThumbnail({ category }: { category: Category }) {
-  const meta = CAT_META[category];
   return (
     <div style={{
       width: 68, height: 68,
-      borderRadius: 14,
+      borderRadius: 22,
       background: CAT_GRADIENTS[category],
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       flexShrink: 0,
-      color: meta.color,
+      position: 'relative',
+      overflow: 'hidden',
+      boxShadow: `${CAT_GLOW[category]}, inset 0 1px 0 rgba(255,255,255,0.30)`,
     }}>
-      <EventIcon category={category as any} size={30} />
+      {/* Glossy top highlight */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0, height: 34,
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.24) 0%, transparent 100%)',
+        pointerEvents: 'none',
+      }} />
+      <EventIcon
+        category={category as any}
+        size={29}
+        style={{
+          color: 'rgba(255,255,255,0.95)',
+          filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.28))',
+          position: 'relative',
+          zIndex: 1,
+        }}
+      />
     </div>
   );
 }

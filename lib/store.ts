@@ -15,6 +15,8 @@ import {
   dbUpdateTripNotes, dbUpdateDayMeta,
   dbUpdateTripInfo as dbSyncTripInfo, dbUpdateTripTheme,
   dbGetOrCreateInviteToken,
+  dbGetPrivacyConsent, dbSavePrivacyConsent, TERMS_VERSION,
+  dbDeleteAccount,
 } from './db';
 
 interface AppState {
@@ -50,7 +52,7 @@ interface AppState {
 
   // Actions
   setScreen: (s: Screen) => void;
-  acceptTerms: () => void;
+  acceptTerms: (contentHash: string, content: string) => Promise<void>;
   checkAuth: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   clearTripEntry: () => void;
@@ -63,6 +65,8 @@ interface AppState {
   rejectInvitation: (invitationId: string) => Promise<void>;
   inviteToTrip: (email: string) => Promise<void>;
   createInviteLink: () => Promise<string>;
+  /** Permanently delete all personal data and auth account. Shared trip content stays for co-participants. */
+  deleteAccount: () => Promise<void>;
   /** Sign completely out of Supabase. Does NOT remove the user from the trip. */
   logout: () => void;
   /** Keep auth but unload the current trip so the user can pick another. */
@@ -176,17 +180,26 @@ export const useAppStore = create<AppState>()(
       pendingInvitations: [],
       termsAccepted: false,
 
-      acceptTerms: () => set({ termsAccepted: true }),
+      acceptTerms: async (contentHash, content) => {
+        try { await dbSavePrivacyConsent(contentHash, content) } catch {}
+        set({ termsAccepted: true })
+      },
       setScreen: (s) => set({ screen: s }),
       checkAuth: async () => {
         const user = await getCurrentUser()
         // Don't reset authUser to null here — sign-out is handled by onAuthStateChange in AppShell.
         // Only update the store when a user is actually found.
         if (!user) return
+        // Check whether this user has already accepted the current terms version.
+        let termsAccepted = false
+        try {
+          const consent = await dbGetPrivacyConsent(user.id)
+          termsAccepted = consent?.content_hash === TERMS_VERSION
+        } catch {}
         // Always land on the trip picker so the user can choose which trip to open.
         // Clear any previously loaded trip; the join-link flow (/?join=id) still works
         // because AppShell's authUser effect handles that separately.
-        set({ authUser: user, userId: user.id, trip: null, tripDbId: null, supplies: [] })
+        set({ authUser: user, userId: user.id, trip: null, tripDbId: null, supplies: [], termsAccepted })
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
 
@@ -307,6 +320,19 @@ export const useAppStore = create<AppState>()(
         }));
       },
 
+      deleteAccount: async () => {
+        await dbDeleteAccount();
+        if (typeof document !== 'undefined') {
+          document.cookie.split(';').forEach(c => {
+            const name = c.split('=')[0].trim();
+            if (name.startsWith('sb-')) {
+              document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+            }
+          });
+        }
+        set({ screen: 'login', trip: null, tripDbId: null, activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false });
+      },
+
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later
       logout: () => {
         signOut().catch(() => {});
@@ -321,7 +347,7 @@ export const useAppStore = create<AppState>()(
             }
           });
         }
-        set({ screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '' });
+        set({ screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false });
       },
 
       // Keep the Supabase session but go back to the trip picker

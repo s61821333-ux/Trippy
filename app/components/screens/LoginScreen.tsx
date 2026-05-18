@@ -32,11 +32,21 @@ const THEMES: { id: TripTheme; emoji: string; label: string; labelHe: string }[]
 
 // ─── Step 1: Auth ─────────────────────────────────────────────────────────────
 
+function isInWebView() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  if (/FBAN|FBAV|FB_IAB|Instagram|Twitter\/|Line\/|WhatsApp|Snapchat/i.test(ua)) return true;
+  if (/Android/.test(ua) && /wv/.test(ua)) return true;
+  if (/iPhone|iPad/.test(ua) && !/Safari\//.test(ua) && /AppleWebKit/.test(ua)) return true;
+  return false;
+}
+
 function AuthStep() {
   const { signInWithGoogle } = useAppStore();
   const { t } = useI18n();
 
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [webView] = useState(() => isInWebView());
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
@@ -96,6 +106,17 @@ function AuthStep() {
             <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text)', marginBottom: 18 }}>
               {t('loginBtn')}
             </h2>
+            {webView && (
+              <div style={{
+                marginBottom: 14, padding: '10px 12px',
+                background: 'rgba(255,180,0,0.12)', border: '1px solid rgba(255,180,0,0.4)',
+                borderRadius: 'var(--radius-md)', fontSize: 13, lineHeight: 1.5,
+                color: 'var(--text)',
+              }}>
+                <span style={{ fontWeight: 700 }}>⚠️ </span>
+                {t('webViewWarning')}
+              </div>
+            )}
             <button
               onClick={handleGoogle}
               disabled={googleLoading}
