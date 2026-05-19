@@ -681,8 +681,9 @@ export default function DayScreen() {
   // Hotel management state
   const [showHotelSheet, setShowHotelSheet] = useState(false);
   const [editHotelTarget, setEditHotelTarget] = useState<string | null>(null); // hotel id being edited
-  const [hName, setHName] = useState('');
   const [hLocation, setHLocation] = useState('');
+  const [hLat, setHLat] = useState<number | null>(null);
+  const [hLng, setHLng] = useState<number | null>(null);
   const [hCheckIn, setHCheckIn] = useState(1);
   const [hCheckOut, setHCheckOut] = useState(2);
 
@@ -965,14 +966,16 @@ export default function DayScreen() {
       const h = (trip?.hotels ?? []).find(h => h.id === hotelId);
       if (!h) return;
       setEditHotelTarget(hotelId);
-      setHName(h.name);
       setHLocation(h.location ?? '');
+      setHLat(h.lat ?? null);
+      setHLng(h.lng ?? null);
       setHCheckIn(h.checkInDay);
       setHCheckOut(h.checkOutDay);
     } else {
       setEditHotelTarget(null);
-      setHName('');
       setHLocation('');
+      setHLat(null);
+      setHLng(null);
       setHCheckIn(activeDay);
       setHCheckOut(Math.min((trip?.days ?? 1), activeDay + 1));
     }
@@ -980,12 +983,19 @@ export default function DayScreen() {
   };
 
   const handleSaveHotel = () => {
-    if (!hName.trim()) { show(locale === 'he' ? 'הכנס שם מלון' : 'Enter hotel name'); return; }
+    if (!hLocation.trim()) { show(locale === 'he' ? 'הכנס מיקום' : 'Enter a location'); return; }
     if (hCheckOut <= hCheckIn) { show(locale === 'he' ? 'תאריך הצ\'ק-אאוט חייב להיות אחרי הצ\'ק-אין' : 'Checkout must be after check-in'); return; }
+    const patch = {
+      location: hLocation,
+      lat: hLat ?? undefined,
+      lng: hLng ?? undefined,
+      checkInDay: hCheckIn,
+      checkOutDay: hCheckOut,
+    };
     if (editHotelTarget) {
-      editHotel(editHotelTarget, { name: hName, location: hLocation || undefined, checkInDay: hCheckIn, checkOutDay: hCheckOut });
+      editHotel(editHotelTarget, patch);
     } else {
-      addHotel({ name: hName, location: hLocation || undefined, checkInDay: hCheckIn, checkOutDay: hCheckOut });
+      addHotel(patch);
     }
     setShowHotelSheet(false);
   };
@@ -1199,20 +1209,26 @@ export default function DayScreen() {
             <span style={{ fontSize: 18 }}>🏨</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               {todayHotel ? (
-                <>
-                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {todayHotel.name}
-                  </p>
-                  {todayHotel.location && (
-                    <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>{todayHotel.location}</p>
-                  )}
-                </>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {todayHotel.location}
+                </p>
               ) : (
                 <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500, margin: 0 }}>
                   {locale === 'he' ? 'הוסף מלון / לינה' : 'Add hotel / accommodation'}
                 </p>
               )}
             </div>
+            {todayHotel && todayHotel.lat != null && todayHotel.lng != null && (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${todayHotel.lat},${todayHotel.lng}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                style={{ display: 'flex', alignItems: 'center', color: 'var(--accent)', flexShrink: 0 }}
+              >
+                <Icon name="pin" size={16} />
+              </a>
+            )}
             {todayHotel && (
               <span style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600 }}>
                 {locale === 'he' ? 'ערוך' : 'Edit'}
@@ -1770,18 +1786,12 @@ export default function DayScreen() {
           subtitle={locale === 'he' ? 'הגדר את הלינה לתאריכים אלה' : 'Set accommodation for date range'}
         >
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <Field
-              label={locale === 'he' ? 'שם המלון' : 'Hotel name'}
-              placeholder={locale === 'he' ? 'לדוג׳ מלון דן, אירבנב...' : 'e.g. Dan Hotel, Airbnb...'}
-              value={hName}
-              onChange={setHName}
-              autoFocus
-            />
-            <Field
-              label={locale === 'he' ? 'מיקום (אופציונלי)' : 'Location (optional)'}
-              placeholder={locale === 'he' ? 'לדוג׳ תל אביב, רחוב...' : 'e.g. Tel Aviv, address...'}
+            <PlacesInput
+              label={locale === 'he' ? 'מיקום' : 'Location'}
+              placeholder={locale === 'he' ? 'חפש מלון, כתובת...' : 'Search hotel, address...'}
               value={hLocation}
-              onChange={setHLocation}
+              onChange={v => { setHLocation(v); setHLat(null); setHLng(null); }}
+              onSelect={place => { setHLocation(place.name); setHLat(place.lat); setHLng(place.lng); }}
             />
             <div style={{ display: 'flex', gap: 10 }}>
               <div style={{ flex: 1 }}>

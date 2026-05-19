@@ -90,8 +90,10 @@ export interface TripInvitation {
 
 export interface HotelStay {
   id: string;
-  name: string;
+  name?: string;
   location?: string;
+  lat?: number;
+  lng?: number;
   checkInDay: number;   // 1-indexed day number (inclusive)
   checkOutDay: number;  // 1-indexed day number (exclusive — don't show banner on this day)
 }
