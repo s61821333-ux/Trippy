@@ -81,6 +81,7 @@
   --safe-right:  env(safe-area-inset-right, 0px);
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-total-h: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
 
   /* ── Brand book extended tokens ── */
   --forest:    #3B6E52;
@@ -405,7 +406,7 @@ select {
 }
 @media (max-width: 767px) {
   .screen-inset-nav {
-    bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+    bottom: var(--nav-total-h);
   }
 }
 

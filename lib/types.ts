@@ -88,6 +88,14 @@ export interface TripInvitation {
   createdAt: string;
 }
 
+export interface HotelStay {
+  id: string;
+  name: string;
+  location?: string;
+  checkInDay: number;   // 1-indexed day number (inclusive)
+  checkOutDay: number;  // 1-indexed day number (exclusive — don't show banner on this day)
+}
+
 export interface Trip {
   name: string;
   days: number;
@@ -100,6 +108,7 @@ export interface Trip {
   tripNotes?: string[];
   expenses?: Expense[];
   emergencyContacts?: EmergencyContact[];
+  hotels?: HotelStay[];
 }
 
 export type Screen = 'login' | 'dashboard' | 'day' | 'supplies' | 'settings' | 'notes';

@@ -126,7 +126,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
           zIndex: 50,
           background: 'var(--surface)',
           borderTop: '1px solid var(--border)',
-          height: 'calc(var(--nav-h) + env(safe-area-inset-bottom, 0px))',
+          height: 'var(--nav-total-h)',
         }}
       >
         <div style={{

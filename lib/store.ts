@@ -2,17 +2,17 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, Screen, SupplyItem, Trip, TripEvent, TripInvitation, TripTheme } from './types';
+import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, HotelStay, Screen, SupplyItem, Trip, TripEvent, TripInvitation, TripTheme } from './types';
 import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
 import {
   signOut, signInWithGoogle as dbSignInWithGoogle, getCurrentUser, getSessionUserId,
   dbCreateTrip, dbLoadTripById, rowToTrip,
   dbGetInvitations, dbInviteToTrip, dbAcceptInvitation, dbRejectInvitation,
-  dbAddEvent, dbEditEvent, dbDeleteEvent, dbLeaveTrip, dbUpdateEventVotes,
+  dbAddEvent, dbEditEvent, dbDeleteEvent, dbMoveEvent, dbLeaveTrip, dbUpdateEventVotes,
   dbAddExpense, dbDeleteExpense,
   dbAddSupply, dbToggleSupply, dbDeleteSupply, dbUpdateSupplyCritical,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
-  dbUpdateTripNotes, dbUpdateDayMeta,
+  dbUpdateTripNotes, dbUpdateDayMeta, dbUpdateHotels,
   dbUpdateTripInfo as dbSyncTripInfo, dbUpdateTripTheme,
   dbGetOrCreateInviteToken,
   dbGetPrivacyConsent, dbSavePrivacyConsent, TERMS_VERSION,
@@ -90,6 +90,11 @@ interface AppState {
   addEvent: (dayNumber: number, event: Omit<TripEvent, 'id' | 'addedBy'>) => void;
   editEvent: (dayNumber: number, eventId: string, updates: Partial<TripEvent>) => void;
   deleteEvent: (dayNumber: number, eventId: string) => void;
+  moveEvent: (fromDay: number, toDay: number, eventId: string) => void;
+
+  addHotel: (hotel: Omit<HotelStay, 'id'>) => void;
+  editHotel: (id: string, updates: Partial<Omit<HotelStay, 'id'>>) => void;
+  deleteHotel: (id: string) => void;
 
   voteEvent: (dayNumber: number, eventId: string, nickname: string, vote: 'up' | 'down') => void;
 
@@ -451,6 +456,51 @@ export const useAppStore = create<AppState>()(
         });
       },
 
+      moveEvent: (fromDay, toDay, eventId) => {
+        const { trip, tripDbId } = get();
+        if (!trip) return;
+        const event = (trip.events[fromDay] ?? []).find(e => e.id === eventId);
+        if (!event) return;
+        const fromEvents = (trip.events[fromDay] ?? []).filter(e => e.id !== eventId);
+        const toEvents = [...(trip.events[toDay] ?? []), event];
+        set({ trip: { ...trip, events: { ...trip.events, [fromDay]: fromEvents, [toDay]: toEvents } } });
+        if (tripDbId) {
+          dbMoveEvent(eventId, toDay).catch(err => {
+            console.error('[moveEvent] DB sync failed:', err);
+            set({ lastSyncError: err?.message ?? 'sync_failed' });
+          });
+        }
+      },
+
+      addHotel: (hotel) => {
+        const { tripDbId } = get();
+        const newHotel: HotelStay = { ...hotel, id: uid() };
+        set(s => {
+          const trip = s.trip ? { ...s.trip, hotels: [...(s.trip.hotels ?? []), newHotel] } : null;
+          if (tripDbId && trip?.hotels) dbUpdateHotels(tripDbId, trip.hotels).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+          return { trip };
+        });
+      },
+
+      editHotel: (id, updates) => {
+        const { tripDbId } = get();
+        set(s => {
+          const trip = s.trip ? { ...s.trip, hotels: (s.trip.hotels ?? []).map(h => h.id === id ? { ...h, ...updates } : h) } : null;
+          if (tripDbId && trip?.hotels) dbUpdateHotels(tripDbId, trip.hotels).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+          return { trip };
+        });
+      },
+
+      deleteHotel: (id) => {
+        const { tripDbId } = get();
+        set(s => {
+          const hotels = (s.trip?.hotels ?? []).filter(h => h.id !== id);
+          const trip = s.trip ? { ...s.trip, hotels } : null;
+          if (tripDbId) dbUpdateHotels(tripDbId, hotels).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+          return { trip };
+        });
+      },
+
       voteEvent: (dayNumber, eventId, nickname, vote) => {
         const { trip, tripDbId } = get();
         if (!trip) return;
@@ -609,3 +659,8 @@ export const useAppStore = create<AppState>()(
     }
   )
 );
+
+// Expose store on window in non-production for Playwright tests
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+  (window as any).__trippyStore = useAppStore;
+}

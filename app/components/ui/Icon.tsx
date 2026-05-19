@@ -6,7 +6,7 @@ type IconName =
   | 'home' | 'calendar' | 'checklist' | 'settings' | 'plus' | 'chevR' | 'chevL'
   | 'share' | 'map' | 'sparkle' | 'trash' | 'edit' | 'x' | 'check' | 'sun'
   | 'wind' | 'lock' | 'pin' | 'download' | 'compass' | 'tent' | 'water'
-  | 'calExport' | 'user' | 'search' | 'filter' | 'ai' | 'clock' | 'arrow' | 'menu' | 'grid';
+  | 'calExport' | 'user' | 'search' | 'filter' | 'ai' | 'clock' | 'arrow' | 'menu' | 'grid' | 'swap';
 
 interface IconProps {
   name: IconName;
@@ -48,6 +48,7 @@ const PATHS: Partial<Record<IconName, string>> = {
   arrow:     `<path d="M5 12h14M13 6l6 6-6 6"/>`,
   menu:      `<path d="M4 7h16M4 12h16M4 17h16"/>`,
   grid:      `<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>`,
+  swap:      `<path d="M7 16V8M7 8L4 11M7 8l3 3M17 8v8M17 16l3-3M17 16l-3-3"/>`,
 };
 
 export default function Icon({ name, size = 20, style = {}, color }: IconProps) {

@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/client'
-import type { Category, DayMeta, EmergencyContact, Expense, SupplyItem, TripEvent, TripInvitation, TripTheme } from './types'
+import type { Category, DayMeta, EmergencyContact, Expense, HotelStay, SupplyItem, TripEvent, TripInvitation, TripTheme } from './types'
 
 // Bump this string whenever the terms/privacy text changes materially.
 // Users who accepted a previous version will be shown the modal again.
@@ -195,6 +195,11 @@ export async function dbDeleteEvent(eventId: string) {
   if (error) throw error
 }
 
+export async function dbMoveEvent(eventId: string, newDayNumber: number) {
+  const { error } = await sb().from('events').update({ day_index: newDayNumber - 1 }).eq('id', eventId)
+  if (error) throw error
+}
+
 // ─── Expenses ────────────────────────────────────────────────────────────────
 
 export async function dbAddExpense(tripId: string, expense: Expense, userId: string) {
@@ -285,6 +290,11 @@ export async function dbLeaveTrip(tripId: string, userId: string) {
 
 export async function dbUpdateTripNotes(tripId: string, notes: string[]) {
   const { error } = await sb().from('trips').update({ trip_notes: notes }).eq('id', tripId)
+  if (error) throw error
+}
+
+export async function dbUpdateHotels(tripId: string, hotels: HotelStay[]) {
+  const { error } = await sb().from('trips').update({ hotels } as any).eq('id', tripId)
   if (error) throw error
 }
 
@@ -468,6 +478,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
       return result.length ? result : undefined
     })(),
     tripNotes:         (data.trip_notes as string[]) ?? [],
+    hotels:            Array.isArray((data as any).hotels) ? (data as any).hotels as HotelStay[] : [],
     participants,
     dayMeta,
     events,

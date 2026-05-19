@@ -12,7 +12,7 @@ import { useAppStore } from '@/lib/store';
 import { CAT_META, fmtDate, fmtDuration, toMins, toTime, getConflicts, getGoldenHourType, getDayBudget } from '@/lib/utils';
 import { getCapitalCoords } from '@/lib/capitals';
 import { getCurrencySymbol } from '@/lib/currency';
-import { Category, TripEvent } from '@/lib/types';
+import { Category, HotelStay, TripEvent } from '@/lib/types';
 import { useToast } from '../ui/Toast';
 import SuggestionsSheet from '../SuggestionsSheet';
 import { useI18n, TranslationKey } from '@/lib/i18n';
@@ -244,14 +244,18 @@ interface EventCardProps {
   onEdit: (e: TripEvent) => void;
   onDelete: (id: string) => void;
   onReschedule: (e: TripEvent, newTime: string) => void;
+  onMove: (event: TripEvent, targetDay: number) => void;
   onFocus: (e: TripEvent) => void;
   isConflict: boolean;
   goldenHour: 'sunrise' | 'sunset' | null;
   nickname: string;
   dayNumber: number;
+  tripDays: number;
+  startDate: string;
+  locale: string;
 }
 
-function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict, goldenHour, nickname, dayNumber }: EventCardProps) {
+function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isConflict, goldenHour, nickname, dayNumber, tripDays, startDate, locale }: EventCardProps) {
   const meta = CAT_META[event.category];
   const endT = toTime(toMins(event.time) + event.duration);
   const { voteEvent } = useAppStore();
@@ -261,11 +265,12 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
 
   const [rescheduling, setRescheduling] = useState(false);
   const [pendingTime, setPendingTime] = useState(event.time);
+  const [moving, setMoving] = useState(false);
 
   // Reset local time whenever the store updates the event
   useEffect(() => { setPendingTime(event.time); }, [event.time]);
 
-  const openReschedule = () => { setPendingTime(event.time); setRescheduling(true); };
+  const openReschedule = () => { setPendingTime(event.time); setRescheduling(true); setMoving(false); };
   const cancelReschedule = () => setRescheduling(false);
   const shift = (mins: number) =>
     setPendingTime(t => toTime(Math.max(0, Math.min(23 * 60 + 55, toMins(t) + mins))));
@@ -453,6 +458,19 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
               }}>
               <Icon name="edit" size={13} />
             </motion.button>
+            {tripDays > 1 && (
+              <motion.button whileTap={{ scale: 0.88 }} onClick={e => { e.stopPropagation(); setMoving(v => !v); setRescheduling(false); }}
+                style={{
+                  width: 32, height: 32, borderRadius: 9,
+                  background: moving ? 'var(--brand-muted)' : 'var(--bg)',
+                  border: moving ? '1.5px solid var(--brand)' : '1px solid var(--border)',
+                  cursor: 'pointer', color: moving ? 'var(--brand)' : 'var(--text-2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'background 0.15s, color 0.15s, border 0.15s',
+                }}>
+                <Icon name="swap" size={13} />
+              </motion.button>
+            )}
             <motion.button whileTap={{ scale: 0.88 }} onClick={e => { e.stopPropagation(); onDelete(event.id); }}
               style={{
                 width: 32, height: 32, borderRadius: 9, background: 'var(--danger-bg)',
@@ -553,6 +571,61 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Inline move-to-day panel */}
+        <AnimatePresence>
+          {moving && (
+            <motion.div
+              key="move-panel"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div style={{
+                borderTop: '1px solid var(--border)',
+                padding: '12px 12px 14px',
+                background: 'var(--bg)',
+              }}>
+                <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-2)', marginBottom: 10 }}>
+                  {locale === 'he' ? 'העבר ליום:' : 'Move to day:'}
+                </p>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {Array.from({ length: tripDays }, (_, i) => i + 1).filter(d => d !== dayNumber).map(d => (
+                    <motion.button
+                      key={d}
+                      whileTap={{ scale: 0.92 }}
+                      onClick={() => { onMove(event, d); setMoving(false); }}
+                      style={{
+                        padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                        minHeight: 36,
+                        background: 'var(--surface)', cursor: 'pointer',
+                        color: 'var(--brand)',
+                        border: '1px solid rgba(59,110,82,0.25)',
+                        touchAction: 'manipulation',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
+                      }}
+                    >
+                      <span style={{ fontSize: 9, fontWeight: 800, color: 'var(--text-3)', letterSpacing: '0.04em' }}>
+                        {locale === 'he' ? `יום ${d}` : `Day ${d}`}
+                      </span>
+                      <span>{fmtDate(startDate, d - 1, locale)}</span>
+                    </motion.button>
+                  ))}
+                </div>
+                <motion.button whileTap={{ scale: 0.96 }} onClick={() => setMoving(false)}
+                  style={{
+                    marginTop: 10, width: '100%', padding: '6px 0', borderRadius: 8,
+                    fontSize: 12, fontWeight: 700, background: 'var(--surface)',
+                    color: 'var(--text-2)', border: '1px solid var(--border)', cursor: 'pointer',
+                  }}>
+                  {t('cancel')}
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.div>
   );
@@ -562,7 +635,8 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onFocus, isConflict,
 export default function DayScreen() {
   const {
     trip, activeDay, setActiveDay,
-    addEvent, editEvent, deleteEvent,
+    addEvent, editEvent, deleteEvent, moveEvent,
+    addHotel, editHotel, deleteHotel,
     setShowSuggestions, showSuggestions,
     updateDayMeta,
     setScreen,
@@ -603,6 +677,14 @@ export default function DayScreen() {
   const [focusedEvent, setFocusedEvent] = useState<TripEvent | null>(null);
   const [savedFlightTime, setSavedFlightTime] = useState('');
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
+
+  // Hotel management state
+  const [showHotelSheet, setShowHotelSheet] = useState(false);
+  const [editHotelTarget, setEditHotelTarget] = useState<string | null>(null); // hotel id being edited
+  const [hName, setHName] = useState('');
+  const [hLocation, setHLocation] = useState('');
+  const [hCheckIn, setHCheckIn] = useState(1);
+  const [hCheckOut, setHCheckOut] = useState(2);
 
   useEffect(() => {
     const up = () => setIsOnline(true);
@@ -873,6 +955,41 @@ export default function DayScreen() {
     show(`${e.name} ${t('movedToSuffix')} ${newTime}`);
   };
 
+  const handleMove = (e: TripEvent, targetDay: number) => {
+    moveEvent(activeDay, targetDay, e.id);
+    show(`${e.name} → Day ${targetDay}`);
+  };
+
+  const openHotelSheet = (hotelId?: string) => {
+    if (hotelId) {
+      const h = (trip?.hotels ?? []).find(h => h.id === hotelId);
+      if (!h) return;
+      setEditHotelTarget(hotelId);
+      setHName(h.name);
+      setHLocation(h.location ?? '');
+      setHCheckIn(h.checkInDay);
+      setHCheckOut(h.checkOutDay);
+    } else {
+      setEditHotelTarget(null);
+      setHName('');
+      setHLocation('');
+      setHCheckIn(activeDay);
+      setHCheckOut(Math.min((trip?.days ?? 1), activeDay + 1));
+    }
+    setShowHotelSheet(true);
+  };
+
+  const handleSaveHotel = () => {
+    if (!hName.trim()) { show(locale === 'he' ? 'הכנס שם מלון' : 'Enter hotel name'); return; }
+    if (hCheckOut <= hCheckIn) { show(locale === 'he' ? 'תאריך הצ\'ק-אאוט חייב להיות אחרי הצ\'ק-אין' : 'Checkout must be after check-in'); return; }
+    if (editHotelTarget) {
+      editHotel(editHotelTarget, { name: hName, location: hLocation || undefined, checkInDay: hCheckIn, checkOutDay: hCheckOut });
+    } else {
+      addHotel({ name: hName, location: hLocation || undefined, checkInDay: hCheckIn, checkOutDay: hCheckOut });
+    }
+    setShowHotelSheet(false);
+  };
+
   // Day strip helpers
   const getDayInfo = (dayNum: number) => {
     const base = trip.startDate ? new Date(trip.startDate) : new Date();
@@ -1061,23 +1178,66 @@ export default function DayScreen() {
       </AnimatePresence>
 
       {/* ── Itinerary list ───────────────────────────────────── */}
-      <div
-        className="flex-1 overflow-y-auto day-list-pb"
-        onTouchStart={e => {
-          swipeStartX.current = e.touches[0].clientX;
-          swipeStartY.current = e.touches[0].clientY;
-        }}
-        onTouchEnd={e => {
-          if (!trip) return;
-          const dx = e.changedTouches[0].clientX - swipeStartX.current;
-          const dy = e.changedTouches[0].clientY - swipeStartY.current;
-          // Only handle clear horizontal swipes (dx dominates and is large enough)
-          if (Math.abs(dx) > Math.abs(dy) * 1.8 && Math.abs(dx) > 55) {
-            if (dx < 0 && activeDay < trip.days) setActiveDay(activeDay + 1);
-            if (dx > 0 && activeDay > 1) setActiveDay(activeDay - 1);
-          }
-        }}
-      >
+      {(() => {
+        const todayHotel = (trip.hotels ?? []).find(
+          h => h.checkInDay <= activeDay && activeDay < h.checkOutDay,
+        );
+        const hotelBanner = (pos: 'top' | 'bottom') => (
+          <div
+            onClick={() => openHotelSheet(todayHotel?.id)}
+            style={{
+              margin: pos === 'top' ? '8px var(--page-px) 4px' : '4px var(--page-px) 8px',
+              padding: '10px 14px',
+              background: todayHotel ? 'rgba(59,126,212,0.08)' : 'transparent',
+              border: `1px ${todayHotel ? 'solid' : 'dashed'} ${todayHotel ? 'rgba(59,126,212,0.25)' : 'var(--border)'}`,
+              borderRadius: 12,
+              display: 'flex', alignItems: 'center', gap: 8,
+              cursor: 'pointer',
+              transition: 'background 0.15s',
+            }}
+          >
+            <span style={{ fontSize: 18 }}>🏨</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {todayHotel ? (
+                <>
+                  <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {todayHotel.name}
+                  </p>
+                  {todayHotel.location && (
+                    <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>{todayHotel.location}</p>
+                  )}
+                </>
+              ) : (
+                <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500, margin: 0 }}>
+                  {locale === 'he' ? 'הוסף מלון / לינה' : 'Add hotel / accommodation'}
+                </p>
+              )}
+            </div>
+            {todayHotel && (
+              <span style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600 }}>
+                {locale === 'he' ? 'ערוך' : 'Edit'}
+              </span>
+            )}
+          </div>
+        );
+        return (
+          <div
+            className="flex-1 overflow-y-auto day-list-pb"
+            onTouchStart={e => {
+              swipeStartX.current = e.touches[0].clientX;
+              swipeStartY.current = e.touches[0].clientY;
+            }}
+            onTouchEnd={e => {
+              if (!trip) return;
+              const dx = e.changedTouches[0].clientX - swipeStartX.current;
+              const dy = e.changedTouches[0].clientY - swipeStartY.current;
+              if (Math.abs(dx) > Math.abs(dy) * 1.8 && Math.abs(dx) > 55) {
+                if (dx < 0 && activeDay < trip.days) setActiveDay(activeDay + 1);
+                if (dx > 0 && activeDay > 1) setActiveDay(activeDay - 1);
+              }
+            }}
+          >
+            {hotelBanner('top')}
         <AnimatePresence>
           {evs.length === 0 ? (
             <motion.div
@@ -1104,11 +1264,15 @@ export default function DayScreen() {
                     onEdit={openEdit}
                     onDelete={handleDelete}
                     onReschedule={handleReschedule}
+                    onMove={handleMove}
                     onFocus={setFocusedEvent}
                     isConflict={conflicts.has(item.ev.id)}
                     goldenHour={getGoldenHourType(toMins(item.ev.time), item.ev.duration, dayLat, dayDate)}
                     nickname={nickname}
                     dayNumber={activeDay}
+                    tripDays={trip.days}
+                    startDate={trip.startDate}
+                    locale={locale}
                   />
                 ) : (
                   <RouteConnector
@@ -1126,7 +1290,10 @@ export default function DayScreen() {
             </div>
           )}
         </AnimatePresence>
-      </div>
+            {hotelBanner('bottom')}
+          </div>
+        );
+      })()}
 
       {/* ── Event detail sheet ──────────────────────────────────── */}
       {focusedEvent && (() => {
@@ -1589,6 +1756,99 @@ export default function DayScreen() {
               <GlassBtn variant="accent" onClick={handleDrivePromptSave} style={{ flex: 2 }}>
                 <Icon name="plus" size={14} />
                 {t('addDriveBtn')}
+              </GlassBtn>
+            </div>
+          </div>
+        </Sheet>
+      )}
+
+      {/* ── Hotel management sheet ─────────────────────────────── */}
+      {showHotelSheet && trip && (
+        <Sheet
+          onClose={() => setShowHotelSheet(false)}
+          title={locale === 'he' ? 'מלון / לינה' : 'Hotel / Accommodation'}
+          subtitle={locale === 'he' ? 'הגדר את הלינה לתאריכים אלה' : 'Set accommodation for date range'}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <Field
+              label={locale === 'he' ? 'שם המלון' : 'Hotel name'}
+              placeholder={locale === 'he' ? 'לדוג׳ מלון דן, אירבנב...' : 'e.g. Dan Hotel, Airbnb...'}
+              value={hName}
+              onChange={setHName}
+              autoFocus
+            />
+            <Field
+              label={locale === 'he' ? 'מיקום (אופציונלי)' : 'Location (optional)'}
+              placeholder={locale === 'he' ? 'לדוג׳ תל אביב, רחוב...' : 'e.g. Tel Aviv, address...'}
+              value={hLocation}
+              onChange={setHLocation}
+            />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
+                  {locale === 'he' ? 'יום צ׳ק-אין' : 'Check-in day'}
+                </label>
+                <select
+                  value={hCheckIn}
+                  onChange={e => { const v = Number(e.target.value); setHCheckIn(v); if (hCheckOut <= v) setHCheckOut(v + 1); }}
+                  style={{
+                    width: '100%', padding: '11px 10px', borderRadius: 'var(--radius-md)',
+                    fontSize: 15, fontWeight: 600, minHeight: 44,
+                    background: 'var(--bg)', color: 'var(--text)',
+                    border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box' as const,
+                  }}
+                >
+                  {Array.from({ length: trip.days }, (_, i) => i + 1).map(d => (
+                    <option key={d} value={d}>
+                      {trip.startDate ? fmtDate(trip.startDate, d - 1, locale) : (locale === 'he' ? `יום ${d}` : `Day ${d}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
+                  {locale === 'he' ? 'יום צ׳ק-אאוט' : 'Checkout day'}
+                </label>
+                <select
+                  value={hCheckOut}
+                  onChange={e => setHCheckOut(Number(e.target.value))}
+                  style={{
+                    width: '100%', padding: '11px 10px', borderRadius: 'var(--radius-md)',
+                    fontSize: 15, fontWeight: 600, minHeight: 44,
+                    background: 'var(--bg)', color: 'var(--text)',
+                    border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box' as const,
+                  }}
+                >
+                  {Array.from({ length: trip.days }, (_, i) => i + 2).filter(d => d > hCheckIn && d <= trip.days + 1).map(d => (
+                    <option key={d} value={d}>
+                      {trip.startDate ? fmtDate(trip.startDate, d - 1, locale) : (locale === 'he' ? `יום ${d}` : `Day ${d}`)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>
+              {(() => {
+                const from = trip.startDate ? fmtDate(trip.startDate, hCheckIn - 1, locale) : `Day ${hCheckIn}`;
+                const to   = trip.startDate ? fmtDate(trip.startDate, hCheckOut - 2, locale) : `Day ${hCheckOut - 1}`;
+                const out  = trip.startDate ? fmtDate(trip.startDate, hCheckOut - 1, locale) : `Day ${hCheckOut}`;
+                return locale === 'he'
+                  ? `יוצג מ-${from} עד ${to} (לא ב-${out})`
+                  : `Shown ${from} – ${to} (not on ${out})`;
+              })()}
+            </p>
+            <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+              {editHotelTarget && (
+                <GlassBtn onClick={() => { deleteHotel(editHotelTarget); setShowHotelSheet(false); }} style={{ flex: 1, color: 'var(--danger)' }}>
+                  <Icon name="trash" size={13} /> {locale === 'he' ? 'מחק' : 'Delete'}
+                </GlassBtn>
+              )}
+              <GlassBtn onClick={() => setShowHotelSheet(false)} style={{ flex: 1 }}>
+                {t('cancel')}
+              </GlassBtn>
+              <GlassBtn variant="accent" onClick={handleSaveHotel} style={{ flex: 2 }}>
+                <Icon name="check" size={14} />
+                {locale === 'he' ? 'שמור' : 'Save'}
               </GlassBtn>
             </div>
           </div>

@@ -174,19 +174,28 @@ function TripStep() {
   }, [authUser?.id]);
 
   const [cName,  setCName]  = useState('');
-  const [cDays,  setCDays]  = useState('3');
   const [cNick,  setCNick]  = useState(authUser?.username ?? '');
   const [cTheme, setCTheme] = useState<TripTheme>('desert');
   const [cDate,  setCDate]  = useState(new Date().toISOString().split('T')[0]);
+  const [cEndDate, setCEndDate] = useState(() => {
+    const d = new Date(); d.setDate(d.getDate() + 6);
+    return d.toISOString().split('T')[0];
+  });
   const [cCountries, setCCountries] = useState<string[]>([]);
   const [cCurrency, setCCurrency] = useState('USD');
+
+  const calcDays = (start: string, end: string) => {
+    const ms = new Date(end).getTime() - new Date(start).getTime();
+    return Math.max(1, Math.min(90, Math.round(ms / 86_400_000) + 1));
+  };
 
   const handleCreate = async () => {
     if (!cName.trim()) { show(t('enterTripName')); return; }
     if (!cNick.trim()) { show(t('enterNickname')); return; }
+    if (cEndDate < cDate) { show(locale === 'he' ? 'תאריך הסיום חייב להיות אחרי תאריך ההתחלה' : 'End date must be after start date'); return; }
     setLoading(true);
     try {
-      const days = Math.min(30, Math.max(1, parseInt(cDays, 10) || 3));
+      const days = calcDays(cDate, cEndDate);
       await createTrip(cName, days, cNick, cTheme, cDate, cCountries, cCurrency);
     } catch (err: any) {
       const msg = (err?.message ?? '').toLowerCase();
@@ -469,14 +478,28 @@ function TripStep() {
 
               <div style={{ display: 'flex', gap: 10 }}>
                 <div style={{ flex: 1 }}>
-                  <Field label={t('numDays')} type="number" placeholder="10" value={cDays} onChange={setCDays} />
-                </div>
-                <div style={{ flex: 2 }}>
                   <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
                     {t('startDateLabel')}
                   </label>
                   <input
-                    type="date" value={cDate} onChange={e => setCDate(e.target.value)}
+                    type="date" value={cDate}
+                    onChange={e => setCDate(e.target.value)}
+                    className="input-premium"
+                    style={{
+                      width: '100%', padding: '11px 12px', borderRadius: 'var(--radius-md)',
+                      fontSize: 15, fontWeight: 500, minHeight: 44,
+                      background: 'var(--bg)', color: 'var(--text)',
+                      border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box' as const,
+                    }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
+                    {locale === 'he' ? 'תאריך סיום' : 'End date'}
+                  </label>
+                  <input
+                    type="date" value={cEndDate} min={cDate}
+                    onChange={e => setCEndDate(e.target.value)}
                     className="input-premium"
                     style={{
                       width: '100%', padding: '11px 12px', borderRadius: 'var(--radius-md)',
@@ -487,6 +510,11 @@ function TripStep() {
                   />
                 </div>
               </div>
+              {cDate && cEndDate && cEndDate >= cDate && (
+                <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500, textAlign: 'center', marginTop: -6 }}>
+                  {calcDays(cDate, cEndDate)} {locale === 'he' ? 'ימים' : 'days'}
+                </p>
+              )}
 
               <GlassBtn variant="accent" size="lg" onClick={handleCreate} style={{ width: '100%', marginTop: 4 }} disabled={loading}>
                 <Icon name="check" size={15} /> {loading ? '…' : t('createBtn')}
