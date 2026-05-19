@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 const TRIP_SELECT = `
-  id, name, days, start_date, theme, trip_notes, countries,
+  id, name, days, start_date, theme, trip_notes, countries, hotels,
   day_meta ( day_index, region, emoji, lat, lng, description ),
   events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes ),
   expenses ( id, description, amount, split_count ),

@@ -90,6 +90,84 @@ function EventThumbnail({ category }: { category: Category }) {
   );
 }
 
+/* ── Shared travel types & badge component ───────────────────── */
+interface TravelMode { durationMins: number; distanceKm: number }
+interface TravelModes { driving: TravelMode | null; walking: TravelMode | null; transit: TravelMode | null }
+
+function TravelBadges({ modes, fetching, darkMode }: { modes: TravelModes | null; fetching: boolean; darkMode: boolean }) {
+  if (fetching) {
+    return (
+      <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+        <motion.span animate={{ rotate: 360 }} transition={{ duration: 1.6, repeat: Infinity, ease: 'linear' }} style={{ display: 'inline-block', lineHeight: 1 }}>⟳</motion.span>
+        Estimating travel…
+      </span>
+    );
+  }
+  if (!modes) return null;
+  const modeItems: { icon: string; m: TravelMode }[] = [];
+  if (modes.driving)  modeItems.push({ icon: '🚗', m: modes.driving });
+  if (modes.walking)  modeItems.push({ icon: '🚶', m: modes.walking });
+  if (modes.transit)  modeItems.push({ icon: '🚌', m: modes.transit });
+  if (!modeItems.length) return null;
+  return (
+    <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+      {modeItems.map(({ icon, m }) => (
+        <span key={icon} style={{
+          fontSize: 11, fontWeight: 700,
+          color: darkMode ? '#818CF8' : '#4F46E5',
+          background: darkMode ? 'rgba(129,140,248,0.14)' : 'rgba(99,102,241,0.08)',
+          border: `1px solid ${darkMode ? 'rgba(129,140,248,0.30)' : 'rgba(99,102,241,0.22)'}`,
+          borderRadius: 100, padding: '4px 10px',
+          display: 'inline-flex', alignItems: 'center', gap: 4,
+        }}>
+          {icon} {fmtDuration(m.durationMins)}
+          <span style={{ opacity: 0.5, fontWeight: 400 }}>· {m.distanceKm} km</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ── Hotel → first event travel time ─────────────────────────── */
+interface HotelTravelRowProps {
+  hotelLat: number; hotelLng: number;
+  eventLat: number; eventLng: number;
+  eventName: string; darkMode: boolean;
+}
+function HotelTravelRow({ hotelLat, hotelLng, eventLat, eventLng, eventName, darkMode }: HotelTravelRowProps) {
+  const [modes, setModes] = useState<TravelModes | null>(null);
+  const [fetching, setFetching] = useState(false);
+
+  useEffect(() => {
+    setFetching(true);
+    setModes(null);
+    fetch(`/api/route-time?olat=${hotelLat}&olng=${hotelLng}&dlat=${eventLat}&dlng=${eventLng}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setModes(d); })
+      .catch(() => {})
+      .finally(() => setFetching(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hotelLat, hotelLng, eventLat, eventLng]);
+
+  if (!fetching && !modes) return null;
+
+  return (
+    <div style={{
+      margin: '0 var(--page-px) 4px',
+      padding: '8px 12px',
+      background: darkMode ? 'rgba(59,126,212,0.07)' : 'rgba(59,126,212,0.05)',
+      border: `1px solid ${darkMode ? 'rgba(59,126,212,0.20)' : 'rgba(59,126,212,0.18)'}`,
+      borderRadius: 10,
+      display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+    }}>
+      <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, flexShrink: 0 }}>
+        🏨 → {eventName}
+      </span>
+      <TravelBadges modes={modes} fetching={fetching} darkMode={darkMode} />
+    </div>
+  );
+}
+
 /* ── Route connector between events ──────────────────────────── */
 interface ConnectorProps {
   gapMins: number;
@@ -102,8 +180,7 @@ interface ConnectorProps {
 }
 
 function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest, onAdd, t }: ConnectorProps) {
-  const [travelMins, setTravelMins] = useState<number | null>(null);
-  const [travelKm, setTravelKm] = useState<number | null>(null);
+  const [modes, setModes] = useState<TravelModes | null>(null);
   const [fetching, setFetching] = useState(false);
   const darkMode = useAppStore(s => s.darkMode);
 
@@ -113,24 +190,17 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
   useEffect(() => {
     if (!canRoute) return;
     setFetching(true);
-    setTravelMins(null);
-    fetch(
-      `/api/route-time?olat=${fromEv!.lat}&olng=${fromEv!.lng}&dlat=${toEv!.lat}&dlng=${toEv!.lng}`
-    )
+    setModes(null);
+    fetch(`/api/route-time?olat=${fromEv!.lat}&olng=${fromEv!.lng}&dlat=${toEv!.lat}&dlng=${toEv!.lng}`)
       .then(r => r.ok ? r.json() : null)
-      .then(d => {
-        if (d?.durationMins != null) {
-          setTravelMins(d.durationMins);
-          setTravelKm(d.distanceKm ?? null);
-        }
-      })
-      .catch(() => { })
+      .then(d => { if (d) setModes(d); })
+      .catch(() => {})
       .finally(() => setFetching(false));
-    // re-fetch only when coordinates change
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromEv?.lat, fromEv?.lng, toEv?.lat, toEv?.lng]);
 
-  const dashColor = isFree ? 'var(--warning)' : travelMins !== null ? 'rgba(99,102,241,0.6)' : 'var(--border)';
+  const hasTravel = modes?.driving || modes?.walking || modes?.transit;
+  const dashColor = isFree ? 'var(--warning)' : hasTravel ? 'rgba(99,102,241,0.6)' : 'var(--border)';
 
   return (
     <div style={{
@@ -138,9 +208,7 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
       padding: '4px var(--page-px) 4px calc(var(--page-px) + 12px)',
     }}>
       {/* Dashed vertical timeline thread */}
-      <div style={{
-        width: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0,
-      }}>
+      <div style={{ width: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
         {[0, 1, 2].map(i => (
           <div key={i} style={{
             width: 2, height: 6, borderRadius: 1, marginBottom: 3,
@@ -152,51 +220,13 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
 
-        {/* ── Estimated travel time badge ── */}
-        {fetching ? (
-          <span style={{
-            fontSize: 11, fontWeight: 500, color: 'var(--text-3)',
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-          }}>
-            <motion.span
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: 'linear' }}
-              style={{ display: 'inline-block', lineHeight: 1 }}
-            >
-              ⟳
-            </motion.span>
-            {t('estimatingTravel')}
-          </span>
-        ) : travelMins !== null ? (
-          <span style={{
-            fontSize: 11, fontWeight: 700,
-            color: darkMode ? '#818CF8' : '#4F46E5',
-            background: darkMode ? 'rgba(129,140,248,0.14)' : 'rgba(99,102,241,0.08)',
-            border: `1px solid ${darkMode ? 'rgba(129,140,248,0.30)' : 'rgba(99,102,241,0.22)'}`,
-            borderRadius: 100,
-            padding: '4px 11px',
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            letterSpacing: '0.01em',
-          }}>
-            {t('estimatedTravelTime')}
-            <span style={{ opacity: 0.45, fontWeight: 400 }}>·</span>
-            {fmtDuration(travelMins)}
-            {travelKm !== null && (
-              <>
-                <span style={{ opacity: 0.45, fontWeight: 400 }}>·</span>
-                {travelKm} km
-              </>
-            )}
-          </span>
-        ) : null}
+        {/* ── Travel mode badges ── */}
+        <TravelBadges modes={modes} fetching={fetching} darkMode={darkMode} />
 
         {/* ── Free time badge + AI suggest ── */}
         {isFree && (
           <>
-            <span style={{
-              fontSize: 11, fontWeight: 700, color: 'var(--warning)',
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-            }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
               ⚡ {fmtDuration(gapMins)} {t('freeTime')}
             </span>
             <motion.button
@@ -206,10 +236,8 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
                 background: 'linear-gradient(135deg, rgba(91,79,207,0.12) 0%, rgba(59,126,212,0.12) 100%)',
                 border: '1px solid rgba(91,79,207,0.25)',
                 borderRadius: 100, padding: '4px 12px',
-                fontSize: 10, fontWeight: 700,
-                color: '#5B4FCF',
-                cursor: 'pointer',
-                display: 'flex', alignItems: 'center', gap: 5,
+                fontSize: 10, fontWeight: 700, color: '#5B4FCF',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
               }}
             >
               <Icon name="sparkle" size={10} /> {t('suggestBtn')}
@@ -225,10 +253,8 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
             background: 'var(--brand-muted)',
             border: '1px solid rgba(59,110,82,0.25)',
             borderRadius: 100, padding: '4px 10px',
-            fontSize: 10, fontWeight: 700,
-            color: 'var(--brand)',
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 4,
+            fontSize: 10, fontWeight: 700, color: 'var(--brand)',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
           }}
         >
           <Icon name="plus" size={10} />
@@ -1254,6 +1280,22 @@ export default function DayScreen() {
             }}
           >
             {hotelBanner('top')}
+            {(() => {
+              const firstWithCoords = evs.find(e => e.lat != null && e.lng != null);
+              if (todayHotel?.lat != null && todayHotel?.lng != null && firstWithCoords) {
+                return (
+                  <HotelTravelRow
+                    hotelLat={todayHotel.lat!}
+                    hotelLng={todayHotel.lng!}
+                    eventLat={firstWithCoords.lat!}
+                    eventLng={firstWithCoords.lng!}
+                    eventName={firstWithCoords.name}
+                    darkMode={darkMode}
+                  />
+                );
+              }
+              return null;
+            })()}
         <AnimatePresence>
           {evs.length === 0 ? (
             <motion.div
