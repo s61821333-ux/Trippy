@@ -160,7 +160,7 @@ function HotelTravelRow({ hotelLat, hotelLng, eventLat, eventLng, eventName, dar
       borderRadius: 10,
       display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
     }}>
-      <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, flexShrink: 0 }}>
+      <span dir="ltr" style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, flexShrink: 0 }}>
         🏨 → {eventName}
       </span>
       <TravelBadges modes={modes} fetching={fetching} darkMode={darkMode} />
@@ -183,8 +183,10 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
   const [modes, setModes] = useState<TravelModes | null>(null);
   const [fetching, setFetching] = useState(false);
   const darkMode = useAppStore(s => s.darkMode);
+  const { locale } = useI18n();
 
   const isFree = gapMins >= 45;
+  const bothExist = !!(fromEv && toEv);
   const canRoute = !!(fromEv?.lat && fromEv?.lng && toEv?.lat && toEv?.lng);
 
   useEffect(() => {
@@ -204,61 +206,87 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
 
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: 10,
+      display: 'flex', flexDirection: 'column', gap: 4,
       padding: '4px var(--page-px) 4px calc(var(--page-px) + 12px)',
     }}>
-      {/* Dashed vertical timeline thread */}
-      <div style={{ width: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
-        {[0, 1, 2].map(i => (
-          <div key={i} style={{
-            width: 2, height: 6, borderRadius: 1, marginBottom: 3,
-            background: dashColor,
-            opacity: isFree ? (1 - i * 0.25) : 0.45,
-          }} />
-        ))}
-      </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
+      {/* ── Travel row: direction label + mode badges ── */}
+      {bothExist && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+          {/* Direction label */}
+          <span dir="ltr" style={{
+            fontSize: 10, fontWeight: 600, color: 'var(--text-3)',
+            display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0,
+          }}>
+            {fromEv!.name}
+            <span style={{ opacity: 0.5 }}>→</span>
+            {toEv!.name}
+          </span>
 
-        {/* ── Travel mode badges ── */}
-        <TravelBadges modes={modes} fetching={fetching} darkMode={darkMode} />
-
-        {/* ── Free time badge + AI suggest ── */}
-        {isFree && (
-          <>
-            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-              ⚡ {fmtDuration(gapMins)} {t('freeTime')}
+          {/* Travel badges or no-location hint */}
+          {canRoute ? (
+            <TravelBadges modes={modes} fetching={fetching} darkMode={darkMode} />
+          ) : (
+            <span style={{
+              fontSize: 10, color: 'var(--text-3)', opacity: 0.65,
+              display: 'inline-flex', alignItems: 'center', gap: 3,
+            }}>
+              📍 {locale === 'he' ? 'הוסף מיקום לחישוב זמן נסיעה' : 'Add locations for travel time'}
             </span>
-            <motion.button
-              whileTap={{ scale: 0.90 }}
-              onClick={onSuggest}
-              style={{
-                background: 'linear-gradient(135deg, rgba(91,79,207,0.12) 0%, rgba(59,126,212,0.12) 100%)',
-                border: '1px solid rgba(91,79,207,0.25)',
-                borderRadius: 100, padding: '4px 12px',
-                fontSize: 10, fontWeight: 700, color: '#5B4FCF',
-                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
-              }}
-            >
-              <Icon name="sparkle" size={10} /> {t('suggestBtn')}
-            </motion.button>
-          </>
-        )}
+          )}
+        </div>
+      )}
 
-        {/* ── Add event button ── */}
-        <motion.button
-          whileTap={{ scale: 0.90 }}
-          onClick={onAdd}
-          style={{
-            background: 'var(--brand-muted)',
-            border: '1px solid rgba(59,110,82,0.25)',
-            borderRadius: 100, padding: '4px 10px',
-            fontSize: 10, fontWeight: 700, color: 'var(--brand)',
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
-          }}
-        >
-          <Icon name="plus" size={10} />
-        </motion.button>
+      {/* ── Bottom row: timeline dash + free time + actions ── */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ width: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{
+              width: 2, height: 6, borderRadius: 1, marginBottom: 3,
+              background: dashColor,
+              opacity: isFree ? (1 - i * 0.25) : 0.45,
+            }} />
+          ))}
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
+          {/* ── Free time badge + AI suggest ── */}
+          {isFree && (
+            <>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                ⚡ {fmtDuration(gapMins)} {t('freeTime')}
+              </span>
+              <motion.button
+                whileTap={{ scale: 0.90 }}
+                onClick={onSuggest}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(91,79,207,0.12) 0%, rgba(59,126,212,0.12) 100%)',
+                  border: '1px solid rgba(91,79,207,0.25)',
+                  borderRadius: 100, padding: '4px 12px',
+                  fontSize: 10, fontWeight: 700, color: '#5B4FCF',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
+                }}
+              >
+                <Icon name="sparkle" size={10} /> {t('suggestBtn')}
+              </motion.button>
+            </>
+          )}
+
+          {/* ── Add event button ── */}
+          <motion.button
+            whileTap={{ scale: 0.90 }}
+            onClick={onAdd}
+            style={{
+              background: 'var(--brand-muted)',
+              border: '1px solid rgba(59,110,82,0.25)',
+              borderRadius: 100, padding: '4px 10px',
+              fontSize: 10, fontWeight: 700, color: 'var(--brand)',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+            }}
+          >
+            <Icon name="plus" size={10} />
+          </motion.button>
+        </div>
       </div>
     </div>
   );
