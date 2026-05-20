@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(Get-ChildItem -Directory)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(mkdir \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\app\\\\api\\\\trips\\\\[tripId]\\\\hotels\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"
     ]
   }
 }

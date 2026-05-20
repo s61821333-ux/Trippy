@@ -294,8 +294,15 @@ export async function dbUpdateTripNotes(tripId: string, notes: string[]) {
 }
 
 export async function dbUpdateHotels(tripId: string, hotels: HotelStay[]) {
-  const { error } = await sb().from('trips').update({ hotels } as any).eq('id', tripId)
-  if (error) throw error
+  const r = await fetch(`/api/trips/${tripId}/hotels`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ hotels }),
+  })
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}))
+    throw new Error(body?.error ?? `hotels_save_failed (${r.status})`)
+  }
 }
 
 // ─── Day meta ────────────────────────────────────────────────────────────────

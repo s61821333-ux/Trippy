@@ -477,7 +477,12 @@ export const useAppStore = create<AppState>()(
         const newHotel: HotelStay = { ...hotel, id: uid() };
         set(s => {
           const trip = s.trip ? { ...s.trip, hotels: [...(s.trip.hotels ?? []), newHotel] } : null;
-          if (tripDbId && trip?.hotels) dbUpdateHotels(tripDbId, trip.hotels).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+          if (tripDbId && trip?.hotels) {
+            dbUpdateHotels(tripDbId, trip.hotels).catch(err => {
+              console.error('[addHotel] DB sync failed:', err);
+              set({ lastSyncError: err?.message ?? 'save_failed' });
+            });
+          }
           return { trip };
         });
       },
@@ -486,7 +491,12 @@ export const useAppStore = create<AppState>()(
         const { tripDbId } = get();
         set(s => {
           const trip = s.trip ? { ...s.trip, hotels: (s.trip.hotels ?? []).map(h => h.id === id ? { ...h, ...updates } : h) } : null;
-          if (tripDbId && trip?.hotels) dbUpdateHotels(tripDbId, trip.hotels).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+          if (tripDbId && trip?.hotels) {
+            dbUpdateHotels(tripDbId, trip.hotels).catch(err => {
+              console.error('[editHotel] DB sync failed:', err);
+              set({ lastSyncError: err?.message ?? 'save_failed' });
+            });
+          }
           return { trip };
         });
       },
@@ -496,7 +506,12 @@ export const useAppStore = create<AppState>()(
         set(s => {
           const hotels = (s.trip?.hotels ?? []).filter(h => h.id !== id);
           const trip = s.trip ? { ...s.trip, hotels } : null;
-          if (tripDbId) dbUpdateHotels(tripDbId, hotels).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+          if (tripDbId) {
+            dbUpdateHotels(tripDbId, hotels).catch(err => {
+              console.error('[deleteHotel] DB sync failed:', err);
+              set({ lastSyncError: err?.message ?? 'save_failed' });
+            });
+          }
           return { trip };
         });
       },
