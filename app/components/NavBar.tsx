@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Icon from './ui/Icon';
 import CompassMark from './ui/CompassMark';
 import { Screen } from '@/lib/types';
@@ -116,6 +116,11 @@ export default function NavBar({ active, onChange }: NavBarProps) {
       </div>
 
       {/* ── Mobile: fixed bottom tab bar ── */}
+      {/*
+        paddingBottom fills the safe-area-inset-bottom region with the nav background
+        so there's no gap between the bar and the screen edge in app/PWA mode.
+        The inner div has the fixed 68px button height; the padding extends below it.
+      */}
       <nav
         className="md:hidden"
         style={{
@@ -126,7 +131,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
           zIndex: 50,
           background: 'var(--surface)',
           borderTop: '1px solid var(--border)',
-          height: 'var(--nav-total-h)',
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
         <div style={{
@@ -157,33 +162,40 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                   color: isActive ? 'var(--brand)' : 'var(--text-3)',
                   minHeight: 48,
                   position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                {/* Active pill behind icon */}
-                {isActive && (
-                  <motion.div
-                    layoutId="nav-active-pill"
-                    style={{
-                      position: 'absolute',
-                      top: '50%',
-                      left: '50%',
-                      transform: 'translate(-50%, -60%)',
-                      width: 42,
-                      height: 30,
-                      borderRadius: 10,
-                      background: 'var(--brand-muted)',
-                      border: '1px solid rgba(92,184,122,0.22)',
-                      zIndex: 0,
-                    }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 38 }}
-                  />
-                )}
+                {/* Active pill — scale in/out, fully contained within the button */}
+                <AnimatePresence>
+                  {isActive && (
+                    <motion.div
+                      key="pill"
+                      initial={{ scale: 0.5, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.5, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                      style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -60%)',
+                        width: 42,
+                        height: 30,
+                        borderRadius: 10,
+                        background: 'var(--brand-muted)',
+                        border: '1px solid rgba(92,184,122,0.22)',
+                        zIndex: 0,
+                        pointerEvents: 'none',
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
                 <Icon name={tab.icon} size={isActive ? 21 : 20} style={{ position: 'relative', zIndex: 1 }} />
                 <span style={{
-                  fontSize: 11,
+                  fontSize: 9,
                   fontWeight: isActive ? 700 : 500,
                   fontFamily: 'var(--font-mono)',
-                  letterSpacing: '0.10em',
+                  letterSpacing: '0.14em',
                   textTransform: 'uppercase',
                   textAlign: 'center',
                   lineHeight: 1.2,

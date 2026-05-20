@@ -732,6 +732,10 @@ export default function DayScreen() {
   const [savedFlightTime, setSavedFlightTime] = useState('');
   const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
 
+  // Budget breakdown state
+  const [showBudget, setShowBudget] = useState(false);
+  const [budgetEdit, setBudgetEdit] = useState<Record<string, string>>({});
+
   // Hotel management state
   const [showHotelSheet, setShowHotelSheet] = useState(false);
   const [editHotelTarget, setEditHotelTarget] = useState<string | null>(null); // hotel id being edited
@@ -1195,14 +1199,23 @@ export default function DayScreen() {
             · {evs.length} {evs.length === 1 ? t('stopSingular') : t('stopPlural')}
           </span>
           {dayBudget > 0 && (
-            <span style={{
-              fontSize: 11, fontWeight: 700, color: 'var(--success)',
-              background: 'var(--success-bg)',
-              border: '1px solid rgba(40,160,90,0.2)',
-              borderRadius: 100, padding: '1px 8px', marginLeft: 2,
-            }}>
+            <motion.span
+              whileTap={{ scale: 0.94 }}
+              onClick={e => {
+                e.stopPropagation();
+                setBudgetEdit(Object.fromEntries(evs.map(ev => [ev.id, ev.cost != null ? String(ev.cost) : ''])));
+                setShowBudget(true);
+              }}
+              style={{
+                fontSize: 11, fontWeight: 700, color: 'var(--success)',
+                background: 'var(--success-bg)',
+                border: '1px solid rgba(40,160,90,0.2)',
+                borderRadius: 100, padding: '1px 8px', marginLeft: 2,
+                cursor: 'pointer',
+              }}
+            >
               💰 {currSym}{dayBudget}
-            </span>
+            </motion.span>
           )}
           {conflicts.size > 0 && (
             <span style={{
@@ -1944,6 +1957,90 @@ export default function DayScreen() {
                 {locale === 'he' ? 'שמור' : 'Save'}
               </GlassBtn>
             </div>
+          </div>
+        </Sheet>
+      )}
+
+      {/* ── Budget breakdown sheet ─────────────────────────────── */}
+      {showBudget && (
+        <Sheet
+          onClose={() => setShowBudget(false)}
+          title={locale === 'he' ? '💰 פירוט הוצאות' : '💰 Budget Breakdown'}
+          subtitle={locale === 'he' ? 'ערוך עלויות לפי אירוע' : 'Edit cost per event'}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {evs.length === 0 ? (
+              <p style={{ fontSize: 13, color: 'var(--text-3)', textAlign: 'center', padding: '16px 0' }}>
+                {locale === 'he' ? 'אין אירועים ביום זה' : 'No events on this day'}
+              </p>
+            ) : (
+              <>
+                {evs.map(ev => (
+                  <div key={ev.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '10px 14px',
+                    background: 'var(--bg)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 12,
+                  }}>
+                    <div style={{
+                      width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                      background: CAT_GRADIENTS[ev.category],
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <EventIcon category={ev.category as any} size={16} style={{ color: 'rgba(255,255,255,0.95)' }} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {ev.name}
+                      </p>
+                      <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>{ev.time} · {ev.duration}min</p>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)' }}>{currSym}</span>
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        value={budgetEdit[ev.id] ?? ''}
+                        onChange={e => setBudgetEdit(prev => ({ ...prev, [ev.id]: e.target.value }))}
+                        onBlur={() => {
+                          const val = parseFloat(budgetEdit[ev.id] ?? '');
+                          editEvent(activeDay, ev.id, { cost: !isNaN(val) && val >= 0 ? val : undefined });
+                        }}
+                        placeholder="0"
+                        style={{
+                          width: 72, padding: '6px 8px', borderRadius: 8,
+                          fontSize: 14, fontWeight: 700, textAlign: 'right',
+                          background: 'var(--surface)', color: 'var(--text)',
+                          border: '1px solid var(--border)', outline: 'none',
+                          fontFamily: 'var(--font-sans)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '12px 14px',
+                  background: 'var(--success-bg)',
+                  border: '1px solid rgba(40,160,90,0.2)',
+                  borderRadius: 12, marginTop: 4,
+                }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--success)' }}>
+                    {locale === 'he' ? 'סה״כ יום' : 'Day Total'}
+                  </span>
+                  <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--success)' }}>
+                    {currSym}{evs.reduce((sum, ev) => {
+                      const v = parseFloat(budgetEdit[ev.id] ?? '');
+                      return sum + (!isNaN(v) && v >= 0 ? v : ev.cost ?? 0);
+                    }, 0).toLocaleString()}
+                  </span>
+                </div>
+              </>
+            )}
+            <GlassBtn onClick={() => setShowBudget(false)} style={{ width: '100%', marginTop: 4 }}>
+              {locale === 'he' ? 'סגור' : 'Close'}
+            </GlassBtn>
           </div>
         </Sheet>
       )}
