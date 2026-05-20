@@ -1243,22 +1243,29 @@ export default function DayScreen() {
 
       {/* ── Itinerary list ───────────────────────────────────── */}
       {(() => {
-        const todayHotel = (trip.hotels ?? []).find(
-          h => h.checkInDay <= activeDay && activeDay <= h.checkOutDay,
+        // Hotel you sleep in tonight (check-in day up to, but not including, checkout day)
+        const tonightHotel = (trip.hotels ?? []).find(
+          h => h.checkInDay <= activeDay && activeDay < h.checkOutDay,
         );
-        const isCheckInDay = todayHotel != null && todayHotel.checkInDay === activeDay;
-        const isCheckOutDay = todayHotel != null && todayHotel.checkOutDay === activeDay;
+        // Hotel you're checking out of this morning
+        const checkoutHotel = (trip.hotels ?? []).find(
+          h => h.checkOutDay === activeDay,
+        );
+        // Top shows the checkout hotel (leaving this morning), or tonight's hotel if not check-in day
+        const topHotel = checkoutHotel ?? (tonightHotel?.checkInDay !== activeDay ? tonightHotel : null);
+        // Bottom always reflects tonight — null means show "Add hotel"
+        const bottomHotel = tonightHotel;
         const hotelBanner = (pos: 'top' | 'bottom') => {
-          if (pos === 'top' && isCheckInDay && !isCheckOutDay) return null;
-          if (pos === 'bottom' && isCheckOutDay && !isCheckInDay) return null;
+          const hotel = pos === 'top' ? topHotel : bottomHotel;
+          if (pos === 'top' && topHotel == null) return null;
           return (
           <div
-            onClick={() => openHotelSheet(todayHotel?.id)}
+            onClick={() => openHotelSheet(hotel?.id)}
             style={{
               margin: pos === 'top' ? '8px var(--page-px) 4px' : '4px var(--page-px) 8px',
               padding: '10px 14px',
-              background: todayHotel ? 'rgba(59,126,212,0.08)' : 'transparent',
-              border: `1px ${todayHotel ? 'solid' : 'dashed'} ${todayHotel ? 'rgba(59,126,212,0.25)' : 'var(--border)'}`,
+              background: hotel ? 'rgba(59,126,212,0.08)' : 'transparent',
+              border: `1px ${hotel ? 'solid' : 'dashed'} ${hotel ? 'rgba(59,126,212,0.25)' : 'var(--border)'}`,
               borderRadius: 12,
               display: 'flex', alignItems: 'center', gap: 8,
               cursor: 'pointer',
@@ -1267,9 +1274,9 @@ export default function DayScreen() {
           >
             <span style={{ fontSize: 18 }}>🏨</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              {todayHotel ? (
+              {hotel ? (
                 <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {todayHotel.location}
+                  {hotel.location}
                 </p>
               ) : (
                 <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500, margin: 0 }}>
@@ -1277,9 +1284,9 @@ export default function DayScreen() {
                 </p>
               )}
             </div>
-            {todayHotel && todayHotel.lat != null && todayHotel.lng != null && (
+            {hotel && hotel.lat != null && hotel.lng != null && (
               <a
-                href={`https://www.google.com/maps/search/?api=1&query=${todayHotel.lat},${todayHotel.lng}`}
+                href={`https://www.google.com/maps/search/?api=1&query=${hotel.lat},${hotel.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}
@@ -1288,7 +1295,7 @@ export default function DayScreen() {
                 <Icon name="pin" size={16} />
               </a>
             )}
-            {todayHotel && (
+            {hotel && (
               <span style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600 }}>
                 {locale === 'he' ? 'ערוך' : 'Edit'}
               </span>
@@ -1316,11 +1323,11 @@ export default function DayScreen() {
             {hotelBanner('top')}
             {(() => {
               const firstWithCoords = evs.find(e => e.lat != null && e.lng != null);
-              if (todayHotel?.lat != null && todayHotel?.lng != null && firstWithCoords) {
+              if (tonightHotel?.lat != null && tonightHotel?.lng != null && firstWithCoords) {
                 return (
                   <HotelTravelRow
-                    hotelLat={todayHotel.lat!}
-                    hotelLng={todayHotel.lng!}
+                    hotelLat={tonightHotel.lat!}
+                    hotelLng={tonightHotel.lng!}
                     eventLat={firstWithCoords.lat!}
                     eventLng={firstWithCoords.lng!}
                     eventName={firstWithCoords.name}
