@@ -207,6 +207,8 @@ html, body {
   line-height: 1.6;
   background: var(--bg);
   color: var(--text);
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 h1, h2, h3, h4, .font-display {
@@ -297,7 +299,7 @@ select {
 }
 
 .sub-label {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -306,7 +308,7 @@ select {
 
 .section-eyebrow, .eyebrow {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -390,8 +392,6 @@ select {
 }
 
 /* ─── Responsive ─────────────────────────────────────────────── */
-@media (max-width: 599px), (max-height: 759px) { body { overflow: auto; } }
-@media (min-width: 600px) and (min-height: 760px) { body { overflow: hidden; } }
 
 /* ─── DayScreen itinerary bottom padding — clears 2 mobile FABs ── */
 .day-list-pb { padding-bottom: 136px; }

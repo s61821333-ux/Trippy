@@ -17,8 +17,6 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
   themeColor: '#F4EFE8',
 };
@@ -39,7 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body style={{ height: '100%', overflow: 'hidden' }}>
+      <body style={{ height: '100%' }}>
         {children}
         <Analytics />
       </body>

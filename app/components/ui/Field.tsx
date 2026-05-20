@@ -21,7 +21,7 @@ const INPUT_STYLE: CSSProperties = {
   borderRadius: 'var(--radius-md)',
   color: 'var(--text)',
   fontFamily: 'var(--font-sans)',
-  fontSize: 15,
+  fontSize: 16,
   padding: '11px 14px',
   width: '100%',
   outline: 'none',

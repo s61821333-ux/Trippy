@@ -17,7 +17,7 @@ interface GlassBtnProps {
 }
 
 const SIZES: Record<Size, { h: number; px: number; fs: number }> = {
-  sm: { h: 36, px: 14, fs: 13 },
+  sm: { h: 44, px: 14, fs: 13 },
   md: { h: 44, px: 18, fs: 14 },
   lg: { h: 52, px: 24, fs: 15 },
 };

@@ -1,6 +1,4 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
 import type { TripEvent, DayMeta, AiSuggestion, Category } from '@/lib/types';
 
@@ -46,8 +44,6 @@ async function enrichWithPlaces(
 
 export const maxDuration = 30;
 
-const client = new Anthropic();
-
 interface RequestBody {
   dayNumber: number;
   dayMeta?: DayMeta;
@@ -61,23 +57,7 @@ interface RequestBody {
 }
 
 export async function POST(request: NextRequest) {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
-          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
-        },
-      },
-    }
-  );
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return Response.json({ error: 'Not authenticated' }, { status: 401 });
-  }
+  const client = new Anthropic();
 
   const { dayNumber, dayMeta, existingEvents, tripName, countries = [], exclude = [], gapStart, gapEnd, locale }: RequestBody =
     await request.json();

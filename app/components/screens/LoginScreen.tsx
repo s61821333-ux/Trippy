@@ -122,7 +122,7 @@ function AuthStep() {
               disabled={googleLoading}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                width: '100%', padding: '11px 16px',
+                width: '100%', padding: '11px 16px', minHeight: 44,
                 background: 'var(--bg)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-md)', fontSize: 14, fontWeight: 600,
                 color: 'var(--text)', cursor: 'pointer',
@@ -318,7 +318,7 @@ function TripStep() {
                         </div>
                         <div style={{ fontSize: 11, color: 'var(--text-2)', marginTop: 2 }}>{t('invitedToJoin')}</div>
                       </div>
-                      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                         <GlassBtn
                           variant="accent" size="sm"
                           onClick={() => handleAccept(inv.id)}

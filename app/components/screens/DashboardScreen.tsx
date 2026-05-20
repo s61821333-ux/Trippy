@@ -240,7 +240,7 @@ export default function DashboardScreen() {
                 <GlassBtn
                   size="sm"
                   onClick={() => setShowShare(true)}
-                  style={{ width: 34, height: 34, padding: 0, borderRadius: 'var(--radius-sm)', minWidth: 0 }}
+                  style={{ width: 44, height: 44, padding: 0, borderRadius: 'var(--radius-sm)', minWidth: 0 }}
                 >
                   <Icon name="share" size={14} />
                 </GlassBtn>
@@ -358,8 +358,8 @@ export default function DashboardScreen() {
           >
             <p style={{
               fontFamily: 'var(--font-mono)',
-              fontSize: 10, fontWeight: 500, color: 'var(--terra)',
-              letterSpacing: '0.16em', textTransform: 'uppercase',
+              fontSize: 12, fontWeight: 500, color: 'var(--terra)',
+              letterSpacing: '0.12em', textTransform: 'uppercase',
               marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5,
             }}>
               {t('nextEvent')}
@@ -399,7 +399,7 @@ export default function DashboardScreen() {
                       {CAT_META[nextEventData.event.category].icon}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 3 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 3 }}>
                         {t('day')} {nextEventData.dayNum}
                         {trip.startDate ? ` · ${fmtDate(trip.startDate, nextEventData.dayNum - 1, locale)}` : ''}
                       </p>
@@ -431,7 +431,7 @@ export default function DashboardScreen() {
                         <span style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 500 }}>
                           {nextWeather.tempMin}°
                         </span>
-                        <span style={{ fontSize: 8, color: 'var(--text-3)', fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase', textAlign: 'center', maxWidth: 52, lineHeight: 1.2, marginTop: 1 }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, letterSpacing: '0.02em', textTransform: 'uppercase', textAlign: 'center', maxWidth: 52, lineHeight: 1.2, marginTop: 1 }}>
                           {nextWeather.label}
                         </span>
                       </div>
@@ -504,8 +504,8 @@ export default function DashboardScreen() {
             >
               <p style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: 10, fontWeight: 500, color: 'var(--terra)',
-                letterSpacing: '0.16em', textTransform: 'uppercase',
+                fontSize: 12, fontWeight: 500, color: 'var(--terra)',
+                letterSpacing: '0.12em', textTransform: 'uppercase',
                 marginBottom: 8,
               }}>
                 {t('forecast') || 'Forecast'}
@@ -548,12 +548,12 @@ export default function DashboardScreen() {
                         transition: 'all 0.15s',
                       }}
                     >
-                      <span style={{ fontSize: 10, fontWeight: 700, color: isNextEventDay ? 'var(--brand)' : 'var(--text-3)', letterSpacing: '0.04em' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: isNextEventDay ? 'var(--brand)' : 'var(--text-3)', letterSpacing: '0.02em' }}>
                         {dateLabel.split(' ').slice(0, 2).join(' ')}
                       </span>
                       <span style={{ fontSize: 20, lineHeight: 1 }}>{w.icon}</span>
                       <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>{w.tempMax}°</span>
-                      <span style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 500 }}>{w.tempMin}°</span>
+                      <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>{w.tempMin}°</span>
                     </motion.a>
                   );
                 })}
@@ -674,7 +674,7 @@ export default function DashboardScreen() {
                           className="input-premium"
                           style={{
                             flex: 3, minWidth: 0, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                            fontSize: 12, background: 'var(--bg)',
+                            fontSize: 14, background: 'var(--bg)',
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}
                         />
@@ -687,7 +687,7 @@ export default function DashboardScreen() {
                           className="input-premium"
                           style={{
                             flex: 1, minWidth: 0, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
-                            fontSize: 12, background: 'var(--bg)',
+                            fontSize: 14, background: 'var(--bg)',
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}
                         />
@@ -700,7 +700,7 @@ export default function DashboardScreen() {
                           className="input-premium"
                           style={{
                             flex: 3, minWidth: 0, padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                            fontSize: 12, background: 'var(--bg)',
+                            fontSize: 14, background: 'var(--bg)',
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}
                         />
@@ -709,7 +709,7 @@ export default function DashboardScreen() {
                           onChange={e => setExpSplit(e.target.value)}
                           style={{
                             flex: 1, minWidth: 0, padding: '8px 10px', borderRadius: 'var(--radius-sm)',
-                            fontSize: 12, background: 'var(--bg)',
+                            fontSize: 14, background: 'var(--bg)',
                             border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
                           }}
                         >
@@ -751,7 +751,7 @@ export default function DashboardScreen() {
                             <motion.button
                               whileTap={{ scale: 0.88 }}
                               onClick={() => deleteExpense(exp.id)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: 2, flexShrink: 0 }}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', flexShrink: 0, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                             >
                               <Icon name="x" size={12} />
                             </motion.button>
@@ -775,8 +775,8 @@ export default function DashboardScreen() {
             >
               <p style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: 10, fontWeight: 500, color: 'var(--terra)',
-                letterSpacing: '0.16em', textTransform: 'uppercase',
+                fontSize: 12, fontWeight: 500, color: 'var(--terra)',
+                letterSpacing: '0.12em', textTransform: 'uppercase',
                 marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5,
               }}>
                 {t('tripInsights')}
@@ -909,8 +909,8 @@ export default function DashboardScreen() {
                         <div style={{
                           position: 'absolute', bottom: -3, right: -3,
                           background: isToday ? 'var(--terra)' : 'var(--brand)', color: 'white',
-                          fontSize: 8, fontWeight: 800,
-                          width: 18, height: 18, borderRadius: '50%',
+                          fontSize: 10, fontWeight: 800,
+                          width: 22, height: 22, borderRadius: '50%',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           border: '2px solid var(--surface)',
                           boxShadow: '0 1px 4px rgba(0,0,0,0.22)',
@@ -931,18 +931,18 @@ export default function DashboardScreen() {
                           )}
                           {isToday && (
                             <span style={{
-                              fontSize: 9, fontWeight: 800, letterSpacing: '0.08em',
+                              fontSize: 10, fontWeight: 800, letterSpacing: '0.06em',
                               background: 'var(--terra)', color: 'white',
-                              borderRadius: 10, padding: '1px 6px', textTransform: 'uppercase',
+                              borderRadius: 10, padding: '2px 7px', textTransform: 'uppercase',
                             }}>
                               Today
                             </span>
                           )}
                           {!isToday && isNextEventDayCard && (
                             <span style={{
-                              fontSize: 9, fontWeight: 800, letterSpacing: '0.08em',
+                              fontSize: 10, fontWeight: 800, letterSpacing: '0.06em',
                               background: 'var(--brand)', color: 'white',
-                              borderRadius: 10, padding: '1px 6px', textTransform: 'uppercase',
+                              borderRadius: 10, padding: '2px 7px', textTransform: 'uppercase',
                             }}>
                               Up Next
                             </span>
@@ -985,13 +985,14 @@ export default function DashboardScreen() {
                               background: isToday ? 'rgba(255,255,255,0.6)' : 'var(--brand-light)',
                               borderRadius: 8, padding: '4px 6px', gap: 1,
                               border: isToday ? '1px solid rgba(255,255,255,0.8)' : 'none',
+                              minWidth: 44,
                             }}
                           >
                             <span>{dayWeather.icon}</span>
                             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>
                               {dayWeather.tempMax}°
                             </span>
-                            <span style={{ fontSize: 9, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
                               {dayWeather.tempMin}°
                             </span>
                           </a>

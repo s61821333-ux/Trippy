@@ -57,6 +57,9 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
   };
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
+    setSuggestions([]);
     setElapsed(0);
     elapsedRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
     fetchSuggestions()
@@ -74,7 +77,9 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
         if (elapsedRef.current) clearInterval(elapsedRef.current);
       });
     return () => { if (elapsedRef.current) clearInterval(elapsedRef.current); };
-  }, [dayNumber, trip]);
+    // Only re-fetch when navigating to a different day, not on every trip state change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayNumber]);
 
   const handleLoadMore = () => {
     setLoadingMore(true);

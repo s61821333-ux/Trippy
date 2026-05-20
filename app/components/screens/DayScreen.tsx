@@ -1275,7 +1275,7 @@ export default function DayScreen() {
             <span style={{ fontSize: 18 }}>🏨</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               {hotel ? (
-                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <p dir="ltr" style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>
                   {hotel.location}
                 </p>
               ) : (
@@ -1348,8 +1348,8 @@ export default function DayScreen() {
                 padding: '48px 20px', gap: 10,
               }}
             >
-              <span style={{ fontSize: 40 }}>{meta?.emoji}</span>
-              <p style={{ fontSize: 14, color: 'var(--text-3)', textAlign: 'center', fontWeight: 500 }}>
+              <span style={{ fontSize: 44 }}>{meta?.emoji ?? '🗺️'}</span>
+              <p style={{ fontSize: 14, color: 'var(--text-3)', textAlign: 'center', fontWeight: 500, maxWidth: 240, lineHeight: 1.5 }}>
                 {t('tapToAdd')}
               </p>
             </motion.div>

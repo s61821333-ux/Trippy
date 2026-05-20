@@ -180,10 +180,10 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                 )}
                 <Icon name={tab.icon} size={isActive ? 21 : 20} style={{ position: 'relative', zIndex: 1 }} />
                 <span style={{
-                  fontSize: 9,
+                  fontSize: 11,
                   fontWeight: isActive ? 700 : 500,
                   fontFamily: 'var(--font-mono)',
-                  letterSpacing: '0.14em',
+                  letterSpacing: '0.10em',
                   textTransform: 'uppercase',
                   textAlign: 'center',
                   lineHeight: 1.2,
