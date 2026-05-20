@@ -1246,7 +1246,12 @@ export default function DayScreen() {
         const todayHotel = (trip.hotels ?? []).find(
           h => h.checkInDay <= activeDay && activeDay < h.checkOutDay,
         );
-        const hotelBanner = (pos: 'top' | 'bottom') => (
+        const isCheckInDay = todayHotel != null && todayHotel.checkInDay === activeDay;
+        const isCheckOutDay = todayHotel != null && todayHotel.checkOutDay === activeDay + 1;
+        const hotelBanner = (pos: 'top' | 'bottom') => {
+          if (pos === 'top' && isCheckInDay && !isCheckOutDay) return null;
+          if (pos === 'bottom' && isCheckOutDay && !isCheckInDay) return null;
+          return (
           <div
             onClick={() => openHotelSheet(todayHotel?.id)}
             style={{
@@ -1289,7 +1294,8 @@ export default function DayScreen() {
               </span>
             )}
           </div>
-        );
+          );
+        };
         return (
           <div
             className="flex-1 overflow-y-auto day-list-pb"

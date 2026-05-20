@@ -3,7 +3,9 @@
     "allow": [
       "Bash(Get-ChildItem -Directory)",
       "Bash(Select-Object Name)",
-      "Bash(mkdir \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\app\\\\api\\\\trips\\\\[tripId]\\\\hotels\")"
+      "Bash(mkdir \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\app\\\\api\\\\trips\\\\[tripId]\\\\hotels\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\" -Force)",
+      "Bash(xargs wc -l)"
     ],
     "additionalDirectories": [
       "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"
