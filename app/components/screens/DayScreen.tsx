@@ -1244,10 +1244,10 @@ export default function DayScreen() {
       {/* ── Itinerary list ───────────────────────────────────── */}
       {(() => {
         const todayHotel = (trip.hotels ?? []).find(
-          h => h.checkInDay <= activeDay && activeDay < h.checkOutDay,
+          h => h.checkInDay <= activeDay && activeDay <= h.checkOutDay,
         );
         const isCheckInDay = todayHotel != null && todayHotel.checkInDay === activeDay;
-        const isCheckOutDay = todayHotel != null && todayHotel.checkOutDay === activeDay + 1;
+        const isCheckOutDay = todayHotel != null && todayHotel.checkOutDay === activeDay;
         const hotelBanner = (pos: 'top' | 'bottom') => {
           if (pos === 'top' && isCheckInDay && !isCheckOutDay) return null;
           if (pos === 'bottom' && isCheckOutDay && !isCheckInDay) return null;
