@@ -1,0 +1,11 @@
+#!/bin/sh
+# SEC-5: Block NEXT_PUBLIC_ env vars in server-only API routes.
+# These vars are bundled into client JS and must never hold secrets.
+
+if grep -rn "NEXT_PUBLIC_" app/api/; then
+  echo ""
+  echo "ERROR: NEXT_PUBLIC_ env var found in app/api/."
+  echo "API routes are server-only. Use non-prefixed env vars via lib/env.ts instead."
+  echo ""
+  exit 1
+fi

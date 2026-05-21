@@ -15,9 +15,36 @@ const DayScreen         = dynamic(() => import('./screens/DayScreen'));
 const SuppliesScreen    = dynamic(() => import('./screens/SuppliesScreen'));
 const SettingsScreen    = dynamic(() => import('./screens/SettingsScreen'));
 const NotesScreen       = dynamic(() => import('./screens/NotesScreen'));
-const TourOverlay       = dynamic(() => import('./TourOverlay'));
+const TourOverlay        = dynamic(() => import('./TourOverlay'));
 const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
-const TermsModal        = dynamic(() => import('./TermsModal'));
+const TermsModal         = dynamic(() => import('./TermsModal'));
+const OnboardingScreen   = dynamic(() => import('./OnboardingScreen'));
+
+// Watches network status, wires online/offline events, flushes pending changes on reconnect
+function OfflineWatcher() {
+  const { setIsOffline, flushPendingChanges } = useAppStore();
+  const { show } = useToast();
+
+  useEffect(() => {
+    const goOnline = () => {
+      setIsOffline(false);
+      const count = useAppStore.getState().pendingChanges.length;
+      flushPendingChanges().then(() => {
+        if (count > 0) show(`Back online — ${count} change${count > 1 ? 's' : ''} synced ✓`);
+      }).catch(() => {});
+    };
+    const goOffline = () => setIsOffline(true);
+    if (!navigator.onLine) setIsOffline(true);
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
+}
 
 // Watches lastSyncError globally and shows a toast — must live inside ToastProvider
 function SyncErrorWatcher() {
@@ -54,14 +81,19 @@ const screenTransition = {
 };
 
 function Shell() {
-  const { screen, setScreen, trip, darkMode, highContrast, reducedMotion, toggleDarkMode, showTour,
+  const { screen, setScreen, trip, themeMode, setThemeMode, highContrast, reducedMotion, showTour,
     tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick, checkAuth, loadTripById, authUser,
-    termsAccepted } = useAppStore();
+    termsAccepted, subscribeToTrip,
+    isOffline, pendingChanges, setIsOffline, flushPendingChanges } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
+  const [osDark, setOsDark] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
   const prevScreen = React.useRef(screen);
+
+  const resolvedDark = themeMode === 'dark' || (themeMode === 'system' && osDark);
 
   useEffect(() => {
     setMounted(true);
@@ -88,6 +120,11 @@ function Shell() {
       }
     });
 
+    // Show onboarding on first-ever device visit
+    if (!localStorage.getItem('trippy-onboarded')) {
+      setShowOnboarding(true);
+    }
+
     // Reload trip data from DB if the user has a stored tripDbId (no auto-navigation).
     checkAuth();
 
@@ -107,6 +144,13 @@ function Shell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser]);
 
+  // Real-time: subscribe to trip changes so co-participants see each other's updates
+  useEffect(() => {
+    if (!tripDbId) return;
+    const unsubscribe = subscribeToTrip(tripDbId);
+    return unsubscribe;
+  }, [tripDbId]);
+
   // Show entry animation when tripEntryCountries is set (trip just entered)
   useEffect(() => {
     if (tripEntryCountries) {
@@ -125,36 +169,29 @@ function Shell() {
     return () => window.removeEventListener('click', handler);
   }, [isDemo]);
 
-  // On first ever visit, apply system dark mode preference
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const key = 'trippy-theme-init';
-    if (!localStorage.getItem(key)) {
-      localStorage.setItem(key, '1');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark && !darkMode) toggleDarkMode();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Also react live to OS theme changes
+  // Detect initial OS dark preference and watch for live changes
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = (e: MediaQueryListEvent) => {
-      const current = useAppStore.getState().darkMode;
-      if (e.matches !== current) toggleDarkMode();
-    };
+    setOsDark(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setOsDark(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Keep body background in sync with the resolved theme (prevents flash on page load)
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.body.style.background = darkMode ? '#0E0C0A' : '#F4EFE8';
+      document.body.style.background = 'var(--bg)';
     }
-  }, [darkMode]);
+  }, [resolvedDark]);
+
+  // Service Worker registration
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    }
+  }, []);
 
   if (!mounted) {
     return (
@@ -191,10 +228,11 @@ function Shell() {
   return (
     <ToastProvider>
       <SyncErrorWatcher />
+      <OfflineWatcher />
       <MotionConfig reducedMotion={motionReduced}>
         <div
           dir={isRTL ? 'rtl' : 'ltr'}
-          data-dark={darkMode ? 'true' : undefined}
+          data-dark={resolvedDark ? 'true' : undefined}
           data-high-contrast={highContrast ? 'true' : undefined}
           data-reduced-motion={reducedMotion ? 'true' : undefined}
           className="fixed inset-0 flex flex-col overflow-hidden"
@@ -205,6 +243,26 @@ function Shell() {
             paddingRight: 'env(safe-area-inset-right, 0px)',
           }}
         >
+          {/* Offline banner — shown above nav and content */}
+          {isOffline && (
+            <div style={{
+              background: 'var(--danger-bg)',
+              borderBottom: '1px solid var(--danger)',
+              padding: '6px var(--page-px)',
+              fontSize: 12,
+              fontWeight: 600,
+              color: 'var(--danger)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              zIndex: 9999,
+            }}>
+              📡 Offline{pendingChanges.length > 0
+                ? ` — ${pendingChanges.length} change${pendingChanges.length > 1 ? 's' : ''} pending`
+                : ' — viewing saved data'}
+            </div>
+          )}
+
           {showNav && (
             <NavBar active={screen} onChange={s => setScreen(s)} />
           )}
@@ -244,6 +302,13 @@ function Shell() {
 
           {/* Terms modal: shown on first real login (not demo) */}
           {authUser && !termsAccepted && <TermsModal />}
+
+          {/* Onboarding: shown only on first-ever device visit */}
+          <AnimatePresence>
+            {showOnboarding && (
+              <OnboardingScreen onDone={() => setShowOnboarding(false)} />
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {showEntryAnim && (

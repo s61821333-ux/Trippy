@@ -38,6 +38,7 @@ export default function SuppliesScreen() {
   const [newCat, setNewCat] = useState<Category>('Gear');
   const [newAssignee, setNewAssignee] = useState('');
   const [newCritical, setNewCritical] = useState(false);
+  const [nudgeId, setNudgeId] = useState<string | null>(null);
 
   const filtered = (filter === 'All' ? supplies : supplies.filter(s => s.category === filter))
     .slice()
@@ -151,21 +152,29 @@ export default function SuppliesScreen() {
                   exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.18 } }}
                   layout
                 >
-                  <div style={{
-                    background: 'var(--surface)',
-                    border: item.critical && !item.checked
-                      ? '2px solid var(--danger)'
-                      : '1px solid var(--border)',
-                    borderRadius: 'var(--radius-md)',
-                    padding: '12px 14px',
-                    opacity: item.checked ? 0.55 : 1,
-                    transition: 'opacity 0.25s, border 0.2s',
-                    display: 'flex', alignItems: 'center', gap: 12,
-                  }}>
+                  <motion.div
+                    animate={nudgeId === item.id ? { x: [0, 4, 0] } : { x: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                    onAnimationComplete={() => { if (nudgeId === item.id) setNudgeId(null); }}
+                    style={{
+                      background: 'var(--surface)',
+                      border: item.critical && !item.checked
+                        ? '2px solid var(--danger)'
+                        : '1px solid var(--border)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '12px 14px',
+                      opacity: item.checked ? 0.55 : 1,
+                      transition: 'opacity 0.25s, border 0.2s',
+                      display: 'flex', alignItems: 'center', gap: 12,
+                    }}
+                  >
                     {/* Checkbox */}
                     <motion.button
                       whileTap={{ scale: 0.88 }}
-                      onClick={() => toggleSupply(item.id)}
+                      onClick={() => {
+                        toggleSupply(item.id);
+                        setNudgeId(item.id);
+                      }}
                       style={{
                         width: 24, height: 24, borderRadius: 6, flexShrink: 0,
                         border: item.checked ? 'none' : item.critical ? '1.5px solid var(--danger)' : '1.5px solid var(--border-strong)',
@@ -194,6 +203,7 @@ export default function SuppliesScreen() {
                         <p style={{
                           fontSize: 14, fontWeight: 600, color: 'var(--text)',
                           textDecoration: item.checked ? 'line-through' : 'none',
+                          transition: 'text-decoration 0.2s',
                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>
                           {item.name}
@@ -246,7 +256,22 @@ export default function SuppliesScreen() {
                     >
                       <Icon name="x" size={14} />
                     </motion.button>
-                  </div>
+
+                    {/* Green checkmark fades in at right edge when checked */}
+                    <AnimatePresence>
+                      {item.checked && (
+                        <motion.span
+                          initial={{ opacity: 0, scale: 0.6 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.6 }}
+                          transition={{ type: 'spring', stiffness: 500, damping: 28 }}
+                          style={{ color: 'var(--success)', fontSize: 16, flexShrink: 0, lineHeight: 1 }}
+                        >
+                          ✓
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -255,10 +280,21 @@ export default function SuppliesScreen() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-3)' }}
+                style={{ padding: '40px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}
               >
-                <span style={{ fontSize: 28, display: 'block', marginBottom: 8 }}>📦</span>
-                <p style={{ fontSize: 13 }}>{t('noItemsCategory')}</p>
+                <motion.span
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{ fontSize: 56, lineHeight: 1, display: 'block' }}
+                >
+                  🎒
+                </motion.span>
+                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', margin: 0 }}>
+                  Your bag is empty
+                </p>
+                <p style={{ fontSize: 13, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
+                  {filter === 'All' ? 'Add your first item below' : `No ${filter.toLowerCase()} items yet`}
+                </p>
               </motion.div>
             )}
           </motion.div>

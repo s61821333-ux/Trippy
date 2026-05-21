@@ -53,7 +53,7 @@ export function getCountryCurrency(country: string): string {
 }
 
 let rateCache: { base: string; rates: Record<string, number>; ts: number } | null = null;
-const CACHE_TTL = 3_600_000; // 1 hour
+const CACHE_TTL = 3_600_000; // 1 hour — mirrors server-side revalidate window
 
 export async function getExchangeRates(base: string): Promise<Record<string, number>> {
   const now = Date.now();
@@ -61,12 +61,13 @@ export async function getExchangeRates(base: string): Promise<Record<string, num
     return rateCache.rates;
   }
   try {
-    const res = await fetch(`https://open.er-api.com/v6/latest/${base}`, { cache: 'no-store' });
+    // Route through our own server proxy — keeps external API calls server-side only
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+    const res = await fetch(`${origin}/api/exchange-rates?base=${base}`);
     if (!res.ok) return {};
-    const data = await res.json();
-    if (data.result !== 'success') return {};
-    rateCache = { base, rates: data.rates, ts: now };
-    return data.rates;
+    const rates = await res.json() as Record<string, number>;
+    rateCache = { base, rates, ts: now };
+    return rates;
   } catch {
     return {};
   }

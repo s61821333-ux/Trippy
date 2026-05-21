@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 
-type PageStatus = 'loading' | 'ready' | 'not_found' | 'joining' | 'joined'
+type PageStatus = 'loading' | 'ready' | 'not_found' | 'expired' | 'joining' | 'joined'
 
 interface TripInfo {
   tripId: string
@@ -31,10 +31,13 @@ export default function JoinPage() {
     // Check auth + fetch trip info in parallel
     Promise.all([
       supabase.auth.getSession(),
-      fetch(`/api/invite/${token}`).then(r => r.json()),
-    ]).then(([{ data: { session } }, info]) => {
+      fetch(`/api/invite/${token}`),
+    ]).then(async ([{ data: { session } }, res]) => {
       setIsAuthed(!!session?.user)
-      if (info.error) {
+      const info = await res.json()
+      if (res.status === 410) {
+        setStatus('expired')
+      } else if (!res.ok || info.error) {
         setStatus('not_found')
       } else {
         setTripInfo({ tripId: info.tripId, tripName: info.tripName, tripTheme: info.tripTheme })
@@ -135,6 +138,28 @@ export default function JoinPage() {
                 }}
               >
                 Go to Trippy
+              </button>
+            </div>
+          )}
+
+          {status === 'expired' && (
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>⏰</div>
+              <div style={{ fontSize: 17, fontWeight: 700, color: '#1a1a1a', marginBottom: 8 }}>
+                Invite link expired or already used
+              </div>
+              <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5 }}>
+                This link has expired or has already been used. Ask the trip organizer to send you a new one.
+              </div>
+              <button
+                onClick={() => window.location.href = '/'}
+                style={{
+                  marginTop: 20, padding: '10px 20px', borderRadius: 10,
+                  background: 'rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.1)',
+                  fontSize: 13, fontWeight: 600, color: '#444', cursor: 'pointer',
+                }}
+              >
+                Back to home
               </button>
             </div>
           )}

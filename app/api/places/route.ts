@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { GOOGLE_MAPS_API_KEY } from '@/lib/env'
 
 // GET /api/places?input=TEXT
 // Server-side proxy — keeps GOOGLE_MAPS_API_KEY off the client
@@ -6,7 +7,7 @@ export async function GET(request: NextRequest) {
   const input = request.nextUrl.searchParams.get('input')?.trim()
   if (!input) return NextResponse.json([], { status: 200 })
 
-  const key = process.env.GOOGLE_MAPS_API_KEY
+  const key = GOOGLE_MAPS_API_KEY()
   if (!key) return NextResponse.json({ error: 'Maps API not configured' }, { status: 503 })
 
   const url = new URL('https://maps.googleapis.com/maps/api/place/autocomplete/json')

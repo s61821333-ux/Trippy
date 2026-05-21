@@ -2,95 +2,114 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 
-function tryAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) return null
-  return createClient(url, key, { auth: { persistSession: false } })
+function adminClient() {
+  return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } })
 }
 
-// GET /api/invite/[token] — public: return trip info for a valid invite link
+// GET /api/invite/[token] — public: return trip info for a valid invite link.
+// Returns 410 if the link is expired or fully used.
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
-  try {
-    const admin = tryAdminClient()
 
-    if (admin) {
-      const { data, error } = await admin
-        .from('trips')
-        .select('id, name, theme')
-        .eq('invite_token', token)
-        .single()
-      if (error || !data) return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
-      return NextResponse.json({ tripId: data.id, tripName: data.name, tripTheme: data.theme })
+  // Basic token format check — hex string of 64 chars (32 bytes)
+  if (!/^[0-9a-f]{64}$/.test(token)) {
+    return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
+  }
+
+  try {
+    const admin = adminClient()
+
+    const { data: link, error } = await admin
+      .from('trip_invite_links')
+      .select('id, trip_id, expires_at, max_uses, use_count')
+      .eq('token', token)
+      .maybeSingle()
+
+    if (error || !link) {
+      return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
     }
 
-    // Fallback: query with anon key (works if RLS allows or is not enabled)
-    const { createClient: createAnonClient } = await import('@supabase/supabase-js')
-    const anon = createAnonClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-    const { data, error } = await anon
+    if (new Date(link.expires_at) < new Date()) {
+      return NextResponse.json({ error: 'This invite link has expired' }, { status: 410 })
+    }
+
+    if (link.use_count >= link.max_uses) {
+      return NextResponse.json({ error: 'This invite link has already been used' }, { status: 410 })
+    }
+
+    const { data: trip, error: tripErr } = await admin
       .from('trips')
       .select('id, name, theme')
-      .eq('invite_token', token)
+      .eq('id', link.trip_id)
       .maybeSingle()
-    if (error || !data) return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
-    return NextResponse.json({ tripId: data.id, tripName: data.name, tripTheme: data.theme })
-  } catch (err: any) {
+
+    if (tripErr || !trip) {
+      return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ tripId: trip.id, tripName: trip.name, tripTheme: trip.theme })
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }
 
-// POST /api/invite/[token] — authenticated: join the trip
+// POST /api/invite/[token] — authenticated: join the trip via an invite link.
+// Increments use_count after successful join.
 export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params
-  const cookieStore = await cookies()
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
-          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
-        },
-      },
-    }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  if (!/^[0-9a-f]{64}$/.test(token)) {
+    return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
   }
 
-  try {
-    const admin = tryAdminClient()
-    const db = admin ?? supabase
+  const cookieStore = await cookies()
+  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: (cookiesToSet) => {
+        try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
+      },
+    },
+  })
 
-    const { data: trip, error: tripErr } = await db
-      .from('trips')
-      .select('id')
-      .eq('invite_token', token)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  try {
+    const admin = adminClient()
+
+    // Re-validate the link atomically
+    const { data: link, error: linkErr } = await admin
+      .from('trip_invite_links')
+      .select('id, trip_id, expires_at, max_uses, use_count')
+      .eq('token', token)
       .maybeSingle()
-    if (tripErr || !trip) {
+
+    if (linkErr || !link) {
       return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
     }
 
-    // No-op if already a participant
-    const { data: existing } = await db
+    if (new Date(link.expires_at) < new Date()) {
+      return NextResponse.json({ error: 'This invite link has expired' }, { status: 410 })
+    }
+
+    if (link.use_count >= link.max_uses) {
+      return NextResponse.json({ error: 'This invite link has already been used' }, { status: 410 })
+    }
+
+    // Check if already a participant
+    const { data: existing } = await admin
       .from('trip_participants')
       .select('user_id')
-      .eq('trip_id', trip.id)
+      .eq('trip_id', link.trip_id)
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -98,20 +117,27 @@ export async function POST(
       const rawName = user.user_metadata?.full_name ?? user.email ?? 'U'
       const initials = rawName.slice(0, 2).toUpperCase()
       const hue = (user.id.charCodeAt(0) * 47 + user.id.charCodeAt(1) * 13) % 360
-      const { error: participantErr } = await db.from('trip_participants').insert({
-        trip_id: trip.id,
+
+      const { error: participantErr } = await admin.from('trip_participants').insert({
+        trip_id: link.trip_id,
         user_id: user.id,
         initials,
         color: `oklch(62% 0.15 ${hue})`,
       })
-      // 23505 = unique_violation: user somehow already a participant, safe to ignore
+
       if (participantErr && (participantErr as any).code !== '23505') {
         return NextResponse.json({ error: 'Failed to join trip' }, { status: 500 })
       }
+
+      // Increment use_count via service role (bypasses RLS update restriction)
+      await admin
+        .from('trip_invite_links')
+        .update({ use_count: link.use_count + 1 })
+        .eq('id', link.id)
     }
 
-    return NextResponse.json({ tripId: trip.id })
-  } catch (err: any) {
+    return NextResponse.json({ tripId: link.trip_id })
+  } catch {
     return NextResponse.json({ error: 'Server error' }, { status: 500 })
   }
 }

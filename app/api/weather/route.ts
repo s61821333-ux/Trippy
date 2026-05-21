@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { GOOGLE_MAPS_API_KEY } from '@/lib/env';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
 
 const GOOGLE_WEATHER_CONDITION_MAP: Record<string, { icon: string; label: string }> = {
   SUNNY:           { icon: '☀️',  label: 'Sunny' },
@@ -67,7 +69,7 @@ interface DailyWeather {
 async function fetchGoogleWeather(
   lat: string, lng: string, days: number,
 ): Promise<DailyWeather | null> {
-  const key = process.env.GOOGLE_MAPS_API_KEY;
+  const key = GOOGLE_MAPS_API_KEY();
   if (!key) return null;
 
   const url = new URL('https://weather.googleapis.com/v1/forecast:lookup');
@@ -151,6 +153,11 @@ async function fetchOpenMeteoWeather(
 
 // GET /api/weather?lat=...&lng=...&start=YYYY-MM-DD&days=N
 export async function GET(request: NextRequest) {
+  // Rate limit: 30 requests/60s per IP
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
+  const rl = checkRateLimit(`weather:${ip}`, 30, 60)
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 30)
+
   const { searchParams } = request.nextUrl;
   const lat   = searchParams.get('lat');
   const lng   = searchParams.get('lng');

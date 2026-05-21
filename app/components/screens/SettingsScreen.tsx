@@ -28,7 +28,7 @@ export default function SettingsScreen() {
 
   const {
     trip, nickname, setNickname, logout, switchTrip, leaveTrip, deleteAccount,
-    darkMode, toggleDarkMode,
+    themeMode, setThemeMode,
     highContrast, toggleHighContrast,
     reducedMotion, toggleReducedMotion,
     hideBudget, toggleHideBudget,
@@ -318,11 +318,33 @@ export default function SettingsScreen() {
               <Glass level={2} style={{ padding: '16px', borderRadius: 'var(--radius-lg)' }}>
                 <SectionLabel label={t('appearanceLabel')} />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <ToggleRow
-                    label={darkMode ? `🌙 ${t('darkMode')}` : `☀️ ${t('lightMode')}`}
-                    checked={darkMode}
-                    onToggle={toggleDarkMode}
-                  />
+                  {/* Three-way theme toggle: Light / System / Dark */}
+                  <div>
+                    <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600, display: 'block', marginBottom: 8 }}>
+                      {locale === 'he' ? 'ערכת נושא' : 'Theme'}
+                    </span>
+                    <div style={{
+                      display: 'flex', borderRadius: 'var(--radius-md)', overflow: 'hidden',
+                      border: '1px solid var(--border)', background: 'var(--bg)',
+                    }}>
+                      {(['light', 'system', 'dark'] as const).map((mode) => (
+                        <motion.button
+                          key={mode}
+                          whileTap={{ scale: 0.96 }}
+                          onClick={() => setThemeMode(mode)}
+                          style={{
+                            flex: 1, padding: '9px 0', fontSize: 13, fontWeight: 600,
+                            background: themeMode === mode ? 'var(--brand)' : 'transparent',
+                            color: themeMode === mode ? 'white' : 'var(--text-2)',
+                            border: 'none', cursor: 'pointer',
+                            transition: 'background 0.18s, color 0.18s',
+                          }}
+                        >
+                          {mode === 'light' ? '☀ Light' : mode === 'system' ? '🌓 System' : '☾ Dark'}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </div>
                   <ToggleRow
                     label={`⬛ ${t('highContrast')}`}
                     sub={t('highContrastSub')}
@@ -517,19 +539,25 @@ export default function SettingsScreen() {
                 {locale === 'he' ? '↩ התנתק' : '↩ Sign Out'}
               </GlassBtn>
 
-              {/* Delete My Data — removes account & personal data, shared trip content stays */}
+              {/* Delete My Data — initiates 2-step email-confirmed deletion (SEC-4) */}
               <GlassBtn
                 variant="danger"
                 size="lg"
                 style={{ width: '100%', opacity: deletingAccount ? 0.6 : 1 }}
                 onClick={() => {
                   confirm(
-                    t('deleteAccountConfirm'),
+                    locale === 'he'
+                      ? 'בטוח? נשלח אליך מייל לאישור. יש לך 24 שעות לשנות את דעתך.'
+                      : "Are you sure? We'll email you a confirmation link. You'll have 24 hours to change your mind.",
                     async () => {
                       setDeletingAccount(true);
                       try {
-                        await deleteAccount();
-                        show(t('deleteAccountSuccess'));
+                        const res = await fetch('/api/account/delete/request', { method: 'POST' });
+                        if (res.ok) {
+                          show(locale === 'he' ? 'נשלח מייל אישור ✓' : 'Confirmation email sent ✓');
+                        } else {
+                          show(t('deleteAccountFailed'));
+                        }
                       } catch {
                         show(t('deleteAccountFailed'));
                       } finally {
@@ -541,7 +569,7 @@ export default function SettingsScreen() {
                 }}
               >
                 {deletingAccount
-                  ? (locale === 'he' ? '…מוחק' : 'Deleting…')
+                  ? (locale === 'he' ? '…שולח' : 'Sending…')
                   : `🗑 ${t('deleteAccount')}`}
               </GlassBtn>
             </motion.div>

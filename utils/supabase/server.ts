@@ -12,7 +12,13 @@ export async function createClient() {
         getAll: () => cookieStore.getAll(),
         setAll: (cookiesToSet) => {
           try {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, {
+                ...options,
+                sameSite: 'strict',
+                secure: process.env.NODE_ENV === 'production',
+              })
+            )
           } catch {}
         },
       },

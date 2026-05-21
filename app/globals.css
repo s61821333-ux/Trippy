@@ -83,6 +83,13 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --nav-total-h: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
 
+  /* ── Type scale ── */
+  --t-display: clamp(1.9rem, 5vw, 2.8rem);
+  --t-heading: 1.25rem;
+  --t-body:    0.9375rem;
+  --t-caption: 0.8125rem;
+  --t-micro:   0.6875rem;
+
   /* ── Brand book extended tokens ── */
   --forest:    #3B6E52;
   --forest-lt: #8BB39A;
@@ -122,6 +129,36 @@
   --green-bg:  var(--success-bg);
   --glass-shadow:    var(--shadow-sm);
   --glass-shadow-lg: var(--shadow-lg);
+
+  /* ── Insight chip colors (light) ── */
+  --insight-gap-bg:       rgba(240,170,30,0.10);
+  --insight-gap-border:   rgba(240,170,30,0.25);
+  --insight-gap-text:     oklch(58% 0.18 75);
+  --insight-balance-bg:   rgba(200,100,30,0.10);
+  --insight-balance-border: rgba(200,100,30,0.22);
+  --insight-balance-text: oklch(55% 0.18 50);
+  --insight-ready-bg:     rgba(40,160,90,0.09);
+  --insight-ready-border: rgba(40,160,90,0.22);
+  --insight-ready-text:   oklch(50% 0.15 148);
+  --insight-tip-bg:       rgba(59,126,212,0.09);
+  --insight-tip-border:   rgba(59,126,212,0.22);
+  --insight-tip-text:     oklch(52% 0.16 225);
+  --insight-eco-bg:       rgba(30,140,90,0.09);
+  --insight-eco-border:   rgba(30,140,90,0.22);
+  --insight-eco-text:     oklch(48% 0.16 158);
+  --insight-pacing-bg:    rgba(180,60,200,0.08);
+  --insight-pacing-border:rgba(180,60,200,0.20);
+  --insight-pacing-text:  oklch(50% 0.17 310);
+  --insight-relax-bg:     rgba(40,160,200,0.08);
+  --insight-relax-border: rgba(40,160,200,0.20);
+  --insight-relax-text:   oklch(50% 0.14 210);
+
+  /* ── Route / travel badge colors ── */
+  --route-badge-text:   oklch(52% 0.16 225);
+  --route-badge-bg:     rgba(59,126,212,0.09);
+  --route-badge-border: rgba(59,126,212,0.22);
+  --hotel-route-bg:     rgba(59,126,212,0.05);
+  --hotel-route-border: rgba(59,126,212,0.18);
 }
 
 /* ─── Dark Mode ───────────────────────────────────────────────────── */
@@ -140,10 +177,10 @@
   --border:        #352C24;
   --border-strong: #4A3E34;
 
-  --brand:         #5CB87A;
+  --brand:         #5CA878;
   --brand-hover:   #4A9A65;
-  --brand-light:   rgba(92, 184, 122, 0.18);
-  --brand-muted:   rgba(92, 184, 122, 0.12);
+  --brand-light:   rgba(92, 168, 120, 0.18);
+  --brand-muted:   rgba(92, 168, 120, 0.15);
 
   --terra:         #E07252;
   --terra-hover:   #C85C3E;
@@ -170,6 +207,36 @@
   --shadow-md: 0 4px 12px rgba(0,0,0,0.50), 0 2px 4px rgba(0,0,0,0.30);
   --shadow-lg: 0 12px 28px rgba(0,0,0,0.60), 0 4px 8px rgba(0,0,0,0.35);
   --shadow-xl: 0 24px 48px rgba(0,0,0,0.65), 0 8px 16px rgba(0,0,0,0.40);
+
+  /* ── Insight chip colors (dark — slightly boosted opacity) ── */
+  --insight-gap-bg:       rgba(240,170,30,0.14);
+  --insight-gap-border:   rgba(240,170,30,0.32);
+  --insight-gap-text:     oklch(68% 0.18 75);
+  --insight-balance-bg:   rgba(200,100,30,0.14);
+  --insight-balance-border: rgba(200,100,30,0.30);
+  --insight-balance-text: oklch(65% 0.18 50);
+  --insight-ready-bg:     rgba(40,160,90,0.13);
+  --insight-ready-border: rgba(40,160,90,0.30);
+  --insight-ready-text:   oklch(62% 0.15 148);
+  --insight-tip-bg:       rgba(59,126,212,0.13);
+  --insight-tip-border:   rgba(59,126,212,0.30);
+  --insight-tip-text:     oklch(65% 0.16 225);
+  --insight-eco-bg:       rgba(30,140,90,0.13);
+  --insight-eco-border:   rgba(30,140,90,0.30);
+  --insight-eco-text:     oklch(62% 0.16 158);
+  --insight-pacing-bg:    rgba(180,60,200,0.12);
+  --insight-pacing-border:rgba(180,60,200,0.28);
+  --insight-pacing-text:  oklch(65% 0.17 310);
+  --insight-relax-bg:     rgba(40,160,200,0.12);
+  --insight-relax-border: rgba(40,160,200,0.28);
+  --insight-relax-text:   oklch(65% 0.14 210);
+
+  /* ── Route / travel badge colors (dark) ── */
+  --route-badge-text:   oklch(72% 0.16 225);
+  --route-badge-bg:     rgba(59,126,212,0.18);
+  --route-badge-border: rgba(59,126,212,0.38);
+  --hotel-route-bg:     rgba(59,126,212,0.07);
+  --hotel-route-border: rgba(59,126,212,0.20);
 }
 
 [data-dark="true"] input[type="date"],
@@ -307,12 +374,11 @@ select {
 }
 
 .section-eyebrow, .eyebrow {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--t-micro);
+  font-weight: 700;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--terra);
+  color: var(--text-3);
 }
 
 /* ─── Gradient text → plain brand color ──────────────────────── */
@@ -390,6 +456,18 @@ select {
   background-size: 200% auto;
   animation: shimmer 1.4s linear infinite;
 }
+
+@keyframes skeleton-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+[data-reduced-motion="true"] .skeleton { animation: none; }
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
 
 /* ─── Responsive ─────────────────────────────────────────────── */
 

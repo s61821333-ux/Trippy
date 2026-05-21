@@ -1,9 +1,11 @@
 'use client';
 
+// Usage: accent/coral/danger for actions; ghost for secondary; flat for inline list controls; default for general buttons.
+// Never use on page-scroll content that is not floating (use a plain <button> or GlassBtn variant="flat" instead).
 import { CSSProperties, ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
-type Variant = 'default' | 'accent' | 'coral' | 'danger' | 'ghost';
+type Variant = 'default' | 'accent' | 'coral' | 'danger' | 'ghost' | 'flat';
 type Size = 'sm' | 'md' | 'lg';
 
 interface GlassBtnProps {
@@ -50,6 +52,13 @@ function getVariantStyles(variant: Variant) {
         bg: 'transparent',
         color: 'var(--text-2)',
         border: 'none',
+        shadow: 'none',
+      };
+    case 'flat':
+      return {
+        bg: 'var(--surface)',
+        color: 'var(--text)',
+        border: '1px solid var(--border)',
         shadow: 'none',
       };
     default:

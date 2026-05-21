@@ -31,7 +31,7 @@ interface AppState {
   activeGapStart: number | null;
   activeGapEnd: number | null;
   aiSuggestions: AiSuggestion[];
-  darkMode: boolean;
+  themeMode: 'light' | 'dark' | 'system';
   highContrast: boolean;
   reducedMotion: boolean;
   hideBudget: boolean;
@@ -78,7 +78,7 @@ interface AppState {
   updateTripInfo: (updates: { name?: string; days?: number; startDate?: string }) => void;
   updateTheme: (theme: TripTheme) => void;
   updateDayMeta: (dayIndex: number, meta: Partial<DayMeta>) => void;
-  toggleDarkMode: () => void;
+  setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
   toggleHighContrast: () => void;
   toggleReducedMotion: () => void;
   toggleHideBudget: () => void;
@@ -117,6 +117,24 @@ interface AppState {
   setShowTour: (v: boolean) => void;
   setAiSuggestions: (suggestions: AiSuggestion[]) => void;
   addSuggestionToDay: (dayNumber: number, suggId: string) => void;
+
+  // Real-time: subscribe to DB changes on a trip, returns unsubscribe fn
+  subscribeToTrip: (tripId: string) => () => void;
+
+  // Offline mode
+  isOffline: boolean;
+  pendingChanges: OfflineChange[];
+  setIsOffline: (v: boolean) => void;
+  addPendingChange: (change: OfflineChange) => void;
+  flushPendingChanges: () => Promise<void>;
+}
+
+export interface OfflineChange {
+  type: 'addEvent' | 'editEvent' | 'deleteEvent' | 'moveEvent' | 'addExpense' | 'deleteExpense' | 'addSupply' | 'deleteSupply' | 'toggleSupply' | 'updateDayMeta' | 'updateTripInfo';
+  payload: Record<string, unknown>;
+  tripId: string;
+  userId: string;
+  timestamp: number;
 }
 
 const uid = () => crypto.randomUUID();
@@ -168,7 +186,7 @@ export const useAppStore = create<AppState>()(
       activeGapStart: null,
       activeGapEnd: null,
       aiSuggestions: [],
-      darkMode: false,
+      themeMode: 'system' as const,
       highContrast: false,
       reducedMotion: false,
       hideBudget: false,
@@ -184,6 +202,8 @@ export const useAppStore = create<AppState>()(
       lastSyncError: null,
       pendingInvitations: [],
       termsAccepted: false,
+      isOffline: false,
+      pendingChanges: [],
 
       acceptTerms: async (contentHash, content) => {
         try { await dbSavePrivacyConsent(contentHash, content) } catch {}
@@ -250,7 +270,7 @@ export const useAppStore = create<AppState>()(
       },
       clearTripEntry: () => set({ tripEntryCountries: null }),
       recordDemoClick: () => set(s => ({ demoClickCount: s.demoClickCount + 1 })),
-      toggleDarkMode: () => set(s => ({ darkMode: !s.darkMode })),
+      setThemeMode: (mode) => set({ themeMode: mode }),
       toggleHighContrast: () => set(s => ({ highContrast: !s.highContrast })),
       toggleReducedMotion: () => set(s => ({ reducedMotion: !s.reducedMotion })),
       toggleHideBudget: () => set(s => ({ hideBudget: !s.hideBudget })),
@@ -650,6 +670,58 @@ export const useAppStore = create<AppState>()(
           }).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
         }
       },
+
+      subscribeToTrip: (tripId: string) => {
+        // Dynamic import avoids SSR issues — Supabase realtime requires browser APIs
+        const { createClient } = require('@/utils/supabase/client') as typeof import('@/utils/supabase/client');
+        const supabase = createClient();
+        const channel = supabase
+          .channel(`trip:${tripId}`)
+          .on(
+            'postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'trips', filter: `id=eq.${tripId}` },
+            () => {
+              // Refetch the full trip on any remote update — avoids complex row merging
+              // since postgres_changes only delivers the trips row, not related tables.
+              get().loadTripById(tripId).catch(() => {});
+            },
+          )
+          .subscribe();
+        return () => { supabase.removeChannel(channel); };
+      },
+
+      setIsOffline: (v) => set({ isOffline: v }),
+
+      addPendingChange: (change) => set(state => ({
+        pendingChanges: [...state.pendingChanges, change],
+      })),
+
+      flushPendingChanges: async () => {
+        const { pendingChanges, tripDbId, userId } = get();
+        if (!pendingChanges.length || !tripDbId || !userId) return;
+        // Replay each pending change in order
+        for (const change of pendingChanges) {
+          try {
+            const { trip: currentTrip } = get();
+            if (!currentTrip) continue;
+            const p = change.payload;
+            if (change.type === 'addEvent') {
+              await dbAddEvent(tripDbId, p.dayNumber as number, p.event as TripEvent, userId);
+            } else if (change.type === 'deleteEvent') {
+              await dbDeleteEvent(p.eventId as string);
+            } else if (change.type === 'addExpense') {
+              await dbAddExpense(tripDbId, p.expense as Expense, userId);
+            } else if (change.type === 'deleteExpense') {
+              await dbDeleteExpense(p.expenseId as string);
+            }
+            // Remove this change on success
+            set(state => ({ pendingChanges: state.pendingChanges.filter(c => c.timestamp !== change.timestamp) }));
+          } catch {
+            // Stop flushing on first failure — will retry on next reconnect
+            break;
+          }
+        }
+      },
     }),
     {
       name: 'trippy-storage',
@@ -658,7 +730,7 @@ export const useAppStore = create<AppState>()(
         nickname: s.nickname,
         activeDay: s.activeDay,
         supplies: s.supplies,
-        darkMode: s.darkMode,
+        themeMode: s.themeMode,
         highContrast: s.highContrast,
         reducedMotion: s.reducedMotion,
         hideBudget: s.hideBudget,

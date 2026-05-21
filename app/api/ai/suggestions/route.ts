@@ -1,14 +1,19 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
-import type { TripEvent, DayMeta, AiSuggestion, Category } from '@/lib/types';
-
-const PLACES_API_KEY = process.env.GOOGLE_MAPS_API_KEY ?? '';
+import type { AiSuggestion, Category } from '@/lib/types';
+import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
+import { AiSuggestionsBody } from '@/lib/schemas';
+import { GOOGLE_MAPS_API_KEY } from '@/lib/env';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/env';
 
 async function enrichWithPlaces(
   suggestions: AiSuggestion[],
   region: string,
 ): Promise<AiSuggestion[]> {
-  if (!PLACES_API_KEY) return suggestions;
+  const key = GOOGLE_MAPS_API_KEY();
+  if (!key) return suggestions;
 
   const results = await Promise.allSettled(
     suggestions.map(async (s) => {
@@ -18,7 +23,7 @@ async function enrichWithPlaces(
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Goog-Api-Key': PLACES_API_KEY,
+            'X-Goog-Api-Key': key,
             'X-Goog-FieldMask': 'places.rating,places.userRatingCount,places.googleMapsUri',
           },
           body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
@@ -44,23 +49,37 @@ async function enrichWithPlaces(
 
 export const maxDuration = 30;
 
-interface RequestBody {
-  dayNumber: number;
-  dayMeta?: DayMeta;
-  existingEvents: TripEvent[];
-  tripName: string;
-  countries?: string[];
-  exclude?: string[];
-  gapStart?: number; // minutes from midnight
-  gapEnd?: number;   // minutes from midnight
-  locale?: string;
-}
-
 export async function POST(request: NextRequest) {
-  const client = new Anthropic();
+  // Auth check — extract userId for per-user rate limiting
+  const cookieStore = await cookies();
+  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: (cookiesToSet) => {
+        try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
+      },
+    },
+  });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 });
 
-  const { dayNumber, dayMeta, existingEvents, tripName, countries = [], exclude = [], gapStart, gapEnd, locale }: RequestBody =
-    await request.json();
+  // Rate limit: 10 requests/60s per user
+  const rl = checkRateLimit(`ai:${user.id}`, 10, 60);
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 10);
+
+  // Validate request body
+  let raw: unknown;
+  try { raw = await request.json() } catch {
+    return Response.json({ error: 'Invalid request body' }, { status: 400 });
+  }
+  const parsed = AiSuggestionsBody.safeParse(raw);
+  if (!parsed.success) {
+    return Response.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 });
+  }
+
+  const { dayNumber, dayMeta, existingEvents, tripName, countries = [], exclude = [], gapStart, gapEnd, locale } = parsed.data;
+
+  const client = new Anthropic();
 
   const toHHMM = (mins: number) =>
     `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
@@ -119,65 +138,79 @@ cost is an estimated cost in local currency (number).
 location is a string representing the address or place.
 Respond with ONLY the JSON array, no other text.`;
 
-  let message: Anthropic.Message;
-  try {
-    message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
-      system:
-        locale === 'he'
-          ? 'אתה עוזר טיולים. תמיד השב עם JSON תקין בלבד — ללא markdown, ללא הסברים. כל שדות הטקסט בעברית. כתוב בשפה יומיומית ורגועה — קצר, ישיר, לא פורמלי ולא שיווקי. כאילו מסביר לחבר. שמות פרטיים של מקומות, מסעדות, אתרים ומותגים — השאר בשמם המקורי באנגלית, אל תתרגם אותם. חשוב מאוד: אל תשתמש בשום אות ערבית — גם לא בתוך מילה עברית. כתוב אך ורק באותיות עבריות ואנגליות.'
-          : 'You are a travel planning assistant. Always respond with valid JSON only — no markdown, no explanation.',
-      messages: [{ role: 'user', content: prompt }],
-    });
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return Response.json({ error: `AI request failed: ${msg}` }, { status: 502 });
-  }
+  const systemPrompt = locale === 'he'
+    ? 'אתה עוזר טיולים. תמיד השב עם JSON תקין בלבד — ללא markdown, ללא הסברים. כל שדות הטקסט בעברית. כתוב בשפה יומיומית ורגועה — קצר, ישיר, לא פורמלי ולא שיווקי. כאילו מסביר לחבר. שמות פרטיים של מקומות, מסעדות, אתרים ומותגים — השאר בשמם המקורי באנגלית, אל תתרגם אותם. חשוב מאוד: אל תשתמש בשום אות ערבית — גם לא בתוך מילה עברית. כתוב אך ורק באותיות עבריות ואנגליות.'
+    : 'You are a travel planning assistant. Always respond with valid JSON only — no markdown, no explanation.';
 
-  const rawText =
-    message.content[0].type === 'text' ? message.content[0].text : '[]';
+  const validCategories: Category[] = [
+    'food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other',
+  ];
 
-  // Claude occasionally wraps JSON in markdown code fences despite instructions
-  const text = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-
-  let suggestions: AiSuggestion[];
-  try {
-    const raw = JSON.parse(text) as Array<{
-      id?: string;
-      name?: string;
-      category?: string;
-      description?: string;
-      duration?: number;
-      time?: string;
-      distance?: string;
-      open?: boolean;
-      cost?: number;
-      location?: string;
-    }>;
-    const validCategories: Category[] = [
-      'food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other',
-    ];
-    suggestions = raw.map((s, i) => ({
-      id: s.id ?? `ai-${i}`,
-      name: s.name ?? 'Suggestion',
-      category: validCategories.includes(s.category as Category)
-        ? (s.category as Category)
-        : 'other',
-      description: s.description ?? '',
-      duration: typeof s.duration === 'number' ? s.duration : 60,
-      time: s.time ?? '10:00',
-      distance: s.distance ?? '—',
-      open: s.open ?? true,
-      cost: typeof s.cost === 'number' ? s.cost : undefined,
-      location: s.location,
-    }));
-  } catch {
-    return Response.json({ error: 'Failed to parse AI response' }, { status: 502 });
-  }
-
+  const encoder = new TextEncoder();
   const region = dayMeta?.region ?? destinationText;
-  const enriched = await enrichWithPlaces(suggestions, region);
 
-  return Response.json(enriched);
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        let accumulated = '';
+
+        const messageStream = client.messages.stream({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1024,
+          system: systemPrompt,
+          messages: [{ role: 'user', content: prompt }],
+        });
+
+        for await (const chunk of messageStream) {
+          if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
+            accumulated += chunk.delta.text;
+            controller.enqueue(encoder.encode(chunk.delta.text));
+          }
+        }
+
+        // Strip markdown fences Claude occasionally adds despite instructions
+        const cleanText = accumulated.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+
+        let suggestions: AiSuggestion[];
+        try {
+          const rawParsed = JSON.parse(cleanText) as Array<{
+            id?: string; name?: string; category?: string; description?: string;
+            duration?: number; time?: string; distance?: string; open?: boolean;
+            cost?: number; location?: string;
+          }>;
+          suggestions = rawParsed.map((s, i) => ({
+            id: s.id ?? `ai-${i}`,
+            name: s.name ?? 'Suggestion',
+            category: validCategories.includes(s.category as Category) ? (s.category as Category) : 'other',
+            description: s.description ?? '',
+            duration: typeof s.duration === 'number' ? s.duration : 60,
+            time: s.time ?? '10:00',
+            distance: s.distance ?? '—',
+            open: s.open ?? true,
+            cost: typeof s.cost === 'number' ? s.cost : undefined,
+            location: s.location,
+          }));
+        } catch {
+          controller.enqueue(encoder.encode('\n__ERROR__Failed to parse AI response'));
+          controller.close();
+          return;
+        }
+
+        const enriched = await enrichWithPlaces(suggestions, region);
+        controller.enqueue(encoder.encode('\n__ENRICHED__' + JSON.stringify(enriched)));
+        controller.close();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown error';
+        controller.enqueue(encoder.encode('\n__ERROR__' + msg));
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff',
+    },
+  });
 }

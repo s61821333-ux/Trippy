@@ -88,9 +88,18 @@ export default function NotesScreen() {
               padding: '48px 20px', gap: 10,
             }}
           >
-            <span style={{ fontSize: 40 }}>🔐</span>
-            <p style={{ fontSize: 14, color: 'var(--text-3)', textAlign: 'center', fontWeight: 500, lineHeight: 1.55, maxWidth: 280 }}>
-              {t('noNotes')}
+            <motion.span
+              animate={{ rotate: [0, -5, 5, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
+              style={{ fontSize: 56, lineHeight: 1, display: 'block' }}
+            >
+              ✏️
+            </motion.span>
+            <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', textAlign: 'center', margin: 0 }}>
+              No notes yet
+            </p>
+            <p style={{ fontSize: 13, color: 'var(--text-3)', textAlign: 'center', lineHeight: 1.5, maxWidth: 260, margin: 0 }}>
+              Use notes for passwords, addresses, emergency contacts, or anything you want to keep handy
             </p>
           </motion.div>
         ) : (

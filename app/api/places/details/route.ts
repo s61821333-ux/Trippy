@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { GOOGLE_MAPS_API_KEY } from '@/lib/env'
 
 // GET /api/places/details?place_id=PLACE_ID
 // Resolves a Google Place ID to lat/lng + formatted address
@@ -6,7 +7,7 @@ export async function GET(request: NextRequest) {
   const placeId = request.nextUrl.searchParams.get('place_id')?.trim()
   if (!placeId) return NextResponse.json({ error: 'Missing place_id' }, { status: 400 })
 
-  const key = process.env.GOOGLE_MAPS_API_KEY
+  const key = GOOGLE_MAPS_API_KEY()
   if (!key) return NextResponse.json({ error: 'Maps API not configured' }, { status: 503 })
 
   const url = new URL('https://maps.googleapis.com/maps/api/place/details/json')

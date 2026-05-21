@@ -2,12 +2,11 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 
 function tryAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) return null
-  return createClient(url, key, { auth: { persistSession: false } })
+  try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
+  catch { return null }
 }
 
 // GET /api/invitations — authenticated: return pending invitations with trip names
@@ -17,8 +16,8 @@ export async function GET(_request: NextRequest) {
   const cookieStore = await cookies()
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL(),
+    SUPABASE_ANON_KEY(),
     {
       cookies: {
         getAll: () => cookieStore.getAll(),

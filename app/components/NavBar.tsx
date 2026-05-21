@@ -160,8 +160,10 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                   cursor: 'pointer',
                   color: isActive ? 'var(--brand)' : 'var(--text-3)',
                   minHeight: 48,
+                  minWidth: 44,
                   position: 'relative',
                   overflow: 'hidden',
+                  transition: 'color 0.18s ease',
                 }}
               >
                 {/* Active pill — scale in/out, fully contained within the button */}
@@ -191,15 +193,17 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                 </AnimatePresence>
                 <Icon name={tab.icon} size={isActive ? 21 : 20} style={{ position: 'relative', zIndex: 1 }} />
                 <span style={{
-                  fontSize: 9,
-                  fontWeight: isActive ? 700 : 500,
+                  fontSize: 11,
+                  fontWeight: isActive ? 800 : 500,
                   fontFamily: 'var(--font-mono)',
-                  letterSpacing: '0.14em',
+                  letterSpacing: '0.12em',
                   textTransform: 'uppercase',
                   textAlign: 'center',
                   lineHeight: 1.2,
                   position: 'relative',
                   zIndex: 1,
+                  color: isActive ? 'var(--brand)' : 'var(--text-3)',
+                  transition: 'color 0.18s ease, font-weight 0.18s ease',
                 }}>
                   {t(tab.labelKey)}
                 </span>
@@ -208,7 +212,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
           })}
         </div>
         {/* Fill safe-area-inset-bottom so the surface colour extends flush to the screen edge */}
-        <div style={{ height: 'env(safe-area-inset-bottom, 0px)', background: 'var(--surface)' }} />
+        <div style={{ height: 'env(safe-area-inset-bottom, 8px)', background: 'var(--surface)' }} />
       </nav>
     </>
   );

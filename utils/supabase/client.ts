@@ -7,7 +7,8 @@ export function createClient() {
     {
       cookieOptions: {
         maxAge: 60 * 60 * 24 * 365, // 1 year — makes cookies persistent across browser restarts
-        sameSite: 'lax',
+        sameSite: 'strict',
+        secure: process.env.NODE_ENV === 'production',
         path: '/',
       },
     }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate as motionAnimate } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Chip from '../ui/Chip';
 import Icon from '../ui/Icon';
@@ -14,6 +14,7 @@ import { useI18n } from '@/lib/i18n';
 import { getCurrencySymbol, getCountryCurrency, getExchangeRates } from '@/lib/currency';
 import { fetchWeatherForTrip, getWeatherUrl, WeatherDay } from '@/lib/weather';
 import { getCapitalCoords } from '@/lib/capitals';
+import AsyncError from '../ui/AsyncError';
 
 function fmtAmt(n: number, decimals = 2): string {
   return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -31,13 +32,13 @@ const stagger = {
 };
 
 const INSIGHT_COLORS: Record<string, { bg: string; border: string; text: string }> = {
-  gap:     { bg: 'rgba(240,170,30,0.10)',  border: 'rgba(240,170,30,0.25)',  text: 'oklch(58% 0.18 75)'  },
-  balance: { bg: 'rgba(200,100,30,0.10)',  border: 'rgba(200,100,30,0.22)',  text: 'oklch(55% 0.18 50)'  },
-  ready:   { bg: 'rgba(40,160,90,0.09)',   border: 'rgba(40,160,90,0.22)',   text: 'oklch(50% 0.15 148)' },
-  tip:     { bg: 'rgba(59,126,212,0.09)',  border: 'rgba(59,126,212,0.22)',  text: 'oklch(52% 0.16 225)' },
-  eco:     { bg: 'rgba(30,140,90,0.09)',   border: 'rgba(30,140,90,0.22)',   text: 'oklch(48% 0.16 158)' },
-  pacing:  { bg: 'rgba(180,60,200,0.08)',  border: 'rgba(180,60,200,0.20)',  text: 'oklch(50% 0.17 310)' },
-  relax:   { bg: 'rgba(40,160,200,0.08)',  border: 'rgba(40,160,200,0.20)',  text: 'oklch(50% 0.14 210)' },
+  gap:     { bg: 'var(--insight-gap-bg)',     border: 'var(--insight-gap-border)',     text: 'var(--insight-gap-text)'     },
+  balance: { bg: 'var(--insight-balance-bg)', border: 'var(--insight-balance-border)', text: 'var(--insight-balance-text)' },
+  ready:   { bg: 'var(--insight-ready-bg)',   border: 'var(--insight-ready-border)',   text: 'var(--insight-ready-text)'   },
+  tip:     { bg: 'var(--insight-tip-bg)',     border: 'var(--insight-tip-border)',     text: 'var(--insight-tip-text)'     },
+  eco:     { bg: 'var(--insight-eco-bg)',     border: 'var(--insight-eco-border)',     text: 'var(--insight-eco-text)'     },
+  pacing:  { bg: 'var(--insight-pacing-bg)',  border: 'var(--insight-pacing-border)',  text: 'var(--insight-pacing-text)'  },
+  relax:   { bg: 'var(--insight-relax-bg)',   border: 'var(--insight-relax-border)',   text: 'var(--insight-relax-text)'   },
 };
 
 export default function DashboardScreen() {
@@ -52,7 +53,10 @@ export default function DashboardScreen() {
   const [showShare, setShowShare]       = useState(false);
   const [inviteEmail, setInviteEmail]   = useState('');
   const [inviteSending, setInviteSending] = useState(false);
-  const [pendingEmails, setPendingEmails] = useState<{ id: string; email: string; status: string }[]>([]);
+  const [pendingEmails, setPendingEmails] = useState<{ id: string; email: string; status: string; created_at?: string }[]>([]);
+  const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [resendSuccessId, setResendSuccessId] = useState<string | null>(null);
   const MAX_INVITES = 4;
 
   // Currency
@@ -63,6 +67,9 @@ export default function DashboardScreen() {
 
   // Weather
   const [weather, setWeather] = useState<WeatherDay[]>([]);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [weatherError, setWeatherError] = useState<string | null>(null);
+  const [weatherRetry, setWeatherRetry] = useState(0);
 
   useEffect(() => {
     if (!trip) return;
@@ -96,10 +103,17 @@ export default function DashboardScreen() {
     }
 
     if (!lat || !lng) return;
+    setWeatherLoading(true);
+    setWeatherError(null);
     fetchWeatherForTrip(lat, lng, trip.startDate, trip.days)
-      .then(setWeather)
-      .catch(() => {});
-  }, [trip?.startDate, trip?.days, JSON.stringify(trip?.dayMeta?.map(m => [m.lat, m.lng])), trip?.countries?.join(',')]);
+      .then(data => { setWeather(data); setWeatherLoading(false); })
+      .catch(() => { setWeatherError("Couldn't load weather"); setWeatherLoading(false); });
+  }, [trip?.startDate, trip?.days, JSON.stringify(trip?.dayMeta?.map(m => [m.lat, m.lng])), trip?.countries?.join(','), weatherRetry]);
+
+  // Exchange rates
+  const [rateLoading, setRateLoading] = useState(false);
+  const [rateError, setRateError] = useState<string | null>(null);
+  const [rateRetry, setRateRetry] = useState(0);
 
   useEffect(() => {
     if (!trip) { setLocalRate(null); setLocalCurrency(''); return; }
@@ -110,17 +124,23 @@ export default function DashboardScreen() {
       const localC = firstCountry ? getCountryCurrency(firstCountry) : 'USD';
       if (localC === 'ILS') { setLocalRate(null); setLocalCurrency(''); return; }
       setLocalCurrency(localC);
+      setRateLoading(true);
+      setRateError(null);
       getExchangeRates('ILS').then(rates => {
         setLocalRate(rates[localC] ?? null);
-      }).catch(() => {});
+        setRateLoading(false);
+      }).catch(() => { setRateError("Couldn't load exchange rates"); setRateLoading(false); });
     } else {
       // Trip budget is in foreign currency → show ILS equivalent
       setLocalCurrency('ILS');
+      setRateLoading(true);
+      setRateError(null);
       getExchangeRates(currency).then(rates => {
         setLocalRate(rates['ILS'] ?? null);
-      }).catch(() => {});
+        setRateLoading(false);
+      }).catch(() => { setRateError("Couldn't load exchange rates"); setRateLoading(false); });
     }
-  }, [currency, trip?.countries?.join(',')]);
+  }, [currency, trip?.countries?.join(','), rateRetry]);
 
 
   useEffect(() => {
@@ -174,6 +194,14 @@ export default function DashboardScreen() {
 
   const expenses      = trip.expenses ?? [];
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+
+  const displayedTotal = useMotionValue(totalExpenses);
+  const roundedTotal   = useTransform(displayedTotal, v => fmtAmt(Math.round(v)));
+
+  useEffect(() => {
+    const controls = motionAnimate(displayedTotal, totalExpenses, { duration: 0.4, ease: 'easeOut' });
+    return controls.stop;
+  }, [totalExpenses]);
 
   return (
     <div
@@ -387,13 +415,11 @@ export default function DashboardScreen() {
                   >
                     <div style={{
                       width: 52, height: 52, borderRadius: 18, flexShrink: 0,
-                      background: 'rgba(255,255,255,0.72)',
-                      backdropFilter: 'blur(10px)',
-                      WebkitBackdropFilter: 'blur(10px)',
+                      background: 'var(--surface)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 26,
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.95), 0 2px 10px rgba(0,0,0,0.10)',
-                      border: '1px solid rgba(255,255,255,0.88)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.60), 0 2px 10px rgba(0,0,0,0.10)',
+                      border: '1px solid var(--border)',
                     }}>
                       {CAT_META[nextEventData.event.category].icon}
                     </div>
@@ -418,10 +444,9 @@ export default function DashboardScreen() {
                     {nextWeather && (
                       <div style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'center',
-                        background: 'rgba(255,255,255,0.55)', borderRadius: 12,
+                        background: 'var(--surface)', borderRadius: 12,
                         padding: '6px 10px', gap: 1, flexShrink: 0,
-                        backdropFilter: 'blur(4px)',
-                        border: '1px solid rgba(255,255,255,0.7)',
+                        border: '1px solid var(--border)',
                       }}>
                         <span style={{ fontSize: 22, lineHeight: 1 }}>{nextWeather.icon}</span>
                         <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', lineHeight: 1.2 }}>
@@ -470,32 +495,42 @@ export default function DashboardScreen() {
                 </div>
               );
             })() : (
-              <div style={{
-                background: 'var(--surface)',
-                border: '1px dashed var(--border)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '18px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-              }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-                  background: 'var(--brand-light)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 20,
-                }}>
-                  🗓️
-                </div>
-                <p style={{ fontSize: 13, color: 'var(--text-3)', fontStyle: 'italic' }}>
-                  {t('noUpcomingEvents')}
+              <motion.div
+                animate={{ rotate: [0, -5, 5, -5, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3 }}
+                style={{
+                  background: 'var(--surface)',
+                  border: '1px dashed var(--border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '28px 16px',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                }}
+              >
+                <span style={{ fontSize: 48, lineHeight: 1 }}>⌛</span>
+                <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', textAlign: 'center', margin: 0 }}>
+                  Add events to start planning
                 </p>
-              </div>
+                <p style={{ fontSize: 12, color: 'var(--text-3)', textAlign: 'center', margin: 0 }}>
+                  Head to the Explore tab to add your first event
+                </p>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setScreen('day')}
+                  style={{
+                    marginTop: 4,
+                    background: 'var(--brand)', color: 'white', border: 'none',
+                    borderRadius: 'var(--radius-md)', padding: '10px 22px',
+                    fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  Plan Day 1
+                </motion.button>
+              </motion.div>
             )}
           </motion.div>
 
           {/* ═══ Weather Forecast Strip ═══ */}
-          {weather.length > 0 && (
+          {(weatherLoading || weatherError || weather.length > 0) && (
             <motion.div
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
@@ -509,54 +544,64 @@ export default function DashboardScreen() {
               }}>
                 {t('forecast') || 'Forecast'}
               </p>
-              <div style={{
-                display: 'flex', gap: 6,
-                overflowX: 'auto',
-                marginLeft: `calc(-1 * var(--page-px))`,
-                marginRight: `calc(-1 * var(--page-px))`,
-                paddingLeft: 'var(--page-px)',
-                paddingRight: 'var(--page-px)',
-                paddingBottom: 4,
-                scrollbarWidth: 'none',
-              }}>
-                {weather.slice(0, 7).map((w, i) => {
-                  const dayNum = i + 1;
-                  const dateLabel = trip.startDate ? fmtDate(trip.startDate, i, locale) : `${t('day')} ${dayNum}`;
-                  const isNextEventDay = nextEventData?.dayNum === dayNum;
-                  return (
-                    <motion.a
-                      key={i}
-                      href={`https://www.google.com/search?q=${encodeURIComponent((trip.dayMeta?.[i]?.region ?? trip.name) + ' weather')}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: 0.22 + i * 0.05, type: 'spring', stiffness: 340, damping: 30 }}
-                      onClick={e => e.stopPropagation()}
-                      style={{
-                        flexShrink: 0,
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                        padding: '10px 12px',
-                        borderRadius: 'var(--radius-md)',
-                        background: isNextEventDay ? 'var(--brand-muted)' : 'var(--surface)',
-                        border: `1px solid ${isNextEventDay ? 'var(--brand)' : 'var(--border)'}`,
-                        minWidth: 58,
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        boxShadow: isNextEventDay ? '0 0 0 2px var(--brand-muted)' : 'none',
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      <span style={{ fontSize: 11, fontWeight: 700, color: isNextEventDay ? 'var(--brand)' : 'var(--text-3)', letterSpacing: '0.02em' }}>
-                        {dateLabel.split(' ').slice(0, 2).join(' ')}
-                      </span>
-                      <span style={{ fontSize: 20, lineHeight: 1 }}>{w.icon}</span>
-                      <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>{w.tempMax}°</span>
-                      <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>{w.tempMin}°</span>
-                    </motion.a>
-                  );
-                })}
-              </div>
+              {weatherLoading ? (
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {[0,1,2,3,4].map(i => (
+                    <div key={i} className="skeleton" style={{ flexShrink: 0, width: 58, height: 88, borderRadius: 'var(--radius-md)' }} />
+                  ))}
+                </div>
+              ) : weatherError ? (
+                <AsyncError message="Couldn't load weather" onRetry={() => setWeatherRetry(c => c + 1)} compact />
+              ) : (
+                <div style={{
+                  display: 'flex', gap: 6,
+                  overflowX: 'auto',
+                  marginLeft: `calc(-1 * var(--page-px))`,
+                  marginRight: `calc(-1 * var(--page-px))`,
+                  paddingLeft: 'var(--page-px)',
+                  paddingRight: 'var(--page-px)',
+                  paddingBottom: 4,
+                  scrollbarWidth: 'none',
+                }}>
+                  {weather.slice(0, 7).map((w, i) => {
+                    const dayNum = i + 1;
+                    const dateLabel = trip.startDate ? fmtDate(trip.startDate, i, locale) : `${t('day')} ${dayNum}`;
+                    const isNextEventDay = nextEventData?.dayNum === dayNum;
+                    return (
+                      <motion.a
+                        key={i}
+                        href={`https://www.google.com/search?q=${encodeURIComponent((trip.dayMeta?.[i]?.region ?? trip.name) + ' weather')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.22 + i * 0.05, type: 'spring', stiffness: 340, damping: 30 }}
+                        onClick={e => e.stopPropagation()}
+                        style={{
+                          flexShrink: 0,
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                          padding: '10px 12px',
+                          borderRadius: 'var(--radius-md)',
+                          background: isNextEventDay ? 'var(--brand-muted)' : 'var(--surface)',
+                          border: `1px solid ${isNextEventDay ? 'var(--brand)' : 'var(--border)'}`,
+                          minWidth: 58,
+                          textDecoration: 'none',
+                          cursor: 'pointer',
+                          boxShadow: isNextEventDay ? '0 0 0 2px var(--brand-muted)' : 'none',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        <span style={{ fontSize: 11, fontWeight: 700, color: isNextEventDay ? 'var(--brand)' : 'var(--text-3)', letterSpacing: '0.02em' }}>
+                          {dateLabel.split(' ').slice(0, 2).join(' ')}
+                        </span>
+                        <span style={{ fontSize: 20, lineHeight: 1 }}>{w.icon}</span>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)' }}>{w.tempMax}°</span>
+                        <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>{w.tempMin}°</span>
+                      </motion.a>
+                    );
+                  })}
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -582,11 +627,15 @@ export default function DashboardScreen() {
                   </span>
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--success)' }}>{currSym}{fmtAmt(tripBudget, 0)}</span>
-                    {localRate && localCurrency && (
+                    {rateLoading ? (
+                      <div className="skeleton" style={{ width: 72, height: 12, borderRadius: 4, marginTop: 3 }} />
+                    ) : rateError ? (
+                      <button onClick={() => setRateRetry(c => c + 1)} style={{ fontSize: 9, color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block', marginTop: 2 }}>⚠ retry</button>
+                    ) : localRate && localCurrency ? (
                       <div style={{ fontSize: 10, color: 'var(--success)', opacity: 0.7, fontWeight: 500 }}>
                         ≈{getCurrencySymbol(localCurrency)}{fmtAmt(Math.round(tripBudget * localRate), 0)} {t('localEquiv')}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               )}
@@ -636,7 +685,7 @@ export default function DashboardScreen() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 {totalExpenses > 0 && (
                   <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-2)' }}>
-                    {currSym}{fmtAmt(totalExpenses)}
+                    {currSym}<motion.span>{roundedTotal}</motion.span>
                   </span>
                 )}
                 <Icon
@@ -727,7 +776,17 @@ export default function DashboardScreen() {
                     </div>
 
                     {expenses.length === 0 ? (
-                      <p style={{ fontSize: 11, color: 'var(--text-3)', fontStyle: 'italic' }}>{t('noExpensesYet')}</p>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '20px 0 8px' }}>
+                        <motion.span
+                          animate={{ y: [0, -6, 0] }}
+                          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                          style={{ fontSize: 40, lineHeight: 1 }}
+                        >
+                          🪙
+                        </motion.span>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)', margin: 0 }}>No expenses logged</p>
+                        <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0, textAlign: 'center' }}>Add your first expense above</p>
+                      </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         {expenses.map(exp => (
@@ -1046,24 +1105,23 @@ export default function DashboardScreen() {
             </p>
             <span style={{
               fontSize: 11, fontWeight: 700,
-              color: pendingEmails.length >= MAX_INVITES ? 'var(--danger, #e53e3e)' : 'var(--text-3)',
+              color: pendingEmails.length >= MAX_INVITES ? 'var(--danger)' : 'var(--text-3)',
+              transition: 'color 0.2s',
             }}>
               {pendingEmails.length}/{MAX_INVITES}
             </span>
           </div>
 
-          {pendingEmails.length >= MAX_INVITES ? (
-            <p style={{ fontSize: 12, color: 'var(--text-3)', fontStyle: 'italic', marginBottom: 14 }}>
-              {t('inviteLimitReached')}
-            </p>
-          ) : (
-            <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+          {/* Email input — always visible, disabled at limit */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
+            <div style={{ flex: 1, position: 'relative' }}>
               <input
                 type="email"
                 value={inviteEmail}
+                disabled={pendingEmails.length >= MAX_INVITES}
                 onChange={e => setInviteEmail(e.target.value)}
                 onKeyDown={async e => {
-                  if (e.key === 'Enter' && inviteEmail.trim()) {
+                  if (e.key === 'Enter' && inviteEmail.trim() && pendingEmails.length < MAX_INVITES) {
                     setInviteSending(true);
                     try {
                       await inviteToTrip(inviteEmail);
@@ -1074,69 +1132,146 @@ export default function DashboardScreen() {
                     setInviteSending(false);
                   }
                 }}
-                placeholder={t('inviteEmailPlaceholder')}
+                placeholder={pendingEmails.length >= MAX_INVITES ? 'Cancel a pending invite to free up a slot' : t('inviteEmailPlaceholder')}
                 style={{
-                  flex: 1, padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                  fontSize: 14, fontWeight: 500, background: 'var(--bg)', color: 'var(--text)',
-                  border: '1px solid var(--border)', outline: 'none',
+                  width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                  fontSize: 14, fontWeight: 500,
+                  background: pendingEmails.length >= MAX_INVITES ? 'var(--bg-alt)' : 'var(--bg)',
+                  color: pendingEmails.length >= MAX_INVITES ? 'var(--text-3)' : 'var(--text)',
+                  border: `1px solid ${pendingEmails.length >= MAX_INVITES ? 'var(--danger)' : 'var(--border)'}`,
+                  outline: 'none', boxSizing: 'border-box' as const,
+                  opacity: pendingEmails.length >= MAX_INVITES ? 0.6 : 1,
+                  transition: 'border-color 0.2s, opacity 0.2s',
                 }}
               />
-              <GlassBtn
-                variant="accent"
-                onClick={async () => {
-                  if (!inviteEmail.trim()) return;
-                  setInviteSending(true);
-                  try {
-                    await inviteToTrip(inviteEmail);
-                    show(t('inviteSent'));
-                    setInviteEmail('');
-                    if (tripDbId) dbGetTripEmailInvitations(tripDbId).then(setPendingEmails).catch(() => {});
-                  } catch { show(t('inviteFailed')); }
-                  setInviteSending(false);
-                }}
-                disabled={inviteSending || !inviteEmail.trim()}
-                style={{ padding: '10px 16px', flexShrink: 0 }}
-              >
-                {inviteSending ? '…' : t('sendInvite')}
-              </GlassBtn>
             </div>
-          )}
+            <GlassBtn
+              variant="accent"
+              onClick={async () => {
+                if (!inviteEmail.trim() || pendingEmails.length >= MAX_INVITES) return;
+                setInviteSending(true);
+                try {
+                  await inviteToTrip(inviteEmail);
+                  show(t('inviteSent'));
+                  setInviteEmail('');
+                  if (tripDbId) dbGetTripEmailInvitations(tripDbId).then(setPendingEmails).catch(() => {});
+                } catch { show(t('inviteFailed')); }
+                setInviteSending(false);
+              }}
+              disabled={inviteSending || !inviteEmail.trim() || pendingEmails.length >= MAX_INVITES}
+              style={{ padding: '10px 16px', flexShrink: 0 }}
+            >
+              {inviteSending ? '…' : t('sendInvite')}
+            </GlassBtn>
+          </div>
 
           {/* Pending invite list */}
-          {pendingEmails.length > 0 && (
-            <div style={{ marginBottom: 16 }}>
-              {pendingEmails.map((inv, i) => (
-                <div key={i} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '8px 12px', borderRadius: 'var(--radius-sm)',
-                  background: 'var(--bg)', border: '1px solid var(--border)', marginBottom: 6,
-                }}>
-                  <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{inv.email}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600 }}>
-                      {t('pendingLabel')}
-                    </span>
-                    {inv.id && (
-                      <button
-                        onClick={async () => {
-                          try {
-                            await dbCancelInvitation(inv.id);
-                            setPendingEmails(prev => prev.filter((_, j) => j !== i));
-                          } catch { show(t('inviteFailed')); }
-                        }}
-                        style={{
-                          fontSize: 11, color: 'var(--danger, #e53e3e)', fontWeight: 600,
-                          background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
-                        }}
-                      >
-                        {t('cancelInvite')}
-                      </button>
-                    )}
+          <div style={{ marginBottom: 16, marginTop: 12 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>
+              Pending invites
+            </p>
+            {pendingEmails.length === 0 ? (
+              <p style={{ fontSize: 12, color: 'var(--text-3)', fontStyle: 'italic' }}>No pending invites.</p>
+            ) : (
+              pendingEmails.map((inv) => {
+                const isConfirming = cancelConfirmId === inv.id;
+                const isResending = resendingId === inv.id;
+                const didResend = resendSuccessId === inv.id;
+
+                // Relative timestamp
+                const relTime = (() => {
+                  if (!inv.created_at) return null;
+                  const diff = Date.now() - new Date(inv.created_at).getTime();
+                  const mins = Math.floor(diff / 60000);
+                  if (mins < 1) return 'just now';
+                  if (mins < 60) return `${mins}min ago`;
+                  const hrs = Math.floor(mins / 60);
+                  if (hrs < 24) return `${hrs}h ago`;
+                  return `${Math.floor(hrs / 24)}d ago`;
+                })();
+
+                return (
+                  <div key={inv.id} style={{
+                    padding: '10px 12px', borderRadius: 'var(--radius-md)',
+                    background: 'var(--bg)', border: '1px solid var(--border)', marginBottom: 6,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600, display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {inv.email}
+                        </span>
+                        {relTime && (
+                          <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>{relTime}</span>
+                        )}
+                      </div>
+
+                      {isConfirming ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                          <span style={{ fontSize: 11, color: 'var(--text-2)', fontWeight: 600 }}>Remove?</span>
+                          <motion.button
+                            whileTap={{ scale: 0.92 }}
+                            onClick={async () => {
+                              try {
+                                await dbCancelInvitation(inv.id);
+                                setPendingEmails(prev => prev.filter(p => p.id !== inv.id));
+                              } catch { show(t('inviteFailed')); }
+                              setCancelConfirmId(null);
+                            }}
+                            style={{ fontSize: 11, fontWeight: 700, color: 'var(--danger)', background: 'var(--danger-bg)', border: '1px solid rgba(192,57,43,0.2)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer' }}
+                          >
+                            Yes
+                          </motion.button>
+                          <motion.button
+                            whileTap={{ scale: 0.92 }}
+                            onClick={() => setCancelConfirmId(null)}
+                            style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, padding: '3px 8px', cursor: 'pointer' }}
+                          >
+                            Keep
+                          </motion.button>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                          <motion.button
+                            whileTap={{ scale: 0.92 }}
+                            onClick={async () => {
+                              if (isResending || didResend) return;
+                              setResendingId(inv.id);
+                              try {
+                                await inviteToTrip(inv.email);
+                                setResendSuccessId(inv.id);
+                                setTimeout(() => setResendSuccessId(null), 2000);
+                              } catch { show(t('inviteFailed')); }
+                              setResendingId(null);
+                            }}
+                            style={{
+                              fontSize: 11, fontWeight: 700,
+                              color: didResend ? 'var(--success)' : 'var(--brand)',
+                              background: didResend ? 'var(--success-bg)' : 'var(--brand-muted)',
+                              border: `1px solid ${didResend ? 'rgba(40,160,90,0.2)' : 'rgba(59,110,82,0.2)'}`,
+                              borderRadius: 6, padding: '3px 8px', cursor: 'pointer',
+                              transition: 'all 0.2s',
+                            }}
+                          >
+                            {isResending ? '…' : didResend ? 'Sent ✓' : 'Resend'}
+                          </motion.button>
+                          <motion.button
+                            whileTap={{ scale: 0.92 }}
+                            onClick={() => {
+                              setCancelConfirmId(inv.id);
+                              setTimeout(() => setCancelConfirmId(prev => prev === inv.id ? null : prev), 3000);
+                            }}
+                            style={{ fontSize: 11, fontWeight: 700, color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px' }}
+                          >
+                            Cancel
+                          </motion.button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+                );
+              })
+            )}
+          </div>
 
           <GlassBtn
             variant="danger" size="lg" style={{ width: '100%' }}

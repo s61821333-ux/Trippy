@@ -2,12 +2,12 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
+import { AcceptInvitationBody } from '@/lib/schemas'
 
 function tryAdminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) return null
-  return createClient(url, key, { auth: { persistSession: false } })
+  try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
+  catch { return null }
 }
 
 // POST /api/invitations/accept — authenticated: accept an email invitation
@@ -17,8 +17,8 @@ export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL(),
+    SUPABASE_ANON_KEY(),
     {
       cookies: {
         getAll: () => cookieStore.getAll(),
@@ -34,30 +34,45 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
-  let body: any
-  try { body = await request.json() } catch {
+  let raw: unknown
+  try { raw = await request.json() } catch {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
   }
 
-  const { invitationId, initials } = body
-  if (!invitationId) {
-    return NextResponse.json({ error: 'Missing invitationId' }, { status: 400 })
+  const parsed = AcceptInvitationBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
   }
+
+  const { invitationId, initials } = parsed.data
 
   try {
     const admin = tryAdminClient()
-    // Use admin client when available (bypasses RLS), otherwise use user session
     const db = admin ?? supabase
 
-    // Look up the invitation
+    // Look up the invitation — verify it was sent to this user's email
     const { data: inv, error: invErr } = await db
       .from('trip_invitations')
-      .select('trip_id')
+      .select('trip_id, invited_email, status, expires_at')
       .eq('id', invitationId)
       .maybeSingle()
 
     if (invErr || !inv) {
       return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
+    }
+
+    // Verify the invitation belongs to the authenticated user
+    if (user.email?.toLowerCase() !== inv.invited_email?.toLowerCase()) {
+      return NextResponse.json({ error: 'Invitation not found' }, { status: 404 })
+    }
+
+    if (inv.status !== 'pending') {
+      return NextResponse.json({ error: 'Invitation already used' }, { status: 409 })
+    }
+
+    // Check expiry (expires_at column added by migration 001)
+    if (inv.expires_at && new Date(inv.expires_at) < new Date()) {
+      return NextResponse.json({ error: 'This invitation has expired' }, { status: 410 })
     }
 
     // Mark as accepted

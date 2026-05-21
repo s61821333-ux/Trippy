@@ -10,14 +10,22 @@ import Sheet from '../ui/Sheet';
 import PlacesInput from '../ui/PlacesInput';
 import { useAppStore } from '@/lib/store';
 import { CAT_META, fmtDate, fmtDuration, toMins, toTime, getConflicts, getGoldenHourType, getDayBudget } from '@/lib/utils';
+import { CAT_GRADIENTS, CAT_GLOW } from '@/lib/categoryTokens';
 import { getCapitalCoords } from '@/lib/capitals';
 import { getCurrencySymbol } from '@/lib/currency';
 import { Category, HotelStay, TripEvent } from '@/lib/types';
 import { useToast } from '../ui/Toast';
 import SuggestionsSheet from '../SuggestionsSheet';
+import DayTimelineView from '../DayTimelineView';
 import { useI18n, TranslationKey } from '@/lib/i18n';
 
 const CATEGORIES: Category[] = ['food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other'];
+
+const daySlideVariants = {
+  initial: (dir: number) => ({ x: dir > 0 ? 44 : -44, opacity: 0 }),
+  animate: { x: 0, opacity: 1 },
+  exit: (dir: number) => ({ x: dir > 0 ? -44 : 44, opacity: 0 }),
+};
 
 function getMapsUrl(location: string, lat?: number, lng?: number): string {
   const isIOS = typeof navigator !== 'undefined' &&
@@ -34,28 +42,6 @@ function getMapsUrl(location: string, lat?: number, lng?: number): string {
 }
 const DAY_ABBREVS_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const DAY_ABBREVS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
-
-const CAT_GRADIENTS: Record<Category, string> = {
-  food:       'linear-gradient(150deg, #FFAA78 0%, #E05530 55%, #B82C0A 100%)',
-  cafe:       'linear-gradient(150deg, #F2CC72 0%, #C67A20 55%, #8A5010 100%)',
-  attraction: 'linear-gradient(150deg, #62CCFA 0%, #1A8EDA 55%, #0858B0 100%)',
-  hotel:      'linear-gradient(150deg, #DC9EF4 0%, #9042CA 55%, #601A9A 100%)',
-  rest:       'linear-gradient(150deg, #72E09A 0%, #22A85A 55%, #0C6E38 100%)',
-  transport:  'linear-gradient(150deg, #7CBAF2 0%, #3272CA 55%, #1045A0 100%)',
-  flight:     'linear-gradient(150deg, #68AAEE 0%, #1252C2 55%, #062A7A 100%)',
-  other:      'linear-gradient(150deg, #F2CA92 0%, #C07A42 55%, #885020 100%)',
-};
-
-const CAT_GLOW: Record<Category, string> = {
-  food:       '0 6px 22px rgba(224,85,48,0.44)',
-  cafe:       '0 6px 22px rgba(155,100,16,0.38)',
-  attraction: '0 6px 22px rgba(26,142,218,0.44)',
-  hotel:      '0 6px 22px rgba(144,66,202,0.42)',
-  rest:       '0 6px 22px rgba(34,168,90,0.42)',
-  transport:  '0 6px 22px rgba(50,114,202,0.40)',
-  flight:     '0 6px 22px rgba(18,82,194,0.48)',
-  other:      '0 6px 22px rgba(140,80,32,0.32)',
-};
 
 /* ── Category thumbnail ────────────────────────────────────────── */
 function EventThumbnail({ category }: { category: Category }) {
@@ -94,7 +80,7 @@ function EventThumbnail({ category }: { category: Category }) {
 interface TravelMode { durationMins: number; distanceKm: number }
 interface TravelModes { driving: TravelMode | null; walking: TravelMode | null; transit: TravelMode | null }
 
-function TravelBadges({ modes, fetching, darkMode }: { modes: TravelModes | null; fetching: boolean; darkMode: boolean }) {
+function TravelBadges({ modes, fetching }: { modes: TravelModes | null; fetching: boolean }) {
   if (fetching) {
     return (
       <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
@@ -114,9 +100,9 @@ function TravelBadges({ modes, fetching, darkMode }: { modes: TravelModes | null
       {modeItems.map(({ icon, m }) => (
         <span key={icon} style={{
           fontSize: 11, fontWeight: 700,
-          color: darkMode ? '#818CF8' : '#4F46E5',
-          background: darkMode ? 'rgba(129,140,248,0.14)' : 'rgba(99,102,241,0.08)',
-          border: `1px solid ${darkMode ? 'rgba(129,140,248,0.30)' : 'rgba(99,102,241,0.22)'}`,
+          color: 'var(--route-badge-text)',
+          background: 'var(--route-badge-bg)',
+          border: '1px solid var(--route-badge-border)',
           borderRadius: 100, padding: '4px 10px',
           display: 'inline-flex', alignItems: 'center', gap: 4,
         }}>
@@ -132,11 +118,12 @@ function TravelBadges({ modes, fetching, darkMode }: { modes: TravelModes | null
 interface HotelTravelRowProps {
   hotelLat: number; hotelLng: number;
   eventLat: number; eventLng: number;
-  eventName: string; darkMode: boolean;
+  eventName: string;
 }
-function HotelTravelRow({ hotelLat, hotelLng, eventLat, eventLng, eventName, darkMode }: HotelTravelRowProps) {
+function HotelTravelRow({ hotelLat, hotelLng, eventLat, eventLng, eventName }: HotelTravelRowProps) {
   const [modes, setModes] = useState<TravelModes | null>(null);
   const [fetching, setFetching] = useState(false);
+  const [routeRetry, setRouteRetry] = useState(0);
 
   useEffect(() => {
     setFetching(true);
@@ -147,7 +134,7 @@ function HotelTravelRow({ hotelLat, hotelLng, eventLat, eventLng, eventName, dar
       .catch(() => {})
       .finally(() => setFetching(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hotelLat, hotelLng, eventLat, eventLng]);
+  }, [hotelLat, hotelLng, eventLat, eventLng, routeRetry]);
 
   if (!fetching && !modes) return null;
 
@@ -155,15 +142,15 @@ function HotelTravelRow({ hotelLat, hotelLng, eventLat, eventLng, eventName, dar
     <div style={{
       margin: '0 var(--page-px) 4px',
       padding: '8px 12px',
-      background: darkMode ? 'rgba(59,126,212,0.07)' : 'rgba(59,126,212,0.05)',
-      border: `1px solid ${darkMode ? 'rgba(59,126,212,0.20)' : 'rgba(59,126,212,0.18)'}`,
+      background: 'var(--hotel-route-bg)',
+      border: '1px solid var(--hotel-route-border)',
       borderRadius: 10,
       display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
     }}>
       <span dir="ltr" style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, flexShrink: 0 }}>
         🏨 → {eventName}
       </span>
-      <TravelBadges modes={modes} fetching={fetching} darkMode={darkMode} />
+      <TravelBadges modes={modes} fetching={fetching} />
     </div>
   );
 }
@@ -182,12 +169,13 @@ interface ConnectorProps {
 function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest, onAdd, t }: ConnectorProps) {
   const [modes, setModes] = useState<TravelModes | null>(null);
   const [fetching, setFetching] = useState(false);
-  const darkMode = useAppStore(s => s.darkMode);
   const { locale } = useI18n();
 
   const isFree = gapMins >= 45;
   const bothExist = !!(fromEv && toEv);
   const canRoute = !!(fromEv?.lat && fromEv?.lng && toEv?.lat && toEv?.lng);
+
+  const [routeRetry, setRouteRetry] = useState(0);
 
   useEffect(() => {
     if (!canRoute) return;
@@ -199,7 +187,7 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
       .catch(() => {})
       .finally(() => setFetching(false));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromEv?.lat, fromEv?.lng, toEv?.lat, toEv?.lng]);
+  }, [fromEv?.lat, fromEv?.lng, toEv?.lat, toEv?.lng, routeRetry]);
 
   const hasTravel = modes?.driving || modes?.walking || modes?.transit;
   const dashColor = isFree ? 'var(--warning)' : hasTravel ? 'rgba(99,102,241,0.6)' : 'var(--border)';
@@ -225,7 +213,14 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
 
           {/* Travel badges or no-location hint */}
           {canRoute ? (
-            <TravelBadges modes={modes} fetching={fetching} darkMode={darkMode} />
+            <>
+              <TravelBadges modes={modes} fetching={fetching} />
+              {!fetching && !modes && (
+                <button onClick={() => setRouteRetry(c => c + 1)} style={{ fontSize: 10, color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
+                  ↻ retry
+                </button>
+              )}
+            </>
           ) : (
             <span style={{
               fontSize: 10, color: 'var(--text-3)', opacity: 0.65,
@@ -307,13 +302,13 @@ interface EventCardProps {
   tripDays: number;
   startDate: string;
   locale: string;
+  isNew?: boolean;
 }
 
-function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isConflict, goldenHour, nickname, dayNumber, tripDays, startDate, locale }: EventCardProps) {
+function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isConflict, goldenHour, nickname, dayNumber, tripDays, startDate, locale, isNew }: EventCardProps) {
   const meta = CAT_META[event.category];
   const endT = toTime(toMins(event.time) + event.duration);
   const { voteEvent } = useAppStore();
-  const darkMode = useAppStore(s => s.darkMode);
   const currSym = useAppStore(s => getCurrencySymbol((s.tripDbId && s.currencyByTrip[s.tripDbId]) || 'USD'));
   const { t } = useI18n();
 
@@ -346,19 +341,24 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
       style={{ display: 'flex', alignItems: 'flex-start', padding: '0 var(--page-px)' }}
     >
       {/* Card — full width, no timeline dot */}
-      <div style={{
-        flex: 1, width: '100%',
-        background: 'var(--surface)',
-        borderRadius: 18,
-        boxShadow: rescheduling
-          ? '0 0 0 2px var(--brand), 0 4px 20px rgba(0,0,0,0.12)'
-          : isConflict
-            ? '0 0 0 1.5px var(--danger), 0 2px 8px rgba(0,0,0,0.07)'
-            : '0 2px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)',
-        border: rescheduling ? '1.5px solid var(--brand)' : isConflict ? '1.5px solid var(--danger)' : '1px solid var(--border)',
-        overflow: 'hidden',
-        transition: 'box-shadow 0.18s, border 0.18s',
-      }}>
+      <motion.div
+        initial={isNew ? { boxShadow: '0 0 0 4px var(--brand-muted), 0 4px 20px rgba(92,168,120,0.18)' } : false}
+        animate={{
+          boxShadow: rescheduling
+            ? '0 0 0 2px var(--brand), 0 4px 20px rgba(0,0,0,0.12)'
+            : isConflict
+              ? '0 0 0 1.5px var(--danger), 0 2px 8px rgba(0,0,0,0.07)'
+              : '0 2px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)',
+        }}
+        transition={rescheduling || isConflict ? { duration: 0.18 } : { duration: 0.6, ease: 'easeOut' }}
+        style={{
+          flex: 1, width: '100%',
+          background: 'var(--surface)',
+          borderRadius: 18,
+          border: rescheduling ? '1.5px solid var(--brand)' : isConflict ? '1.5px solid var(--danger)' : '1px solid var(--border)',
+          overflow: 'hidden',
+          transition: 'border 0.18s',
+        }}>
         {isConflict && !rescheduling && (
           <div style={{ width: '100%', height: 4, background: 'var(--danger)' }} />
         )}
@@ -459,10 +459,10 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
                 {event.tags.map((tag, ti) => (
                   <span key={ti} style={{
                     display: 'inline-flex', alignItems: 'center',
-                    fontSize: 10, fontWeight: 700,
-                    color: darkMode ? 'oklch(72% 0.16 225)' : 'oklch(52% 0.16 225)',
-                    background: darkMode ? 'rgba(59,126,212,0.18)' : 'rgba(59,126,212,0.09)',
-                    border: `1px solid ${darkMode ? 'rgba(59,126,212,0.38)' : 'rgba(59,126,212,0.22)'}`,
+                    fontSize: 11, fontWeight: 700,
+                    color: 'var(--route-badge-text)',
+                    background: 'var(--route-badge-bg)',
+                    border: '1px solid var(--route-badge-border)',
                     borderRadius: 100, padding: '2px 8px',
                   }}>
                     {tag}
@@ -680,7 +680,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </motion.div>
     </motion.div>
   );
 }
@@ -696,7 +696,6 @@ export default function DayScreen() {
     setScreen,
     nickname,
     dayEndHour,
-    darkMode,
     currencyByTrip, tripDbId,
   } = useAppStore();
   const { show } = useToast();
@@ -709,6 +708,14 @@ export default function DayScreen() {
   const swipeStartY = useRef(0);
 
   const [weather, setWeather] = useState<{ temp: number; code: number; icon?: string; label?: string } | null>(null);
+
+  const [navDirection, setNavDirection] = useState(0);
+  const [glowKey, setGlowKey] = useState<string | null>(null);
+
+  const navigateToDay = (dayNum: number) => {
+    setNavDirection(dayNum > activeDay ? 1 : -1);
+    setActiveDay(dayNum);
+  };
 
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<TripEvent | null>(null);
@@ -744,6 +751,9 @@ export default function DayScreen() {
   const [hLng, setHLng] = useState<number | null>(null);
   const [hCheckIn, setHCheckIn] = useState(1);
   const [hCheckOut, setHCheckOut] = useState(2);
+
+  // View mode: list (default) or timeline — session-scoped, resets on app close
+  const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
 
   useEffect(() => {
     const up = () => setIsOnline(true);
@@ -966,6 +976,9 @@ export default function DayScreen() {
       });
       show(t('eventAdded'));
       setShowAdd(false);
+      const newGlowKey = fTime + '|' + fName;
+      setGlowKey(newGlowKey);
+      setTimeout(() => setGlowKey(k => k === newGlowKey ? null : k), 1500);
       if (fCat === 'flight') {
         setSavedFlightTime(fTime);
         setDriveMinutes('');
@@ -1135,7 +1148,7 @@ export default function DayScreen() {
           return (
             <motion.button
               key={dayNum}
-              onClick={() => setActiveDay(dayNum)}
+              onClick={() => navigateToDay(dayNum)}
               whileTap={{ scale: 0.88 }}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -1254,6 +1267,46 @@ export default function DayScreen() {
         </motion.div>
       </AnimatePresence>
 
+      {/* ── View mode toggle (List / Timeline) ───────────────── */}
+      {evs.length > 0 && (
+        <div style={{
+          display: 'flex', justifyContent: 'flex-end',
+          padding: '0 var(--page-px) 8px',
+          flexShrink: 0,
+        }}>
+          <div style={{
+            display: 'flex',
+            background: 'var(--surface)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-sm)',
+            padding: 2,
+            gap: 2,
+          }}>
+            {(['list', 'timeline'] as const).map(mode => (
+              <motion.button
+                key={mode}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => setViewMode(mode)}
+                style={{
+                  padding: '5px 12px',
+                  borderRadius: 6,
+                  fontSize: 11, fontWeight: 700,
+                  fontFamily: 'var(--font-mono)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase' as const,
+                  background: viewMode === mode ? 'var(--brand)' : 'transparent',
+                  color: viewMode === mode ? 'white' : 'var(--text-3)',
+                  border: 'none', cursor: 'pointer',
+                  transition: 'background 0.18s, color 0.18s',
+                }}
+              >
+                {mode === 'list' ? '≡ List' : '⏱ Timeline'}
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Itinerary list ───────────────────────────────────── */}
       {(() => {
         // Hotel you sleep in tonight (check-in day up to, but not including, checkout day)
@@ -1328,11 +1381,22 @@ export default function DayScreen() {
               const dx = e.changedTouches[0].clientX - swipeStartX.current;
               const dy = e.changedTouches[0].clientY - swipeStartY.current;
               if (Math.abs(dx) > Math.abs(dy) * 1.8 && Math.abs(dx) > 55) {
-                if (dx < 0 && activeDay < trip.days) setActiveDay(activeDay + 1);
-                if (dx > 0 && activeDay > 1) setActiveDay(activeDay - 1);
+                if (dx < 0 && activeDay < trip.days) navigateToDay(activeDay + 1);
+                if (dx > 0 && activeDay > 1) navigateToDay(activeDay - 1);
               }
             }}
+            style={{ overflowX: 'hidden' }}
           >
+            <AnimatePresence mode="wait" custom={navDirection} initial={false}>
+              <motion.div
+                key={activeDay}
+                custom={navDirection}
+                variants={daySlideVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+              >
             {hotelBanner('top')}
             {(() => {
               const firstWithCoords = evs.find(e => e.lat != null && e.lng != null);
@@ -1344,65 +1408,99 @@ export default function DayScreen() {
                     eventLat={firstWithCoords.lat!}
                     eventLng={firstWithCoords.lng!}
                     eventName={firstWithCoords.name}
-                    darkMode={darkMode}
                   />
                 );
               }
               return null;
             })()}
-        <AnimatePresence>
-          {evs.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                padding: '48px 20px', gap: 10,
-              }}
-            >
-              <span style={{ fontSize: 44 }}>{meta?.emoji ?? '🗺️'}</span>
-              <p style={{ fontSize: 14, color: 'var(--text-3)', textAlign: 'center', fontWeight: 500, maxWidth: 240, lineHeight: 1.5 }}>
-                {t('tapToAdd')}
-              </p>
-            </motion.div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 4 }}>
-              {items.map((item, idx) =>
-                item.type === 'event' ? (
-                  <EventCard
-                    key={item.ev.id}
-                    event={item.ev}
-                    onEdit={openEdit}
-                    onDelete={handleDelete}
-                    onReschedule={handleReschedule}
-                    onMove={handleMove}
-                    onFocus={setFocusedEvent}
-                    isConflict={conflicts.has(item.ev.id)}
-                    goldenHour={getGoldenHourType(toMins(item.ev.time), item.ev.duration, dayLat, dayDate)}
-                    nickname={nickname}
-                    dayNumber={activeDay}
-                    tripDays={trip.days}
-                    startDate={trip.startDate}
-                    locale={locale}
-                  />
-                ) : (
-                  <RouteConnector
-                    key={`conn-${idx}`}
-                    gapMins={item.gapMins}
-                    gapStart={item.gapStart}
-                    fromEv={item.fromEv}
-                    toEv={item.toEv}
-                    onSuggest={() => setShowSuggestions(true, item.gapStart, item.gapStart + item.gapMins)}
-                    onAdd={() => openAdd(toTime(item.gapStart))}
-                    t={t}
-                  />
-                )
-              )}
-            </div>
-          )}
-        </AnimatePresence>
+        {/* Timeline view — shown instead of list when toggled */}
+        {viewMode === 'timeline' && evs.length > 0 ? (
+          <DayTimelineView
+            events={evs}
+            dayEndHour={dayEndHour}
+            onAdd={prefillTime => openAdd(prefillTime)}
+            onSuggest={(gapStart, gapEnd) => setShowSuggestions(true, gapStart, gapEnd)}
+            onFocus={setFocusedEvent}
+          />
+        ) : (
+          <AnimatePresence>
+            {evs.length === 0 ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  padding: '48px 20px', gap: 10,
+                }}
+              >
+                <motion.span
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{ fontSize: 56, lineHeight: 1, display: 'block' }}
+                >
+                  📍
+                </motion.span>
+                <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', textAlign: 'center', margin: 0 }}>
+                  Nothing planned for this day yet
+                </p>
+                <p style={{ fontSize: 13, color: 'var(--text-3)', textAlign: 'center', maxWidth: 240, lineHeight: 1.5, margin: 0 }}>
+                  Add your first event to start building the day
+                </p>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => openAdd()}
+                  style={{
+                    background: 'var(--brand)', color: 'white', border: 'none',
+                    borderRadius: 'var(--radius-lg)', padding: '12px 28px',
+                    fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                    boxShadow: '0 4px 14px rgba(59,110,82,0.28)',
+                  }}
+                >
+                  Add first event
+                </motion.button>
+              </motion.div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 4 }}>
+                {items.map((item, idx) =>
+                  item.type === 'event' ? (
+                    <EventCard
+                      key={item.ev.id}
+                      event={item.ev}
+                      onEdit={openEdit}
+                      onDelete={handleDelete}
+                      onReschedule={handleReschedule}
+                      onMove={handleMove}
+                      onFocus={setFocusedEvent}
+                      isConflict={conflicts.has(item.ev.id)}
+                      goldenHour={getGoldenHourType(toMins(item.ev.time), item.ev.duration, dayLat, dayDate)}
+                      nickname={nickname}
+                      dayNumber={activeDay}
+                      tripDays={trip.days}
+                      startDate={trip.startDate}
+                      locale={locale}
+                      isNew={glowKey === item.ev.time + '|' + item.ev.name}
+                    />
+                  ) : (
+                    <RouteConnector
+                      key={`conn-${idx}`}
+                      gapMins={item.gapMins}
+                      gapStart={item.gapStart}
+                      fromEv={item.fromEv}
+                      toEv={item.toEv}
+                      onSuggest={() => setShowSuggestions(true, item.gapStart, item.gapStart + item.gapMins)}
+                      onAdd={() => openAdd(toTime(item.gapStart))}
+                      t={t}
+                    />
+                  )
+                )}
+              </div>
+            )}
+          </AnimatePresence>
+        )}
             {hotelBanner('bottom')}
+              </motion.div>
+            </AnimatePresence>
           </div>
         );
       })()}
@@ -1490,9 +1588,9 @@ export default function DayScreen() {
                     <span key={ti} style={{
                       display: 'inline-flex', alignItems: 'center',
                       fontSize: 11, fontWeight: 700,
-                      color: darkMode ? 'oklch(72% 0.16 225)' : 'oklch(52% 0.16 225)',
-                      background: darkMode ? 'rgba(59,126,212,0.18)' : 'rgba(59,126,212,0.09)',
-                      border: `1px solid ${darkMode ? 'rgba(59,126,212,0.38)' : 'rgba(59,126,212,0.22)'}`,
+                      color: 'var(--route-badge-text)',
+                      background: 'var(--route-badge-bg)',
+                      border: '1px solid var(--route-badge-border)',
                       borderRadius: 100, padding: '4px 10px',
                     }}>
                       {tag}
@@ -1727,10 +1825,10 @@ export default function DayScreen() {
                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 6 }}>
                   {fTags.split(',').map(t => t.trim()).filter(Boolean).map((tag, i) => (
                     <span key={i} style={{
-                      fontSize: 10, fontWeight: 700,
-                      color: darkMode ? 'oklch(72% 0.16 225)' : 'oklch(52% 0.16 225)',
-                      background: darkMode ? 'rgba(59,126,212,0.18)' : 'rgba(59,126,212,0.09)',
-                      border: `1px solid ${darkMode ? 'rgba(59,126,212,0.38)' : 'rgba(59,126,212,0.22)'}`,
+                      fontSize: 11, fontWeight: 700,
+                      color: 'var(--route-badge-text)',
+                      background: 'var(--route-badge-bg)',
+                      border: '1px solid var(--route-badge-border)',
                       borderRadius: 100, padding: '2px 8px',
                     }}>
                       {tag}
