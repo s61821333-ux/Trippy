@@ -131,7 +131,6 @@ export default function NavBar({ active, onChange }: NavBarProps) {
           zIndex: 50,
           background: 'var(--surface)',
           borderTop: '1px solid var(--border)',
-          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
         }}
       >
         <div style={{
@@ -178,10 +177,10 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                         position: 'absolute',
                         top: '50%',
                         left: '50%',
-                        transform: 'translate(-50%, -60%)',
-                        width: 42,
-                        height: 30,
-                        borderRadius: 10,
+                        transform: 'translate(-50%, -50%)',
+                        width: 52,
+                        height: 44,
+                        borderRadius: 12,
                         background: 'var(--brand-muted)',
                         border: '1px solid rgba(92,184,122,0.22)',
                         zIndex: 0,
@@ -208,6 +207,8 @@ export default function NavBar({ active, onChange }: NavBarProps) {
             );
           })}
         </div>
+        {/* Fill safe-area-inset-bottom so the surface colour extends flush to the screen edge */}
+        <div style={{ height: 'env(safe-area-inset-bottom, 0px)', background: 'var(--surface)' }} />
       </nav>
     </>
   );

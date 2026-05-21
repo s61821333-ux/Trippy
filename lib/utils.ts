@@ -58,11 +58,13 @@ export const toMins = (t: string): number => {
   return h * 60 + m;
 };
 
-export const toTime = (m: number): string =>
-  `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+export const toTime = (m: number): string => {
+  const wrapped = Math.max(0, m) % (24 * 60);
+  return `${String(Math.floor(wrapped / 60)).padStart(2, '0')}:${String(wrapped % 60).padStart(2, '0')}`;
+};
 
 export const fmtDate = (base: string, offset: number, locale = 'en-US'): string => {
-  const d = new Date(base);
+  const d = new Date(base + 'T00:00:00');
   d.setDate(d.getDate() + offset);
   return d.toLocaleDateString(locale, { weekday: 'short', month: 'short', day: 'numeric' });
 };
@@ -157,8 +159,7 @@ export function getNextEvent(trip: Trip): { event: TripEvent; dayNum: number } |
 
   let currentDayNum = 1;
   if (trip.startDate) {
-    const start = new Date(trip.startDate);
-    start.setHours(0, 0, 0, 0);
+    const start = new Date(trip.startDate + 'T00:00:00');
     const diffDays = Math.floor((now.getTime() - start.getTime()) / (24 * 60 * 60 * 1000));
     currentDayNum = diffDays + 1;
   }

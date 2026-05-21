@@ -151,8 +151,7 @@ export default function DashboardScreen() {
 
   // Trip countdown
   const today = new Date(); today.setHours(0, 0, 0, 0);
-  const startDate = trip.startDate ? new Date(trip.startDate) : null;
-  if (startDate) startDate.setHours(0, 0, 0, 0);
+  const startDate = trip.startDate ? new Date(trip.startDate + 'T00:00:00') : null;
   const endDate = startDate ? new Date(startDate.getTime() + (trip.days - 1) * 86400000) : null;
   const daysUntil = startDate ? Math.round((startDate.getTime() - today.getTime()) / 86400000) : null;
   const currentTripDay = (startDate && endDate && today >= startDate && today <= endDate)

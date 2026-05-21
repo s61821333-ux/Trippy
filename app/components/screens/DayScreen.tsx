@@ -1060,7 +1060,7 @@ export default function DayScreen() {
 
   // Day strip helpers
   const getDayInfo = (dayNum: number) => {
-    const base = trip.startDate ? new Date(trip.startDate) : new Date();
+    const base = trip.startDate ? new Date(trip.startDate + 'T00:00:00') : new Date();
     base.setDate(base.getDate() + dayNum - 1);
     const dow = base.getDay();
     const abbrev = locale === 'he' ? DAY_ABBREVS_HE[dow] : DAY_ABBREVS_EN[dow];
