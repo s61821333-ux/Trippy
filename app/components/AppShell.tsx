@@ -60,7 +60,7 @@ function SyncErrorWatcher() {
       ? (locale === 'he' ? '⚠️ לא ניתן היה לטעון את הטיול — נסה שוב' : '⚠️ Could not load the trip — please try again')
       : isRLS
       ? (locale === 'he' ? 'לא ניתן לשמור. נסה שוב.' : "Couldn't save. Please try again.")
-      : (locale === 'he' ? 'שגיאת סנכרון — שינויים נשמרו מקומית' : 'Sync error — changes saved locally');
+      : `DB error: ${lastSyncError}`;
     show(msg);
     useAppStore.setState({ lastSyncError: null });
   }, [lastSyncError]);

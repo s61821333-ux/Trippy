@@ -149,29 +149,53 @@ export async function dbLoadTripById(tripId: string) {
 
 // ─── Events ──────────────────────────────────────────────────────────────────
 
-export async function dbAddEvent(tripId: string, dayNumber: number, event: TripEvent, userId: string) {
-  const { error } = await sb().from('events').insert({
-    id: event.id,
-    trip_id: tripId,
-    day_index: dayNumber - 1,
-    time: event.time,
-    duration: event.duration,
-    name: event.name,
-    category: event.category,
-    location: event.location ?? null,
-    lat: event.lat ?? null,
-    lng: event.lng ?? null,
-    notes: event.notes ?? null,
-    added_by: userId,
-    cost: event.cost ?? null,
-    tags: event.tags ?? null,
+export async function dbAddEvent(tripId: string, dayNumber: number, event: TripEvent, _userId: string) {
+  const res = await fetch(`/api/trips/${tripId}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id: event.id,
+      day_index: dayNumber - 1,
+      time: event.time,
+      duration: event.duration,
+      name: event.name,
+      category: event.category,
+      location: event.location ?? null,
+      lat: event.lat ?? null,
+      lng: event.lng ?? null,
+      notes: event.notes ?? null,
+      cost: event.cost ?? null,
+      tags: event.tags ?? null,
+    }),
   })
-  if (error) throw error
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error ?? `HTTP ${res.status}`)
+  }
 }
 
-export async function dbEditEvent(eventId: string, updates: Partial<TripEvent>) {
+export async function dbEditEvent(eventId: string, updates: Partial<TripEvent> & { tripId?: string }) {
+  const tripId = updates.tripId
+  if (!tripId) {
+    // Fallback: direct Supabase update (non-recursive tables are safe)
+    const patch: Record<string, unknown> = {}
+    if (updates.time      !== undefined) patch.time      = updates.time
+    if (updates.duration  !== undefined) patch.duration  = updates.duration
+    if (updates.name      !== undefined) patch.name      = updates.name
+    if (updates.category  !== undefined) patch.category  = updates.category
+    if (updates.location  !== undefined) patch.location  = updates.location
+    if (updates.lat       !== undefined) patch.lat       = updates.lat
+    if (updates.lng       !== undefined) patch.lng       = updates.lng
+    if (updates.notes     !== undefined) patch.notes     = updates.notes
+    if (updates.cost      !== undefined) patch.cost      = updates.cost
+    if (updates.tags      !== undefined) patch.tags      = updates.tags
+    if (updates.votes     !== undefined) patch.votes     = updates.votes
+    const { error } = await sb().from('events').update(patch).eq('id', eventId)
+    if (error) throw error
+    return
+  }
   const patch: Record<string, unknown> = {}
-  if (updates.time      !== undefined) patch.time     = updates.time
+  if (updates.time      !== undefined) patch.time      = updates.time
   if (updates.duration  !== undefined) patch.duration  = updates.duration
   if (updates.name      !== undefined) patch.name      = updates.name
   if (updates.category  !== undefined) patch.category  = updates.category
@@ -182,9 +206,15 @@ export async function dbEditEvent(eventId: string, updates: Partial<TripEvent>) 
   if (updates.cost      !== undefined) patch.cost      = updates.cost
   if (updates.tags      !== undefined) patch.tags      = updates.tags
   if (updates.votes     !== undefined) patch.votes     = updates.votes
-
-  const { error } = await sb().from('events').update(patch).eq('id', eventId)
-  if (error) throw error
+  const res = await fetch(`/api/trips/${tripId}/events?eventId=${eventId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error ?? `HTTP ${res.status}`)
+  }
 }
 
 export async function dbUpdateEventVotes(eventId: string, votes: Record<string, 'up' | 'down'>) {
@@ -192,14 +222,34 @@ export async function dbUpdateEventVotes(eventId: string, votes: Record<string, 
   if (error) throw error
 }
 
-export async function dbDeleteEvent(eventId: string) {
-  const { error } = await sb().from('events').delete().eq('id', eventId)
-  if (error) throw error
+export async function dbDeleteEvent(eventId: string, tripId?: string) {
+  if (!tripId) {
+    const { error } = await sb().from('events').delete().eq('id', eventId)
+    if (error) throw error
+    return
+  }
+  const res = await fetch(`/api/trips/${tripId}/events?eventId=${eventId}`, { method: 'DELETE' })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error ?? `HTTP ${res.status}`)
+  }
 }
 
-export async function dbMoveEvent(eventId: string, newDayNumber: number) {
-  const { error } = await sb().from('events').update({ day_index: newDayNumber - 1 }).eq('id', eventId)
-  if (error) throw error
+export async function dbMoveEvent(eventId: string, newDayNumber: number, tripId?: string) {
+  if (!tripId) {
+    const { error } = await sb().from('events').update({ day_index: newDayNumber - 1 }).eq('id', eventId)
+    if (error) throw error
+    return
+  }
+  const res = await fetch(`/api/trips/${tripId}/events?eventId=${eventId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ day_index: newDayNumber - 1 }),
+  })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body.error ?? `HTTP ${res.status}`)
+  }
 }
 
 // ─── Expenses ────────────────────────────────────────────────────────────────

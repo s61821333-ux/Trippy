@@ -459,7 +459,7 @@ export const useAppStore = create<AppState>()(
         if (!trip) return;
         const dayEvents = (trip.events[dayNumber] || []).map(e => e.id === eventId ? { ...e, ...updates } : e);
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
-        if (tripDbId) dbEditEvent(eventId, updates).catch(err => {
+        if (tripDbId) dbEditEvent(eventId, { ...updates, tripId: tripDbId }).catch(err => {
           console.error('[editEvent] DB sync failed:', err);
           set({ lastSyncError: err?.message ?? 'sync_failed' });
         });
@@ -470,7 +470,7 @@ export const useAppStore = create<AppState>()(
         if (!trip) return;
         const dayEvents = (trip.events[dayNumber] || []).filter(e => e.id !== eventId);
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
-        if (tripDbId) dbDeleteEvent(eventId).catch(err => {
+        if (tripDbId) dbDeleteEvent(eventId, tripDbId).catch(err => {
           console.error('[deleteEvent] DB sync failed:', err);
           set({ lastSyncError: err?.message ?? 'sync_failed' });
         });
@@ -485,7 +485,7 @@ export const useAppStore = create<AppState>()(
         const toEvents = [...(trip.events[toDay] ?? []), event];
         set({ trip: { ...trip, events: { ...trip.events, [fromDay]: fromEvents, [toDay]: toEvents } } });
         if (tripDbId) {
-          dbMoveEvent(eventId, toDay).catch(err => {
+          dbMoveEvent(eventId, toDay, tripDbId).catch(err => {
             console.error('[moveEvent] DB sync failed:', err);
             set({ lastSyncError: err?.message ?? 'sync_failed' });
           });
