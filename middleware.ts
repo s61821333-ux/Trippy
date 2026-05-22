@@ -1,9 +1,9 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const ALLOWED_ORIGINS = [
-  process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
-]
+const ALLOWED_ORIGINS = (
+  process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+).split(',').map(s => s.trim()).filter(Boolean)
 
 export async function middleware(request: NextRequest) {
   // CSRF: block cross-origin mutations on all API routes
@@ -11,7 +11,9 @@ export async function middleware(request: NextRequest) {
     const method = request.method
     if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
       const origin = request.headers.get('origin')
-      if (origin && !ALLOWED_ORIGINS.includes(origin)) {
+      const host = request.headers.get('host')
+      const sameOrigin = origin && host && (origin === `https://${host}` || origin === `http://${host}`)
+      if (origin && !sameOrigin && !ALLOWED_ORIGINS.includes(origin)) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
       // Require JSON content-type on mutation routes (except multipart forms)

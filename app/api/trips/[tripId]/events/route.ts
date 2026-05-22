@@ -21,15 +21,10 @@ async function getUserClient() {
   })
 }
 
-async function verifyParticipant(supabase: ReturnType<typeof createServerClient>, tripId: string, userId: string) {
-  // Use the user's own session — tp_select allows reading own rows without recursion
-  const { data } = await supabase
-    .from('trip_participants')
-    .select('user_id')
-    .eq('trip_id', tripId)
-    .eq('user_id', userId)
-    .maybeSingle()
-  return !!data
+async function getAuthUser() {
+  const supabase = await getUserClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  return user
 }
 
 // POST /api/trips/[tripId]/events
@@ -38,56 +33,44 @@ export async function POST(
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params
-  const supabase = await getUserClient()
-
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  const isParticipant = await verifyParticipant(supabase, tripId, user.id)
-  if (!isParticipant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
-
-  const body = await request.json()
   const admin = tryAdminClient()
 
+  // If admin is available, verify participation with it (bypasses RLS — works regardless of cookie state)
   if (admin) {
-    const { error } = await admin.from('events').insert({
-      id: body.id,
-      trip_id: tripId,
-      day_index: body.day_index,
-      time: body.time,
-      duration: body.duration,
-      name: body.name,
-      category: body.category,
-      location: body.location ?? null,
-      lat: body.lat ?? null,
-      lng: body.lng ?? null,
-      notes: body.notes ?? null,
-      added_by: user.id,
-      cost: body.cost ?? null,
-      tags: body.tags ?? null,
-    })
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  } else {
-    // No service role key — fall back to user session (requires RLS to be working)
-    const { error } = await supabase.from('events').insert({
-      id: body.id,
-      trip_id: tripId,
-      day_index: body.day_index,
-      time: body.time,
-      duration: body.duration,
-      name: body.name,
-      category: body.category,
-      location: body.location ?? null,
-      lat: body.lat ?? null,
-      lng: body.lng ?? null,
-      notes: body.notes ?? null,
-      added_by: user.id,
-      cost: body.cost ?? null,
-      tags: body.tags ?? null,
-    })
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    const { data: participant } = await admin
+      .from('trip_participants')
+      .select('user_id')
+      .eq('trip_id', tripId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
+  }
+  // If no admin client, trust the auth check and let RLS enforce it on the insert
+
+  const body = await request.json()
+  const row = {
+    id: body.id,
+    trip_id: tripId,
+    day_index: body.day_index,
+    time: body.time,
+    duration: body.duration,
+    name: body.name,
+    category: body.category,
+    location: body.location ?? null,
+    lat: body.lat ?? null,
+    lng: body.lng ?? null,
+    notes: body.notes ?? null,
+    added_by: user.id,
+    cost: body.cost ?? null,
+    tags: body.tags ?? null,
   }
 
+  const client = admin ?? await getUserClient()
+  const { error } = await client.from('events').insert(row)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
 
@@ -100,15 +83,18 @@ export async function DELETE(
   const eventId = request.nextUrl.searchParams.get('eventId')
   if (!eventId) return NextResponse.json({ error: 'Missing eventId' }, { status: 400 })
 
-  const supabase = await getUserClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  const isParticipant = await verifyParticipant(supabase, tripId, user.id)
-  if (!isParticipant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
-
   const admin = tryAdminClient()
-  const client = admin ?? supabase
+  if (admin) {
+    const { data: participant } = await admin
+      .from('trip_participants').select('user_id')
+      .eq('trip_id', tripId).eq('user_id', user.id).maybeSingle()
+    if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
+  }
+
+  const client = admin ?? await getUserClient()
   const { error } = await client.from('events').delete().eq('id', eventId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
@@ -123,12 +109,16 @@ export async function PATCH(
   const eventId = request.nextUrl.searchParams.get('eventId')
   if (!eventId) return NextResponse.json({ error: 'Missing eventId' }, { status: 400 })
 
-  const supabase = await getUserClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const user = await getAuthUser()
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  const isParticipant = await verifyParticipant(supabase, tripId, user.id)
-  if (!isParticipant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
+  const admin = tryAdminClient()
+  if (admin) {
+    const { data: participant } = await admin
+      .from('trip_participants').select('user_id')
+      .eq('trip_id', tripId).eq('user_id', user.id).maybeSingle()
+    if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
+  }
 
   const body = await request.json()
   const allowed = ['time','duration','name','category','location','lat','lng','notes','cost','tags','votes','day_index']
@@ -137,8 +127,7 @@ export async function PATCH(
     if (key in body) patch[key] = body[key]
   }
 
-  const admin = tryAdminClient()
-  const client = admin ?? supabase
+  const client = admin ?? await getUserClient()
   const { error } = await client.from('events').update(patch).eq('id', eventId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
