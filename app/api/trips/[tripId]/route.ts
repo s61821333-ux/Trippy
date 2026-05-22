@@ -70,9 +70,11 @@ export async function GET(
         .maybeSingle()
 
       if (error || !data) {
+        console.error('[GET trip] admin query failed:', error)
         return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
       }
 
+      console.log('[GET trip] admin ok, events count:', (data as any).events?.length ?? 0)
       return NextResponse.json(data)
     }
 
@@ -84,9 +86,11 @@ export async function GET(
       .maybeSingle()
 
     if (error || !data) {
+      console.error('[GET trip] fallback query failed:', error)
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
     }
 
+    console.log('[GET trip] fallback ok, events count:', (data as any).events?.length ?? 0)
     return NextResponse.json(data)
   } catch (err: any) {
     return NextResponse.json({ error: err.message ?? 'Server error' }, { status: 500 })
