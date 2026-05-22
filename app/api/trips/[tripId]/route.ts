@@ -75,7 +75,7 @@ export async function GET(
       }
 
       console.log('[GET trip] admin ok, events count:', (data as any).events?.length ?? 0)
-      return NextResponse.json(data)
+      return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } })
     }
 
     // Fallback — query with user's JWT (subject to RLS)
@@ -91,7 +91,7 @@ export async function GET(
     }
 
     console.log('[GET trip] fallback ok, events count:', (data as any).events?.length ?? 0)
-    return NextResponse.json(data)
+    return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err: any) {
     return NextResponse.json({ error: err.message ?? 'Server error' }, { status: 500 })
   }

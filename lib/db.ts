@@ -142,7 +142,7 @@ export async function dbRejectInvitation(invitationId: string): Promise<void> {
 export async function dbLoadTripById(tripId: string) {
   // Use the server route so the load works regardless of RLS configuration —
   // the route uses the service role key and verifies participation itself.
-  const r = await fetch(`/api/trips/${tripId}`)
+  const r = await fetch(`/api/trips/${tripId}`, { cache: 'no-store' })
   if (!r.ok) return null
   return await r.json()
 }
