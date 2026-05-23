@@ -106,41 +106,41 @@ export const fmtDuration = (mins: number): string => {
 // ── Smart day icon based on event keywords ──────────────────────────
 
 const KEYWORD_ICONS: [RegExp, string][] = [
-  [/music|concert|festival|show|theater|theatre|opera|gig|band/i,        '🎵'],
-  [/museum|gallery|exhibit|art\b|culture/i,                               '🏛️'],
-  [/hike|hiking|trail|trek|climb|peak|summit|canyon/i,                   '🥾'],
-  [/beach|swim|snorkel|surf/i,                                            '🏄'],
-  [/restaurant|dinner|lunch|breakfast|brunch|bistro/i,                    '🍽️'],
-  [/cafe|coffee|bakery|pastry|espresso/i,                                 '☕'],
-  [/flight|airport|landing|takeoff|take.?off|boarding|terminal|runway|plane|check.?in/i, '✈️'],
-  [/jeep|train|ferry/i,                                                   '🚗'],
-  [/camp|tent|bonfire|stargazing/i,                                       '⛺'],
-  [/park|garden|forest|wildlife|zoo|safari|reserve/i,                     '🌲'],
-  [/market|souk|bazaar|shopping|mall/i,                                   '🛍️'],
-  [/spa|massage|wellness|yoga|meditat/i,                                  '🧘'],
-  [/ruin|castle|temple|fort|ancient|nabatean|histor/i,                   '🏰'],
-  [/kayak|canoe|sail|rafting/i,                                           '🚣'],
-  [/ski|snowboard/i,                                                      '⛷️'],
-  [/sunset|sunrise|viewpoint|vista|lookout|panorama/i,                   '🌅'],
-  [/stadium|football|soccer|basketball|tennis/i,                         '⚽'],
-  [/winery|brewery|cocktail bar/i,                                        '🍷'],
-  [/balloon|skydiv|paraglid|zip.?line/i,                                 '🪂'],
-  [/photo session|photo shoot/i,                                          '📸'],
-  [/volcano|crater|lava/i,                                                '🌋'],
-  [/cycling|bicycle/i,                                                    '🚴'],
-  [/picnic/i,                                                             '🧺'],
-  [/meditation|prayer|church|mosque|synagogue/i,                         '🙏'],
-  [/river|waterfall|lake/i,                                               '🏞️'],
-  [/city|downtown|old town|street/i,                                      '🏙️'],
-  [/snow|ice/i,                                                           '❄️'],
-  [/farm|ranch|vineyard/i,                                                '🌾'],
+  [/music|concert|festival|show|theater|theatre|opera|gig|band/i,        'nightlife'],
+  [/museum|gallery|exhibit|art\b|culture/i,                               'museum'],
+  [/hike|hiking|trail|trek|climb|peak|summit|canyon/i,                   'hiking'],
+  [/beach|swim|snorkel|surf/i,                                            'beach'],
+  [/restaurant|dinner|lunch|breakfast|brunch|bistro/i,                    'noodles'],
+  [/cafe|coffee|bakery|pastry|espresso/i,                                 'coffee'],
+  [/flight|airport|landing|takeoff|take.?off|boarding|terminal|runway|plane|check.?in/i, 'plane'],
+  [/jeep|train|ferry/i,                                                   'car'],
+  [/camp|tent|bonfire|stargazing/i,                                       'tent'],
+  [/park|garden|forest|wildlife|zoo|safari|reserve/i,                     'pine_tree'],
+  [/market|souk|bazaar|shopping|mall/i,                                   'shopping'],
+  [/spa|massage|wellness|yoga|meditat/i,                                  'spa'],
+  [/ruin|castle|temple|fort|ancient|nabatean|histor/i,                   'castle'],
+  [/kayak|canoe|sail|rafting/i,                                           'kayak'],
+  [/ski|snowboard/i,                                                      'skiing'],
+  [/sunset|sunrise|viewpoint|vista|lookout|panorama/i,                   'sunrise'],
+  [/stadium|football|soccer|basketball|tennis/i,                         'stadium'],
+  [/winery|brewery|cocktail bar/i,                                        'wine'],
+  [/balloon|skydiv|paraglid|zip.?line/i,                                 'hot_air_balloon'],
+  [/photo session|photo shoot/i,                                          'camera'],
+  [/volcano|crater|lava/i,                                                'volcano'],
+  [/cycling|bicycle/i,                                                    'bike'],
+  [/picnic/i,                                                             'picnic'],
+  [/meditation|prayer|church|mosque|synagogue/i,                         'church'],
+  [/river|waterfall|lake/i,                                               'river'],
+  [/city|downtown|old town|street/i,                                      'eiffel'],
+  [/snow|ice/i,                                                           'snow'],
+  [/farm|ranch|vineyard/i,                                                'leaf'],
 ];
 
 const CAT_FALLBACK: Record<Category, string> = {
-  food: '🍽️', cafe: '☕', attraction: '🗺️', hotel: '🏨', rest: '⛺', transport: '🚗', flight: '✈️', other: '✨',
+  food: 'noodles', cafe: 'coffee', attraction: 'museum', hotel: 'hotel', rest: 'tent', transport: 'car', flight: 'plane', other: 'globe',
 };
 
-export function getDayIcon(events: TripEvent[], fallback = '🏔️'): string {
+export function getDayIcon(events: TripEvent[], fallback = 'mountain'): string {
   if (!events?.length) return fallback;
   const sorted = [...events].sort((a, b) => b.duration - a.duration);
   for (const ev of sorted) {

@@ -31,7 +31,8 @@
       "Bash(del \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\scripts\\\\update-empty-states.js\")",
       "Bash(node -e \"const d=require\\('./package.json'\\); console.log\\('tsx:', d.dependencies?.tsx || d.devDependencies?.tsx || 'not installed'\\); console.log\\('husky:', d.dependencies?.husky || d.devDependencies?.husky || 'not installed'\\)\")",
       "Bash(node -e \"const fs=require\\('fs'\\); const env=fs.readFileSync\\('.env.local','utf8'\\); const lines=env.split\\('\\\\n'\\).filter\\(l=>l&&!l.startsWith\\('#'\\)\\); const keys=lines.map\\(l=>l.split\\('='\\)[0]\\); console.log\\(keys.join\\('\\\\n'\\)\\)\")",
-      "Bash(node -e \"const d=require\\('./package.json'\\); console.log\\(d.dependencies?.dotenv || d.devDependencies?.dotenv || 'not installed'\\)\")"
+      "Bash(node -e \"const d=require\\('./package.json'\\); console.log\\(d.dependencies?.dotenv || d.devDependencies?.dotenv || 'not installed'\\)\")",
+      "Bash(dir \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\" /B)"
     ],
     "additionalDirectories": [
       "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"

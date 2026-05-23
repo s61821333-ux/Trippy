@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Icon from './ui/Icon';
 import CompassMark from './ui/CompassMark';
@@ -90,20 +89,20 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                     gap: 6,
                     padding: '8px 16px',
                     borderRadius: 'var(--radius-md)',
-                    border: isActive ? '1px solid var(--brand-border, rgba(92,184,122,0.3))' : '1px solid transparent',
+                    border: isActive ? '1px solid rgba(196,113,74,0.3)' : '1px solid transparent',
                     background: isActive
-                      ? 'linear-gradient(135deg, var(--brand-muted) 0%, rgba(92,184,122,0.06) 100%)'
+                      ? 'var(--terra-muted)'
                       : 'transparent',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 12,
                     fontWeight: isActive ? 600 : 500,
                     letterSpacing: '0.10em',
                     textTransform: 'uppercase' as const,
-                    color: isActive ? 'var(--brand)' : 'var(--text-2)',
+                    color: isActive ? 'var(--terra)' : 'var(--text-2)',
                     cursor: 'pointer',
                     outline: 'none',
                     transition: 'background 0.18s ease, color 0.18s ease, border-color 0.18s ease',
-                    boxShadow: isActive ? 'inset 0 1px 0 rgba(255,255,255,0.5)' : 'none',
+                    boxShadow: 'none',
                   }}
                 >
                   <Icon name={tab.icon} size={16} />
@@ -153,45 +152,40 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 3,
+                  gap: 4,
                   padding: '6px 4px',
                   border: 'none',
                   background: 'transparent',
                   cursor: 'pointer',
-                  color: isActive ? 'var(--brand)' : 'var(--text-3)',
+                  color: isActive ? 'var(--terra)' : 'var(--text-3)',
                   minHeight: 48,
                   minWidth: 44,
-                  position: 'relative',
-                  overflow: 'hidden',
                   transition: 'color 0.18s ease',
                 }}
               >
-                {/* Active pill — scale in/out, fully contained within the button */}
-                <AnimatePresence>
-                  {isActive && (
-                    <motion.div
-                      key="pill"
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.5, opacity: 0 }}
-                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                      style={{
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                        width: 52,
-                        height: 44,
-                        borderRadius: 12,
-                        background: 'var(--brand-muted)',
-                        border: '1px solid rgba(92,184,122,0.22)',
-                        zIndex: 0,
-                        pointerEvents: 'none',
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
-                <Icon name={tab.icon} size={isActive ? 21 : 20} style={{ position: 'relative', zIndex: 1 }} />
+                {/* Icon wrapped in its own relative container so the pill centers on the icon only */}
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 52, height: 36 }}>
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        key="pill"
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.5, opacity: 0 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          borderRadius: 12,
+                          background: 'var(--terra-muted)',
+                          border: '1px solid rgba(196,113,74,0.22)',
+                          pointerEvents: 'none',
+                        }}
+                      />
+                    )}
+                  </AnimatePresence>
+                  <Icon name={tab.icon} size={isActive ? 21 : 20} style={{ position: 'relative', zIndex: 1 }} />
+                </div>
                 <span style={{
                   fontSize: 11,
                   fontWeight: isActive ? 800 : 500,
@@ -200,9 +194,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                   textTransform: 'uppercase',
                   textAlign: 'center',
                   lineHeight: 1.2,
-                  position: 'relative',
-                  zIndex: 1,
-                  color: isActive ? 'var(--brand)' : 'var(--text-3)',
+                  color: isActive ? 'var(--terra)' : 'var(--text-3)',
                   transition: 'color 0.18s ease, font-weight 0.18s ease',
                 }}>
                   {t(tab.labelKey)}

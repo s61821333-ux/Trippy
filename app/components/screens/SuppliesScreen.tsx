@@ -54,7 +54,7 @@ export default function SuppliesScreen() {
   // Progress turns success green only when all critical items are also checked
   const allCriticalDone = supplies.filter(s => s.critical).every(s => s.checked);
   const pct = total > 0 ? Math.round((packed / total) * 100) : 0;
-  const progressColor = pct === 100 && allCriticalDone ? 'var(--success)' : pct > 0 && !allCriticalDone ? 'var(--warning)' : 'var(--brand)';
+  const progressColor = pct === 100 && allCriticalDone ? 'var(--success)' : pct > 0 && !allCriticalDone ? 'var(--warning)' : 'var(--terra)';
 
   const handleAdd = () => {
     if (!newName.trim()) { show(t('enterItemName')); return; }
@@ -119,7 +119,7 @@ export default function SuppliesScreen() {
               style={{
                 flexShrink: 0, padding: '6px 14px', borderRadius: 'var(--radius-sm)',
                 fontSize: 12, fontWeight: 600,
-                background: filter === c ? 'var(--brand)' : 'var(--surface)',
+                background: filter === c ? 'var(--terra)' : 'var(--surface)',
                 color: filter === c ? 'white' : 'var(--text-2)',
                 border: filter === c ? 'none' : '1px solid var(--border)',
                 boxShadow: filter === c ? 'var(--shadow-sm)' : 'var(--shadow-xs)',
@@ -178,7 +178,7 @@ export default function SuppliesScreen() {
                       style={{
                         width: 24, height: 24, borderRadius: 6, flexShrink: 0,
                         border: item.checked ? 'none' : item.critical ? '1.5px solid var(--danger)' : '1.5px solid var(--border-strong)',
-                        background: item.checked ? 'var(--brand)' : 'var(--surface)',
+                        background: item.checked ? 'var(--terra)' : 'var(--surface)',
                         cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         transition: 'background 0.2s, border 0.2s',
@@ -243,7 +243,7 @@ export default function SuppliesScreen() {
                         fontSize: 14,
                       }}
                     >
-                      {item.critical ? '📌' : '📍'}
+                      <Icon name="pin" size={14} style={{ color: item.critical ? 'var(--danger)' : 'var(--text-3)' }} />
                     </motion.button>
 
                     <motion.button
@@ -282,13 +282,13 @@ export default function SuppliesScreen() {
                 animate={{ opacity: 1 }}
                 style={{ padding: '40px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}
               >
-                <motion.span
+                <motion.div
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  style={{ fontSize: 56, lineHeight: 1, display: 'block' }}
+                  style={{ width: 72, height: 72, borderRadius: 24, background: 'var(--terra-muted)', border: '1.5px solid rgba(196,113,74,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  🎒
-                </motion.span>
+                  <SupplyIcon category="Gear" size={36} style={{ color: 'var(--terra)' }} />
+                </motion.div>
                 <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', margin: 0 }}>
                   Your bag is empty
                 </p>
@@ -340,7 +340,7 @@ export default function SuppliesScreen() {
                       onClick={() => setNewCat(c)}
                       style={{
                         padding: '5px 12px', borderRadius: 'var(--radius-sm)', fontSize: 11, fontWeight: 600,
-                        background: newCat === c ? 'var(--brand)' : 'var(--bg)',
+                        background: newCat === c ? 'var(--terra)' : 'var(--bg)',
                         color: newCat === c ? 'white' : 'var(--text-2)',
                         border: newCat === c ? 'none' : '1px solid var(--border)',
                         boxShadow: newCat === c ? 'var(--shadow-sm)' : 'none',
@@ -368,7 +368,7 @@ export default function SuppliesScreen() {
                       cursor: 'pointer', transition: 'all 0.15s',
                     }}
                   >
-                    📌 {newCritical ? t('unmarkCritical') : t('markCritical')}
+                    <Icon name="pin" size={13} /> {newCritical ? t('unmarkCritical') : t('markCritical')}
                   </motion.button>
                   {newCritical && (
                     <span style={{ fontSize: 11, color: 'var(--text-3)' }}>

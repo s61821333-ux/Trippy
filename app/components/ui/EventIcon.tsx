@@ -1,14 +1,32 @@
 'use client';
 
 import React, { CSSProperties } from 'react';
+import { StampIcon } from './StampIcon';
 
-// Event category keys used in DayScreen
 type EventCategory = 'food' | 'cafe' | 'attraction' | 'hotel' | 'rest' | 'transport' | 'flight' | 'other';
-
-// Supply category keys used in SuppliesScreen
 type SupplyCategory = 'Water' | 'Food' | 'Gear' | 'Medical' | 'Documents' | 'Other';
 
-// Brand-spec SVG paths for event categories (24×24, stroke currentColor)
+const EVENT_STAMP: Record<EventCategory, string> = {
+  food:      'noodles',
+  cafe:      'coffee',
+  attraction:'museum',
+  hotel:     'hotel',
+  rest:      'tent',
+  transport: 'car',
+  flight:    'plane',
+  other:     'globe',
+};
+
+const SUPPLY_STAMP: Record<SupplyCategory, string> = {
+  Water:     'water_bottle',
+  Food:      'noodles',
+  Gear:      'backpack',
+  Medical:   'first_aid',
+  Documents: 'passport',
+  Other:     'globe',
+};
+
+// Fallback stroke paths for small sizes (< 20px) where stamp discs would be unreadable
 const EVENT_PATHS: Record<EventCategory, string> = {
   food:      `<path d="M7 3v8a2 2 0 0 0 2 2v8M9 3v6M5 3v6M17 3c-2 0-3 3-3 6s1 4 3 4v8"/>`,
   cafe:      `<path d="M4 11h12v4a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4zM16 12h2a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-2M7 3c-.5 1 .5 2 0 3M11 3c-.5 1 .5 2 0 3"/>`,
@@ -20,10 +38,9 @@ const EVENT_PATHS: Record<EventCategory, string> = {
   other:     `<path d="M11 3l1.4 5.6L18 10l-5.6 1.4L11 17l-1.4-5.6L4 10l5.6-1.4zM18.5 14l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z"/>`,
 };
 
-// Brand-spec SVG paths for supply categories (24×24, stroke currentColor)
 const SUPPLY_PATHS: Record<SupplyCategory, string> = {
   Water:     `<path d="M12 3s7 7 7 12a7 7 0 0 1-14 0c0-5 7-12 7-12z"/>`,
-  Food:      `<path d="M5 12a7 7 0 0 1 14 0v1H5zM5 13h14v3a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM5 16h14"/>`,
+  Food:      `<path d="M5 12a7 7 0 0 1 14 0v1H5zM5 13h14v3a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2z"/>`,
   Gear:      `<path d="M7 7V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M5 9a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2zM9 12h6v3H9z"/>`,
   Medical:   `<rect x="4" y="6" width="16" height="14" rx="2"/><path d="M12 10v6M9 13h6M8 6V4h8v2"/>`,
   Documents: `<path d="M6 3h9l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zM14 3v5h5M9 13h6M9 17h4"/>`,
@@ -43,6 +60,10 @@ interface SupplyIconProps {
 }
 
 export function EventIcon({ category, size = 20, style = {} }: EventIconProps) {
+  if (size >= 20) {
+    const key = EVENT_STAMP[category] ?? 'globe';
+    return <StampIcon iconKey={key} size={size} style={style} />;
+  }
   const svg = EVENT_PATHS[category] ?? EVENT_PATHS.other;
   return (
     <svg
@@ -57,6 +78,10 @@ export function EventIcon({ category, size = 20, style = {} }: EventIconProps) {
 }
 
 export function SupplyIcon({ category, size = 16, style = {} }: SupplyIconProps) {
+  if (size >= 20) {
+    const key = SUPPLY_STAMP[category] ?? 'backpack';
+    return <StampIcon iconKey={key} size={size} style={style} />;
+  }
   const svg = SUPPLY_PATHS[category] ?? SUPPLY_PATHS.Other;
   return (
     <svg

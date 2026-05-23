@@ -497,7 +497,7 @@ select {
 }
 
 /* ─── Nav ────────────────────────────────────────────────────── */
-.nav-active-filled { background: var(--brand); color: white; }
+.nav-active-filled { background: var(--terra); color: white; }
 
 /* ─── Legacy classes → visually neutral ─────────────────────── */
 .readability-overlay    { display: none; }
@@ -506,6 +506,58 @@ select {
 .depth-strip::before    { display: none; }
 .glow-teal, .glow-gold  { filter: none; }
 .emoji-glow             { text-shadow: none; }
+
+/* ─── Brand Book v2 Utilities ───────────────────────────────── */
+
+/* Wordmark — matches brand book .wm */
+.wm {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.wm .dot { color: var(--terra); }
+
+/* Wordmark serif variant — italic editorial */
+.wm-serif {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-style: italic;
+  line-height: 1;
+}
+
+/* Mono label — brand book .mono-label */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Pill badge — brand book .pill */
+.bb-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 18px;
+  border: 1.5px solid currentColor;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Compass loader keyframes (shared so the component can reference them) */
+@keyframes compSpinCW  { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
+@keyframes compSpinCCW { from { transform: rotate(360deg); } to { transform: rotate(0deg);    } }
+@keyframes compHaloBreathe {
+  0%, 100% { transform: scale(0.86); opacity: 0.7; }
+  50%       { transform: scale(1.04); opacity: 1;   }
+}
 
 /* ─── Reduced Motion ─────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {

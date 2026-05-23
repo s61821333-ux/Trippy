@@ -8,6 +8,7 @@ import Sheet from '../ui/Sheet';
 import Icon from '../ui/Icon';
 import CompassMark from '../ui/CompassMark';
 import CountriesInput from '../ui/CountriesInput';
+import { StampIcon } from '../ui/StampIcon';
 import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
@@ -23,11 +24,11 @@ const card = {
   }),
 };
 
-const THEMES: { id: TripTheme; emoji: string; label: string; labelHe: string }[] = [
-  { id: 'desert', emoji: '🏜️', label: 'Desert', labelHe: 'מדבר' },
-  { id: 'nature', emoji: '🌲', label: 'Nature', labelHe: 'טבע'  },
-  { id: 'city',   emoji: '🌆', label: 'City',   labelHe: 'עיר'  },
-  { id: 'beach',  emoji: '🏖️', label: 'Beach',  labelHe: 'חוף'  },
+const THEMES: { id: TripTheme; stampKey: string; label: string; labelHe: string }[] = [
+  { id: 'desert', stampKey: 'cactus',    label: 'Desert', labelHe: 'מדבר' },
+  { id: 'nature', stampKey: 'pine_tree', label: 'Nature', labelHe: 'טבע'  },
+  { id: 'city',   stampKey: 'museum',    label: 'City',   labelHe: 'עיר'  },
+  { id: 'beach',  stampKey: 'beach',     label: 'Beach',  labelHe: 'חוף'  },
 ];
 
 // ─── Step 1: Auth ─────────────────────────────────────────────────────────────
@@ -421,7 +422,7 @@ function TripStep() {
           <Sheet
             onClose={() => setShowCreate(false)}
             title={t('createNewTrip')}
-            subtitle={`${selectedTheme.emoji} ${locale === 'he' ? selectedTheme.labelHe : selectedTheme.label}`}
+            subtitle={locale === 'he' ? selectedTheme.labelHe : selectedTheme.label}
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {/* Theme */}
@@ -434,12 +435,12 @@ function TripStep() {
                     <motion.button key={th.id} whileTap={{ scale: 0.93 }} onClick={() => setCTheme(th.id)} style={{
                       flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
                       padding: '10px 4px', borderRadius: 'var(--radius-md)', cursor: 'pointer',
-                      background: cTheme === th.id ? 'var(--brand-light)' : 'var(--bg)',
-                      border: cTheme === th.id ? '2px solid var(--brand)' : '1px solid var(--border)',
+                      background: cTheme === th.id ? 'var(--terra-muted)' : 'var(--bg)',
+                      border: cTheme === th.id ? '2px solid var(--terra)' : '1px solid var(--border)',
                       transition: 'all 0.15s',
                     }}>
-                      <span style={{ fontSize: 22 }}>{th.emoji}</span>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: cTheme === th.id ? 'var(--brand)' : 'var(--text-2)' }}>
+                      <StampIcon iconKey={th.stampKey} size={36} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: cTheme === th.id ? 'var(--terra)' : 'var(--text-2)' }}>
                         {locale === 'he' ? th.labelHe : th.label}
                       </span>
                     </motion.button>

@@ -6,6 +6,7 @@ import GlassBtn from '../ui/GlassBtn';
 import Chip from '../ui/Chip';
 import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
+import { StampIcon } from '../ui/StampIcon';
 import { useAppStore } from '@/lib/store';
 import { dbGetTripEmailInvitations, dbCancelInvitation } from '@/lib/db';
 import { fmtDate, getGaps, toMins, getDayIcon, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget, estimateCarbonKg } from '@/lib/utils';
@@ -229,7 +230,7 @@ export default function DashboardScreen() {
           <div style={{
             position: 'absolute', top: -40, right: -60,
             width: 220, height: 220, borderRadius: '50%',
-            background: 'radial-gradient(circle, var(--brand-muted) 0%, transparent 70%)',
+            background: 'radial-gradient(circle, var(--terra-muted) 0%, transparent 70%)',
             opacity: 0.55, pointerEvents: 'none', zIndex: 0,
           }} />
 
@@ -299,7 +300,7 @@ export default function DashboardScreen() {
                   transition={{ delay: 0.3, type: 'spring', stiffness: 440, damping: 24 }}
                   style={{
                     fontSize: 11, fontWeight: 800,
-                    background: 'var(--brand)', color: 'white',
+                    background: 'var(--terra)', color: 'white',
                     borderRadius: 20, padding: '3px 10px',
                     letterSpacing: '0.06em', textTransform: 'uppercase',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
@@ -367,7 +368,7 @@ export default function DashboardScreen() {
                   height: '100%', borderRadius: 4,
                   background: pct === 100
                     ? 'var(--success)'
-                    : 'linear-gradient(90deg, var(--brand), var(--brand-hover))',
+                    : 'linear-gradient(90deg, var(--terra), #b85f3a)',
                 }}
               />
             </div>
@@ -506,7 +507,9 @@ export default function DashboardScreen() {
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
                 }}
               >
-                <span style={{ fontSize: 48, lineHeight: 1 }}>⌛</span>
+                <div style={{ width: 72, height: 72, borderRadius: 24, background: 'var(--terra-muted)', border: '1.5px solid rgba(196,113,74,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon name="compass" size={36} style={{ color: 'var(--terra)' }} />
+                </div>
                 <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', textAlign: 'center', margin: 0 }}>
                   Add events to start planning
                 </p>
@@ -518,7 +521,7 @@ export default function DashboardScreen() {
                   onClick={() => setScreen('day')}
                   style={{
                     marginTop: 4,
-                    background: 'var(--brand)', color: 'white', border: 'none',
+                    background: 'var(--terra)', color: 'white', border: 'none',
                     borderRadius: 'var(--radius-md)', padding: '10px 22px',
                     fontSize: 13, fontWeight: 700, cursor: 'pointer',
                   }}
@@ -582,16 +585,16 @@ export default function DashboardScreen() {
                           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
                           padding: '10px 12px',
                           borderRadius: 'var(--radius-md)',
-                          background: isNextEventDay ? 'var(--brand-muted)' : 'var(--surface)',
-                          border: `1px solid ${isNextEventDay ? 'var(--brand)' : 'var(--border)'}`,
+                          background: isNextEventDay ? 'var(--terra-muted)' : 'var(--surface)',
+                          border: `1px solid ${isNextEventDay ? 'var(--terra)' : 'var(--border)'}`,
                           minWidth: 58,
                           textDecoration: 'none',
                           cursor: 'pointer',
-                          boxShadow: isNextEventDay ? '0 0 0 2px var(--brand-muted)' : 'none',
+                          boxShadow: isNextEventDay ? '0 0 0 2px var(--terra-muted)' : 'none',
                           transition: 'all 0.15s',
                         }}
                       >
-                        <span style={{ fontSize: 11, fontWeight: 700, color: isNextEventDay ? 'var(--brand)' : 'var(--text-3)', letterSpacing: '0.02em' }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: isNextEventDay ? 'var(--terra)' : 'var(--text-3)', letterSpacing: '0.02em' }}>
                           {dateLabel.split(' ').slice(0, 2).join(' ')}
                         </span>
                         <span style={{ fontSize: 20, lineHeight: 1 }}>{w.icon}</span>
@@ -903,7 +906,7 @@ export default function DashboardScreen() {
                 const lastEnd = last
                   ? `${Math.floor((toMins(last.time) + last.duration) / 60).toString().padStart(2, '0')}:${String((toMins(last.time) + last.duration) % 60).padStart(2, '0')}`
                   : '—';
-                const dayIcon = getDayIcon(evs, meta?.emoji ?? '🏔️');
+                const dayIcon = getDayIcon(evs, meta?.emoji ?? 'mountain');
                 const dayWeather = weather[i] ?? null;
                 const longestEv = evs.length ? [...evs].sort((a, b) => b.duration - a.duration)[0] : null;
                 const weatherLocation = longestEv?.location ?? meta?.region ?? '';
@@ -916,15 +919,15 @@ export default function DashboardScreen() {
                       onClick={() => handleDayClick(dayNum)}
                       className="premium-hover"
                       style={{
-                        background: isToday ? 'var(--brand-muted)' : 'var(--surface)',
-                        border: `1px solid ${isToday ? 'var(--brand)' : 'var(--border)'}`,
+                        background: isToday ? 'var(--terra-muted)' : 'var(--surface)',
+                        border: `1px solid ${isToday ? 'var(--terra)' : 'var(--border)'}`,
                         borderRadius: 'var(--radius-lg)',
                         padding: '14px 16px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 14,
-                        boxShadow: isToday ? '0 0 0 3px var(--brand-muted)' : 'var(--shadow-xs)',
+                        boxShadow: isToday ? '0 0 0 3px var(--terra-muted)' : 'var(--shadow-xs)',
                         position: 'relative',
                         overflow: 'hidden',
                         transition: 'box-shadow 0.2s',
@@ -935,9 +938,9 @@ export default function DashboardScreen() {
                         position: 'absolute', left: 0, top: 0, bottom: 0,
                         width: 3,
                         background: isToday
-                          ? 'linear-gradient(180deg, var(--brand) 0%, var(--terra) 100%)'
-                          : 'linear-gradient(180deg, var(--brand) 0%, var(--brand-hover) 100%)',
-                        opacity: isToday ? 0.9 : 0.4,
+                          ? 'linear-gradient(180deg, var(--terra) 0%, #b85f3a 100%)'
+                          : 'linear-gradient(180deg, var(--terra) 0%, var(--terra) 100%)',
+                        opacity: isToday ? 0.9 : 0.35,
                         borderRadius: '4px 0 0 4px',
                       }} />
 
@@ -946,14 +949,14 @@ export default function DashboardScreen() {
                         <div style={{
                           width: 52, height: 52, borderRadius: 18,
                           background: isToday
-                            ? 'linear-gradient(150deg, var(--brand-hover) 0%, var(--brand) 100%)'
-                            : 'linear-gradient(150deg, var(--surface) 0%, var(--brand-light) 100%)',
+                            ? 'linear-gradient(150deg, #d4845a 0%, var(--terra) 100%)'
+                            : 'linear-gradient(150deg, var(--surface) 0%, var(--terra-muted) 100%)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 26,
                           position: 'relative',
                           overflow: 'hidden',
                           boxShadow: isToday
-                            ? '0 4px 16px rgba(92,184,122,0.38), inset 0 1px 0 rgba(255,255,255,0.25)'
+                            ? '0 4px 16px rgba(196,113,74,0.32), inset 0 1px 0 rgba(255,255,255,0.25)'
                             : 'inset 0 1px 0 rgba(255,255,255,0.85), 0 1px 4px rgba(0,0,0,0.07)',
                           border: isToday ? 'none' : '1px solid var(--border)',
                         }}>
@@ -962,11 +965,11 @@ export default function DashboardScreen() {
                             background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%)',
                             pointerEvents: 'none',
                           }} />
-                          <span style={{ position: 'relative', zIndex: 1 }}>{dayIcon}</span>
+                          <StampIcon iconKey={dayIcon} size={32} style={{ position: 'relative', zIndex: 1 }} />
                         </div>
                         <div style={{
                           position: 'absolute', bottom: -3, right: -3,
-                          background: isToday ? 'var(--terra)' : 'var(--brand)', color: 'white',
+                          background: 'var(--terra)', color: 'white',
                           fontSize: 10, fontWeight: 800,
                           width: 22, height: 22, borderRadius: '50%',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -999,7 +1002,7 @@ export default function DashboardScreen() {
                           {!isToday && isNextEventDayCard && (
                             <span style={{
                               fontSize: 10, fontWeight: 800, letterSpacing: '0.06em',
-                              background: 'var(--brand)', color: 'white',
+                              background: 'var(--terra)', color: 'white',
                               borderRadius: 10, padding: '2px 7px', textTransform: 'uppercase',
                             }}>
                               Up Next
@@ -1040,7 +1043,7 @@ export default function DashboardScreen() {
                             style={{
                               display: 'flex', flexDirection: 'column', alignItems: 'center',
                               fontSize: 18, lineHeight: 1, textDecoration: 'none',
-                              background: isToday ? 'rgba(255,255,255,0.6)' : 'var(--brand-light)',
+                              background: isToday ? 'rgba(255,255,255,0.6)' : 'var(--terra-muted)',
                               borderRadius: 8, padding: '4px 6px', gap: 1,
                               border: isToday ? '1px solid rgba(255,255,255,0.8)' : 'none',
                               minWidth: 44,
@@ -1245,9 +1248,9 @@ export default function DashboardScreen() {
                             }}
                             style={{
                               fontSize: 11, fontWeight: 700,
-                              color: didResend ? 'var(--success)' : 'var(--brand)',
-                              background: didResend ? 'var(--success-bg)' : 'var(--brand-muted)',
-                              border: `1px solid ${didResend ? 'rgba(40,160,90,0.2)' : 'rgba(59,110,82,0.2)'}`,
+                              color: didResend ? 'var(--success)' : 'var(--terra)',
+                              background: didResend ? 'var(--success-bg)' : 'var(--terra-muted)',
+                              border: `1px solid ${didResend ? 'rgba(40,160,90,0.2)' : 'rgba(196,113,74,0.2)'}`,
                               borderRadius: 6, padding: '3px 8px', cursor: 'pointer',
                               transition: 'all 0.2s',
                             }}

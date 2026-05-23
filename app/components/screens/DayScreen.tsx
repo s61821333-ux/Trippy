@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
 import { EventIcon } from '../ui/EventIcon';
+import { StampIcon } from '../ui/StampIcon';
 import Field from '../ui/Field';
 import Sheet from '../ui/Sheet';
 import PlacesInput from '../ui/PlacesInput';
@@ -216,7 +217,7 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
             <>
               <TravelBadges modes={modes} fetching={fetching} />
               {!fetching && !modes && (
-                <button onClick={() => setRouteRetry(c => c + 1)} style={{ fontSize: 10, color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
+                <button onClick={() => setRouteRetry(c => c + 1)} style={{ fontSize: 10, color: 'var(--terra)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
                   ↻ retry
                 </button>
               )}
@@ -272,10 +273,10 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
             whileTap={{ scale: 0.90 }}
             onClick={onAdd}
             style={{
-              background: 'var(--brand-muted)',
-              border: '1px solid rgba(59,110,82,0.25)',
+              background: 'var(--terra-muted)',
+              border: '1px solid rgba(196,113,74,0.25)',
               borderRadius: 100, padding: '4px 10px',
-              fontSize: 10, fontWeight: 700, color: 'var(--brand)',
+              fontSize: 10, fontWeight: 700, color: 'var(--terra)',
               cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
             }}
           >
@@ -342,10 +343,10 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
     >
       {/* Card — full width, no timeline dot */}
       <motion.div
-        initial={isNew ? { boxShadow: '0 0 0 4px var(--brand-muted), 0 4px 20px rgba(92,168,120,0.18)' } : false}
+        initial={isNew ? { boxShadow: '0 0 0 4px var(--terra-muted), 0 4px 20px rgba(196,113,74,0.18)' } : false}
         animate={{
           boxShadow: rescheduling
-            ? '0 0 0 2px var(--brand), 0 4px 20px rgba(0,0,0,0.12)'
+            ? '0 0 0 2px var(--terra), 0 4px 20px rgba(0,0,0,0.12)'
             : isConflict
               ? '0 0 0 1.5px var(--danger), 0 2px 8px rgba(0,0,0,0.07)'
               : '0 2px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)',
@@ -355,7 +356,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
           flex: 1, width: '100%',
           background: 'var(--surface)',
           borderRadius: 18,
-          border: rescheduling ? '1.5px solid var(--brand)' : isConflict ? '1.5px solid var(--danger)' : '1px solid var(--border)',
+          border: rescheduling ? '1.5px solid var(--terra)' : isConflict ? '1.5px solid var(--danger)' : '1px solid var(--border)',
           overflow: 'hidden',
           transition: 'border 0.18s',
         }}>
@@ -409,7 +410,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
               title="Tap to reschedule"
               style={{
                 display: 'inline-flex', alignItems: 'center', gap: 5,
-                background: rescheduling ? 'var(--brand)' : 'var(--bg)',
+                background: rescheduling ? 'var(--terra)' : 'var(--bg)',
                 color: rescheduling ? '#fff' : 'var(--text-2)',
                 border: rescheduling ? 'none' : '1px solid var(--border)',
                 borderRadius: 100, padding: '3px 10px',
@@ -441,9 +442,9 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
                   onClick={e => e.stopPropagation()}
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 4,
-                    fontSize: 11, color: 'var(--brand)', fontWeight: 600,
+                    fontSize: 11, color: 'var(--terra)', fontWeight: 600,
                     textDecoration: 'none',
-                    background: 'var(--brand-muted)',
+                    background: 'var(--terra-muted)',
                     border: '1px solid rgba(59,110,82,0.22)',
                     borderRadius: 100, padding: '2px 9px',
                   }}
@@ -516,9 +517,9 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
               <motion.button whileTap={{ scale: 0.88 }} onClick={e => { e.stopPropagation(); setMoving(v => !v); setRescheduling(false); }}
                 style={{
                   width: 32, height: 32, borderRadius: 9,
-                  background: moving ? 'var(--brand-muted)' : 'var(--bg)',
-                  border: moving ? '1.5px solid var(--brand)' : '1px solid var(--border)',
-                  cursor: 'pointer', color: moving ? 'var(--brand)' : 'var(--text-2)',
+                  background: moving ? 'var(--terra-muted)' : 'var(--bg)',
+                  border: moving ? '1.5px solid var(--terra)' : '1px solid var(--border)',
+                  cursor: 'pointer', color: moving ? 'var(--terra)' : 'var(--text-2)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   transition: 'background 0.15s, color 0.15s, border 0.15s',
                 }}>
@@ -561,8 +562,8 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
                         padding: '8px 12px', borderRadius: 8, fontSize: 12, fontWeight: 700,
                         minHeight: 44, minWidth: 52,
                         background: 'var(--surface)', cursor: 'pointer',
-                        color: d < 0 ? 'var(--danger)' : 'var(--brand)',
-                        border: `1px solid ${d < 0 ? 'rgba(192,57,43,0.2)' : 'rgba(59,110,82,0.25)'}`,
+                        color: d < 0 ? 'var(--danger)' : 'var(--terra)',
+                        border: `1px solid ${d < 0 ? 'rgba(192,57,43,0.2)' : 'rgba(196,113,74,0.25)'}`,
                         touchAction: 'manipulation',
                       }}>
                       {d > 0 ? `+${d}m` : `${d}m`}
@@ -586,9 +587,9 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
                 <p style={{ fontSize: 12, color: 'var(--text-2)', margin: 0 }}>
                   {t('moveToTime')}{' '}
                   <span dir="ltr" style={{ display: 'inline' }}>
-                    <strong style={{ color: 'var(--brand)' }}>{pendingTime}</strong>
+                    <strong style={{ color: 'var(--terra)' }}>{pendingTime}</strong>
                     {' '}–{' '}
-                    <strong style={{ color: 'var(--brand)' }}>{toTime(toMins(pendingTime) + event.duration)}</strong>
+                    <strong style={{ color: 'var(--terra)' }}>{toTime(toMins(pendingTime) + event.duration)}</strong>
                     {pendingTime !== event.time && (
                       <span style={{ color: 'var(--text-3)', fontSize: 11 }}>
                         {' '}({toMins(pendingTime) > toMins(event.time) ? '+' : ''}{toMins(pendingTime) - toMins(event.time)}m)
@@ -613,7 +614,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
                     disabled={pendingTime === event.time}
                     style={{
                       flex: 2, padding: '8px 0', borderRadius: 10, fontSize: 12, fontWeight: 800,
-                      background: pendingTime !== event.time ? 'var(--brand)' : 'var(--border)',
+                      background: pendingTime !== event.time ? 'var(--terra)' : 'var(--border)',
                       color: pendingTime !== event.time ? '#fff' : 'var(--text-3)',
                       border: 'none', cursor: pendingTime !== event.time ? 'pointer' : 'default',
                       transition: 'background 0.15s',
@@ -655,8 +656,8 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
                         padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700,
                         minHeight: 36,
                         background: 'var(--surface)', cursor: 'pointer',
-                        color: 'var(--brand)',
-                        border: '1px solid rgba(59,110,82,0.25)',
+                        color: 'var(--terra)',
+                        border: '1px solid rgba(196,113,74,0.25)',
                         touchAction: 'manipulation',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                       }}
@@ -1159,14 +1160,14 @@ export default function DayScreen() {
             >
               <span style={{
                 fontSize: 10, fontWeight: 800, letterSpacing: '0.07em',
-                color: isActive ? 'var(--brand)' : 'var(--text-3)',
+                color: isActive ? 'var(--terra)' : 'var(--text-3)',
                 fontFamily: 'var(--font-sans)',
               }}>
                 {abbrev}
               </span>
               <div style={{
                 width: 40, height: 40, borderRadius: '50%',
-                background: isActive ? 'var(--brand)' : 'transparent',
+                background: isActive ? 'var(--terra)' : 'transparent',
                 border: isActive ? 'none' : '1.5px solid var(--border)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'background 0.18s ease, border 0.18s ease',
@@ -1194,7 +1195,7 @@ export default function DayScreen() {
           transition={{ duration: 0.16 }}
           onClick={() => {
             setEditDayName(meta?.region ?? `Day ${activeDay}`);
-            setEditDayEmoji(meta?.emoji ?? '📍');
+            setEditDayEmoji(meta?.emoji ?? 'compass');
             setShowEditDay(true);
           }}
           style={{
@@ -1203,7 +1204,7 @@ export default function DayScreen() {
             flexShrink: 0, cursor: 'pointer',
           }}
         >
-          <span style={{ fontSize: 16 }}>{meta?.emoji}</span>
+          {meta?.emoji && <StampIcon iconKey={meta.emoji} size={20} />}
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-2)' }}>
             {meta?.region}
             {trip.startDate ? ` · ${fmtDate(trip.startDate, activeDay - 1, locale)}` : ''}
@@ -1294,7 +1295,7 @@ export default function DayScreen() {
                   fontFamily: 'var(--font-mono)',
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase' as const,
-                  background: viewMode === mode ? 'var(--brand)' : 'transparent',
+                  background: viewMode === mode ? 'var(--terra)' : 'transparent',
                   color: viewMode === mode ? 'white' : 'var(--text-3)',
                   border: 'none', cursor: 'pointer',
                   transition: 'background 0.18s, color 0.18s',
@@ -1434,13 +1435,13 @@ export default function DayScreen() {
                   padding: '48px 20px', gap: 10,
                 }}
               >
-                <motion.span
+                <motion.div
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  style={{ fontSize: 56, lineHeight: 1, display: 'block' }}
+                  style={{ width: 72, height: 72, borderRadius: 24, background: 'var(--terra-muted)', border: '1.5px solid rgba(196,113,74,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  📍
-                </motion.span>
+                  <EventIcon category="attraction" size={36} style={{ color: 'var(--terra)' }} />
+                </motion.div>
                 <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', textAlign: 'center', margin: 0 }}>
                   Nothing planned for this day yet
                 </p>
@@ -1451,10 +1452,10 @@ export default function DayScreen() {
                   whileTap={{ scale: 0.95 }}
                   onClick={() => openAdd()}
                   style={{
-                    background: 'var(--brand)', color: 'white', border: 'none',
+                    background: 'var(--terra)', color: 'white', border: 'none',
                     borderRadius: 'var(--radius-lg)', padding: '12px 28px',
                     fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(59,110,82,0.28)',
+                    boxShadow: '0 4px 14px rgba(196,113,74,0.28)',
                   }}
                 >
                   Add first event
@@ -1556,9 +1557,9 @@ export default function DayScreen() {
                   rel="noopener noreferrer"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 6,
-                    fontSize: 14, color: 'var(--brand)', fontWeight: 600,
+                    fontSize: 14, color: 'var(--terra)', fontWeight: 600,
                     textDecoration: 'none',
-                    background: 'var(--brand-muted)',
+                    background: 'var(--terra-muted)',
                     border: '1px solid rgba(59,110,82,0.22)',
                     borderRadius: 'var(--radius-md)', padding: '10px 14px',
                     width: 'fit-content',
@@ -1659,10 +1660,10 @@ export default function DayScreen() {
                         display: 'flex', alignItems: 'center', gap: 5,
                         padding: '6px 12px', borderRadius: 8,
                         fontSize: 12, fontWeight: 600,
-                        background: fName === p.name && fCat === p.cat ? 'var(--brand-light)' : 'var(--bg)',
-                        color: fName === p.name && fCat === p.cat ? 'var(--brand)' : 'var(--text-2)',
+                        background: fName === p.name && fCat === p.cat ? 'var(--terra-muted)' : 'var(--bg)',
+                        color: fName === p.name && fCat === p.cat ? 'var(--terra)' : 'var(--text-2)',
                         border: fName === p.name && fCat === p.cat
-                          ? '1.5px solid var(--brand)'
+                          ? '1.5px solid var(--terra)'
                           : '1px solid var(--border)',
                         cursor: 'pointer', transition: 'all 0.15s',
                       }}
@@ -1698,7 +1699,7 @@ export default function DayScreen() {
                       style={{
                         padding: '8px 14px', borderRadius: 10,
                         fontSize: 13, fontWeight: 600, flex: '1 1 auto',
-                        background: fDur === String(d) ? 'var(--brand)' : 'var(--bg)',
+                        background: fDur === String(d) ? 'var(--terra)' : 'var(--bg)',
                         color: fDur === String(d) ? 'white' : 'var(--text-2)',
                         border: fDur === String(d) ? 'none' : '1px solid var(--border)',
                         cursor: 'pointer', transition: 'background 0.15s',
@@ -1725,7 +1726,7 @@ export default function DayScreen() {
                       style={{
                         padding: '8px 10px', borderRadius: 10, minHeight: 44,
                         fontSize: 15, fontWeight: 700,
-                        background: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'var(--brand)' : 'var(--bg)',
+                        background: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'var(--terra)' : 'var(--bg)',
                         color: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'white' : 'var(--text)',
                         border: ![30, 60, 90, 120].includes(parseInt(fDur)) ? 'none' : '1px solid var(--border)',
                         outline: 'none', cursor: 'pointer',
@@ -1871,19 +1872,20 @@ export default function DayScreen() {
                 {t('emojiLabel')}
               </label>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                {['🏙️', '🗼', '🌊', '🏖️', '🏔️', '🌲', '✈️', '🚂', '🛳️', '🏛️', '🗺️', '🎡', '🌅', '❄️', '🍷', '🎭', '🎨', '⛷️'].map(em => (
+                {['museum', 'eiffel', 'ocean', 'beach', 'mountain', 'pine_tree', 'plane', 'train', 'ferry', 'ferris_wheel', 'sunrise', 'snow', 'wine', 'theater', 'painting', 'skiing', 'hiking', 'compass'].map(key => (
                   <motion.button
-                    key={em}
+                    key={key}
                     whileTap={{ scale: 0.88 }}
-                    onClick={() => setEditDayEmoji(em)}
+                    onClick={() => setEditDayEmoji(key)}
                     style={{
-                      width: 38, height: 38, borderRadius: 10, fontSize: 20,
-                      background: editDayEmoji === em ? 'var(--brand-light)' : 'var(--bg)',
-                      border: editDayEmoji === em ? '2px solid var(--brand)' : '1px solid var(--border)',
+                      width: 44, height: 44, borderRadius: 10,
+                      background: editDayEmoji === key ? 'var(--terra-muted)' : 'var(--bg)',
+                      border: editDayEmoji === key ? '2px solid var(--terra)' : '1px solid var(--border)',
                       cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      padding: 4,
                     }}
                   >
-                    {em}
+                    <StampIcon iconKey={key} size={32} />
                   </motion.button>
                 ))}
               </div>
@@ -1932,7 +1934,7 @@ export default function DayScreen() {
                     style={{
                       padding: '6px 14px', borderRadius: 8,
                       fontSize: 13, fontWeight: 600,
-                      background: driveMinutes === String(d) ? 'var(--brand)' : 'var(--bg)',
+                      background: driveMinutes === String(d) ? 'var(--terra)' : 'var(--bg)',
                       color: driveMinutes === String(d) ? 'white' : 'var(--text-2)',
                       border: driveMinutes === String(d) ? 'none' : '1px solid var(--border)',
                       cursor: 'pointer', transition: 'background 0.15s',
@@ -2183,7 +2185,7 @@ export default function DayScreen() {
           right: 20, zIndex: 40,
           width: 52, height: 52, borderRadius: '50%',
           border: 'none', cursor: 'pointer',
-          background: 'var(--brand)',
+          background: 'var(--terra)',
           color: 'white',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: 'var(--shadow-lg)',
