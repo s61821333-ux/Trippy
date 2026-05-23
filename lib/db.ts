@@ -217,9 +217,18 @@ export async function dbEditEvent(eventId: string, updates: Partial<TripEvent> &
   }
 }
 
-export async function dbUpdateEventVotes(eventId: string, votes: Record<string, 'up' | 'down'>) {
-  const { error } = await sb().from('events').update({ votes }).eq('id', eventId)
-  if (error) throw error
+export async function dbUpdateEventVotes(eventId: string, votes: Record<string, 'up' | 'down'>, tripId?: string) {
+  if (!tripId) {
+    const { error } = await sb().from('events').update({ votes }).eq('id', eventId)
+    if (error) throw error
+    return
+  }
+  const r = await fetch(`/api/trips/${tripId}/events?eventId=${eventId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ votes }),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 export async function dbDeleteEvent(eventId: string, tripId?: string) {
@@ -254,83 +263,111 @@ export async function dbMoveEvent(eventId: string, newDayNumber: number, tripId?
 
 // ─── Expenses ────────────────────────────────────────────────────────────────
 
-export async function dbAddExpense(tripId: string, expense: Expense, userId: string) {
-  const { error } = await sb().from('expenses').insert({
-    id: expense.id,
-    trip_id: tripId,
-    description: expense.description,
-    amount: expense.amount,
-    paid_by: userId,
-    split_count: expense.splitCount,
+export async function dbAddExpense(tripId: string, expense: Expense, _userId: string) {
+  const r = await fetch(`/api/trips/${tripId}/expenses`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: expense.id, description: expense.description, amount: expense.amount, splitCount: expense.splitCount }),
   })
-  if (error) throw error
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
-export async function dbDeleteExpense(expenseId: string) {
-  const { error } = await sb().from('expenses').delete().eq('id', expenseId)
-  if (error) throw error
+export async function dbDeleteExpense(expenseId: string, tripId?: string) {
+  if (!tripId) {
+    const { error } = await sb().from('expenses').delete().eq('id', expenseId)
+    if (error) throw error
+    return
+  }
+  const r = await fetch(`/api/trips/${tripId}/expenses?id=${expenseId}`, { method: 'DELETE' })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 // ─── Supplies ────────────────────────────────────────────────────────────────
 
 export async function dbAddSupply(tripId: string, supply: SupplyItem) {
-  const { error } = await sb().from('supplies').insert({
-    id: supply.id,
-    trip_id: tripId,
-    name: supply.name,
-    category: supply.category,
-    checked: supply.checked,
-    critical: supply.critical ?? false,
-    assignee: supply.assignee ?? null,
+  const r = await fetch(`/api/trips/${tripId}/supplies`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: supply.id, name: supply.name, category: supply.category, checked: supply.checked, critical: supply.critical ?? false, assignee: supply.assignee ?? null }),
   })
-  if (error) throw error
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
-export async function dbToggleSupply(supplyId: string, checked: boolean) {
-  const { error } = await sb().from('supplies').update({ checked }).eq('id', supplyId)
-  if (error) throw error
+export async function dbToggleSupply(supplyId: string, checked: boolean, tripId?: string) {
+  if (!tripId) {
+    const { error } = await sb().from('supplies').update({ checked }).eq('id', supplyId)
+    if (error) throw error
+    return
+  }
+  const r = await fetch(`/api/trips/${tripId}/supplies?id=${supplyId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ checked }),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
-export async function dbDeleteSupply(supplyId: string) {
-  const { error } = await sb().from('supplies').delete().eq('id', supplyId)
-  if (error) throw error
+export async function dbDeleteSupply(supplyId: string, tripId?: string) {
+  if (!tripId) {
+    const { error } = await sb().from('supplies').delete().eq('id', supplyId)
+    if (error) throw error
+    return
+  }
+  const r = await fetch(`/api/trips/${tripId}/supplies?id=${supplyId}`, { method: 'DELETE' })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 // ─── Emergency contacts ──────────────────────────────────────────────────────
 
 export async function dbAddEmergencyContact(tripId: string, contact: EmergencyContact) {
-  const { error } = await sb().from('emergency_contacts').insert({
-    id: contact.id,
-    trip_id: tripId,
-    name: contact.name,
-    phone: contact.phone,
-    type: contact.type,
+  const r = await fetch(`/api/trips/${tripId}/emergency-contacts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: contact.id, name: contact.name, phone: contact.phone, type: contact.type }),
   })
-  if (error) throw error
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
-export async function dbDeleteEmergencyContact(contactId: string) {
-  const { error } = await sb().from('emergency_contacts').delete().eq('id', contactId)
-  if (error) throw error
+export async function dbDeleteEmergencyContact(contactId: string, tripId?: string) {
+  if (!tripId) {
+    const { error } = await sb().from('emergency_contacts').delete().eq('id', contactId)
+    if (error) throw error
+    return
+  }
+  const r = await fetch(`/api/trips/${tripId}/emergency-contacts?id=${contactId}`, { method: 'DELETE' })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 export async function dbUpdateTripInfo(tripId: string, updates: { name?: string; days?: number; startDate?: string }) {
-  const patch: Record<string, unknown> = {}
-  if (updates.name      !== undefined) patch.name       = updates.name
-  if (updates.days      !== undefined) patch.days       = updates.days
-  if (updates.startDate !== undefined) patch.start_date = updates.startDate
-  const { error } = await sb().from('trips').update(patch).eq('id', tripId)
-  if (error) throw error
+  const r = await fetch(`/api/trips/${tripId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 export async function dbUpdateTripTheme(tripId: string, theme: string) {
-  const { error } = await sb().from('trips').update({ theme }).eq('id', tripId)
-  if (error) throw error
+  const r = await fetch(`/api/trips/${tripId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ theme }),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
-export async function dbUpdateSupplyCritical(supplyId: string, critical: boolean) {
-  const { error } = await sb().from('supplies').update({ critical }).eq('id', supplyId)
-  if (error) throw error
+export async function dbUpdateSupplyCritical(supplyId: string, critical: boolean, tripId?: string) {
+  if (!tripId) {
+    const { error } = await sb().from('supplies').update({ critical }).eq('id', supplyId)
+    if (error) throw error
+    return
+  }
+  const r = await fetch(`/api/trips/${tripId}/supplies?id=${supplyId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ critical }),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 export async function dbLeaveTrip(tripId: string, userId: string) {
@@ -341,8 +378,12 @@ export async function dbLeaveTrip(tripId: string, userId: string) {
 // ─── Trip notes ──────────────────────────────────────────────────────────────
 
 export async function dbUpdateTripNotes(tripId: string, notes: string[]) {
-  const { error } = await sb().from('trips').update({ trip_notes: notes }).eq('id', tripId)
-  if (error) throw error
+  const r = await fetch(`/api/trips/${tripId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tripNotes: notes }),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 export async function dbUpdateHotels(tripId: string, hotels: HotelStay[]) {
@@ -360,15 +401,12 @@ export async function dbUpdateHotels(tripId: string, hotels: HotelStay[]) {
 // ─── Day meta ────────────────────────────────────────────────────────────────
 
 export async function dbUpdateDayMeta(tripId: string, dayIndex: number, meta: Partial<DayMeta>) {
-  const patch: Record<string, unknown> = {}
-  if (meta.region !== undefined) patch.region      = meta.region
-  if (meta.emoji  !== undefined) patch.emoji       = meta.emoji
-  if (meta.lat    !== undefined) patch.lat         = meta.lat
-  if (meta.lng    !== undefined) patch.lng         = meta.lng
-  if (meta.desc   !== undefined) patch.description = meta.desc
-
-  const { error } = await sb().from('day_meta').update(patch).eq('trip_id', tripId).eq('day_index', dayIndex)
-  if (error) throw error
+  const r = await fetch(`/api/trips/${tripId}/day-meta`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dayIndex, ...meta }),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 // ─── Invite links ────────────────────────────────────────────────────────────

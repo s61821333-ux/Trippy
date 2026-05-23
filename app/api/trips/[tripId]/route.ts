@@ -19,6 +19,45 @@ function tryAdminClient() {
   catch { return null }
 }
 
+// PATCH /api/trips/[tripId] — update trip metadata (name, days, startDate, theme, trip_notes)
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ tripId: string }> }
+) {
+  const { tripId } = await params
+  const cookieStore = await cookies()
+  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: (cookiesToSet) => {
+        try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
+      },
+    },
+  })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  const admin = tryAdminClient()
+  if (admin) {
+    const { data: participant } = await admin.from('trip_participants').select('user_id')
+      .eq('trip_id', tripId).eq('user_id', user.id).maybeSingle()
+    if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
+  }
+
+  const body = await request.json()
+  const patch: Record<string, unknown> = {}
+  if (body.name      !== undefined) patch.name       = body.name
+  if (body.days      !== undefined) patch.days       = body.days
+  if (body.startDate !== undefined) patch.start_date = body.startDate
+  if (body.theme     !== undefined) patch.theme      = body.theme
+  if (body.tripNotes !== undefined) patch.trip_notes = body.tripNotes
+
+  const client = admin ?? supabase
+  const { error } = await client.from('trips').update(patch).eq('id', tripId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
+
 // GET /api/trips/[tripId] — authenticated: load full trip data
 // Uses admin client to bypass RLS when SUPABASE_SERVICE_ROLE_KEY is set,
 // otherwise queries directly via the user's session (subject to RLS).

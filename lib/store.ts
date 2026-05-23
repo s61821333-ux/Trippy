@@ -550,7 +550,7 @@ export const useAppStore = create<AppState>()(
         });
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
         if (tripDbId) {
-          dbUpdateEventVotes(eventId, updatedVotes).catch(err => {
+          dbUpdateEventVotes(eventId, updatedVotes, tripDbId).catch(err => {
             set({ lastSyncError: err?.message ?? 'vote_sync_failed' });
           });
         }
@@ -561,7 +561,7 @@ export const useAppStore = create<AppState>()(
         set(s => {
           const supplies = s.supplies.map(i => i.id === id ? { ...i, checked: !i.checked } : i);
           const item = supplies.find(i => i.id === id);
-          if (tripDbId && item) dbToggleSupply(id, item.checked).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+          if (tripDbId && item) dbToggleSupply(id, item.checked, tripDbId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
           return { supplies };
         });
       },
@@ -576,13 +576,13 @@ export const useAppStore = create<AppState>()(
       deleteSupplyItem: (id) => {
         const { tripDbId } = get();
         set(s => ({ supplies: s.supplies.filter(i => i.id !== id) }));
-        if (tripDbId) dbDeleteSupply(id).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        if (tripDbId) dbDeleteSupply(id, tripDbId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
       },
 
       toggleSupplyCritical: (id) => set(s => {
         const supplies = s.supplies.map(i => i.id === id ? { ...i, critical: !i.critical } : i);
         const item = supplies.find(i => i.id === id);
-        if (s.tripDbId && item) dbUpdateSupplyCritical(id, item.critical ?? false).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        if (s.tripDbId && item) dbUpdateSupplyCritical(id, item.critical ?? false, s.tripDbId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
         return { supplies };
       }),
 
@@ -618,7 +618,7 @@ export const useAppStore = create<AppState>()(
         set(s => ({
           trip: s.trip ? { ...s.trip, expenses: (s.trip.expenses ?? []).filter(e => e.id !== id) } : null,
         }));
-        if (tripDbId) dbDeleteExpense(id).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        if (tripDbId) dbDeleteExpense(id, tripDbId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
       },
 
       addEmergencyContact: (contact) => {
@@ -635,7 +635,7 @@ export const useAppStore = create<AppState>()(
         set(s => ({
           trip: s.trip ? { ...s.trip, emergencyContacts: (s.trip.emergencyContacts ?? []).filter(c => c.id !== id) } : null,
         }));
-        if (tripDbId) dbDeleteEmergencyContact(id).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        if (tripDbId) dbDeleteEmergencyContact(id, tripDbId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
       },
 
       setShowAddEvent: (v) => set({ showAddEvent: v }),
@@ -708,11 +708,11 @@ export const useAppStore = create<AppState>()(
             if (change.type === 'addEvent') {
               await dbAddEvent(tripDbId, p.dayNumber as number, p.event as TripEvent, userId);
             } else if (change.type === 'deleteEvent') {
-              await dbDeleteEvent(p.eventId as string);
+              await dbDeleteEvent(p.eventId as string, tripDbId);
             } else if (change.type === 'addExpense') {
               await dbAddExpense(tripDbId, p.expense as Expense, userId);
             } else if (change.type === 'deleteExpense') {
-              await dbDeleteExpense(p.expenseId as string);
+              await dbDeleteExpense(p.expenseId as string, tripDbId);
             }
             // Remove this change on success
             set(state => ({ pendingChanges: state.pendingChanges.filter(c => c.timestamp !== change.timestamp) }));
