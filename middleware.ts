@@ -16,10 +16,12 @@ export async function middleware(request: NextRequest) {
       if (origin && !sameOrigin && !ALLOWED_ORIGINS.includes(origin)) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
-      // Require JSON content-type on mutation routes (except multipart forms)
-      const ct = request.headers.get('content-type') ?? ''
-      if (!ct.includes('application/json') && !ct.includes('multipart/form-data')) {
-        return NextResponse.json({ error: 'Invalid content type' }, { status: 415 })
+      // Require JSON content-type on routes that send a body (DELETE has no body)
+      if (method !== 'DELETE') {
+        const ct = request.headers.get('content-type') ?? ''
+        if (!ct.includes('application/json') && !ct.includes('multipart/form-data')) {
+          return NextResponse.json({ error: 'Invalid content type' }, { status: 415 })
+        }
       }
     }
   }
