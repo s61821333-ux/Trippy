@@ -6,8 +6,8 @@ export function createClient() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookieOptions: {
-        maxAge: 60 * 60 * 24 * 365, // 1 year — makes cookies persistent across browser restarts
-        sameSite: 'strict',
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: 'lax', // must be lax (not strict) so the PKCE verifier cookie survives OAuth redirects
         secure: process.env.NODE_ENV === 'production',
         path: '/',
       },

@@ -15,7 +15,7 @@ export async function createClient() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, {
                 ...options,
-                sameSite: 'strict',
+                sameSite: 'lax', // lax required for OAuth redirect flow
                 secure: process.env.NODE_ENV === 'production',
               })
             )
