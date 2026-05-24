@@ -235,10 +235,20 @@ export const useAppStore = create<AppState>()(
             termsAccepted = consent.content_hash === TERMS_VERSION
           }
         } catch {}
-        // Always land on the trip picker so the user can choose which trip to open.
-        // Clear any previously loaded trip; the join-link flow (/?join=id) still works
-        // because AppShell's authUser effect handles that separately.
-        set({ authUser: user, userId: user.id, trip: null, tripDbId: null, supplies: [], termsAccepted })
+        // Set identity so auth-dependent effects (join-link, terms) can proceed immediately.
+        set({ authUser: user, userId: user.id, termsAccepted })
+        // If the user had a trip open before, auto-reload it from DB so data is always
+        // fresh on refresh. The join-link flow (/?join=id) will overwrite this if needed,
+        // since AppShell's authUser effect runs after checkAuth resolves.
+        const { tripDbId: persistedTripDbId } = get()
+        if (persistedTripDbId) {
+          get().loadTripById(persistedTripDbId).catch(() => {
+            // Trip gone or access revoked — fall back to trip picker
+            set({ trip: null, tripDbId: null, supplies: [] })
+          })
+        } else {
+          set({ trip: null, tripDbId: null, supplies: [] })
+        }
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
 
@@ -330,15 +340,18 @@ export const useAppStore = create<AppState>()(
             }
             trip = { ...trip, events: filteredEvents };
           }
+          const { screen: currentScreen } = get();
+          const navUpdate = isSameTrip && currentScreen !== 'login'
+            ? {}  // preserve current screen/activeDay when refreshing an already-open trip
+            : { screen: 'dashboard' as const, activeDay: 1 };
           set({
             userId,
             tripDbId: data.id,
             trip,
             supplies,
             nickname,
-            screen: 'dashboard',
-            activeDay: 1,
-            tripEntryCountries: trip.countries?.length ? trip.countries : null,
+            ...navUpdate,
+            tripEntryCountries: !isSameTrip && trip.countries?.length ? trip.countries : null,
             isGlobalLoading: false,
           });
         } catch (err: any) {
@@ -511,10 +524,10 @@ export const useAppStore = create<AppState>()(
         const originalEvents = trip.events[dayNumber] || [];
         const dayEvents = originalEvents.filter(e => e.id !== eventId);
         // Add to pendingDeleteIds before local state update so loadTripById cannot restore it
-        set(s => ({
-          trip: { ...s.trip!, events: { ...s.trip!.events, [dayNumber]: dayEvents } },
+        set(s => s.trip ? ({
+          trip: { ...s.trip, events: { ...s.trip.events, [dayNumber]: dayEvents } },
           pendingDeleteIds: [...s.pendingDeleteIds, eventId],
-        }));
+        }) : { pendingDeleteIds: [...s.pendingDeleteIds, eventId] });
         if (tripDbId) {
           dbDeleteEvent(eventId, tripDbId)
             .then(() => {
