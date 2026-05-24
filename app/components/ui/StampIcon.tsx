@@ -11,7 +11,14 @@ interface StampIconProps {
 
 export function StampIcon({ iconKey, size = 48, style = {} }: StampIconProps) {
   const icon = STAMP_ICONS[iconKey];
-  if (!icon) return null;
+  if (!icon) {
+    // Legacy: DB stored actual emoji characters before stamp keys were introduced
+    return (
+      <span style={{ fontSize: size * 0.65, lineHeight: 1, display: 'inline-flex', alignItems: 'center', flexShrink: 0, ...style }}>
+        {iconKey}
+      </span>
+    );
+  }
   return (
     <svg
       viewBox="0 0 80 80"

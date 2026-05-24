@@ -132,11 +132,12 @@ export async function dbAcceptInvitation(invitationId: string, userId: string, i
 }
 
 export async function dbRejectInvitation(invitationId: string): Promise<void> {
-  const { error } = await sb()
-    .from('trip_invitations')
-    .update({ status: 'rejected' })
-    .eq('id', invitationId)
-  if (error) throw error
+  const r = await fetch(`/api/invitations?id=${encodeURIComponent(invitationId)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 export async function dbLoadTripById(tripId: string) {
@@ -370,9 +371,9 @@ export async function dbUpdateSupplyCritical(supplyId: string, critical: boolean
   if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
-export async function dbLeaveTrip(tripId: string, userId: string) {
-  const { error } = await sb().from('trip_participants').delete().eq('trip_id', tripId).eq('user_id', userId)
-  if (error) throw error
+export async function dbLeaveTrip(tripId: string, _userId: string) {
+  const r = await fetch(`/api/trips/${tripId}`, { method: 'DELETE' })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 // ─── Trip notes ──────────────────────────────────────────────────────────────
@@ -432,11 +433,8 @@ export async function dbGetTripEmailInvitations(tripId: string): Promise<{ id: s
 }
 
 export async function dbCancelInvitation(invitationId: string): Promise<void> {
-  const { error } = await sb()
-    .from('trip_invitations')
-    .delete()
-    .eq('id', invitationId)
-  if (error) throw error
+  const r = await fetch(`/api/invitations?id=${encodeURIComponent(invitationId)}`, { method: 'DELETE' })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
 // ─── Privacy consents ────────────────────────────────────────────────────────

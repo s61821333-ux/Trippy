@@ -14,7 +14,6 @@ import {
   dbAddEmergencyContact, dbDeleteEmergencyContact,
   dbUpdateTripNotes, dbUpdateDayMeta, dbUpdateHotels,
   dbUpdateTripInfo as dbSyncTripInfo, dbUpdateTripTheme,
-  dbGetOrCreateInviteToken,
   dbGetPrivacyConsent, dbSavePrivacyConsent, TERMS_VERSION,
   dbDeleteAccount,
 } from './db';
@@ -275,8 +274,14 @@ export const useAppStore = create<AppState>()(
       createInviteLink: async () => {
         const { tripDbId } = get()
         if (!tripDbId) throw new Error('No active trip')
-        const token = await dbGetOrCreateInviteToken(tripDbId)
-        return `${window.location.origin}/join/${token}`
+        const r = await fetch(`/api/trips/${tripDbId}/invite-link`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        })
+        const body = await r.json().catch(() => ({}))
+        if (!r.ok) throw new Error(body.error ?? 'Failed to create invite link')
+        return `${window.location.origin}/join/${body.token}`
       },
       clearTripEntry: () => set({ tripEntryCountries: null }),
       recordDemoClick: () => set(s => ({ demoClickCount: s.demoClickCount + 1 })),
@@ -327,7 +332,7 @@ export const useAppStore = create<AppState>()(
       },
 
       createTrip: async (name, days, nickname, theme = 'desert', startDate, countries, currency = 'USD') => {
-        const defaultEmoji = theme === 'city' ? '🏙️' : theme === 'beach' ? '🏖️' : theme === 'nature' ? '🌲' : theme === 'mountain' ? '⛰️' : theme === 'snow' ? '❄️' : '🏔️';
+        const defaultEmoji = theme === 'city' ? 'museum' : theme === 'beach' ? 'beach' : theme === 'nature' ? 'pine_tree' : theme === 'mountain' ? 'mountain' : theme === 'snow' ? 'snow' : 'compass';
 
         const dayMetas: DayMeta[] = Array.from({ length: days }, (_, i) => ({
           region: `Day ${i + 1}`, emoji: defaultEmoji, lat: 31, lng: 35, desc: '',

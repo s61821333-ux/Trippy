@@ -135,3 +135,32 @@ export async function GET(
     return NextResponse.json({ error: err.message ?? 'Server error' }, { status: 500 })
   }
 }
+
+// DELETE /api/trips/[tripId] — leave a trip (removes current user from participants)
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ tripId: string }> }
+) {
+  const { tripId } = await params
+  const cookieStore = await cookies()
+  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: (cookiesToSet) => {
+        try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
+      },
+    },
+  })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  const admin = tryAdminClient()
+  const client = admin ?? supabase
+  const { error } = await client
+    .from('trip_participants')
+    .delete()
+    .eq('trip_id', tripId)
+    .eq('user_id', user.id)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ ok: true })
+}
