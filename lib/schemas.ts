@@ -77,13 +77,12 @@ export const UpdateTripBody = z.object({
 export const HotelsBody = z.object({
   hotels: z.array(z.object({
     id: z.string().max(100),
-    name: z.string().min(1).max(200),
-    address: z.string().max(300).optional(),
-    checkIn: z.string().max(50).optional(),
-    checkOut: z.string().max(50).optional(),
+    name: z.string().max(200).optional(),
+    location: z.string().max(300).optional(),
+    checkInDay: z.number().int().min(1),
+    checkOutDay: z.number().int().min(1),
     lat: z.number().optional(),
     lng: z.number().optional(),
-    notes: z.string().max(1000).optional(),
   })).max(50),
 })
 
