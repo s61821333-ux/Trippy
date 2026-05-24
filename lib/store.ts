@@ -121,6 +121,10 @@ interface AppState {
   // Real-time: subscribe to DB changes on a trip, returns unsubscribe fn
   subscribeToTrip: (tripId: string) => () => void;
 
+  // Global loading overlay
+  isGlobalLoading: boolean;
+  setGlobalLoading: (v: boolean) => void;
+
   // Offline mode
   isOffline: boolean;
   pendingChanges: OfflineChange[];
@@ -204,6 +208,7 @@ export const useAppStore = create<AppState>()(
       termsAccepted: false,
       isOffline: false,
       pendingChanges: [],
+      isGlobalLoading: false,
 
       acceptTerms: async (contentHash, content) => {
         try { await dbSavePrivacyConsent(contentHash, content) } catch {}
@@ -216,10 +221,15 @@ export const useAppStore = create<AppState>()(
         // Only update the store when a user is actually found.
         if (!user) return
         // Check whether this user has already accepted the current terms version.
-        let termsAccepted = false
+        // Keep the persisted value as the default — only override it when the DB
+        // returns a definitive answer (a record exists). Never downgrade true→false
+        // just because the DB returned null (could be RLS or no record yet).
+        let termsAccepted = get().termsAccepted
         try {
           const consent = await dbGetPrivacyConsent(user.id)
-          termsAccepted = consent?.content_hash === TERMS_VERSION
+          if (consent !== null) {
+            termsAccepted = consent.content_hash === TERMS_VERSION
+          }
         } catch {}
         // Always land on the trip picker so the user can choose which trip to open.
         // Clear any previously loaded trip; the join-link flow (/?join=id) still works
@@ -289,6 +299,7 @@ export const useAppStore = create<AppState>()(
         let userId = authUser?.id ?? null;
         if (!userId) userId = await getSessionUserId();
         if (!userId) throw new Error('not_authed');
+        set({ isGlobalLoading: true });
         try {
           const data = await dbLoadTripById(tripId);
           if (!data) throw new Error('not_found');
@@ -307,8 +318,10 @@ export const useAppStore = create<AppState>()(
             screen: 'dashboard',
             activeDay: 1,
             tripEntryCountries: trip.countries?.length ? trip.countries : null,
+            isGlobalLoading: false,
           });
         } catch (err: any) {
+          set({ isGlobalLoading: false });
           throw err?.message === 'not_authed' || err?.message === 'not_found' ? err : new Error('load_failed');
         }
       },
@@ -334,15 +347,21 @@ export const useAppStore = create<AppState>()(
         // Save to DB first — throws on failure so LoginScreen can show a meaningful error
         const userId = await getSessionUserId();
         if (!userId) throw new Error('Not authenticated');
-        const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, theme, dayMetas, nickname, countries);
-
-        set(s => ({
-          userId, tripDbId, trip: newTrip,
-          nickname: nickname || 'Traveler',
-          screen: 'dashboard', activeDay: 1, supplies: [],
-          tripEntryCountries: countries?.length ? countries : null,
-          currencyByTrip: { ...s.currencyByTrip, [tripDbId]: currency },
-        }));
+        set({ isGlobalLoading: true });
+        try {
+          const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, theme, dayMetas, nickname, countries);
+          set(s => ({
+            userId, tripDbId, trip: newTrip,
+            nickname: nickname || 'Traveler',
+            screen: 'dashboard', activeDay: 1, supplies: [],
+            tripEntryCountries: countries?.length ? countries : null,
+            currencyByTrip: { ...s.currencyByTrip, [tripDbId]: currency },
+            isGlobalLoading: false,
+          }));
+        } catch (err) {
+          set({ isGlobalLoading: false });
+          throw err;
+        }
       },
 
       deleteAccount: async () => {
@@ -690,6 +709,7 @@ export const useAppStore = create<AppState>()(
         return () => { supabase.removeChannel(channel); };
       },
 
+      setGlobalLoading: (v) => set({ isGlobalLoading: v }),
       setIsOffline: (v) => set({ isOffline: v }),
 
       addPendingChange: (change) => set(state => ({

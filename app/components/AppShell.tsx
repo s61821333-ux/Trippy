@@ -85,7 +85,8 @@ function Shell() {
   const { screen, setScreen, trip, themeMode, setThemeMode, highContrast, reducedMotion, showTour,
     tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick, checkAuth, loadTripById, authUser,
     termsAccepted, subscribeToTrip,
-    isOffline, pendingChanges, setIsOffline, flushPendingChanges } = useAppStore();
+    isOffline, pendingChanges, setIsOffline, flushPendingChanges,
+    isGlobalLoading } = useAppStore();
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [osDark, setOsDark] = useState(false);
@@ -310,6 +311,35 @@ function Shell() {
                 countries={entryCountries}
                 onDone={() => setShowEntryAnim(false)}
               />
+            )}
+          </AnimatePresence>
+
+          {/* Global loading overlay — shown during loadTripById / createTrip */}
+          <AnimatePresence>
+            {isGlobalLoading && (
+              <motion.div
+                key="global-loader"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+                style={{
+                  position: 'fixed', inset: 0, zIndex: 9990,
+                  background: 'var(--bg)',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  gap: 24,
+                }}
+              >
+                <CompassLoader size={140} />
+                <span style={{
+                  fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+                  fontSize: 20, fontWeight: 700, letterSpacing: '-0.04em',
+                  color: 'var(--text)', lineHeight: 1,
+                }}>
+                  Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+                </span>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>

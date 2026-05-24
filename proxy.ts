@@ -5,7 +5,7 @@ const ALLOWED_ORIGINS = (
   process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
 ).split(',').map(s => s.trim()).filter(Boolean)
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // CSRF: block cross-origin mutations on all API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
     const method = request.method
