@@ -327,7 +327,7 @@ export const useAppStore = create<AppState>()(
           // If this is the same trip we had locally, merge pending events before overwriting
           const isSameTrip = localTripDbId === data.id;
           let trip = isSameTrip
-            ? mergeLocalIntoDbTrip(dbTrip, localTrip, data.id, userId, msg => set({ lastSyncError: msg }))
+            ? mergeLocalIntoDbTrip(dbTrip, localTrip, data.id, userId, msg => console.warn('[bgSync] pending event failed:', msg))
             : dbTrip;
           // Filter out events that are currently being deleted (prevents race condition
           // where realtime subscription triggers loadTripById before DB delete commits)
@@ -578,7 +578,8 @@ export const useAppStore = create<AppState>()(
           if (tripDbId && trip?.hotels) {
             dbUpdateHotels(tripDbId, trip.hotels).catch(err => {
               console.error('[addHotel] DB sync failed:', err);
-              set({ lastSyncError: err?.message ?? 'save_failed' });
+              // Only show error if still on the same trip (avoid stale async errors on trip switch)
+              if (get().tripDbId === tripDbId) set({ lastSyncError: err?.message ?? 'save_failed' });
             });
           }
           return { trip };
@@ -592,7 +593,7 @@ export const useAppStore = create<AppState>()(
           if (tripDbId && trip?.hotels) {
             dbUpdateHotels(tripDbId, trip.hotels).catch(err => {
               console.error('[editHotel] DB sync failed:', err);
-              set({ lastSyncError: err?.message ?? 'save_failed' });
+              if (get().tripDbId === tripDbId) set({ lastSyncError: err?.message ?? 'save_failed' });
             });
           }
           return { trip };
@@ -607,7 +608,7 @@ export const useAppStore = create<AppState>()(
           if (tripDbId) {
             dbUpdateHotels(tripDbId, hotels).catch(err => {
               console.error('[deleteHotel] DB sync failed:', err);
-              set({ lastSyncError: err?.message ?? 'save_failed' });
+              if (get().tripDbId === tripDbId) set({ lastSyncError: err?.message ?? 'save_failed' });
             });
           }
           return { trip };
