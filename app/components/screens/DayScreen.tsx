@@ -718,6 +718,7 @@ export default function DayScreen() {
     setActiveDay(dayNum);
   };
 
+  const savingRef = useRef(false);
   const [showAdd, setShowAdd] = useState(false);
   const [editTarget, setEditTarget] = useState<TripEvent | null>(null);
   const [fTime, setFTime] = useState('09:00');
@@ -928,6 +929,7 @@ export default function DayScreen() {
   }
 
   const openAdd = (prefillTime?: string) => {
+    savingRef.current = false;
     // Default start time: after the last event, or 09:00 for first event
     let defaultStart = '09:00';
     if (prefillTime) {
@@ -944,6 +946,7 @@ export default function DayScreen() {
   };
 
   const openEdit = (e: TripEvent) => {
+    savingRef.current = false;
     setFTime(e.time); setFDur(String(e.duration));
     setFName(e.name); setFCat(e.category);
     setFLoc(e.location ?? ''); setFLat(e.lat); setFLng(e.lng); setFNotes(e.notes ?? '');
@@ -955,7 +958,9 @@ export default function DayScreen() {
   };
 
   const handleSave = () => {
-    if (!fName.trim()) { show(t('enterEventName')); return; }
+    if (savingRef.current) return;
+    savingRef.current = true;
+    if (!fName.trim()) { savingRef.current = false; show(t('enterEventName')); return; }
     const dur = parseInt(fDur, 10) || 60;
     const cost = fCost.trim() ? parseFloat(fCost) : undefined;
     const tags = fTags.split(',').map(t => t.trim()).filter(Boolean);

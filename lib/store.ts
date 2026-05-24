@@ -124,6 +124,10 @@ interface AppState {
   isGlobalLoading: boolean;
   setGlobalLoading: (v: boolean) => void;
 
+  // Tracks event IDs currently being deleted — prevents loadTripById from restoring them
+  // during the in-flight DB call (race condition with realtime subscription)
+  pendingDeleteIds: string[];
+
   // Offline mode
   isOffline: boolean;
   pendingChanges: OfflineChange[];
@@ -208,6 +212,7 @@ export const useAppStore = create<AppState>()(
       isOffline: false,
       pendingChanges: [],
       isGlobalLoading: false,
+      pendingDeleteIds: [],
 
       acceptTerms: async (contentHash, content) => {
         try { await dbSavePrivacyConsent(contentHash, content) } catch {}
@@ -311,9 +316,20 @@ export const useAppStore = create<AppState>()(
           const { trip: dbTrip, supplies } = rowToTrip(data);
           // If this is the same trip we had locally, merge pending events before overwriting
           const isSameTrip = localTripDbId === data.id;
-          const trip = isSameTrip
+          let trip = isSameTrip
             ? mergeLocalIntoDbTrip(dbTrip, localTrip, data.id, userId, msg => set({ lastSyncError: msg }))
             : dbTrip;
+          // Filter out events that are currently being deleted (prevents race condition
+          // where realtime subscription triggers loadTripById before DB delete commits)
+          const { pendingDeleteIds } = get();
+          if (pendingDeleteIds.length > 0) {
+            const deleteSet = new Set(pendingDeleteIds);
+            const filteredEvents: Record<number, TripEvent[]> = {};
+            for (const [day, evs] of Object.entries(trip.events)) {
+              filteredEvents[Number(day)] = (evs as TripEvent[]).filter(e => !deleteSet.has(e.id));
+            }
+            trip = { ...trip, events: filteredEvents };
+          }
           set({
             userId,
             tripDbId: data.id,
@@ -492,12 +508,37 @@ export const useAppStore = create<AppState>()(
       deleteEvent: (dayNumber, eventId) => {
         const { trip, tripDbId } = get();
         if (!trip) return;
-        const dayEvents = (trip.events[dayNumber] || []).filter(e => e.id !== eventId);
-        set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
-        if (tripDbId) dbDeleteEvent(eventId, tripDbId).catch(err => {
-          console.error('[deleteEvent] DB sync failed:', err);
-          set({ lastSyncError: err?.message ?? 'sync_failed' });
-        });
+        const originalEvents = trip.events[dayNumber] || [];
+        const dayEvents = originalEvents.filter(e => e.id !== eventId);
+        // Add to pendingDeleteIds before local state update so loadTripById cannot restore it
+        set(s => ({
+          trip: { ...s.trip!, events: { ...s.trip!.events, [dayNumber]: dayEvents } },
+          pendingDeleteIds: [...s.pendingDeleteIds, eventId],
+        }));
+        if (tripDbId) {
+          dbDeleteEvent(eventId, tripDbId)
+            .then(() => {
+              set(s => ({ pendingDeleteIds: s.pendingDeleteIds.filter(id => id !== eventId) }));
+            })
+            .catch(err => {
+              console.error('[deleteEvent] DB sync failed:', err);
+              // Rollback: restore the event into its day
+              set(s => {
+                const currentDay = s.trip?.events[dayNumber] || [];
+                const victim = originalEvents.find(e => e.id === eventId);
+                const updatedDay = victim && !currentDay.some(e => e.id === eventId)
+                  ? [...currentDay, victim]
+                  : currentDay;
+                return {
+                  trip: s.trip ? { ...s.trip, events: { ...s.trip.events, [dayNumber]: updatedDay } } : null,
+                  pendingDeleteIds: s.pendingDeleteIds.filter(id => id !== eventId),
+                  lastSyncError: err?.message ?? 'sync_failed',
+                };
+              });
+            });
+        } else {
+          set(s => ({ pendingDeleteIds: s.pendingDeleteIds.filter(id => id !== eventId) }));
+        }
       },
 
       moveEvent: (fromDay, toDay, eventId) => {
