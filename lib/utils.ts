@@ -91,8 +91,12 @@ export const CAT_META: Record<Category, { icon: string; label: string; color: st
   attraction: { icon: '📍', label: 'Sight',     color: 'oklch(52% 0.16 195)', bg: 'rgba(30,145,175,0.12)'  },
   hotel:      { icon: '🏨', label: 'Hotel',     color: 'oklch(52% 0.14 310)', bg: 'rgba(160,60,180,0.11)'  },
   rest:       { icon: '⛺', label: 'Rest',      color: 'oklch(52% 0.15 148)', bg: 'rgba(40,160,90,0.11)'   },
-  transport:  { icon: '🚗', label: 'Drive',     color: 'oklch(50% 0.13 255)', bg: 'rgba(60,100,200,0.11)'  },
+  transport:  { icon: '🚗', label: 'Drive',      color: 'oklch(50% 0.13 255)', bg: 'rgba(60,100,200,0.11)'  },
   flight:     { icon: '✈️', label: 'Flight',    color: 'oklch(46% 0.15 230)', bg: 'rgba(20,70,180,0.12)'   },
+  concert:    { icon: '🎤', label: 'Concert',   color: 'oklch(48% 0.20 330)', bg: 'rgba(192,38,211,0.12)'  },
+  theme_park: { icon: '🎡', label: 'Theme Park',color: 'oklch(56% 0.18 38)',  bg: 'rgba(220,90,30,0.12)'   },
+  sport:      { icon: '🏟️', label: 'Sport',     color: 'oklch(46% 0.16 148)', bg: 'rgba(22,120,60,0.12)'   },
+  beach:      { icon: '🏖️', label: 'Beach',     color: 'oklch(58% 0.15 80)',  bg: 'rgba(200,155,30,0.12)'  },
   other:      { icon: '✦',  label: 'Other',     color: 'oklch(52% 0.10 30)',  bg: 'rgba(180,90,50,0.10)'   },
 };
 
@@ -137,7 +141,8 @@ const KEYWORD_ICONS: [RegExp, string][] = [
 ];
 
 const CAT_FALLBACK: Record<Category, string> = {
-  food: 'noodles', cafe: 'coffee', attraction: 'museum', hotel: 'hotel', rest: 'tent', transport: 'car', flight: 'plane', other: 'globe',
+  food: 'noodles', cafe: 'coffee', attraction: 'museum', hotel: 'hotel', rest: 'tent', transport: 'car', flight: 'plane',
+  concert: 'music', theme_park: 'ferris_wheel', sport: 'stadium', beach: 'beach', other: 'globe',
 };
 
 export function getDayIcon(events: TripEvent[], fallback = 'mountain'): string {

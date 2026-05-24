@@ -20,7 +20,7 @@ import SuggestionsSheet from '../SuggestionsSheet';
 import DayTimelineView from '../DayTimelineView';
 import { useI18n, TranslationKey } from '@/lib/i18n';
 
-const CATEGORIES: Category[] = ['food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other'];
+const CATEGORIES: Category[] = ['food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'concert', 'theme_park', 'sport', 'beach', 'other'];
 
 const daySlideVariants = {
   initial: (dir: number) => ({ x: dir > 0 ? 44 : -44, opacity: 0 }),

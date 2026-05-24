@@ -1,4 +1,4 @@
-export type Category = 'food' | 'cafe' | 'attraction' | 'hotel' | 'rest' | 'transport' | 'flight' | 'other';
+export type Category = 'food' | 'cafe' | 'attraction' | 'hotel' | 'rest' | 'transport' | 'flight' | 'concert' | 'theme_park' | 'sport' | 'beach' | 'other';
 
 export interface Participant {
   id: number;
