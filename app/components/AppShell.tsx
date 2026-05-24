@@ -184,6 +184,9 @@ function Shell() {
   // Keep body background in sync with the resolved theme (prevents flash on page load)
   useEffect(() => {
     if (typeof document !== 'undefined') {
+      // Propagate data-dark to <html> so var(--bg) resolves correctly on body/html
+      // (data-dark on the inner div doesn't affect var(--bg) resolution on ancestors)
+      document.documentElement.dataset.dark = resolvedDark ? 'true' : '';
       document.body.style.background = 'var(--bg)';
     }
   }, [resolvedDark]);
