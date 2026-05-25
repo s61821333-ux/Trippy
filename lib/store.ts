@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, HotelStay, Screen, SupplyItem, Trip, TripEvent, TripInvitation, TripTheme } from './types';
 import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
+import { createClient as createSupabaseClient } from '@/utils/supabase/client';
 import {
   signOut, signInWithGoogle as dbSignInWithGoogle, getCurrentUser, getSessionUserId,
   dbCreateTrip, dbLoadTripById, rowToTrip,
@@ -761,9 +762,7 @@ export const useAppStore = create<AppState>()(
       },
 
       subscribeToTrip: (tripId: string) => {
-        // Dynamic import avoids SSR issues — Supabase realtime requires browser APIs
-        const { createClient } = require('@/utils/supabase/client') as typeof import('@/utils/supabase/client');
-        const supabase = createClient();
+        const supabase = createSupabaseClient();
         const channel = supabase
           .channel(`trip:${tripId}`)
           .on(
@@ -832,6 +831,7 @@ export const useAppStore = create<AppState>()(
         tripDbId: s.tripDbId,
         authUser: s.authUser,
         termsAccepted: s.termsAccepted,
+        pendingChanges: s.pendingChanges,
       }),
     }
   )

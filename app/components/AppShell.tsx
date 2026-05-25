@@ -204,15 +204,17 @@ function Shell() {
         position: 'fixed', inset: 0,
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         gap: 28,
-        background: '#F4EFE8',
+        background: 'var(--bg)',
       }}>
         <CompassLoader size={160} />
         <span style={{
-          fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
-          fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em', color: '#1A1410',
+          fontFamily: 'var(--font-sans)',
+          fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text)',
           lineHeight: 1,
+          direction: 'ltr',
+          unicodeBidi: 'isolate',
         }}>
-          Trippy<span style={{ color: '#C4714A' }}>.</span>
+          Trippy<span style={{ color: 'var(--terra)' }}>.</span>
         </span>
       </div>
     );
@@ -328,7 +330,7 @@ function Shell() {
                 transition={{ duration: 0.22 }}
                 style={{
                   position: 'fixed', inset: 0, zIndex: 9990,
-                  background: '#F4EFE8',
+                  background: 'var(--bg)',
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center',
                   gap: 28,
@@ -336,11 +338,13 @@ function Shell() {
               >
                 <CompassLoader size={200} />
                 <span style={{
-                  fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+                  fontFamily: 'var(--font-sans)',
                   fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em',
-                  color: '#1A1410', lineHeight: 1,
+                  color: 'var(--text)', lineHeight: 1,
+                  direction: 'ltr',
+                  unicodeBidi: 'isolate',
                 }}>
-                  Trippy<span style={{ color: '#C4714A' }}>.</span>
+                  Trippy<span style={{ color: 'var(--terra)' }}>.</span>
                 </span>
               </motion.div>
             )}

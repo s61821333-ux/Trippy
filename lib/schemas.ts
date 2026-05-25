@@ -63,7 +63,7 @@ export const UpdateTripBody = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
   theme: z.string().max(50).optional(),
   countries: z.array(z.string().max(100)).max(30).optional(),
-  trip_notes: z.string().max(5000).optional(),
+  trip_notes: z.array(z.string().max(5000)).optional(),
   day_meta: z.array(z.object({
     day_index: z.number().int().min(0),
     region: z.string().max(200).optional(),

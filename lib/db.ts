@@ -426,15 +426,15 @@ export async function dbGetOrCreateInviteToken(tripId: string): Promise<string> 
   return token
 }
 
-export async function dbGetTripEmailInvitations(tripId: string): Promise<{ id: string; email: string; status: string }[]> {
+export async function dbGetTripEmailInvitations(tripId: string): Promise<{ id: string; email: string; status: string; created_at: string }[]> {
   const { data, error } = await sb()
     .from('trip_invitations')
-    .select('id, invited_email, status')
+    .select('id, invited_email, status, created_at')
     .eq('trip_id', tripId)
     .not('invited_email', 'is', null)
     .eq('status', 'pending')
   if (error) return []
-  return (data ?? []).map((r: any) => ({ id: r.id, email: r.invited_email, status: r.status }))
+  return (data ?? []).map((r: any) => ({ id: r.id, email: r.invited_email, status: r.status, created_at: r.created_at }))
 }
 
 export async function dbCancelInvitation(invitationId: string): Promise<void> {

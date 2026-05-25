@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate as motionAnimate } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Chip from '../ui/Chip';
@@ -72,6 +72,11 @@ export default function DashboardScreen() {
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [weatherRetry, setWeatherRetry] = useState(0);
 
+  const dayCoordsKey = useMemo(
+    () => (trip?.dayMeta ?? []).map(m => `${m.lat ?? ''},${m.lng ?? ''}`).join('|'),
+    [trip?.dayMeta],
+  );
+
   useEffect(() => {
     if (!trip) return;
     const isDefaultIsrael = (lat: number, lng: number) =>
@@ -109,7 +114,7 @@ export default function DashboardScreen() {
     fetchWeatherForTrip(lat, lng, trip.startDate, trip.days)
       .then(data => { setWeather(data); setWeatherLoading(false); })
       .catch(() => { setWeatherError("Couldn't load weather"); setWeatherLoading(false); });
-  }, [trip?.startDate, trip?.days, JSON.stringify(trip?.dayMeta?.map(m => [m.lat, m.lng])), trip?.countries?.join(','), weatherRetry]);
+  }, [trip?.startDate, trip?.days, dayCoordsKey, trip?.countries?.join(','), weatherRetry]);
 
   // Exchange rates
   const [rateLoading, setRateLoading] = useState(false);

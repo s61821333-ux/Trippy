@@ -11,11 +11,12 @@ interface NavBarProps {
   onChange: (s: Screen) => void;
 }
 
-const TABS: { id: Screen; icon: 'grid' | 'compass' | 'checklist' | 'settings'; labelKey: 'navCamp' | 'navExplore' | 'navPack' | 'navSetup' }[] = [
-  { id: 'dashboard', icon: 'grid', labelKey: 'navCamp' },
-  { id: 'day', icon: 'compass', labelKey: 'navExplore' },
-  { id: 'supplies', icon: 'checklist', labelKey: 'navPack' },
-  { id: 'settings', icon: 'settings', labelKey: 'navSetup' },
+const TABS: { id: Screen; icon: 'grid' | 'compass' | 'checklist' | 'lock' | 'settings'; labelKey: 'navCamp' | 'navExplore' | 'navPack' | 'navNotes' | 'navSetup'; ariaLabel: string }[] = [
+  { id: 'dashboard', icon: 'grid',      labelKey: 'navCamp',    ariaLabel: 'Overview' },
+  { id: 'day',       icon: 'compass',   labelKey: 'navExplore', ariaLabel: 'Day planner' },
+  { id: 'supplies',  icon: 'checklist', labelKey: 'navPack',    ariaLabel: 'Packing list' },
+  { id: 'notes',     icon: 'lock',      labelKey: 'navNotes',   ariaLabel: 'Travel Vault' },
+  { id: 'settings',  icon: 'settings',  labelKey: 'navSetup',   ariaLabel: 'Settings' },
 ];
 
 export default function NavBar({ active, onChange }: NavBarProps) {
@@ -83,6 +84,8 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                   data-tour={`nav-${tab.id}`}
                   onClick={() => onChange(tab.id)}
                   whileTap={{ scale: 0.95 }}
+                  aria-label={tab.ariaLabel}
+                  aria-current={isActive ? 'page' : undefined}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
@@ -103,6 +106,8 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                     outline: 'none',
                     transition: 'background 0.18s ease, color 0.18s ease, border-color 0.18s ease',
                     boxShadow: 'none',
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
                   }}
                 >
                   <Icon name={tab.icon} size={16} />
@@ -146,6 +151,8 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                 data-tour={`nav-${tab.id}`}
                 onClick={() => onChange(tab.id)}
                 whileTap={{ scale: 0.88 }}
+                aria-label={tab.ariaLabel}
+                aria-current={isActive ? 'page' : undefined}
                 style={{
                   flex: 1,
                   display: 'flex',
@@ -161,6 +168,9 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                   minHeight: 48,
                   minWidth: 44,
                   transition: 'color 0.18s ease',
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                  userSelect: 'none',
                 }}
               >
                 {/* Icon wrapped in its own relative container so the pill centers on the icon only */}
