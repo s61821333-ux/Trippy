@@ -369,6 +369,10 @@ export const useAppStore = create<AppState>()(
           region: `Day ${i + 1}`, emoji: defaultEmoji, lat: 31, lng: 35, desc: '',
         }));
 
+        // Save to DB first — throws on failure so LoginScreen can show a meaningful error
+        const userId = await getSessionUserId();
+        if (!userId) throw new Error('Not authenticated');
+
         const newTrip: Trip = {
           name,
           days,
@@ -378,11 +382,8 @@ export const useAppStore = create<AppState>()(
           participants: [{ id: 1, name: nickname || 'You', initials: (nickname || 'Y').slice(0, 2).toUpperCase(), color: 'oklch(62% 0.15 195)' }],
           dayMeta: dayMetas,
           events: Object.fromEntries(Array.from({ length: days }, (_, i) => [i + 1, []])),
+          createdBy: userId,
         };
-
-        // Save to DB first — throws on failure so LoginScreen can show a meaningful error
-        const userId = await getSessionUserId();
-        if (!userId) throw new Error('Not authenticated');
         set({ isGlobalLoading: true });
         try {
           const tripDbId = await dbCreateTrip(userId, name, days, newTrip.startDate, theme, dayMetas, nickname, countries);

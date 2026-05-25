@@ -1054,7 +1054,7 @@ export default function DayScreen() {
       setHLat(null);
       setHLng(null);
       setHCheckIn(activeDay);
-      setHCheckOut(Math.min((trip?.days ?? 1), activeDay + 1));
+      setHCheckOut(activeDay + 1);
     }
     setShowHotelSheet(true);
   };

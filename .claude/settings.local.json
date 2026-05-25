@@ -36,10 +36,32 @@
       "Bash(node -e \"const p = require\\('./node_modules/@supabase/supabase-js/package.json'\\); console.log\\('version:', p.version\\)\")",
       "Bash(node -e \"const p = require\\('./node_modules/next/package.json'\\); console.log\\('next version:', p.version\\)\")",
       "Bash(taskkill /PID 14268 /F)",
-      "PowerShell(taskkill /PID 14268 /F)"
+      "PowerShell(taskkill /PID 14268 /F)",
+      "PowerShell(cd \"C:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\"; Get-ChildItem -Path \"src\" -Recurse -File | Where-Object {$_.Extension -match '\\\\.\\(ts|tsx|js|json\\)$'} | Select-Object -ExpandProperty FullName)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\" -Force | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"Dir\"}else{\"File\"}}} | Format-Table -AutoSize)",
+      "Skill(update-config)",
+      "Skill(update-config:*)",
+      "Bash(git -C \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\" show --stat 3f5cdfb)"
     ],
     "additionalDirectories": [
       "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -File \"c:\\Users\\guy9d\\Desktop\\Trippy\\.claude\\pre-push-check.ps1\"",
+            "shell": "powershell",
+            "timeout": 300,
+            "statusMessage": "Running pre-push checks (lint + build)...",
+            "asyncRewake": true,
+            "rewakeSummary": "Pre-push check results"
+          }
+        ]
+      }
     ]
   }
 }

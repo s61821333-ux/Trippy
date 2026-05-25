@@ -39,7 +39,10 @@ export default function SettingsScreen() {
     currencyByTrip, tripDbId, setCurrency, userId,
   } = useAppStore();
 
-  const isOwner = !!(trip?.createdBy && userId && trip.createdBy === userId);
+  // Primary: compare createdBy (set since v1.0.1). Fallback: first participant heuristic for old cached trips.
+  const isOwner = trip?.createdBy
+    ? trip.createdBy === userId
+    : trip?.participants[0]?.name === nickname;
   const { show } = useToast();
   const { t, locale, setLocale, isRTL } = useI18n();
   const [nickEdit, setNickEdit] = useState(nickname);
