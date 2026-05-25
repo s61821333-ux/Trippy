@@ -1278,7 +1278,7 @@ export default function DashboardScreen() {
 
           <GlassBtn
             variant="danger" size="lg" style={{ width: '100%' }}
-            onClick={() => { setShowShare(false); setInviteEmail(''); setPendingEmails([]); leaveTrip(); }}
+            onClick={() => { setShowShare(false); setInviteEmail(''); setPendingEmails([]); leaveTrip().catch(() => show(locale === 'he' ? 'שגיאה בעזיבת הטיול. נסה שוב.' : 'Failed to leave trip. Please try again.')); }}
           >
             {t('leaveTrip')}
           </GlassBtn>

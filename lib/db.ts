@@ -91,7 +91,7 @@ export async function dbCreateTrip(
 
 
 export async function dbGetUserTrips(userId: string): Promise<{ id: string; name: string; theme: string | null; days: number; start_date: string | null }[]> {
-  const r = await fetch('/api/trips')
+  const r = await fetch('/api/trips', { cache: 'no-store' })
   if (!r.ok) return []
   const data = await r.json()
   // Support both legacy array shape and new paginated { trips, nextCursor } shape

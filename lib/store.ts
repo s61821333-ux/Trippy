@@ -436,7 +436,7 @@ export const useAppStore = create<AppState>()(
       // Permanently remove the user from this trip's participant list
       leaveTrip: async () => {
         const { tripDbId, userId } = get();
-        if (tripDbId && userId) await dbLeaveTrip(tripDbId, userId).catch(() => {});
+        if (tripDbId && userId) await dbLeaveTrip(tripDbId, userId);
         set({ trip: null, tripDbId: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [] });
       },
 

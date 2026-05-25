@@ -522,7 +522,7 @@ export default function SettingsScreen() {
                     : (locale === 'he'
                         ? 'האם אתה בטוח? פעולה זו תסיר אותך מהטיול.'
                         : 'Are you sure? This will remove you from the trip.');
-                  confirm(warning, leaveTrip, 'danger');
+                  confirm(warning, () => leaveTrip().catch(() => show(locale === 'he' ? 'שגיאה בעזיבת הטיול. נסה שוב.' : 'Failed to leave trip. Please try again.')), 'danger');
                 }}
               >
                 {t('leaveTrip')}

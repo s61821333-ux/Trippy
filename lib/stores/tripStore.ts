@@ -155,7 +155,7 @@ export const useTripStore = create<TripState>()(
       leaveTrip: async () => {
         const { tripDbId } = get();
         const userId = (await import('../store').then(m => m.useAppStore.getState())).userId;
-        if (tripDbId && userId) await dbLeaveTrip(tripDbId, userId).catch(() => {});
+        if (tripDbId && userId) await dbLeaveTrip(tripDbId, userId);
         set({ trip: null, tripDbId: null, supplies: [] });
       },
 
