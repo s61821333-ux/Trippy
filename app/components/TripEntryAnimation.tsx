@@ -72,14 +72,39 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
         />
       ))}
 
-      {/* Logo — springs in, fades out */}
+      {/* Loader card — springs in, fades out */}
       <motion.div
         initial={{ opacity: 0, scale: 0.6, y: 12 }}
         animate={{ opacity: [0, 1, 1, 0], scale: [0.6, 1.05, 1, 0.92], y: [12, 0, 0, 0] }}
         transition={{ duration: 1.8, times: [0.10, 0.26, 0.72, 0.96], ease: 'easeOut' }}
-        style={{ position: 'relative', zIndex: 2 }}
+        style={{
+          position: 'relative', zIndex: 2,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', gap: 20,
+        }}
       >
-        <CompassLoader size={160} />
+        {/* Frosted glass disc */}
+        <div style={{
+          width: 188, height: 188,
+          borderRadius: '50%',
+          background: 'rgba(244,239,232,0.13)',
+          backdropFilter: 'blur(24px)',
+          WebkitBackdropFilter: 'blur(24px)',
+          border: '1.5px solid rgba(244,239,232,0.38)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.35)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <CompassLoader size={140} />
+        </div>
+        {/* Brand label */}
+        <span style={{
+          fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
+          fontSize: 22, fontWeight: 700, color: '#F4EFE8',
+          letterSpacing: '-0.04em', lineHeight: 1,
+          textShadow: '0 2px 12px rgba(0,0,0,0.6)',
+        }}>
+          Trippy<span style={{ color: '#E0916B' }}>.</span>
+        </span>
       </motion.div>
     </motion.div>
   );
