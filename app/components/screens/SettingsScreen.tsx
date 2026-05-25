@@ -27,7 +27,7 @@ export default function SettingsScreen() {
   const [deletingAccount, setDeletingAccount] = useState(false);
 
   const {
-    trip, nickname, setNickname, logout, switchTrip, leaveTrip, deleteAccount,
+    trip, nickname, setNickname, logout, switchTrip, leaveTrip, deleteTrip, deleteAccount,
     themeMode, setThemeMode,
     highContrast, toggleHighContrast,
     reducedMotion, toggleReducedMotion,
@@ -527,6 +527,23 @@ export default function SettingsScreen() {
               >
                 {t('leaveTrip')}
               </GlassBtn>
+
+              {/* Delete Trip — only visible to the owner, permanently destroys the trip for everyone */}
+              {trip.participants[0]?.name === nickname && (
+                <GlassBtn
+                  variant="danger"
+                  size="lg"
+                  style={{ width: '100%' }}
+                  onClick={() => {
+                    const warning = locale === 'he'
+                      ? 'מחיקת הטיול היא פעולה בלתי הפיכה. כל הנתונים (אירועים, הוצאות, הערות) יימחקו לצמיתות עבור כל המשתתפים. להמשיך?'
+                      : 'Deleting the trip is permanent and cannot be undone. All data (events, expenses, notes) will be erased for all participants. Continue?';
+                    confirm(warning, () => deleteTrip().catch(() => show(locale === 'he' ? 'שגיאה במחיקת הטיול. נסה שוב.' : 'Failed to delete trip. Please try again.')), 'danger');
+                  }}
+                >
+                  {locale === 'he' ? '🗑 מחק טיול לצמיתות' : '🗑 Delete Trip Permanently'}
+                </GlassBtn>
+              )}
 
               {/* Sign Out — terminates the session, trip membership is preserved */}
               <GlassBtn

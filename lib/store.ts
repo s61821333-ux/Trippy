@@ -8,7 +8,7 @@ import {
   signOut, signInWithGoogle as dbSignInWithGoogle, getCurrentUser, getSessionUserId,
   dbCreateTrip, dbLoadTripById, rowToTrip,
   dbGetInvitations, dbInviteToTrip, dbAcceptInvitation, dbRejectInvitation,
-  dbAddEvent, dbEditEvent, dbDeleteEvent, dbMoveEvent, dbLeaveTrip, dbUpdateEventVotes,
+  dbAddEvent, dbEditEvent, dbDeleteEvent, dbMoveEvent, dbLeaveTrip, dbDeleteTrip, dbUpdateEventVotes,
   dbAddExpense, dbDeleteExpense,
   dbAddSupply, dbToggleSupply, dbDeleteSupply, dbUpdateSupplyCritical,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
@@ -72,6 +72,8 @@ interface AppState {
   switchTrip: () => void;
   /** Remove the user from this trip's participant list, then unload it. */
   leaveTrip: () => Promise<void>;
+  /** Permanently delete the entire trip from the DB (owner only). */
+  deleteTrip: () => Promise<void>;
   setActiveDay: (day: number) => void;
   setNickname: (n: string) => void;
   updateTripInfo: (updates: { name?: string; days?: number; startDate?: string }) => void;
@@ -437,6 +439,13 @@ export const useAppStore = create<AppState>()(
       leaveTrip: async () => {
         const { tripDbId, userId } = get();
         if (tripDbId && userId) await dbLeaveTrip(tripDbId, userId);
+        set({ trip: null, tripDbId: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [] });
+      },
+
+      // Permanently delete the entire trip (owner only)
+      deleteTrip: async () => {
+        const { tripDbId } = get();
+        if (tripDbId) await dbDeleteTrip(tripDbId);
         set({ trip: null, tripDbId: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [] });
       },
 

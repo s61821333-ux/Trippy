@@ -137,8 +137,9 @@ export async function GET(
 }
 
 // DELETE /api/trips/[tripId] — leave a trip (removes current user from participants)
+// DELETE /api/trips/[tripId]?full=true — permanently delete the entire trip (owner only)
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
 ) {
   const { tripId } = await params
@@ -156,6 +157,18 @@ export async function DELETE(
 
   const admin = tryAdminClient()
   const client = admin ?? supabase
+  const full = request.nextUrl.searchParams.get('full') === 'true'
+
+  if (full) {
+    // Verify the requesting user is the trip owner
+    const { data: trip } = await client.from('trips').select('created_by').eq('id', tripId).maybeSingle()
+    if (!trip) return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+    if (trip.created_by !== user.id) return NextResponse.json({ error: 'Only the trip owner can delete it' }, { status: 403 })
+    const { error } = await client.from('trips').delete().eq('id', tripId)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ ok: true })
+  }
+
   const { error } = await client
     .from('trip_participants')
     .delete()

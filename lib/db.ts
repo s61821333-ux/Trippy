@@ -376,6 +376,11 @@ export async function dbLeaveTrip(tripId: string, _userId: string) {
   if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
+export async function dbDeleteTrip(tripId: string) {
+  const r = await fetch(`/api/trips/${tripId}?full=true`, { method: 'DELETE' })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
+}
+
 // ─── Trip notes ──────────────────────────────────────────────────────────────
 
 export async function dbUpdateTripNotes(tripId: string, notes: string[]) {
