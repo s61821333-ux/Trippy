@@ -3,49 +3,11 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { getCountryColors } from '@/lib/countryColors';
+import CompassLoader from './ui/CompassLoader';
 
 interface Props {
   countries: string[];
   onDone: () => void;
-}
-
-function TrippyLogo({ size = 128 }: { size?: number }) {
-  const compassSize = size * 0.58;
-  return (
-    <div style={{
-      width: size, height: size,
-      borderRadius: size * 0.26,
-      background: 'rgba(244,239,232,0.14)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      border: '1.5px solid rgba(244,239,232,0.40)',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      gap: size * 0.06,
-    }}>
-      <svg
-        width={compassSize} height={compassSize}
-        viewBox="0 0 240 240" fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        style={{ filter: 'drop-shadow(0 3px 10px rgba(0,0,0,0.35))' }}
-      >
-        <circle cx="120" cy="120" r="90" stroke="#F4EFE8" strokeWidth="4" fill="none"/>
-        <path d="M120 36 L138 120 L120 124 L102 120 Z" fill="#E0916B"/>
-        <path d="M120 204 L102 120 L120 116 L138 120 Z" fill="#8BB39A"/>
-        <path d="M204 120 L120 102 L116 120 L120 138 Z" fill="#E6B574" opacity="0.85"/>
-        <path d="M36 120 L120 138 L124 120 L120 102 Z" fill="#E6B574" opacity="0.85"/>
-        <circle cx="120" cy="120" r="6" fill="#F4EFE8"/>
-      </svg>
-      <span style={{
-        fontSize: size * 0.145, fontWeight: 700, color: '#F4EFE8',
-        letterSpacing: '-0.04em', lineHeight: 1,
-        textShadow: '0 1px 8px rgba(0,0,0,0.5)',
-        fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
-      }}>
-        Trippy<span style={{ color: '#E0916B' }}>.</span>
-      </span>
-    </div>
-  );
 }
 
 export default function TripEntryAnimation({ countries, onDone }: Props) {
@@ -117,7 +79,7 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
         transition={{ duration: 1.8, times: [0.10, 0.26, 0.72, 0.96], ease: 'easeOut' }}
         style={{ position: 'relative', zIndex: 2 }}
       >
-        <TrippyLogo size={140} />
+        <CompassLoader size={160} />
       </motion.div>
     </motion.div>
   );
