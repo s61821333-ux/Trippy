@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
+import { AddEmergencyContactBody } from '@/lib/schemas'
 
 function tryAdminClient() {
   try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
@@ -41,13 +42,23 @@ export async function POST(
   const r = await setup(tripId)
   if ('error' in r) return r.error
 
-  const body = await request.json()
+  let raw: unknown
+  try { raw = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const parsed = AddEmergencyContactBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
+  }
+
+  const { id, name, phone, type } = parsed.data
   const { error } = await r.client.from('emergency_contacts').insert({
-    id: body.id,
+    id,
     trip_id: tripId,
-    name: body.name,
-    phone: body.phone,
-    type: body.type ?? 'personal',
+    name,
+    phone,
+    type: type ?? 'personal',
   })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

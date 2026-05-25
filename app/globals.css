@@ -4,10 +4,20 @@
 
 /* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
+  /* ── V2 Liquid Glass surfaces (oklch, translucent) ── */
+  --surface:        oklch(97% 0.01 80 / 0.82);
+  --surface-strong: oklch(95% 0.015 80 / 0.92);
+  --nav-surface:    oklch(96% 0.01 80 / 0.94);
+
+  /* Glass blur + specular rim */
+  --glass-blur: blur(20px) saturate(1.8);
+  --glass-rim:  linear-gradient(180deg, oklch(100% 0 0 / 0.18) 0%, oklch(100% 0 0 / 0) 40%);
+
   /* Backgrounds */
   --bg:            #F4EFE8;
   --bg-alt:        #EDE7DE;
-  --surface:       #FFFFFF;
+  --bg-paper:      #F4EFE8;   /* alias */
+  --bg-warm:       #EDE7DE;   /* alias */
   --surface-warm:  #FAF8F5;
 
   /* Borders */
@@ -32,9 +42,11 @@
 
   /* Text */
   --text:          #1A1410;
+  --text-1:        #1A1410;   /* alias */
   --text-2:        #6B5C4E;
   --text-3:        #A8998A;
   --text-inv:      #FFFFFF;
+  --text-inverse:  #FFFFFF;   /* alias */
 
   /* Semantic */
   --success:       #2E7D55;
@@ -59,14 +71,52 @@
   --radius-xl:   20px;
   --radius-full: 9999px;
 
+  /* V2 numbered radius scale */
+  --radius-1: 8px;
+  --radius-2: 14px;
+  --radius-3: 20px;
+  --radius-4: 28px;
+
   /* Typography */
   --font-sans:    'Bricolage Grotesque', -apple-system, system-ui, sans-serif;
   --font-display: 'Bricolage Grotesque', -apple-system, system-ui, sans-serif;
   --font-serif:   'Newsreader', Georgia, serif;
   --font-mono:    'JetBrains Mono', ui-monospace, monospace;
-  --font-hebrew:  'Huninn', 'DM Sans', sans-serif;
+  --font-hebrew:  'Noto Sans Hebrew', 'DM Sans', sans-serif;
 
-  /* Spacing */
+  /* V2 type scale — Major Third (1.25) */
+  --text-xs:   0.64rem;
+  --text-sm:   0.8rem;
+  --text-base: 1rem;
+  --text-md:   1.25rem;
+  --text-lg:   1.563rem;
+  --text-xl:   1.953rem;
+  --text-2xl:  2.441rem;
+
+  /* Line heights */
+  --leading-tight:   1.2;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.75;
+
+  /* Font weights */
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* V2 space scale — 4px base */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Legacy spacing (kept for backward compat) */
   --gap-xs: 8px;
   --gap-sm: 12px;
   --gap-md: 20px;
@@ -169,9 +219,15 @@
   --compass-ew:   #E6B574;
   --compass-hub:  #F4EFE8;
 
+  /* V2 Liquid Glass — dark mode */
+  --surface:        oklch(18% 0.02 80 / 0.82);
+  --surface-strong: oklch(15% 0.025 80 / 0.92);
+  --nav-surface:    oklch(16% 0.02 80 / 0.94);
+
   --bg:            #0E0C0A;
   --bg-alt:        #17140F;
-  --surface:       #1C1814;
+  --bg-paper:      #0E0C0A;
+  --bg-warm:       #17140F;
   --surface-warm:  #211D18;
 
   --border:        #352C24;
@@ -328,9 +384,32 @@ select {
   box-sizing: border-box;
 }
 
+/* ─── V2 Liquid Glass Panel ───────────────────────────────────── */
+.glass-panel {
+  background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid oklch(100% 0 0 / 0.12);
+  border-top-color: oklch(100% 0 0 / 0.24);
+  border-radius: var(--radius-2);
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 0.1) inset,
+    0 8px 32px oklch(0% 0 0 / 0.08);
+}
+
+[data-dark="true"] .glass-panel {
+  border-color: oklch(100% 0 0 / 0.06);
+  border-top-color: oklch(100% 0 0 / 0.12);
+  box-shadow:
+    0 1px 0 oklch(100% 0 0 / 0.06) inset,
+    0 8px 32px oklch(0% 0 0 / 0.40);
+}
+
 /* ─── Card (replaces .glass) ──────────────────────────────────── */
 .glass {
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -404,6 +483,17 @@ select {
     border-color: var(--border-strong);
   }
   .text-glow-hover:hover { filter: brightness(1.06); }
+}
+
+/* ─── Focus indicators (WCAG AA) ─────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--terra);
+  outline-offset: 2px;
+  border-radius: var(--radius-1);
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /* ─── Input focus ─────────────────────────────────────────────── */
@@ -627,3 +717,69 @@ select {
   --danger:        #FF5555;
   --danger-bg:     rgba(255, 85, 85, 0.18);
 }
+
+/* ─── Scroll utilities ───────────────────────────────────────── */
+.scroll-container {
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+@media (pointer: coarse) {
+  .scroll-container::-webkit-scrollbar { display: none; }
+  .scroll-container { scrollbar-width: none; }
+}
+@media (pointer: fine) {
+  .scroll-container::-webkit-scrollbar { width: 4px; }
+  .scroll-container::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: var(--radius-full);
+  }
+}
+
+/* ─── Scroll snap — day navigation ──────────────────────────── */
+.days-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.days-container::-webkit-scrollbar { display: none; }
+
+.day-panel {
+  scroll-snap-align: start;
+  flex: 0 0 100%;
+  height: 100%;
+}
+
+/* ─── Touch interaction baseline ─────────────────────────────── */
+button, [role="button"], a, [tabindex] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+nav, [data-no-select] {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ─── Logical property helpers (RTL-safe) ─────────────────────── */
+.ms-auto  { margin-inline-start: auto; }
+.me-auto  { margin-inline-end: auto; }
+.ps-4     { padding-inline-start: var(--space-4); }
+.pe-4     { padding-inline-end: var(--space-4); }
+.start-0  { inset-inline-start: 0; }
+.end-0    { inset-inline-end: 0; }
+
+/* ─── Brand wordmark — always LTR ───────────────────────────── */
+.wordmark {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.wordmark .dot { color: var(--terra); }

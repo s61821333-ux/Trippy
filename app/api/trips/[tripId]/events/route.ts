@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
+import { AddEventBody, PatchEventBody } from '@/lib/schemas'
 
 function tryAdminClient() {
   try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
@@ -38,7 +39,6 @@ export async function POST(
 
   const admin = tryAdminClient()
 
-  // If admin is available, verify participation with it (bypasses RLS — works regardless of cookie state)
   if (admin) {
     const { data: participant } = await admin
       .from('trip_participants')
@@ -48,24 +48,33 @@ export async function POST(
       .maybeSingle()
     if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
   }
-  // If no admin client, trust the auth check and let RLS enforce it on the insert
 
-  const body = await request.json()
+  let raw: unknown
+  try { raw = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const parsed = AddEventBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
+  }
+
+  const d = parsed.data
   const row = {
-    id: body.id,
+    id: d.id,
     trip_id: tripId,
-    day_index: body.day_index,
-    time: body.time,
-    duration: body.duration,
-    name: body.name,
-    category: body.category,
-    location: body.location ?? null,
-    lat: body.lat ?? null,
-    lng: body.lng ?? null,
-    notes: body.notes ?? null,
+    day_index: d.day_index,
+    time: d.time,
+    duration: d.duration,
+    name: d.name,
+    category: d.category,
+    location: d.location ?? null,
+    lat: d.lat ?? null,
+    lng: d.lng ?? null,
+    notes: d.notes ?? null,
     added_by: user.id,
-    cost: body.cost ?? null,
-    tags: body.tags ?? null,
+    cost: d.cost ?? null,
+    tags: d.tags ?? null,
   }
 
   const client = admin ?? await getUserClient()
@@ -120,15 +129,18 @@ export async function PATCH(
     if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
   }
 
-  const body = await request.json()
-  const allowed = ['time','duration','name','category','location','lat','lng','notes','cost','tags','votes','day_index']
-  const patch: Record<string, unknown> = {}
-  for (const key of allowed) {
-    if (key in body) patch[key] = body[key]
+  let raw: unknown
+  try { raw = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const parsed = PatchEventBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
   }
 
   const client = admin ?? await getUserClient()
-  const { error } = await client.from('events').update(patch).eq('id', eventId)
+  const { error } = await client.from('events').update(parsed.data).eq('id', eventId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
+import { PatchDayMetaBody } from '@/lib/schemas'
 
 function tryAdminClient() {
   try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
@@ -35,16 +36,24 @@ export async function PATCH(
     if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
   }
 
-  const body = await request.json()
-  const { dayIndex, ...meta } = body
-  if (dayIndex === undefined) return NextResponse.json({ error: 'Missing dayIndex' }, { status: 400 })
+  let raw: unknown
+  try { raw = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const parsed = PatchDayMetaBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
+  }
+
+  const { dayIndex, region, emoji, lat, lng, desc } = parsed.data
 
   const patch: Record<string, unknown> = {}
-  if (meta.region !== undefined) patch.region      = meta.region
-  if (meta.emoji  !== undefined) patch.emoji       = meta.emoji
-  if (meta.lat    !== undefined) patch.lat         = meta.lat
-  if (meta.lng    !== undefined) patch.lng         = meta.lng
-  if (meta.desc   !== undefined) patch.description = meta.desc
+  if (region !== undefined) patch.region      = region
+  if (emoji  !== undefined) patch.emoji       = emoji
+  if (lat    !== undefined) patch.lat         = lat
+  if (lng    !== undefined) patch.lng         = lng
+  if (desc   !== undefined) patch.description = desc
 
   const client = admin ?? supabase
   const { error } = await client.from('day_meta').update(patch).eq('trip_id', tripId).eq('day_index', dayIndex)

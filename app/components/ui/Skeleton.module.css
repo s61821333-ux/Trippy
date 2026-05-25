@@ -1,0 +1,89 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+}
+
+.line {
+  height: 14px;
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--border-strong) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+  border-radius: var(--radius-1);
+}
+
+.eventCard {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-2);
+}
+
+.eventTime {
+  width: 44px;
+  height: 36px;
+  border-radius: var(--radius-1);
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--border-strong) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.eventBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.eventChip {
+  width: 52px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    var(--border-strong) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes skeleton-sweep {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line,
+  .eventTime,
+  .eventChip {
+    animation: none;
+    background: var(--border);
+  }
+}
+
+[data-reduced-motion="true"] .line,
+[data-reduced-motion="true"] .eventTime,
+[data-reduced-motion="true"] .eventChip {
+  animation: none;
+  background: var(--border);
+}

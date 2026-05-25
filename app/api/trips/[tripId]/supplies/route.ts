@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
+import { AddSupplyBody, PatchSupplyBody } from '@/lib/schemas'
 
 function tryAdminClient() {
   try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
@@ -42,22 +43,32 @@ export async function POST(
   const r = await setup(request, tripId)
   if ('error' in r) return r.error
 
-  const body = await request.json()
+  let raw: unknown
+  try { raw = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const parsed = AddSupplyBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
+  }
+
+  const { id, name, category, checked, critical, assignee } = parsed.data
   const { error } = await r.client.from('supplies').insert({
-    id: body.id,
+    id,
     trip_id: tripId,
-    name: body.name,
-    category: body.category,
-    checked: body.checked ?? false,
-    critical: body.critical ?? false,
-    assignee: body.assignee ?? null,
+    name,
+    category: category ?? null,
+    checked: checked ?? false,
+    critical: critical ?? false,
+    assignee: assignee ?? null,
   })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
 
 // PATCH /api/trips/[tripId]/supplies?id=xxx
-// Body: { checked? } or { critical? }
+// Body: { checked? } or { critical? } or { assignee? }
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
@@ -69,10 +80,20 @@ export async function PATCH(
   const r = await setup(request, tripId)
   if ('error' in r) return r.error
 
-  const body = await request.json()
+  let raw: unknown
+  try { raw = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const parsed = PatchSupplyBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
+  }
+
   const patch: Record<string, unknown> = {}
-  if (body.checked  !== undefined) patch.checked  = body.checked
-  if (body.critical !== undefined) patch.critical = body.critical
+  if (parsed.data.checked   !== undefined) patch.checked   = parsed.data.checked
+  if (parsed.data.critical  !== undefined) patch.critical  = parsed.data.critical
+  if (parsed.data.assignee  !== undefined) patch.assignee  = parsed.data.assignee
 
   const { error } = await r.client.from('supplies').update(patch).eq('id', supplyId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

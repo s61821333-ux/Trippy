@@ -13,6 +13,12 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // Prevent accidental console.log leaking auth data or PII to production logs.
+      "no-console": ["error", { allow: ["warn", "error"] }],
+    },
+  },
 ]);
 
 export default eslintConfig;

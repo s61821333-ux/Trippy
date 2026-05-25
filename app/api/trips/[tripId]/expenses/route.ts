@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
+import { AddExpenseBody } from '@/lib/schemas'
 
 function tryAdminClient() {
   try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
@@ -39,17 +40,27 @@ export async function POST(
     if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
   }
 
-  const body = await request.json()
+  let raw: unknown
+  try { raw = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const parsed = AddExpenseBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
+  }
+
+  const { id, description, amount, splitCount } = parsed.data
   const client = admin ?? createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
     cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} },
   })
   const { error } = await client.from('expenses').insert({
-    id: body.id,
+    id,
     trip_id: tripId,
-    description: body.description,
-    amount: body.amount,
+    description,
+    amount,
     paid_by: user.id,
-    split_count: body.splitCount ?? 1,
+    split_count: splitCount ?? 1,
   })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

@@ -1,9 +1,24 @@
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
-import { GOOGLE_MAPS_API_KEY } from '@/lib/env'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit'
+import { SUPABASE_URL, SUPABASE_ANON_KEY, GOOGLE_MAPS_API_KEY } from '@/lib/env'
 
 // GET /api/places?input=TEXT
 // Server-side proxy — keeps GOOGLE_MAPS_API_KEY off the client
 export async function GET(request: NextRequest) {
+  // Auth check — prevents anonymous quota exhaustion on Google Places API
+  const cookieStore = await cookies()
+  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+    cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} },
+  })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Rate limit: 60 autocomplete requests/60s per user
+  const rl = checkRateLimit(`places:${user.id}`, 60, 60)
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 60)
+
   const input = request.nextUrl.searchParams.get('input')?.trim()
   if (!input) return NextResponse.json([], { status: 200 })
 

@@ -768,9 +768,10 @@ export const useAppStore = create<AppState>()(
           .on(
             'postgres_changes',
             { event: 'UPDATE', schema: 'public', table: 'trips', filter: `id=eq.${tripId}` },
-            () => {
-              // Refetch the full trip on any remote update — avoids complex row merging
-              // since postgres_changes only delivers the trips row, not related tables.
+            (payload) => {
+              // Guard: only act on changes for the active trip (defence-in-depth)
+              const changedId = (payload.new as any)?.id ?? (payload.old as any)?.id;
+              if (changedId && changedId !== tripId) return;
               get().loadTripById(tripId).catch(() => {});
             },
           )
@@ -836,8 +837,3 @@ export const useAppStore = create<AppState>()(
     }
   )
 );
-
-// Expose store on window in non-production for Playwright tests
-if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-  (window as any).__trippyStore = useAppStore;
-}

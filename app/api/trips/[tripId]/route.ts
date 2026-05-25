@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
+import { UpdateTripBody } from '@/lib/schemas'
 
 const TRIP_SELECT = `
   id, name, days, start_date, theme, trip_notes, countries, hotels, created_by,
@@ -44,13 +45,23 @@ export async function PATCH(
     if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
   }
 
-  const body = await request.json()
+  let raw: unknown
+  try { raw = await request.json() } catch {
+    return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+  }
+
+  const parsed = UpdateTripBody.safeParse(raw)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
+  }
+
+  const d = parsed.data
   const patch: Record<string, unknown> = {}
-  if (body.name      !== undefined) patch.name       = body.name
-  if (body.days      !== undefined) patch.days       = body.days
-  if (body.startDate !== undefined) patch.start_date = body.startDate
-  if (body.theme     !== undefined) patch.theme      = body.theme
-  if (body.tripNotes !== undefined) patch.trip_notes = body.tripNotes
+  if (d.name       !== undefined) patch.name       = d.name
+  if (d.days       !== undefined) patch.days       = d.days
+  if (d.startDate  !== undefined) patch.start_date = d.startDate
+  if (d.theme      !== undefined) patch.theme      = d.theme
+  if (d.trip_notes !== undefined) patch.trip_notes = d.trip_notes
 
   const client = admin ?? supabase
   const { error } = await client.from('trips').update(patch).eq('id', tripId)
@@ -109,11 +120,9 @@ export async function GET(
         .maybeSingle()
 
       if (error || !data) {
-        console.error('[GET trip] admin query failed:', error)
         return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
       }
 
-      console.log('[GET trip] admin ok, events count:', (data as any).events?.length ?? 0)
       return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } })
     }
 
@@ -125,11 +134,9 @@ export async function GET(
       .maybeSingle()
 
     if (error || !data) {
-      console.error('[GET trip] fallback query failed:', error)
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
     }
 
-    console.log('[GET trip] fallback ok, events count:', (data as any).events?.length ?? 0)
     return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } })
   } catch (err: any) {
     return NextResponse.json({ error: err.message ?? 'Server error' }, { status: 500 })
