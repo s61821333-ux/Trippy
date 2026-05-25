@@ -111,6 +111,7 @@ export interface Trip {
   expenses?: Expense[];
   emergencyContacts?: EmergencyContact[];
   hotels?: HotelStay[];
+  createdBy?: string;
 }
 
 export type Screen = 'login' | 'dashboard' | 'day' | 'supplies' | 'settings' | 'notes';

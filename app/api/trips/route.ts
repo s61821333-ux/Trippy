@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
     if (partErr || !participantRows?.length) {
       return NextResponse.json(
         { trips: [], nextCursor: null },
-        { status: 200, headers: { 'Cache-Control': 'private, max-age=30' } },
+        { status: 200, headers: { 'Cache-Control': 'no-store' } },
       )
     }
 
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     if (error) {
       return NextResponse.json(
         { trips: [], nextCursor: null },
-        { status: 200, headers: { 'Cache-Control': 'private, max-age=30' } },
+        { status: 200, headers: { 'Cache-Control': 'no-store' } },
       )
     }
 
@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(
       { trips: result, nextCursor },
-      { headers: { 'Cache-Control': 'private, max-age=30' } },
+      { headers: { 'Cache-Control': 'no-store' } },
     )
   } catch {
     return NextResponse.json({ trips: [], nextCursor: null }, { status: 200 })

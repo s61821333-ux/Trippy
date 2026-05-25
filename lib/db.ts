@@ -584,6 +584,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     events,
     expenses,
     emergencyContacts,
+    createdBy: (data as any).created_by ?? undefined,
   }
 
   return { trip, supplies }

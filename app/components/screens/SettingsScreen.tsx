@@ -36,8 +36,10 @@ export default function SettingsScreen() {
     dayEndHour, setDayEndHour,
     addExpense, deleteExpense,
     updateTripInfo,
-    currencyByTrip, tripDbId, setCurrency,
+    currencyByTrip, tripDbId, setCurrency, userId,
   } = useAppStore();
+
+  const isOwner = !!(trip?.createdBy && userId && trip.createdBy === userId);
   const { show } = useToast();
   const { t, locale, setLocale, isRTL } = useI18n();
   const [nickEdit, setNickEdit] = useState(nickname);
@@ -508,28 +510,25 @@ export default function SettingsScreen() {
                 {locale === 'he' ? '🔄 החלף טיול' : '🔄 Switch Trip'}
               </GlassBtn>
 
-              {/* Leave Trip — permanently removes you from the participant list */}
-              <GlassBtn
-                variant="danger"
-                size="lg"
-                style={{ width: '100%' }}
-                onClick={() => {
-                  const isOwner = trip.participants[0]?.name === nickname;
-                  const warning = isOwner
-                    ? (locale === 'he'
-                        ? 'אתה בעל הטיול. עזיבתך תסיר אותך מרשימת המשתתפים. להמשיך?'
-                        : 'You are the trip owner. Leaving will remove you from the participants list. Continue?')
-                    : (locale === 'he'
-                        ? 'האם אתה בטוח? פעולה זו תסיר אותך מהטיול.'
-                        : 'Are you sure? This will remove you from the trip.');
-                  confirm(warning, () => leaveTrip().catch(() => show(locale === 'he' ? 'שגיאה בעזיבת הטיול. נסה שוב.' : 'Failed to leave trip. Please try again.')), 'danger');
-                }}
-              >
-                {t('leaveTrip')}
-              </GlassBtn>
+              {/* Leave Trip — only for non-owners */}
+              {!isOwner && (
+                <GlassBtn
+                  variant="danger"
+                  size="lg"
+                  style={{ width: '100%' }}
+                  onClick={() => {
+                    const warning = locale === 'he'
+                      ? 'האם אתה בטוח? פעולה זו תסיר אותך מהטיול.'
+                      : 'Are you sure? This will remove you from the trip.';
+                    confirm(warning, () => leaveTrip().catch(() => show(locale === 'he' ? 'שגיאה בעזיבת הטיול. נסה שוב.' : 'Failed to leave trip. Please try again.')), 'danger');
+                  }}
+                >
+                  {t('leaveTrip')}
+                </GlassBtn>
+              )}
 
-              {/* Delete Trip — only visible to the owner, permanently destroys the trip for everyone */}
-              {trip.participants[0]?.name === nickname && (
+              {/* Delete Trip — only for the owner, permanently destroys the trip for everyone */}
+              {isOwner && (
                 <GlassBtn
                   variant="danger"
                   size="lg"

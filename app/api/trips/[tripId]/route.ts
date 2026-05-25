@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 
 const TRIP_SELECT = `
-  id, name, days, start_date, theme, trip_notes, countries, hotels,
+  id, name, days, start_date, theme, trip_notes, countries, hotels, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
   events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes ),
   expenses ( id, description, amount, split_count ),
@@ -169,11 +169,14 @@ export async function DELETE(
     return NextResponse.json({ ok: true })
   }
 
-  const { error } = await client
+  const { data: deleted, error } = await client
     .from('trip_participants')
     .delete()
     .eq('trip_id', tripId)
     .eq('user_id', user.id)
+    .select()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (!deleted || deleted.length === 0)
+    return NextResponse.json({ error: 'Not a participant or permission denied' }, { status: 403 })
   return NextResponse.json({ ok: true })
 }
