@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { AnimatePresence, motion, MotionConfig } from 'framer-motion';
+import { AnimatePresence, m, MotionConfig } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
+import { screenVariants, spring } from '@/lib/motion';
 import { useAppStore } from '@/lib/store';
 import { I18nProvider, useI18n } from '@/lib/i18n';
 import { createClient } from '@/utils/supabase/client';
@@ -68,25 +70,50 @@ function SyncErrorWatcher() {
   return null;
 }
 
-const screenVariants = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -4 },
-};
-
-const screenTransition = {
-  type: 'spring' as const,
-  stiffness: 360,
-  damping: 38,
-  mass: 0.8,
-};
+const screenTransition = spring.default;
 
 function Shell() {
-  const { screen, setScreen, trip, themeMode, setThemeMode, highContrast, reducedMotion, showTour,
-    tripEntryCountries, clearTripEntry, tripDbId, recordDemoClick, checkAuth, loadTripById, authUser,
-    termsAccepted, subscribeToTrip,
-    isOffline, pendingChanges, setIsOffline, flushPendingChanges,
-    isGlobalLoading } = useAppStore();
+  // Granular selectors — each group only re-renders Shell when its slice changes (ME-5)
+  const screen          = useAppStore(s => s.screen);
+  const isGlobalLoading = useAppStore(s => s.isGlobalLoading);
+  const themeMode       = useAppStore(s => s.themeMode);
+
+  const { setScreen, setThemeMode, checkAuth, loadTripById, subscribeToTrip,
+          recordDemoClick, clearTripEntry } = useAppStore(
+    useShallow(s => ({
+      setScreen:       s.setScreen,
+      setThemeMode:    s.setThemeMode,
+      checkAuth:       s.checkAuth,
+      loadTripById:    s.loadTripById,
+      subscribeToTrip: s.subscribeToTrip,
+      recordDemoClick: s.recordDemoClick,
+      clearTripEntry:  s.clearTripEntry,
+    }))
+  );
+
+  const { trip, tripDbId, tripEntryCountries, authUser, termsAccepted, showTour } = useAppStore(
+    useShallow(s => ({
+      trip:               s.trip,
+      tripDbId:           s.tripDbId,
+      tripEntryCountries: s.tripEntryCountries,
+      authUser:           s.authUser,
+      termsAccepted:      s.termsAccepted,
+      showTour:           s.showTour,
+    }))
+  );
+
+  const { highContrast, reducedMotion } = useAppStore(
+    useShallow(s => ({ highContrast: s.highContrast, reducedMotion: s.reducedMotion }))
+  );
+
+  const { isOffline, pendingChanges, setIsOffline, flushPendingChanges } = useAppStore(
+    useShallow(s => ({
+      isOffline:          s.isOffline,
+      pendingChanges:     s.pendingChanges,
+      setIsOffline:       s.setIsOffline,
+      flushPendingChanges: s.flushPendingChanges,
+    }))
+  );
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [osDark, setOsDark] = useState(false);
@@ -269,7 +296,7 @@ function Shell() {
 
           <div className="flex-1 flex flex-col relative overflow-hidden w-full">
             <AnimatePresence mode="wait" initial={false}>
-              <motion.div
+              <m.div
                 key={screen}
                 variants={screenVariants}
                 initial="initial"
@@ -295,7 +322,7 @@ function Shell() {
                     ) : null}
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             </AnimatePresence>
           </div>
           {showTour && <TourOverlay />}
@@ -322,7 +349,7 @@ function Shell() {
           {/* Global loading overlay — shown during loadTripById / createTrip */}
           <AnimatePresence>
             {isGlobalLoading && (
-              <motion.div
+              <m.div
                 key="global-loader"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -346,7 +373,7 @@ function Shell() {
                 }}>
                   Trippy<span style={{ color: 'var(--terra)' }}>.</span>
                 </span>
-              </motion.div>
+              </m.div>
             )}
           </AnimatePresence>
         </div>

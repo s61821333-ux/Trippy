@@ -8,6 +8,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useAppStore } from '../store';
 import type {
   Trip, TripEvent, HotelStay, SupplyItem, Expense, DayMeta,
   AiSuggestion, TripInvitation, TripTheme,
@@ -186,7 +187,7 @@ export const useTripStore = create<TripState>()(
       addEvent: (dayNumber, event) => {
         const { trip, tripDbId } = get();
         if (!trip) return;
-        const userId = (require('../store') as typeof import('../store')).useAppStore.getState().userId;
+        const userId = useAppStore.getState().userId;
         const newEvent: TripEvent = { ...event, id: uid(), addedBy: userId ?? 'local' };
         const events = { ...trip.events, [dayNumber]: [...(trip.events[dayNumber] ?? []), newEvent] };
         set({ trip: { ...trip, events } });
@@ -298,7 +299,7 @@ export const useTripStore = create<TripState>()(
         const expenses = [...(trip.expenses ?? []), expense];
         set({ trip: { ...trip, expenses } });
         if (tripDbId) {
-          const userId = (require('../store') as typeof import('../store')).useAppStore.getState().userId;
+          const userId = useAppStore.getState().userId;
           dbAddExpense(tripDbId, expense, userId ?? 'local').catch(() => {});
         }
       },

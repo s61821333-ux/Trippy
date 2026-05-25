@@ -1,6 +1,39 @@
 import type { Metadata, Viewport } from 'next';
+import { Bricolage_Grotesque, Newsreader, JetBrains_Mono, Noto_Sans_Hebrew } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
+import MotionProvider from './components/MotionProvider';
 import './globals.css';
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  display: 'swap',
+  axes: ['opsz'],
+  weight: 'variable',
+});
+
+const newsreader = Newsreader({
+  subsets: ['latin'],
+  variable: '--font-serif',
+  display: 'swap',
+  style: ['normal', 'italic'],
+  axes: ['opsz'],
+  weight: 'variable',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  variable: '--font-mono',
+  display: 'swap',
+  weight: ['400', '500', '600'],
+});
+
+const hebrewFont = Noto_Sans_Hebrew({
+  subsets: ['hebrew'],
+  variable: '--font-hebrew',
+  display: 'swap',
+  weight: ['400', '500', '600', '700'],
+});
 
 export const metadata: Metadata = {
   title: 'Trippy - Friendly Trip Planner',
@@ -23,22 +56,15 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" style={{ height: '100%' }}>
-      <head>
-        <meta charSet="utf-8" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Huninn&display=swap"
-          rel="stylesheet"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html
+      lang="en"
+      style={{ height: '100%' }}
+      className={`${bricolage.variable} ${newsreader.variable} ${jetbrainsMono.variable} ${hebrewFont.variable}`}
+    >
       <body style={{ height: '100%' }}>
-        {children}
+        <MotionProvider>
+          {children}
+        </MotionProvider>
         <Analytics />
       </body>
     </html>
