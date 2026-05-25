@@ -325,22 +325,22 @@ function Shell() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.18 }}
+                transition={{ duration: 0.22 }}
                 style={{
                   position: 'fixed', inset: 0, zIndex: 9990,
-                  background: 'var(--bg)',
+                  background: '#F4EFE8',
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center',
-                  gap: 24,
+                  gap: 28,
                 }}
               >
-                <CompassLoader size={140} />
+                <CompassLoader size={200} />
                 <span style={{
                   fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
-                  fontSize: 20, fontWeight: 700, letterSpacing: '-0.04em',
-                  color: 'var(--text)', lineHeight: 1,
+                  fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em',
+                  color: '#1A1410', lineHeight: 1,
                 }}>
-                  Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+                  Trippy<span style={{ color: '#C4714A' }}>.</span>
                 </span>
               </motion.div>
             )}
