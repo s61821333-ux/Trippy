@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { recommendMode, getGapUrgency, URGENCY_COLORS, MODE_ICON } from '@/lib/travelMode';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
 import { EventIcon } from '../ui/EventIcon';
@@ -19,14 +20,9 @@ import { useToast } from '../ui/Toast';
 import SuggestionsSheet from '../SuggestionsSheet';
 import DayTimelineView from '../DayTimelineView';
 import { useI18n, TranslationKey } from '@/lib/i18n';
+import { slideVariants, spring } from '@/lib/motion';
 
 const CATEGORIES: Category[] = ['food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'concert', 'theme_park', 'sport', 'beach', 'other'];
-
-const daySlideVariants = {
-  initial: (dir: number) => ({ x: dir > 0 ? 44 : -44, opacity: 0 }),
-  animate: { x: 0, opacity: 1 },
-  exit: (dir: number) => ({ x: dir > 0 ? -44 : 44, opacity: 0 }),
-};
 
 function getMapsUrl(location: string, lat?: number, lng?: number): string {
   const isIOS = typeof navigator !== 'undefined' &&
@@ -162,14 +158,16 @@ interface ConnectorProps {
   gapStart: number;
   fromEv?: TripEvent;
   toEv?: TripEvent;
+  tripStartDate?: string;
   onSuggest: () => void;
   onAdd: () => void;
-  t: (k: TranslationKey) => string;
+  t: (k: TranslationKey | string) => string;
 }
 
-function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest, onAdd, t }: ConnectorProps) {
+function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, tripStartDate, onSuggest, onAdd, t }: ConnectorProps) {
   const [modes, setModes] = useState<TravelModes | null>(null);
   const [fetching, setFetching] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const { locale } = useI18n();
 
   const isFree = gapMins >= 45;
@@ -178,11 +176,25 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
 
   const [routeRetry, setRouteRetry] = useState(0);
 
+  // Compute departure unix timestamp for rush-hour awareness (§2.4)
+  const departureTime = (() => {
+    if (!fromEv?.time || !tripStartDate) return undefined;
+    try {
+      const ts = Math.floor(new Date(`${tripStartDate}T${fromEv.time}`).getTime() / 1000);
+      return isNaN(ts) ? undefined : ts;
+    } catch { return undefined; }
+  })();
+
   useEffect(() => {
     if (!canRoute) return;
     setFetching(true);
     setModes(null);
-    fetch(`/api/route-time?olat=${fromEv!.lat}&olng=${fromEv!.lng}&dlat=${toEv!.lat}&dlng=${toEv!.lng}`)
+    const params = new URLSearchParams({
+      olat: String(fromEv!.lat), olng: String(fromEv!.lng),
+      dlat: String(toEv!.lat), dlng: String(toEv!.lng),
+    });
+    if (departureTime) params.set('departureTime', String(departureTime));
+    fetch(`/api/route-time?${params.toString()}`)
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d) setModes(d); })
       .catch(() => {})
@@ -190,8 +202,20 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromEv?.lat, fromEv?.lng, toEv?.lat, toEv?.lng, routeRetry]);
 
+  // Smart mode recommendation + urgency (§2.3 + §4)
+  const rec = modes ? recommendMode(modes, gapMins) : null;
+  const recMode = rec?.mode;
+  const recResult = recMode && modes ? modes[recMode] : null;
+  const recTravelMins = recResult?.durationMins ?? 0;
+  const urgency = getGapUrgency(gapMins, recTravelMins);
+  const urgencyStyle = URGENCY_COLORS[urgency];
+
   const hasTravel = modes?.driving || modes?.walking || modes?.transit;
-  const dashColor = isFree ? 'var(--warning)' : hasTravel ? 'rgba(99,102,241,0.6)' : 'var(--border)';
+  const dashColor = isFree
+    ? 'var(--warning)'
+    : hasTravel
+      ? urgencyStyle.line
+      : 'var(--border)';
 
   return (
     <div style={{
@@ -199,10 +223,9 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
       padding: '4px var(--page-px) 4px calc(var(--page-px) + 12px)',
     }}>
 
-      {/* ── Travel row: direction label + mode badges ── */}
+      {/* ── Smart travel row with recommended mode badge ── */}
       {bothExist && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          {/* Direction label */}
           <span dir="ltr" style={{
             fontSize: 10, fontWeight: 600, color: 'var(--text-3)',
             display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0,
@@ -212,26 +235,118 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
             {toEv!.name}
           </span>
 
-          {/* Travel badges or no-location hint */}
           {canRoute ? (
             <>
-              <TravelBadges modes={modes} fetching={fetching} />
-              {!fetching && !modes && (
+              {fetching ? (
+                <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text-3)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  <motion.span animate={{ rotate: 360 }} transition={{ duration: 1.6, repeat: Infinity, ease: 'linear' }} style={{ display: 'inline-block', lineHeight: 1 }}>⟳</motion.span>
+                  {t('estimatingTravel')}
+                </span>
+              ) : recMode && recResult ? (
+                /* Recommended mode compact badge — tap to expand */
+                <button
+                  onClick={() => setExpanded(e => !e)}
+                  aria-label={t('routeConnector.expand')}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    background: urgencyStyle.badge,
+                    border: `1px solid ${urgencyStyle.line}`,
+                    borderRadius: 100, padding: '4px 10px',
+                    fontSize: 11, fontWeight: 700, color: 'var(--text)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {MODE_ICON[recMode]} {fmtDuration(recResult.durationMins)}
+                  <span style={{ opacity: 0.6, fontWeight: 400 }}>· {recResult.distanceKm} km</span>
+                  {urgency !== 'ok' && (
+                    <span style={{ color: urgencyStyle.line, fontWeight: 800 }}>
+                      {t(`routeConnector.${urgency}`)}
+                    </span>
+                  )}
+                  <span style={{ fontSize: 9, opacity: 0.5 }}>▾</span>
+                </button>
+              ) : modes ? (
+                <TravelBadges modes={modes} fetching={false} />
+              ) : (
                 <button onClick={() => setRouteRetry(c => c + 1)} style={{ fontSize: 10, color: 'var(--terra)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontWeight: 600 }}>
                   ↻ retry
                 </button>
               )}
             </>
           ) : (
-            <span style={{
-              fontSize: 10, color: 'var(--text-3)', opacity: 0.65,
-              display: 'inline-flex', alignItems: 'center', gap: 3,
-            }}>
+            <span style={{ fontSize: 10, color: 'var(--text-3)', opacity: 0.65, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
               📍 {locale === 'he' ? 'הוסף מיקום לחישוב זמן נסיעה' : 'Add locations for travel time'}
             </span>
           )}
         </div>
       )}
+
+      {/* ── Expanded sheet: all modes + departure info (§2.5) ── */}
+      <AnimatePresence>
+        {expanded && modes && recMode && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            style={{ overflow: 'hidden' }}
+          >
+            <div style={{
+              background: 'var(--surface)',
+              border: `1px solid ${urgencyStyle.line}`,
+              borderRadius: 'var(--radius-md)',
+              padding: '10px 12px',
+              marginTop: 4,
+              display: 'flex', flexDirection: 'column', gap: 6,
+            }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }} dir="ltr">
+                {fromEv!.name} → {toEv!.name}
+              </p>
+              {(['walking', 'transit', 'driving'] as const).map(mode => {
+                const r = modes[mode];
+                if (!r) return null;
+                const isRec = mode === recMode;
+                return (
+                  <div key={mode} style={{
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    padding: '5px 8px', borderRadius: 'var(--radius-sm)',
+                    background: isRec ? urgencyStyle.badge : 'transparent',
+                    border: isRec ? `1px solid ${urgencyStyle.line}` : '1px solid transparent',
+                  }}>
+                    <span style={{ fontSize: 16, width: 22, textAlign: 'center' }}>{MODE_ICON[mode]}</span>
+                    <span style={{ flex: 1, fontSize: 12, fontWeight: isRec ? 700 : 500, color: 'var(--text)' }}>
+                      {fmtDuration(r.durationMins)}
+                      <span style={{ fontWeight: 400, color: 'var(--text-3)', marginLeft: 6 }}>
+                        · {r.distanceKm} km
+                        {mode === 'driving' && departureTime ? ` (${locale === 'he' ? 'עם פקקים' : 'with traffic'})` : ''}
+                      </span>
+                    </span>
+                    {isRec && (
+                      <span style={{
+                        fontSize: 10, fontWeight: 800,
+                        background: urgencyStyle.line, color: 'white',
+                        borderRadius: 100, padding: '2px 8px',
+                      }}>
+                        {t('routeConnector.recommended')}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+              {fromEv?.time && (
+                <p style={{ fontSize: 10, color: 'var(--text-3)', marginTop: 2 }}>
+                  {t('routeConnector.departure')} {fromEv.time}
+                  {urgency !== 'ok' && (
+                    <span style={{ color: urgencyStyle.line, fontWeight: 700, marginLeft: 8 }}>
+                      {t(`routeConnector.${urgency}`)}
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Bottom row: timeline dash + free time + actions ── */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -246,7 +361,6 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
-          {/* ── Free time badge + AI suggest ── */}
           {isFree && (
             <>
               <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
@@ -268,7 +382,6 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, onSuggest,
             </>
           )}
 
-          {/* ── Add event button ── */}
           <motion.button
             whileTap={{ scale: 0.90 }}
             onClick={onAdd}
@@ -700,7 +813,7 @@ export default function DayScreen() {
     currencyByTrip, tripDbId,
   } = useAppStore();
   const { show } = useToast();
-  const { t, locale } = useI18n();
+  const { t, locale, isRTL } = useI18n();
 
   const stripRef = useRef<HTMLDivElement>(null);
 
@@ -710,11 +823,11 @@ export default function DayScreen() {
 
   const [weather, setWeather] = useState<{ temp: number; code: number; icon?: string; label?: string } | null>(null);
 
-  const [navDirection, setNavDirection] = useState(0);
+  const [navDirection, setNavDirection] = useState<'forward' | 'back'>('forward');
   const [glowKey, setGlowKey] = useState<string | null>(null);
 
   const navigateToDay = (dayNum: number) => {
-    setNavDirection(dayNum > activeDay ? 1 : -1);
+    setNavDirection(dayNum > activeDay ? 'forward' : 'back');
     setActiveDay(dayNum);
   };
 
@@ -1347,7 +1460,7 @@ export default function DayScreen() {
             <span style={{ fontSize: 18 }}>🏨</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               {hotel ? (
-                <p dir="ltr" style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>
+                <p dir="ltr" style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'start' }}>
                   {hotel.location}
                 </p>
               ) : (
@@ -1387,8 +1500,11 @@ export default function DayScreen() {
               const dx = e.changedTouches[0].clientX - swipeStartX.current;
               const dy = e.changedTouches[0].clientY - swipeStartY.current;
               if (Math.abs(dx) > Math.abs(dy) * 1.8 && Math.abs(dx) > 55) {
-                if (dx < 0 && activeDay < trip.days) navigateToDay(activeDay + 1);
-                if (dx > 0 && activeDay > 1) navigateToDay(activeDay - 1);
+                // In RTL, swipe directions are flipped (right-to-left reads backward)
+                const fwd = isRTL ? dx > 0 : dx < 0;
+                const bwd = isRTL ? dx < 0 : dx > 0;
+                if (fwd && activeDay < trip.days) navigateToDay(activeDay + 1);
+                if (bwd && activeDay > 1) navigateToDay(activeDay - 1);
               }
             }}
             style={{ overflowX: 'hidden' }}
@@ -1397,11 +1513,11 @@ export default function DayScreen() {
               <motion.div
                 key={activeDay}
                 custom={navDirection}
-                variants={daySlideVariants}
-                initial="initial"
-                animate="animate"
+                variants={slideVariants(isRTL)}
+                initial="enter"
+                animate="center"
                 exit="exit"
-                transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+                transition={spring.gentle}
               >
             {hotelBanner('top')}
             {(() => {
@@ -1494,6 +1610,7 @@ export default function DayScreen() {
                       gapStart={item.gapStart}
                       fromEv={item.fromEv}
                       toEv={item.toEv}
+                      tripStartDate={trip.startDate}
                       onSuggest={() => setShowSuggestions(true, item.gapStart, item.gapStart + item.gapMins)}
                       onAdd={() => openAdd(toTime(item.gapStart))}
                       t={t}

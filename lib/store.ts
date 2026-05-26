@@ -131,6 +131,12 @@ interface AppState {
   // during the in-flight DB call (race condition with realtime subscription)
   pendingDeleteIds: string[];
 
+  // Smart budget alerts — set by addExpense, cleared by BudgetAlertWatcher after toast shown
+  lastBudgetAlert: { type: 'over' | 'eighty'; amount: number; remaining: number } | null;
+
+  // Actions
+  setTripBudget: (budget: number) => void;
+
   // Offline mode
   isOffline: boolean;
   pendingChanges: OfflineChange[];
@@ -216,6 +222,7 @@ export const useAppStore = create<AppState>()(
       pendingChanges: [],
       isGlobalLoading: false,
       pendingDeleteIds: [],
+      lastBudgetAlert: null,
 
       acceptTerms: async (contentHash, content) => {
         try { await dbSavePrivacyConsent(contentHash, content) } catch {}
@@ -695,12 +702,30 @@ export const useAppStore = create<AppState>()(
       },
 
       addExpense: (exp) => {
-        const { userId, tripDbId } = get();
+        const { userId, tripDbId, trip } = get();
         const newExp: Expense = { ...exp, id: uid() };
         set(s => ({
           trip: s.trip ? { ...s.trip, expenses: [...(s.trip.expenses ?? []), newExp] } : null,
         }));
         if (tripDbId && userId) dbAddExpense(tripDbId, newExp, userId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+
+        // Smart Budget Alerts — fire when crossing 80% or 100% of budget limit
+        const budget = trip?.budget ?? 0;
+        if (budget > 0) {
+          const prevTotal = (trip?.expenses ?? []).reduce((s, e) => s + e.amount, 0);
+          const newTotal  = prevTotal + newExp.amount;
+          const prevPct   = prevTotal / budget;
+          const newPct    = newTotal  / budget;
+          if (newPct >= 1.0 && prevPct < 1.0) {
+            set({ lastBudgetAlert: { type: 'over', amount: newTotal, remaining: newTotal - budget } });
+          } else if (newPct >= 0.8 && prevPct < 0.8) {
+            set({ lastBudgetAlert: { type: 'eighty', amount: newTotal, remaining: budget - newTotal } });
+          }
+        }
+      },
+
+      setTripBudget: (budget) => {
+        set(s => ({ trip: s.trip ? { ...s.trip, budget } : null }));
       },
 
       deleteExpense: (id) => {

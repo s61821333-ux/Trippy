@@ -16,6 +16,10 @@ import { getCurrencySymbol, getCountryCurrency, getExchangeRates } from '@/lib/c
 import { fetchWeatherForTrip, getWeatherUrl, WeatherDay } from '@/lib/weather';
 import { getCapitalCoords } from '@/lib/capitals';
 import AsyncError from '../ui/AsyncError';
+import { WorldClock } from '../ui/WorldClock';
+import { getTimezoneForCountry } from '@/lib/countryTimezones';
+import { calculateSettlements } from '@/lib/settlement';
+import { shareTripDNA } from '@/lib/tripDNA';
 
 function fmtAmt(n: number, decimals = 2): string {
   return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
@@ -47,7 +51,7 @@ export default function DashboardScreen() {
     trip, nickname, tripDbId, setScreen, setActiveDay, logout, leaveTrip, supplies,
     hideBudget, showCarbonBudget, dayEndHour,
     addExpense, deleteExpense, inviteToTrip,
-    currencyByTrip,
+    currencyByTrip, setTripBudget,
   } = useAppStore();
   const { show } = useToast();
   const { t, locale } = useI18n();
@@ -160,8 +164,30 @@ export default function DashboardScreen() {
   const [expAmount, setExpAmount]       = useState('');
   const [expPaidBy, setExpPaidBy]       = useState('');
   const [expSplit, setExpSplit]         = useState(() => String(trip?.participants?.length ?? 2));
+  // V2 — Settlement
+  const [showSettlement, setShowSettlement] = useState(false);
+  // V2 — DNA Card
+  const [dnaLoading, setDnaLoading]     = useState(false);
+  // V2 — Budget limit
+  const [showBudgetInput, setShowBudgetInput] = useState(false);
+  const [budgetInput, setBudgetInput]         = useState('');
 
   if (!trip) return null;
+
+  // WorldClock: derive destination timezone from trip countries or dayMeta
+  const destTimezone = (() => {
+    // Try fetched timezone from first dayMeta with coords (set on event-edit)
+    for (const ev of Object.values(trip.events).flat()) {
+      if ((ev as any).timezone) return (ev as any).timezone as string;
+    }
+    // Fall back to bundled country map
+    if (trip.countries?.[0]) {
+      const tz = getTimezoneForCountry(trip.countries[0]);
+      if (tz) return tz;
+    }
+    return null;
+  })();
+  const destCity = trip.dayMeta?.[0]?.region || trip.countries?.[0] || trip.name;
 
   const packedCount = supplies.filter(s => s.checked).length;
   const totalCount  = supplies.length;
@@ -378,6 +404,18 @@ export default function DashboardScreen() {
               />
             </div>
           </motion.div>
+
+          {/* WorldClock — shown when destination timezone is known (§08 §1.4) */}
+          {destTimezone && (
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.17 }}
+              style={{ marginTop: 10 }}
+            >
+              <WorldClock destinationTimezone={destTimezone} destinationCity={destCity} />
+            </motion.div>
+          )}
         </div>
 
         {/* ═══ Body ═══ */}
@@ -831,6 +869,207 @@ export default function DashboardScreen() {
             </AnimatePresence>
           </motion.div>
 
+          {/* ── V2: Budget limit setter ── */}
+          {!hideBudget && (
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+              <motion.div
+                onClick={() => setShowBudgetInput(v => !v)}
+                className="premium-hover"
+                style={{
+                  background: 'var(--surface)', border: '1px solid var(--border)',
+                  borderRadius: showBudgetInput ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
+                  padding: '11px 16px', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  boxShadow: 'var(--shadow-xs)',
+                }}
+              >
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                  🎯 {t('budgetLabel')}
+                  {trip.budget ? (
+                    <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>
+                      {currSym}{trip.budget.toLocaleString()}
+                    </span>
+                  ) : (
+                    <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 400 }}>(not set)</span>
+                  )}
+                </span>
+                <Icon name={showBudgetInput ? 'chevL' : 'chevR'} size={13}
+                  style={{ color: 'var(--text-3)', transform: showBudgetInput ? 'rotate(-90deg)' : 'rotate(90deg)' }} />
+              </motion.div>
+              <AnimatePresence>
+                {showBudgetInput && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2, ease: 'easeInOut' }}
+                    style={{ overflow: 'hidden' }}
+                  >
+                    <div style={{
+                      background: 'var(--surface)', border: '1px solid var(--border)', borderTop: 'none',
+                      borderRadius: '0 0 var(--radius-lg) var(--radius-lg)', padding: '12px 16px',
+                      boxShadow: 'var(--shadow-xs)', display: 'flex', gap: 8,
+                    }}>
+                      <input
+                        type="number" min="0" placeholder={t('budgetPlaceholder')}
+                        value={budgetInput} onChange={e => setBudgetInput(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            const n = parseFloat(budgetInput);
+                            if (!isNaN(n) && n > 0) { setTripBudget(n); show(t('budgetSet')); setShowBudgetInput(false); setBudgetInput(''); }
+                          }
+                        }}
+                        style={{
+                          flex: 1, padding: '8px 12px', borderRadius: 'var(--radius-sm)', fontSize: 14,
+                          background: 'var(--bg)', border: '1px solid var(--border)', outline: 'none', color: 'var(--text)',
+                        }}
+                      />
+                      <motion.button
+                        whileTap={{ scale: 0.93 }} transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+                        onClick={() => {
+                          const n = parseFloat(budgetInput);
+                          if (!isNaN(n) && n > 0) { setTripBudget(n); show(t('budgetSet')); setShowBudgetInput(false); setBudgetInput(''); }
+                        }}
+                        style={{
+                          padding: '8px 16px', background: 'var(--terra)', color: '#fff', border: 'none',
+                          borderRadius: 'var(--radius-sm)', fontFamily: 'var(--font-sans)', fontWeight: 600,
+                          fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap',
+                          WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
+                        }}
+                      >
+                        {t('setBudget')}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          )}
+
+          {/* ── V2: Settlement — Who Owes Who ── */}
+          {expenses.length >= 2 && (() => {
+            const settlements = calculateSettlements(expenses, currency);
+            return (
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
+                <motion.div
+                  onClick={() => setShowSettlement(v => !v)}
+                  className="premium-hover"
+                  style={{
+                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    borderRadius: showSettlement ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
+                    padding: '11px 16px', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    boxShadow: 'var(--shadow-xs)',
+                  }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    🤝 {t('settlementTitle')}
+                    {settlements.length > 0 && (
+                      <span style={{ fontSize: 11, color: 'var(--terra)', fontWeight: 600, background: 'var(--terra-muted)', borderRadius: 'var(--radius-full)', padding: '1px 7px' }}>
+                        {settlements.length}
+                      </span>
+                    )}
+                  </span>
+                  <Icon name={showSettlement ? 'chevL' : 'chevR'} size={13}
+                    style={{ color: 'var(--text-3)', transform: showSettlement ? 'rotate(-90deg)' : 'rotate(90deg)' }} />
+                </motion.div>
+                <AnimatePresence>
+                  {showSettlement && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      style={{ overflow: 'hidden' }}
+                    >
+                      <div style={{
+                        background: 'var(--surface)', border: '1px solid var(--border)', borderTop: 'none',
+                        borderRadius: '0 0 var(--radius-lg) var(--radius-lg)', padding: '12px 16px',
+                        boxShadow: 'var(--shadow-xs)',
+                      }}>
+                        <p style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 10 }}>{t('settlementSub')}</p>
+                        {settlements.length === 0 ? (
+                          <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)', textAlign: 'center', padding: '12px 0' }}>
+                            {t('settlementAllClear')}
+                          </p>
+                        ) : (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            {settlements.map((s, i) => (
+                              <div key={i} style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
+                                border: '1px solid var(--border)', padding: '10px 12px',
+                              }}>
+                                <div>
+                                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{s.from}</span>
+                                  <span style={{ fontSize: 12, color: 'var(--text-3)', margin: '0 6px' }}>{t('settlementOwes')}</span>
+                                  <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{s.to}</span>
+                                </div>
+                                <span style={{ fontWeight: 700, fontSize: 14, color: 'var(--terra)' }}>
+                                  {currSym}{fmtAmt(s.amount)}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })()}
+
+          {/* ── V2: Trip DNA Card ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26 }}
+            style={{ display: 'flex', gap: 8 }}
+          >
+            <motion.button
+              onClick={async () => {
+                setDnaLoading(true);
+                show(t('dnaGenerating'));
+                const result = await shareTripDNA(trip);
+                setDnaLoading(false);
+                if (result === 'shared' || result === 'downloaded') show(result === 'shared' ? '✓ Shared!' : t('dnaDownloaded'));
+                else show(t('dnaShareFailed'));
+              }}
+              disabled={dnaLoading}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+              style={{
+                flex: 1,
+                padding: '12px 16px',
+                background: 'linear-gradient(135deg, var(--terra) 0%, var(--sand) 100%)',
+                border: 'none',
+                borderRadius: 'var(--radius-lg)',
+                color: '#fff',
+                fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14,
+                cursor: dnaLoading ? 'not-allowed' : 'pointer',
+                opacity: dnaLoading ? 0.7 : 1,
+                boxShadow: 'var(--shadow-sm)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
+              }}
+            >
+              {dnaLoading ? '⏳' : '✨'} {t('dnaBtnShare')}
+            </motion.button>
+            <motion.button
+              onClick={() => setScreen('map')}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+              style={{
+                padding: '12px 16px',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)',
+                color: 'var(--text)',
+                fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 14,
+                cursor: 'pointer',
+                boxShadow: 'var(--shadow-xs)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
+              }}
+            >
+              <Icon name="map" size={16} /> Map
+            </motion.button>
+          </motion.div>
 
           {/* Insights horizontal scroll */}
           {insights.length > 0 && (

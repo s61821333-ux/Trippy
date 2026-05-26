@@ -8,10 +8,17 @@ import { EventIcon } from './ui/EventIcon';
 import Icon from './ui/Icon';
 
 const PX_PER_HOUR = 64;
-const DAY_START_HOUR = 7; // 07:00
 
-function minutesToPx(mins: number): number {
-  return ((mins - DAY_START_HOUR * 60) * PX_PER_HOUR) / 60;
+// §5 timeline clip fix: use earliest event hour (min 06:00) so pre-7am
+// events are never clipped. Computed per render in DayTimelineView.
+function getStartHour(events: TripEvent[]): number {
+  if (events.length === 0) return 7;
+  const earliest = Math.min(...events.map(e => parseInt(e.time.split(':')[0], 10)));
+  return Math.min(6, earliest);
+}
+
+function minutesToPx(mins: number, startHour: number): number {
+  return ((mins - startHour * 60) * PX_PER_HOUR) / 60;
 }
 
 interface TimelineEvent {
@@ -64,12 +71,12 @@ interface FreeGap {
   endMins: number;
 }
 
-function getFreeGaps(events: TripEvent[], dayEndHour: number): FreeGap[] {
+function getFreeGaps(events: TripEvent[], dayEndHour: number, startHour: number): FreeGap[] {
   const gaps: FreeGap[] = [];
   const dayEnd = dayEndHour * 60;
   const sorted = [...events].sort((a, b) => toMins(a.time) - toMins(b.time));
 
-  let cursor = DAY_START_HOUR * 60;
+  let cursor = startHour * 60;
   for (const ev of sorted) {
     const start = toMins(ev.time);
     if (start - cursor >= 30) gaps.push({ startMins: cursor, endMins: start });
@@ -88,11 +95,12 @@ interface DayTimelineViewProps {
 }
 
 export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, onFocus }: DayTimelineViewProps) {
-  const hours = Array.from({ length: dayEndHour - DAY_START_HOUR }, (_, i) => DAY_START_HOUR + i);
-  const totalHeight = (dayEndHour - DAY_START_HOUR) * PX_PER_HOUR;
+  const startHour = getStartHour(events);
+  const hours = Array.from({ length: dayEndHour - startHour }, (_, i) => startHour + i);
+  const totalHeight = (dayEndHour - startHour) * PX_PER_HOUR;
 
   const resolved = resolveColumns(events);
-  const gaps = getFreeGaps(events, dayEndHour);
+  const gaps = getFreeGaps(events, dayEndHour, startHour);
 
   const toTimeStr = (mins: number) => {
     const h = Math.floor(mins / 60).toString().padStart(2, '0');
@@ -121,7 +129,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
             key={h}
             style={{
               position: 'absolute',
-              top: (h - DAY_START_HOUR) * PX_PER_HOUR,
+              top: (h - startHour) * PX_PER_HOUR,
               left: 0,
               right: 0,
               display: 'flex',
@@ -152,8 +160,8 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
 
         {/* Free gap zones */}
         {gaps.map((gap, i) => {
-          const top = minutesToPx(gap.startMins);
-          const height = Math.max(28, minutesToPx(gap.endMins) - minutesToPx(gap.startMins));
+          const top = minutesToPx(gap.startMins, startHour);
+          const height = Math.max(28, minutesToPx(gap.endMins, startHour) - minutesToPx(gap.startMins, startHour));
           const gapMins = gap.endMins - gap.startMins;
           return (
             <motion.div
@@ -211,7 +219,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
         {/* Event blocks */}
         {resolved.map(({ event: ev, column, totalColumns, isConflict }) => {
           const startMins = toMins(ev.time);
-          const top = Math.max(0, minutesToPx(startMins));
+          const top = Math.max(0, minutesToPx(startMins, startHour));
           const rawHeight = (ev.duration * PX_PER_HOUR) / 60;
           const height = Math.max(36, rawHeight);
 

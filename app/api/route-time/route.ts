@@ -5,10 +5,9 @@ import { z } from 'zod'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, GOOGLE_MAPS_API_KEY } from '@/lib/env'
 
-// GET /api/route-time?olat=&olng=&dlat=&dlng=
+// GET /api/route-time?olat=&olng=&dlat=&dlng=[&departureTime=<unix>]
 // Returns travel time + distance for driving, walking, and transit modes.
 export async function GET(request: NextRequest) {
-  // Auth check — prevents anonymous quota exhaustion on Google Distance Matrix
   const cookieStore = await cookies()
   const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
     cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} },
@@ -16,7 +15,6 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Rate limit: 60 requests/60s per user (tighter than per-IP — prevents multi-account abuse)
   const rl = checkRateLimit(`route:${user.id}`, 60, 60)
   if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 60)
 
@@ -25,6 +23,7 @@ export async function GET(request: NextRequest) {
   const olng = searchParams.get('olng')
   const dlat = searchParams.get('dlat')
   const dlng = searchParams.get('dlng')
+  const departureTimeParam = searchParams.get('departureTime')
 
   if (!olat || !olng || !dlat || !dlng) {
     return NextResponse.json({ error: 'Missing coordinates' }, { status: 400 })
@@ -41,12 +40,19 @@ export async function GET(request: NextRequest) {
     url.searchParams.set('destinations', `${dlat},${dlng}`)
     url.searchParams.set('mode', mode)
     url.searchParams.set('key', key!)
+    // Rush-hour awareness: pass departure_time for driving (§2.4)
+    if (mode === 'driving' && departureTimeParam) {
+      url.searchParams.set('departure_time', departureTimeParam)
+      url.searchParams.set('traffic_model', 'best_guess')
+    }
     const res = await fetch(url.toString(), { next: { revalidate: 300 } })
     const data = await res.json()
     const element = data?.rows?.[0]?.elements?.[0]
     if (!element || element.status !== 'OK') return null
+    // Prefer duration_in_traffic when available (driving with departure_time)
+    const durationSec = element.duration_in_traffic?.value ?? element.duration.value
     return {
-      durationMins: Math.max(1, Math.round(element.duration.value / 60)),
+      durationMins: Math.max(1, Math.round(durationSec / 60)),
       distanceKm: Math.round(element.distance.value / 100) / 10,
     }
   }
@@ -64,8 +70,7 @@ export async function GET(request: NextRequest) {
 
 // ──────────────────────────────────────────────────────────────────────────────
 // POST /api/route-time  — batch up to 25 pairs in a single server round-trip.
-// Reduces client→server calls from N (one per event pair) to 1 per day view.
-// Body: { pairs: [{ olat, olng, dlat, dlng }] }
+// Body: { pairs: [{ olat, olng, dlat, dlng, departureTime? }] }
 // Returns: { results: [{ driving, walking, transit } | null][] } in input order.
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -76,6 +81,7 @@ const BatchBody = z.object({
       olng: z.number(),
       dlat: z.number(),
       dlng: z.number(),
+      departureTime: z.number().optional(),  // Unix seconds — for rush-hour estimates
     })
   ).min(1).max(25),
 })
@@ -100,28 +106,35 @@ export async function POST(request: NextRequest) {
   if (!apiKey) return NextResponse.json({ error: 'Maps API not configured' }, { status: 503 })
 
   async function fetchPairMode(
-    olat: number, olng: number, dlat: number, dlng: number, mode: string,
+    olat: number, olng: number, dlat: number, dlng: number,
+    mode: string, departureTime?: number,
   ) {
     const url = new URL('https://maps.googleapis.com/maps/api/distancematrix/json')
     url.searchParams.set('origins', `${olat},${olng}`)
     url.searchParams.set('destinations', `${dlat},${dlng}`)
     url.searchParams.set('mode', mode)
     url.searchParams.set('key', apiKey!)
+    // Rush-hour traffic model for driving with known departure time (§2.4)
+    if (mode === 'driving' && departureTime) {
+      url.searchParams.set('departure_time', String(departureTime))
+      url.searchParams.set('traffic_model', 'best_guess')
+    }
     const res = await fetch(url.toString(), { next: { revalidate: 300 } })
     const data = await res.json()
     const el = data?.rows?.[0]?.elements?.[0]
     if (!el || el.status !== 'OK') return null
+    const durationSec = el.duration_in_traffic?.value ?? el.duration.value
     return {
-      durationMins: Math.max(1, Math.round(el.duration.value / 60)),
+      durationMins: Math.max(1, Math.round(durationSec / 60)),
       distanceKm: Math.round(el.distance.value / 100) / 10,
     }
   }
 
   try {
     const results = await Promise.all(
-      parsed.data.pairs.map(async ({ olat, olng, dlat, dlng }) => {
+      parsed.data.pairs.map(async ({ olat, olng, dlat, dlng, departureTime }) => {
         const [driving, walking, transit] = await Promise.all([
-          fetchPairMode(olat, olng, dlat, dlng, 'driving'),
+          fetchPairMode(olat, olng, dlat, dlng, 'driving', departureTime),
           fetchPairMode(olat, olng, dlat, dlng, 'walking'),
           fetchPairMode(olat, olng, dlat, dlng, 'transit'),
         ])

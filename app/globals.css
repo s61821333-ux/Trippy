@@ -340,21 +340,28 @@ h1, h2, h3, h4, .font-display {
   letter-spacing: -0.03em;
 }
 
-/* ── RTL / Hebrew: redirect ALL font vars to Huninn ───────────────
-   Inline styles use var(--font-*), so overriding the variable here
-   makes every component pick up the correct font automatically.     */
-[dir="rtl"] {
+/* ── RTL / Hebrew: redirect ALL font vars to Noto Sans Hebrew ──────
+   Using both [dir="rtl"] and :lang(he) so the override fires whether
+   direction is set on <html> (server) or inherited from a parent div
+   (client before hydration). Both selectors are needed for coverage. */
+[dir="rtl"],
+:lang(he) {
   --font-sans:    var(--font-hebrew);
   --font-display: var(--font-hebrew);
   --font-mono:    var(--font-hebrew);
   --font-serif:   var(--font-hebrew);
   font-family: var(--font-hebrew);
+  /* Noto Sans Hebrew is optically slightly larger — nudge down */
+  --text-base: 0.975rem;
+  --leading-normal: 1.6;
 }
-[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 {
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4,
+:lang(he) h1, :lang(he) h2, :lang(he) h3, :lang(he) h4 {
   font-family: var(--font-hebrew);
   letter-spacing: 0;
 }
-[dir="rtl"] .section-eyebrow, [dir="rtl"] .eyebrow {
+[dir="rtl"] .section-eyebrow, [dir="rtl"] .eyebrow,
+:lang(he) .section-eyebrow, :lang(he) .eyebrow {
   font-family: var(--font-hebrew);
   letter-spacing: 0.05em;
 }

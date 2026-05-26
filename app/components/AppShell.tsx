@@ -51,6 +51,28 @@ function OfflineWatcher() {
   return null;
 }
 
+// Watches lastBudgetAlert and fires toasts when budget thresholds are crossed
+function BudgetAlertWatcher() {
+  const lastBudgetAlert = useAppStore(s => s.lastBudgetAlert);
+  const { show } = useToast();
+  const tripDbId = useAppStore(s => s.tripDbId);
+  const currencyByTrip = useAppStore(s => s.currencyByTrip);
+
+  useEffect(() => {
+    if (!lastBudgetAlert) return;
+    const currency = (tripDbId && currencyByTrip[tripDbId]) || '';
+    const fmt = (n: number) => `${currency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (lastBudgetAlert.type === 'over') {
+      show(`⚠️ Over budget! Exceeded by ${fmt(lastBudgetAlert.remaining)}`);
+    } else {
+      show(`💛 80% of budget used — ${fmt(lastBudgetAlert.remaining)} remaining`);
+    }
+    useAppStore.setState({ lastBudgetAlert: null });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastBudgetAlert]);
+  return null;
+}
+
 // Watches lastSyncError globally and shows a toast — must live inside ToastProvider
 function SyncErrorWatcher() {
   const { lastSyncError } = useAppStore();
@@ -257,6 +279,7 @@ function Shell() {
   return (
     <ToastProvider>
       <SyncErrorWatcher />
+      <BudgetAlertWatcher />
       <OfflineWatcher />
       <MotionConfig reducedMotion={motionReduced}>
         <div

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Bricolage_Grotesque, Newsreader, JetBrains_Mono, Noto_Sans_Hebrew } from 'next/font/google';
+import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
 import MotionProvider from './components/MotionProvider';
 import './globals.css';
@@ -54,10 +55,16 @@ export const viewport: Viewport = {
   themeColor: '#F4EFE8',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const locale = (cookieStore.get('trippy-locale')?.value === 'he') ? 'he' : 'en';
+  const dir = locale === 'he' ? 'rtl' : 'ltr';
+
   return (
     <html
-      lang="en"
+      lang={locale}
+      dir={dir}
+      suppressHydrationWarning
       style={{ height: '100%' }}
       className={`${bricolage.variable} ${newsreader.variable} ${jetbrainsMono.variable} ${hebrewFont.variable}`}
     >
