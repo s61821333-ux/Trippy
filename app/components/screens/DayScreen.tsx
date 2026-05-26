@@ -401,6 +401,37 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, tripStartD
   );
 }
 
+/* ── Timezone boundary badge (§3) ────────────────────────────── */
+function TimezoneBadge({ timezone }: { timezone: string }) {
+  const { t, locale } = useI18n();
+  const now = new Date();
+  const tzShort = new Intl.DateTimeFormat('en', { timeZone: timezone, timeZoneName: 'short' })
+    .formatToParts(now).find(p => p.type === 'timeZoneName')?.value ?? timezone;
+  const offsetLabel = new Intl.DateTimeFormat('en', { timeZone: timezone, timeZoneName: 'shortOffset' })
+    .formatToParts(now).find(p => p.type === 'timeZoneName')?.value ?? '';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        margin: '4px var(--page-px)',
+        padding: '6px 12px',
+        background: 'var(--brand-muted)',
+        border: '1px solid rgba(59,110,82,0.20)',
+        borderRadius: 10,
+        display: 'flex', alignItems: 'center', gap: 6,
+      }}
+    >
+      <span style={{ fontSize: 14 }}>📍</span>
+      <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>
+        {t('timezoneBadge.change')}: {t('timezoneBadge.nowIn')} {tzShort}
+        {offsetLabel ? <span style={{ fontWeight: 400, marginLeft: 4, opacity: 0.75 }}>({offsetLabel})</span> : null}
+      </span>
+    </motion.div>
+  );
+}
+
 /* ── Event card ───────────────────────────────────────────────── */
 interface EventCardProps {
   event: TripEvent;
@@ -1021,11 +1052,19 @@ export default function DayScreen() {
   // Build interleaved list: event → connector → event → …
   type ListItem =
     | { type: 'event'; ev: TripEvent }
-    | { type: 'connector'; gapMins: number; gapStart: number; fromEv?: TripEvent; toEv?: TripEvent };
+    | { type: 'connector'; gapMins: number; gapStart: number; fromEv?: TripEvent; toEv?: TripEvent }
+    | { type: 'tz-badge'; timezone: string };
 
   const items: ListItem[] = [];
+  let prevTz: string | undefined;
   for (let i = 0; i < evs.length; i++) {
-    items.push({ type: 'event', ev: evs[i] });
+    const ev = evs[i];
+    // §3: inject timezone boundary badge when crossing timezones
+    if (ev.timezone && prevTz && ev.timezone !== prevTz) {
+      items.push({ type: 'tz-badge', timezone: ev.timezone });
+    }
+    if (ev.timezone) prevTz = ev.timezone;
+    items.push({ type: 'event', ev });
     if (i < evs.length - 1) {
       const curEnd = toMins(evs[i].time) + evs[i].duration;
       const nextStart = toMins(evs[i + 1].time);
@@ -1070,19 +1109,33 @@ export default function DayScreen() {
     setShowAdd(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (savingRef.current) return;
     savingRef.current = true;
     if (!fName.trim()) { savingRef.current = false; show(t('enterEventName')); return; }
     const dur = parseInt(fDur, 10) || 60;
     const cost = fCost.trim() ? parseFloat(fCost) : undefined;
     const tags = fTags.split(',').map(t => t.trim()).filter(Boolean);
+
+    // Fetch IANA timezone for the event's location (§1.3 — cached 24h on server)
+    let timezone: string | undefined;
+    if (fLat && fLng) {
+      try {
+        const tzRes = await fetch(`/api/timezone?lat=${fLat}&lng=${fLng}`);
+        if (tzRes.ok) {
+          const tzData = await tzRes.json();
+          if (tzData.timeZoneId) timezone = tzData.timeZoneId;
+        }
+      } catch { /* save without timezone on network failure */ }
+    }
+
     if (editTarget) {
       editEvent(activeDay, editTarget.id, {
         time: fTime, duration: dur, name: fName, category: fCat,
         location: fLoc || undefined, lat: fLat, lng: fLng, notes: fNotes || undefined,
         cost: cost && !isNaN(cost) ? cost : undefined,
         tags: tags.length ? tags : undefined,
+        timezone,
       });
       show(t('eventUpdated'));
       setShowAdd(false);
@@ -1092,6 +1145,7 @@ export default function DayScreen() {
         location: fLoc || undefined, lat: fLat, lng: fLng, notes: fNotes || undefined,
         cost: cost && !isNaN(cost) ? cost : undefined,
         tags: tags.length ? tags : undefined,
+        timezone,
       });
       show(t('eventAdded'));
       setShowAdd(false);
@@ -1585,7 +1639,9 @@ export default function DayScreen() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingTop: 4 }}>
                 {items.map((item, idx) =>
-                  item.type === 'event' ? (
+                  item.type === 'tz-badge' ? (
+                    <TimezoneBadge key={`tz-${idx}`} timezone={item.timezone} />
+                  ) : item.type === 'event' ? (
                     <EventCard
                       key={item.ev.id}
                       event={item.ev}
