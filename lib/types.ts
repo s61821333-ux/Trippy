@@ -24,6 +24,7 @@ export interface TripEvent {
   location?: string;
   lat?: number;
   lng?: number;
+  timezone?: string;  // IANA timezone of event location, e.g. "Europe/Rome"
   notes?: string;
   addedBy: string;
   cost?: number;                          // estimated cost in local currency
@@ -112,6 +113,14 @@ export interface Trip {
   emergencyContacts?: EmergencyContact[];
   hotels?: HotelStay[];
   createdBy?: string;
+  budget?: number;       // optional total budget limit for alerts
 }
 
-export type Screen = 'login' | 'dashboard' | 'day' | 'supplies' | 'settings' | 'notes';
+export interface Settlement {
+  from: string;
+  to: string;
+  amount: number;
+  currency: string;
+}
+
+export type Screen = 'login' | 'dashboard' | 'day' | 'supplies' | 'settings' | 'notes' | 'map' | 'crew';

@@ -18,6 +18,8 @@ const DayScreen         = dynamic(() => import('./screens/DayScreen'));
 const SuppliesScreen    = dynamic(() => import('./screens/SuppliesScreen'));
 const SettingsScreen    = dynamic(() => import('./screens/SettingsScreen'));
 const NotesScreen       = dynamic(() => import('./screens/NotesScreen'));
+const MapScreen         = dynamic(() => import('./screens/MapScreen'), { ssr: false });
+const CrewScreen        = dynamic(() => import('./screens/CrewScreen'));
 const TourOverlay        = dynamic(() => import('./TourOverlay'));
 const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
 const TermsModal         = dynamic(() => import('./TermsModal'));
@@ -291,7 +293,11 @@ function Shell() {
           )}
 
           {showNav && (
-            <NavBar active={screen} onChange={s => setScreen(s)} />
+            <NavBar
+              active={screen}
+              onChange={s => setScreen(s)}
+              onSettings={() => setScreen('settings')}
+            />
           )}
 
           <div className="flex-1 flex flex-col relative overflow-hidden w-full">
@@ -313,6 +319,10 @@ function Shell() {
                       <DashboardScreen />
                     ) : screen === 'day' ? (
                       <DayScreen />
+                    ) : screen === 'map' ? (
+                      <MapScreen />
+                    ) : screen === 'crew' ? (
+                      <CrewScreen />
                     ) : screen === 'supplies' ? (
                       <SuppliesScreen />
                     ) : screen === 'settings' ? (

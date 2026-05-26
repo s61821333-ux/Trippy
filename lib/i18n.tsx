@@ -166,6 +166,25 @@ const en = {
   notePlaceholder: 'e.g. Hotel confirmation: ABC123…',
   noNotes: 'No notes yet. Add confirmations, visa details, or anything you want to remember.',
   navNotes: 'Vault',
+  navMap: 'Map',
+  navCrew: 'Crew',
+  crewTitle: 'Crew',
+  crewMembers: 'Members',
+  crewOwnerLabel: 'Owner',
+  crewMemberLabel: 'Member',
+  crewInviteTitle: 'Invite',
+  crewInviteByEmail: 'Email invite',
+  crewCopyLink: 'Copy invite link',
+  crewPending: 'Pending Invitations',
+  crewNoMembers: 'No crew members yet',
+  crewKickMember: 'Remove from trip',
+  mapTitle: 'Map',
+  mapNoEvents: 'No events with locations yet',
+  mapNoEventsHint: 'Add location to events in the Day planner to see them here',
+  mapEventCount: '{count} pin',
+  mapEventCountPlural: '{count} pins',
+  mapAllDays: 'All Days',
+  mapDay: 'Day {day}',
   appearanceLabel: 'Appearance',
   highContrast: 'High Contrast',
   highContrastSub: 'Solidifies glass backgrounds, darkens secondary text (WCAG AA)',
@@ -325,6 +344,48 @@ const en = {
   deleteAccountSuccess: 'Your data has been deleted.',
   deleteAccountFailed: 'Failed to delete account — please try again or contact guy9d2g5@gmail.com.',
 
+  // World Clock (§08_WORLD_CLOCK_TRAVEL §1)
+  'worldClock.nowHere': 'now here',
+  'worldClock.yourTime': 'Your time',
+  'worldClock.sameZone': 'same timezone',
+  'worldClock.ahead': '+{h}h ahead',
+  'worldClock.behind': '{h}h behind',
+  'worldClock.localTime': 'Local time',
+
+  // Route Connector (§08_WORLD_CLOCK_TRAVEL §2.5)
+  'routeConnector.expand': 'Show travel options',
+  'routeConnector.recommended': 'Recommended',
+  'routeConnector.departure': 'Departure at',
+  'routeConnector.overlap': '⚠️ Overlap!',
+  'routeConnector.tight': 'Tight connection',
+  'routeConnector.warning': 'Allow travel time',
+
+  // Timezone Badge (§08_WORLD_CLOCK_TRAVEL §3)
+  'timezoneBadge.change': 'Timezone change',
+  'timezoneBadge.nowIn': 'Now in',
+
+  // Map (§07_HEBREW §8)
+  'map.noCoords': 'This event has no location',
+
+  // Crew (§07_HEBREW §8)
+  'crew.linkCopied': 'Link copied!',
+
+  // Expense settlement (§07_HEBREW §8)
+  'settlement.title': 'Who owes who',
+  'settlement.owes': '{from} owes {to}',
+  'settlement.settled': 'All settled!',
+
+  // Budget alerts (§07_HEBREW §8)
+  'budget.eightyPct': '{remaining} left in budget',
+  'budget.over': '{amount} over budget',
+
+  // Vibe quiz (§07_HEBREW §8)
+  'vibe.explorer': 'Explorer',
+  'vibe.relaxed': 'Relaxed',
+  'vibe.foodie': 'Foodie',
+  'vibe.budget': 'Budget-smart',
+  'vibe.balanced': 'Balanced',
+
   // Demo Data
   'Morning camp breakfast': 'Morning camp breakfast',
   'Makhtesh Ramon Hike': 'Makhtesh Ramon Hike',
@@ -357,6 +418,40 @@ const en = {
   'Acclaimed café with Bedouin coffee and a crater-view terrace.': 'Acclaimed café with Bedouin coffee and a crater-view terrace.',
   '15-min walk to a spectacular vantage over the crater floor.': '15-min walk to a spectacular vantage over the crater floor.',
   'Traditional tea and local bread with a Bedouin family — unforgettable.': 'Traditional tea and local bread with a Bedouin family — unforgettable.',
+
+  // V2 — Budget Alerts
+  budgetOverTitle: '⚠️ Over budget!',
+  budgetOverDesc: 'You\'ve exceeded your budget by {amount}',
+  budgetEightyTitle: '💛 80% of budget used',
+  budgetEightyDesc: '{remaining} remaining',
+  budgetLabel: 'Budget Limit (optional)',
+  budgetPlaceholder: 'e.g. 2000',
+  setBudget: 'Set Budget',
+  budgetSet: 'Budget limit set ✓',
+
+  // V2 — Expense Settlement
+  settlementTitle: 'Who Owes Who',
+  settlementSub: 'Minimal payments to settle all debts',
+  settlementAllClear: '🎉 All settled — no debts!',
+  settlementOwes: 'owes',
+  settlementNoExpenses: 'Add shared expenses to see how to settle up',
+  settleUp: 'Settle Up',
+
+  // V2 — Trip DNA Card
+  dnaBtnShare: '✨ Share Trip DNA',
+  dnaGenerating: 'Generating your Trip DNA card…',
+  dnaShareFailed: 'Could not share — try saving the image instead',
+  dnaDownloaded: 'Trip DNA card saved!',
+  dnaBtnDownload: 'Save Image',
+
+  // V2 — Homepage CTA
+  v2HeroTitle: 'Version 2 is here.',
+  v2HeroSub: 'Map view, settlements, shareable DNA cards and more.',
+  v2TryBtn: '🚀 Try V2 Features',
+  v2FeatMap: 'Interactive Trip Map',
+  v2FeatSettle: 'Expense Settlement',
+  v2FeatDNA: 'Shareable DNA Card',
+  v2FeatAlerts: 'Smart Budget Alerts',
 };
 
 const he: typeof en = {
@@ -522,6 +617,25 @@ const he: typeof en = {
   notePlaceholder: 'למשל אישור מלון: ABC123…',
   noNotes: 'אין הערות עדיין. הוסף אישורים, פרטי ויזה או כל מה שתרצה לזכור.',
   navNotes: 'כספת',
+  navMap: 'מפה',
+  navCrew: 'צוות',
+  crewTitle: 'הצוות',
+  crewMembers: 'חברים',
+  crewOwnerLabel: 'בעלים',
+  crewMemberLabel: 'חבר',
+  crewInviteTitle: 'הזמנה',
+  crewInviteByEmail: 'הזמנה לפי אימייל',
+  crewCopyLink: 'העתק קישור הזמנה',
+  crewPending: 'הזמנות ממתינות',
+  crewNoMembers: 'אין חברי צוות עדיין',
+  crewKickMember: 'הסר מהטיול',
+  mapTitle: 'מפה',
+  mapNoEvents: 'אין אירועים עם מיקומים עדיין',
+  mapNoEventsHint: 'הוסף מיקום לאירועים בתכנון היומי כדי לראות אותם כאן',
+  mapEventCount: '{count} סיכה',
+  mapEventCountPlural: '{count} סיכות',
+  mapAllDays: 'כל הימים',
+  mapDay: 'יום {day}',
   appearanceLabel: 'מראה',
   highContrast: 'ניגודיות גבוהה',
   highContrastSub: 'מחדד רקעים שקופים ומכהה טקסט משני (WCAG AA)',
@@ -681,6 +795,48 @@ const he: typeof en = {
   deleteAccountSuccess: 'הנתונים שלך נמחקו.',
   deleteAccountFailed: 'מחיקת החשבון נכשלה — נסה שוב או פנה אל guy9d2g5@gmail.com.',
 
+  // World Clock
+  'worldClock.nowHere': 'עכשיו כאן',
+  'worldClock.yourTime': 'השעה אצלך',
+  'worldClock.sameZone': 'אותה אזור זמן',
+  'worldClock.ahead': '+{h}ש׳ קדימה',
+  'worldClock.behind': '{h}ש׳ אחורה',
+  'worldClock.localTime': 'שעה מקומית',
+
+  // Route Connector
+  'routeConnector.expand': 'הצג אפשרויות נסיעה',
+  'routeConnector.recommended': 'מומלץ',
+  'routeConnector.departure': 'יציאה בשעה',
+  'routeConnector.overlap': '⚠️ חפיפה!',
+  'routeConnector.tight': 'חיבור צמוד',
+  'routeConnector.warning': 'קחו בחשבון זמן נסיעה',
+
+  // Timezone Badge
+  'timezoneBadge.change': 'שינוי אזור זמן',
+  'timezoneBadge.nowIn': 'עכשיו ב',
+
+  // Map (§07_HEBREW §8)
+  'map.noCoords': 'לפעילות זו אין מיקום',
+
+  // Crew (§07_HEBREW §8)
+  'crew.linkCopied': 'הקישור הועתק!',
+
+  // Expense settlement (§07_HEBREW §8)
+  'settlement.title': 'מי חייב למי',
+  'settlement.owes': '{from} חייב/ת ל-{to}',
+  'settlement.settled': 'הכל מסודר!',
+
+  // Budget alerts (§07_HEBREW §8)
+  'budget.eightyPct': 'נשארו {remaining} מהתקציב',
+  'budget.over': 'חרגתם ב-{amount} מהתקציב',
+
+  // Vibe quiz (§07_HEBREW §8)
+  'vibe.explorer': 'חוקרים',
+  'vibe.relaxed': 'ריילקסד',
+  'vibe.foodie': 'אוכל אוכל',
+  'vibe.budget': 'חסכנים חכמים',
+  'vibe.balanced': 'מאוזנים',
+
   // Demo Data
   'Morning camp breakfast': 'ארוחת בוקר במחנה',
   'Makhtesh Ramon Hike': 'טיול במכתש רמון',
@@ -713,6 +869,40 @@ const he: typeof en = {
   'Acclaimed café with Bedouin coffee and a crater-view terrace.': 'קפה מומלץ עם קפה בדואי ומרפסת צופה למכתש.',
   '15-min walk to a spectacular vantage over the crater floor.': 'הליכה של 15 דקות לנקודת תצפית מרהיבה על המכתש.',
   'Traditional tea and local bread with a Bedouin family — unforgettable.': 'תה מסורתי ולחם מקומי עם משפחה בדואית - חוויה בלתי נשכחת.',
+
+  // V2 — Budget Alerts
+  budgetOverTitle: '⚠️ חרגת מהתקציב!',
+  budgetOverDesc: 'חרגת מהתקציב ב-{amount}',
+  budgetEightyTitle: '💛 80% מהתקציב נוצל',
+  budgetEightyDesc: 'נותרו {remaining}',
+  budgetLabel: 'מגבלת תקציב (אופציונלי)',
+  budgetPlaceholder: 'לדוג׳ 2000',
+  setBudget: 'הגדר תקציב',
+  budgetSet: 'מגבלת תקציב נשמרה ✓',
+
+  // V2 — Expense Settlement
+  settlementTitle: 'מי חייב למי',
+  settlementSub: 'מינימום תשלומים לסגירת כל החובות',
+  settlementAllClear: '🎉 הכל מסולק — אין חובות!',
+  settlementOwes: 'חייב ל',
+  settlementNoExpenses: 'הוסף הוצאות משותפות כדי לראות כיצד לסלק',
+  settleUp: 'סלק חשבונות',
+
+  // V2 — Trip DNA Card
+  dnaBtnShare: '✨ שתף כרטיס DNA',
+  dnaGenerating: 'מייצר את כרטיס ה-DNA של הטיול…',
+  dnaShareFailed: 'לא ניתן לשתף — נסה לשמור את התמונה',
+  dnaDownloaded: 'כרטיס DNA נשמר!',
+  dnaBtnDownload: 'שמור תמונה',
+
+  // V2 — Homepage CTA
+  v2HeroTitle: 'גרסה 2 כאן.',
+  v2HeroSub: 'תצוגת מפה, סילוק חובות, כרטיסי DNA לשיתוף ועוד.',
+  v2TryBtn: '🚀 נסה פיצ׳רים של V2',
+  v2FeatMap: 'מפת טיול אינטראקטיבית',
+  v2FeatSettle: 'סילוק הוצאות',
+  v2FeatDNA: 'כרטיס DNA לשיתוף',
+  v2FeatAlerts: 'התראות תקציב חכמות',
 };
 
 const translations = { en, he } as const;
@@ -747,12 +937,22 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
   // Detect locale once on mount (client-side only)
   useEffect(() => {
-    setLocaleState(detectLocale());
+    const detected = detectLocale();
+    setLocaleState(detected);
+    // Sync <html> attrs in case server-rendered lang/dir differ from client locale
+    document.documentElement.lang = detected;
+    document.documentElement.dir  = detected === 'he' ? 'rtl' : 'ltr';
   }, []);
 
   const setLocale = (l: Locale) => {
     setLocaleState(l);
-    if (typeof window !== 'undefined') localStorage.setItem('trippy-locale', l);
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('trippy-locale', l);
+    // Persist to cookie so server-side layout.tsx picks it up on next request
+    document.cookie = `trippy-locale=${l}; path=/; max-age=31536000; SameSite=Lax`;
+    // Keep <html lang> and <html dir> in sync for screen readers & CSS :lang()
+    document.documentElement.lang = l;
+    document.documentElement.dir  = l === 'he' ? 'rtl' : 'ltr';
   };
 
   const isRTL = locale === 'he';

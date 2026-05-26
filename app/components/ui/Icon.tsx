@@ -6,7 +6,7 @@ type IconName =
   | 'home' | 'calendar' | 'checklist' | 'settings' | 'plus' | 'chevR' | 'chevL'
   | 'share' | 'map' | 'sparkle' | 'trash' | 'edit' | 'x' | 'check' | 'sun'
   | 'wind' | 'lock' | 'pin' | 'download' | 'compass' | 'tent' | 'water'
-  | 'calExport' | 'user' | 'search' | 'filter' | 'ai' | 'clock' | 'arrow' | 'menu' | 'grid' | 'swap';
+  | 'calExport' | 'user' | 'users' | 'search' | 'filter' | 'ai' | 'clock' | 'arrow' | 'menu' | 'grid' | 'swap';
 
 interface IconProps {
   name: IconName;
@@ -41,6 +41,7 @@ const PATHS: Partial<Record<IconName, string>> = {
   water:     `<path d="M12 3s7 7 7 12a7 7 0 0 1-14 0c0-5 7-12 7-12z"/>`,
   calExport: `<rect x="3" y="5" width="13" height="15.5" rx="2"/><path d="M3 9.5h13M7 3v4M12 3v4M14 14h7M18 11l3 3-3 3"/>`,
   user:      `<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>`,
+  users:     `<circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="3"/><path d="M22 21a5 5 0 0 0-8-4"/>`,
   search:    `<circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/>`,
   filter:    `<path d="M3 5h18l-7 8v7l-4-2v-5z"/>`,
   ai:        `<path d="M13 3L5 13h6l-2 8 10-12h-7z"/>`,

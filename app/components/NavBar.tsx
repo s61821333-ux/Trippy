@@ -11,22 +11,24 @@ import { useI18n } from '@/lib/i18n';
 interface NavBarProps {
   active: Screen;
   onChange: (s: Screen) => void;
+  onSettings?: () => void;
 }
 
+// V2 tab structure: Overview · Days · Map · Supplies · Crew
 const TABS: {
   id: Screen;
-  icon: 'grid' | 'compass' | 'checklist' | 'lock' | 'settings';
-  labelKey: 'navCamp' | 'navExplore' | 'navPack' | 'navNotes' | 'navSetup';
+  icon: 'grid' | 'compass' | 'map' | 'checklist' | 'users';
+  labelKey: 'navCamp' | 'navExplore' | 'navMap' | 'navPack' | 'navCrew';
   ariaLabel: string;
 }[] = [
   { id: 'dashboard', icon: 'grid',      labelKey: 'navCamp',    ariaLabel: 'Overview' },
   { id: 'day',       icon: 'compass',   labelKey: 'navExplore', ariaLabel: 'Day planner' },
+  { id: 'map',       icon: 'map',       labelKey: 'navMap',     ariaLabel: 'Map' },
   { id: 'supplies',  icon: 'checklist', labelKey: 'navPack',    ariaLabel: 'Packing list' },
-  { id: 'notes',     icon: 'lock',      labelKey: 'navNotes',   ariaLabel: 'Travel Vault' },
-  { id: 'settings',  icon: 'settings',  labelKey: 'navSetup',   ariaLabel: 'Settings' },
+  { id: 'crew',      icon: 'users',     labelKey: 'navCrew',    ariaLabel: 'Crew' },
 ];
 
-export default function NavBar({ active, onChange }: NavBarProps) {
+export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
   const { t } = useI18n();
 
   const handleChange = (id: Screen) => {
@@ -63,7 +65,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
             onClick={() => handleChange('dashboard')}
             whileTap={{ scale: 0.95 }}
             transition={spring.snap}
-            aria-label="Go to dashboard"
+            aria-label="Go to overview"
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -101,12 +103,12 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '8px 16px',
+                    padding: '8px 14px',
                     borderRadius: 'var(--radius-md)',
                     border: isActive ? '1px solid rgba(196,113,74,0.3)' : '1px solid transparent',
                     background: isActive ? 'var(--terra-muted)' : 'transparent',
                     fontFamily: 'var(--font-mono)',
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: isActive ? 600 : 500,
                     letterSpacing: '0.10em',
                     textTransform: 'uppercase' as const,
@@ -118,11 +120,41 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                     touchAction: 'manipulation',
                   }}
                 >
-                  <Icon name={tab.icon} size={16} />
+                  <Icon name={tab.icon} size={15} />
                   <span>{t(tab.labelKey)}</span>
                 </m.button>
               );
             })}
+
+            {/* Settings gear — accessible from top bar without taking a primary tab slot */}
+            {onSettings && (
+              <m.button
+                onClick={onSettings}
+                whileTap={{ scale: 0.95 }}
+                transition={spring.snap}
+                aria-label="Settings"
+                aria-current={active === 'settings' ? 'page' : undefined}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: 36,
+                  height: 36,
+                  marginInlineStart: 4,
+                  borderRadius: 'var(--radius-md)',
+                  border: active === 'settings' ? '1px solid rgba(196,113,74,0.3)' : '1px solid transparent',
+                  background: active === 'settings' ? 'var(--terra-muted)' : 'transparent',
+                  color: active === 'settings' ? 'var(--terra)' : 'var(--text-2)',
+                  cursor: 'pointer',
+                  outline: 'none',
+                  transition: 'background 0.18s ease, color 0.18s ease',
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                }}
+              >
+                <Icon name="settings" size={16} />
+              </m.button>
+            )}
           </nav>
         </div>
       </div>
@@ -134,7 +166,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
         aria-label="Main navigation"
         style={{
           position: 'fixed',
-          insetInline: 'var(--space-4)',      /* 16px side margins — RTL-safe */
+          insetInline: 'var(--space-4)',
           bottom: 'calc(var(--space-4) + env(safe-area-inset-bottom, 0px))',
           zIndex: 100,
 
@@ -145,11 +177,11 @@ export default function NavBar({ active, onChange }: NavBarProps) {
           borderTopColor: 'oklch(100% 0 0 / 0.22)',
           borderRadius: 'var(--radius-full)',
 
-          padding: 'var(--space-2) var(--space-3)',
+          padding: 'var(--space-2) var(--space-2)',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
-          gap: 'var(--space-2)',
+          gap: 0,
 
           boxShadow: `
             0 1px 0 oklch(100% 0 0 / 0.12) inset,
@@ -175,8 +207,8 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 3,
-                padding: '6px 4px',
+                gap: 2,
+                padding: '5px 2px',
                 border: 'none',
                 background: 'transparent',
                 cursor: 'pointer',
@@ -189,8 +221,8 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                 userSelect: 'none',
               }}
             >
-              {/* Icon container with animated pill indicator */}
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 32 }}>
+              {/* Icon with animated pill indicator */}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 28 }}>
                 <AnimatePresence>
                   {isActive && (
                     <m.div
@@ -202,7 +234,7 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                       style={{
                         position: 'absolute',
                         inset: 0,
-                        borderRadius: 10,
+                        borderRadius: 9,
                         background: 'var(--terra-muted)',
                         border: '1px solid rgba(196,113,74,0.22)',
                         pointerEvents: 'none',
@@ -210,14 +242,14 @@ export default function NavBar({ active, onChange }: NavBarProps) {
                     />
                   )}
                 </AnimatePresence>
-                <Icon name={tab.icon} size={isActive ? 20 : 19} style={{ position: 'relative', zIndex: 1 }} />
+                <Icon name={tab.icon} size={isActive ? 19 : 18} style={{ position: 'relative', zIndex: 1 }} />
               </div>
 
               <span style={{
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: isActive ? 700 : 500,
                 fontFamily: 'var(--font-mono)',
-                letterSpacing: '0.10em',
+                letterSpacing: '0.08em',
                 textTransform: 'uppercase',
                 textAlign: 'center',
                 lineHeight: 1.2,
