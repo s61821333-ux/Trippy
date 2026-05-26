@@ -142,6 +142,70 @@ function AuthStep() {
           </div>
         </motion.div>
 
+        {/* ── V2 Feature Banner ── */}
+        <motion.div
+          custom={5} variants={card} initial="hidden" animate="visible"
+          style={{ marginTop: 32 }}
+        >
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(196,113,74,0.12) 0%, rgba(200,148,74,0.10) 100%)',
+            border: '1px solid rgba(196,113,74,0.30)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '18px 20px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 20 }}>🚀</span>
+              <div>
+                <p style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, color: 'var(--text)', margin: 0 }}>
+                  {t('v2HeroTitle')}
+                </p>
+                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--text-2)', margin: 0 }}>
+                  {t('v2HeroSub')}
+                </p>
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+              {(['v2FeatMap', 'v2FeatSettle', 'v2FeatDNA', 'v2FeatAlerts'] as const).map(key => (
+                <span key={key} style={{
+                  padding: '3px 10px',
+                  background: 'var(--terra-muted)',
+                  border: '1px solid rgba(196,113,74,0.25)',
+                  borderRadius: 'var(--radius-full)',
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10,
+                  fontWeight: 600,
+                  letterSpacing: '0.06em',
+                  color: 'var(--terra)',
+                }}>
+                  {t(key)}
+                </span>
+              ))}
+            </div>
+            <motion.button
+              whileTap={{ scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+              onClick={handleGoogle}
+              disabled={googleLoading}
+              style={{
+                width: '100%',
+                padding: '11px 16px',
+                background: 'var(--terra)',
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                color: '#fff',
+                fontFamily: 'var(--font-sans)',
+                fontWeight: 700,
+                fontSize: 14,
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
+              }}
+            >
+              {t('v2TryBtn')}
+            </motion.button>
+          </div>
+        </motion.div>
+
       </div>
     </div>
   );

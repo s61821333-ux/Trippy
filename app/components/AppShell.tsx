@@ -18,7 +18,7 @@ const DayScreen         = dynamic(() => import('./screens/DayScreen'));
 const SuppliesScreen    = dynamic(() => import('./screens/SuppliesScreen'));
 const SettingsScreen    = dynamic(() => import('./screens/SettingsScreen'));
 const NotesScreen       = dynamic(() => import('./screens/NotesScreen'));
-const MapScreen         = dynamic(() => import('./screens/MapScreen'), { ssr: false });
+const MapScreen         = dynamic(() => import('./screens/MapScreen'));
 const CrewScreen        = dynamic(() => import('./screens/CrewScreen'));
 const TourOverlay        = dynamic(() => import('./TourOverlay'));
 const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
