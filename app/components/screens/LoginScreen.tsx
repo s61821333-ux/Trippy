@@ -101,34 +101,48 @@ function AuthStep() {
         {/* Auth card */}
         <motion.div custom={1} variants={card} initial="hidden" animate="visible" style={{ marginBottom: 10 }}>
           <div style={{
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-xl)', padding: '24px', boxShadow: 'var(--shadow-md)',
+            background: 'oklch(97% 0.01 80 / 0.85)',
+            backdropFilter: 'blur(40px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+            borderWidth: 1, borderStyle: 'solid',
+            borderColor: 'oklch(100% 0 0 / 0.10)',
+            borderTopColor: 'oklch(100% 0 0 / 0.42)',
+            borderLeftColor: 'oklch(100% 0 0 / 0.28)',
+            borderBottomColor: 'rgba(26,20,16,0.07)',
+            borderRightColor: 'rgba(26,20,16,0.05)',
+            borderRadius: 32, padding: '28px',
+            boxShadow: '0 12px 40px rgba(26,20,16,0.10), 0 1px 0 oklch(100% 0 0 / 0.12) inset',
           }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text)', marginBottom: 18 }}>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', marginBottom: 18, letterSpacing: '-0.02em' }}>
               {t('loginBtn')}
             </h2>
             {webView && (
               <div style={{
-                marginBottom: 14, padding: '10px 12px',
-                background: 'rgba(255,180,0,0.12)', border: '1px solid rgba(255,180,0,0.4)',
-                borderRadius: 'var(--radius-md)', fontSize: 13, lineHeight: 1.5,
+                marginBottom: 14, padding: '12px 14px',
+                background: 'rgba(255,180,0,0.10)', border: '1px solid rgba(255,180,0,0.35)',
+                borderRadius: 16, fontSize: 13, lineHeight: 1.5,
                 color: 'var(--text)',
               }}>
                 <span style={{ fontWeight: 700 }}>⚠️ </span>
                 {t('webViewWarning')}
               </div>
             )}
-            <button
+            <motion.button
               onClick={handleGoogle}
               disabled={googleLoading}
+              whileTap={{ scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                width: '100%', padding: '11px 16px', minHeight: 44,
-                background: 'var(--bg)', border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-md)', fontSize: 14, fontWeight: 600,
+                width: '100%', padding: '13px 16px', minHeight: 48,
+                background: 'var(--bg)',
+                border: '1px solid var(--border)',
+                borderTopColor: 'oklch(100% 0 0 / 0.30)',
+                borderRadius: 20, fontSize: 14, fontWeight: 600,
                 color: 'var(--text)', cursor: 'pointer',
-                transition: 'opacity 0.15s',
+                fontFamily: 'var(--font-sans)',
+                transition: 'opacity 0.15s, box-shadow 0.2s',
                 opacity: googleLoading ? 0.6 : 1,
+                boxShadow: '0 2px 8px rgba(26,20,16,0.06)',
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
@@ -138,7 +152,7 @@ function AuthStep() {
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
               </svg>
               {googleLoading ? '…' : t('signInWithGoogle')}
-            </button>
+            </motion.button>
           </div>
         </motion.div>
 
@@ -148,29 +162,40 @@ function AuthStep() {
           style={{ marginTop: 32 }}
         >
           <div style={{
-            background: 'linear-gradient(135deg, rgba(196,113,74,0.12) 0%, rgba(200,148,74,0.10) 100%)',
-            border: '1px solid rgba(196,113,74,0.30)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '18px 20px',
+            background: 'linear-gradient(135deg, rgba(196,113,74,0.13) 0%, rgba(200,148,74,0.09) 100%)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderWidth: 1, borderStyle: 'solid',
+            borderColor: 'rgba(196,113,74,0.20)',
+            borderTopColor: 'rgba(196,113,74,0.40)',
+            borderRadius: 28,
+            padding: '20px 22px',
+            boxShadow: '0 4px 16px rgba(196,113,74,0.08)',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ fontSize: 20 }}>🚀</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+                background: 'rgba(196,113,74,0.15)',
+                border: '1px solid rgba(196,113,74,0.30)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 18,
+              }}>🚀</div>
               <div>
-                <p style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, color: 'var(--text)', margin: 0 }}>
+                <p style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, color: 'var(--text)', margin: 0, letterSpacing: '-0.02em' }}>
                   {t('v2HeroTitle')}
                 </p>
-                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--text-2)', margin: 0 }}>
+                <p style={{ fontFamily: 'var(--font-sans)', fontSize: 12, color: 'var(--text-2)', margin: '2px 0 0' }}>
                   {t('v2HeroSub')}
                 </p>
               </div>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 14 }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
               {(['v2FeatMap', 'v2FeatSettle', 'v2FeatDNA', 'v2FeatAlerts'] as const).map(key => (
                 <span key={key} style={{
-                  padding: '3px 10px',
+                  padding: '4px 12px',
                   background: 'var(--terra-muted)',
                   border: '1px solid rgba(196,113,74,0.25)',
-                  borderRadius: 'var(--radius-full)',
+                  borderRadius: 9999,
                   fontFamily: 'var(--font-mono)',
                   fontSize: 10,
                   fontWeight: 600,
@@ -182,23 +207,24 @@ function AuthStep() {
               ))}
             </div>
             <motion.button
-              whileTap={{ scale: 0.96 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+              whileTap={{ scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
               onClick={handleGoogle}
               disabled={googleLoading}
               style={{
                 width: '100%',
-                padding: '11px 16px',
+                padding: '14px 16px', minHeight: 48,
                 background: 'var(--terra)',
                 border: 'none',
-                borderRadius: 'var(--radius-md)',
+                borderRadius: 20,
                 color: '#fff',
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 700,
-                fontSize: 14,
+                fontSize: 15,
+                letterSpacing: '-0.01em',
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
                 touchAction: 'manipulation',
+                boxShadow: '0 6px 20px rgba(196,113,74,0.30), 0 2px 6px rgba(196,113,74,0.16)',
               }}
             >
               {t('v2TryBtn')}
@@ -334,8 +360,14 @@ function TripStep() {
         <motion.div custom={0} variants={card} initial="hidden" animate="visible" style={{ marginBottom: 24 }}>
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            background: 'var(--surface)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-xl)', padding: '12px 16px', boxShadow: 'var(--shadow-md)',
+            background: 'oklch(97% 0.01 80 / 0.85)',
+            backdropFilter: 'blur(40px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+            borderWidth: 1, borderStyle: 'solid',
+            borderColor: 'oklch(100% 0 0 / 0.10)',
+            borderTopColor: 'oklch(100% 0 0 / 0.38)',
+            borderRadius: 28, padding: '14px 18px',
+            boxShadow: '0 4px 16px rgba(26,20,16,0.08)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <div style={{
@@ -413,8 +445,14 @@ function TripStep() {
         {(tripsLoading || userTrips.length > 0) && (
           <motion.div custom={2} variants={card} initial="hidden" animate="visible" style={{ marginBottom: 10 }}>
             <div style={{
-              background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-xl)', padding: '20px 24px', boxShadow: 'var(--shadow-md)',
+              background: 'oklch(97% 0.01 80 / 0.85)',
+              backdropFilter: 'blur(40px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+              borderWidth: 1, borderStyle: 'solid',
+              borderColor: 'oklch(100% 0 0 / 0.10)',
+              borderTopColor: 'oklch(100% 0 0 / 0.38)',
+              borderRadius: 28, padding: '20px 24px',
+              boxShadow: '0 4px 16px rgba(26,20,16,0.08)',
             }}>
               <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', marginBottom: 14, letterSpacing: '-0.01em' }}>
                 {t('myTrips')}

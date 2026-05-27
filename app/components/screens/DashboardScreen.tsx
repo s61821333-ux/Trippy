@@ -372,14 +372,18 @@ export default function DashboardScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.13 }}
             onClick={() => setScreen('supplies')}
-            className="premium-hover"
+            className="premium-hover specular-card"
             style={{
-              background: 'var(--surface)',
-              border: '1px solid var(--border)',
+              background: 'oklch(97% 0.01 80 / 0.82)',
+              backdropFilter: 'blur(40px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+              borderStyle: 'solid', borderWidth: 1,
+              borderColor: 'oklch(100% 0 0 / 0.10)',
+              borderTopColor: 'oklch(100% 0 0 / 0.36)',
               borderRadius: 'var(--radius-lg)',
-              padding: '12px 16px',
+              padding: '14px 18px',
               cursor: 'pointer',
-              boxShadow: 'var(--shadow-xs)',
+              boxShadow: '0 4px 16px rgba(26,20,16,0.08)',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>

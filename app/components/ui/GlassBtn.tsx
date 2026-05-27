@@ -63,10 +63,12 @@ function getVariantStyles(variant: Variant) {
       };
     default:
       return {
-        bg: 'var(--surface)',
+        bg: 'oklch(97% 0.01 80 / 0.82)',
         color: 'var(--text)',
-        border: '1px solid var(--border)',
-        shadow: 'var(--shadow-xs)',
+        border: '1px solid oklch(100% 0 0 / 0.10)',
+        borderTop: '1px solid oklch(100% 0 0 / 0.36)',
+        shadow: '0 2px 8px rgba(26,20,16,0.07)',
+        backdropFilter: 'blur(20px) saturate(1.6)',
       };
   }
 }
@@ -76,14 +78,16 @@ export default function GlassBtn({
   onClick, disabled = false, style = {}, type = 'button',
 }: GlassBtnProps) {
   const sz = SIZES[size];
-  const { bg, color, border, shadow } = getVariantStyles(variant);
+  const vs = getVariantStyles(variant);
+
+  const isDefault = variant === 'default' || variant === 'flat';
 
   return (
     <motion.button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      whileTap={disabled ? {} : { scale: 0.97 }}
+      whileTap={disabled ? {} : { scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
       whileHover={disabled ? {} : { scale: 1.01 }}
       transition={{ type: 'spring', stiffness: 500, damping: 26 }}
       style={{
@@ -92,19 +96,24 @@ export default function GlassBtn({
         fontSize: sz.fs,
         fontFamily: 'var(--font-sans)',
         fontWeight: 600,
-        letterSpacing: '0.01em',
+        letterSpacing: '-0.01em',
         cursor: disabled ? 'not-allowed' : 'pointer',
-        border: border || 'none',
+        border: vs.border || 'none',
+        borderTopColor: (vs as any).borderTop ? undefined : undefined,
         borderRadius: 'var(--radius-md)',
-        color,
-        background: bg,
-        boxShadow: shadow,
+        color: vs.color,
+        background: vs.bg,
+        boxShadow: vs.shadow,
+        backdropFilter: (vs as any).backdropFilter || undefined,
+        WebkitBackdropFilter: (vs as any).backdropFilter || undefined,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
         opacity: disabled ? 0.45 : 1,
-        transition: 'background 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease',
+        transition: 'background 0.18s ease, box-shadow 0.18s ease',
+        WebkitTapHighlightColor: 'transparent',
+        touchAction: 'manipulation',
         ...style,
       }}
     >

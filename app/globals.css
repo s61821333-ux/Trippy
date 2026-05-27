@@ -9,9 +9,10 @@
   --surface-strong: oklch(95% 0.015 80 / 0.92);
   --nav-surface:    oklch(96% 0.01 80 / 0.94);
 
-  /* Glass blur + specular rim */
-  --glass-blur: blur(20px) saturate(1.8);
-  --glass-rim:  linear-gradient(180deg, oklch(100% 0 0 / 0.18) 0%, oklch(100% 0 0 / 0) 40%);
+  /* Glass blur + specular rim — v2: 40px blur per Jelly Liquid Glass spec */
+  --glass-blur: blur(40px) saturate(1.8);
+  --glass-rim:  linear-gradient(135deg, oklch(100% 0 0 / 0.28) 0%, oklch(100% 0 0 / 0) 50%);
+  --glass-specular: linear-gradient(135deg, oklch(100% 0 0 / 0.18) 0%, transparent 60%);
 
   /* Backgrounds */
   --bg:            #F4EFE8;
@@ -56,26 +57,26 @@
   --danger:        #C0392B;
   --danger-bg:     #FEE8E6;
 
-  /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.04);
-  --shadow-lg: 0 12px 28px rgba(0,0,0,0.09), 0 4px 8px rgba(0,0,0,0.05);
-  --shadow-xl: 0 24px 48px rgba(0,0,0,0.10), 0 8px 16px rgba(0,0,0,0.05);
+  /* Shadows — v2: never pure black; use Ink #1A1410 at low alpha with wide spread */
+  --shadow-xs: 0 1px 3px rgba(26,20,16,0.06), 0 1px 2px rgba(26,20,16,0.04);
+  --shadow-sm: 0 2px 8px rgba(26,20,16,0.08), 0 1px 2px rgba(26,20,16,0.04);
+  --shadow-md: 0 4px 16px rgba(26,20,16,0.08), 0 2px 6px rgba(26,20,16,0.04);
+  --shadow-lg: 0 12px 40px rgba(26,20,16,0.10), 0 4px 12px rgba(26,20,16,0.06);
+  --shadow-xl: 0 24px 64px rgba(26,20,16,0.12), 0 8px 24px rgba(26,20,16,0.07);
 
-  /* Border radii */
-  --radius-xs:   6px;
-  --radius-sm:   8px;
-  --radius-md:   12px;
-  --radius-lg:   16px;
-  --radius-xl:   20px;
+  /* Border radii — v2: min 24px for cards, 32px for containers (Jelly Glass spec) */
+  --radius-xs:   10px;
+  --radius-sm:   16px;
+  --radius-md:   20px;
+  --radius-lg:   24px;
+  --radius-xl:   32px;
   --radius-full: 9999px;
 
   /* V2 numbered radius scale */
-  --radius-1: 8px;
-  --radius-2: 14px;
-  --radius-3: 20px;
-  --radius-4: 28px;
+  --radius-1: 16px;
+  --radius-2: 24px;
+  --radius-3: 32px;
+  --radius-4: 40px;
 
   /* Typography */
   --font-sans:    'Bricolage Grotesque', -apple-system, system-ui, sans-serif;
@@ -258,11 +259,11 @@
   --danger:        #E05040;
   --danger-bg:     rgba(224, 80, 64, 0.13);
 
-  --shadow-xs: 0 1px 2px rgba(0,0,0,0.50);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.55), 0 1px 2px rgba(0,0,0,0.35);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.50), 0 2px 4px rgba(0,0,0,0.30);
-  --shadow-lg: 0 12px 28px rgba(0,0,0,0.60), 0 4px 8px rgba(0,0,0,0.35);
-  --shadow-xl: 0 24px 48px rgba(0,0,0,0.65), 0 8px 16px rgba(0,0,0,0.40);
+  --shadow-xs: 0 1px 3px rgba(0,0,0,0.45);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.52), 0 1px 2px rgba(0,0,0,0.32);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.50), 0 2px 6px rgba(0,0,0,0.28);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.60), 0 4px 12px rgba(0,0,0,0.32);
+  --shadow-xl: 0 24px 64px rgba(0,0,0,0.68), 0 8px 24px rgba(0,0,0,0.38);
 
   /* ── Insight chip colors (dark — slightly boosted opacity) ── */
   --insight-gap-bg:       rgba(240,170,30,0.14);
@@ -392,24 +393,43 @@ select {
 }
 
 /* ─── V2 Liquid Glass Panel ───────────────────────────────────── */
+/* Specular edge: white 80% top/left, ink 10% bottom/right */
 .glass-panel {
   background: var(--surface);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid oklch(100% 0 0 / 0.12);
-  border-top-color: oklch(100% 0 0 / 0.24);
+  border-style: solid;
+  border-width: 1px;
+  border-color: oklch(100% 0 0 / 0.12);
+  border-top-color: oklch(100% 0 0 / 0.45);
+  border-left-color: oklch(100% 0 0 / 0.35);
+  border-bottom-color: rgba(26,20,16,0.10);
+  border-right-color: rgba(26,20,16,0.08);
   border-radius: var(--radius-2);
   box-shadow:
-    0 1px 0 oklch(100% 0 0 / 0.1) inset,
-    0 8px 32px oklch(0% 0 0 / 0.08);
+    0 1px 0 oklch(100% 0 0 / 0.14) inset,
+    0 -1px 0 rgba(26,20,16,0.06) inset,
+    0 12px 40px rgba(26,20,16,0.10);
+  position: relative;
+  overflow: hidden;
+}
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--glass-specular);
+  pointer-events: none;
+  border-radius: inherit;
 }
 
 [data-dark="true"] .glass-panel {
-  border-color: oklch(100% 0 0 / 0.06);
-  border-top-color: oklch(100% 0 0 / 0.12);
+  border-top-color: oklch(100% 0 0 / 0.18);
+  border-left-color: oklch(100% 0 0 / 0.14);
+  border-bottom-color: rgba(26,20,16,0.45);
+  border-right-color: rgba(26,20,16,0.35);
   box-shadow:
-    0 1px 0 oklch(100% 0 0 / 0.06) inset,
-    0 8px 32px oklch(0% 0 0 / 0.40);
+    0 1px 0 oklch(100% 0 0 / 0.08) inset,
+    0 12px 40px rgba(0,0,0,0.45);
 }
 
 /* ─── Card (replaces .glass) ──────────────────────────────────── */
@@ -417,7 +437,13 @@ select {
   background: var(--surface);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--border);
+  border-style: solid;
+  border-width: 1px;
+  border-color: oklch(100% 0 0 / 0.10);
+  border-top-color: oklch(100% 0 0 / 0.32);
+  border-left-color: oklch(100% 0 0 / 0.22);
+  border-bottom-color: rgba(26,20,16,0.08);
+  border-right-color: rgba(26,20,16,0.06);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   position: relative;
@@ -425,7 +451,8 @@ select {
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.glass::before, .glass::after { display: none; }
+.glass::before { display: none; }
+.glass::after { display: none; }
 
 .glass-1 { background: var(--surface-warm); box-shadow: var(--shadow-xs); }
 .glass-2 { background: var(--surface); }
@@ -479,15 +506,35 @@ select {
   background-clip: unset;
 }
 
+/* ─── Specular card — diagonal shine overlay ─────────────────── */
+.specular-card {
+  position: relative;
+  overflow: hidden;
+}
+.specular-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    oklch(100% 0 0 / 0.12) 0%,
+    oklch(100% 0 0 / 0.04) 30%,
+    transparent 60%
+  );
+  pointer-events: none;
+  border-radius: inherit;
+  transition: opacity 0.3s ease;
+}
+
 /* ─── Interactions ────────────────────────────────────────────── */
 .premium-hover {
-  transition: box-shadow 0.2s ease, transform 0.18s ease, border-color 0.2s ease;
+  transition: box-shadow 0.25s ease, transform 0.2s cubic-bezier(0.16,1,0.3,1), border-color 0.2s ease;
 }
 @media (hover: hover) and (pointer: fine) {
   .premium-hover:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
-    border-color: var(--border-strong);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px) scale(1.005);
+    border-top-color: oklch(100% 0 0 / 0.42) !important;
   }
   .text-glow-hover:hover { filter: brightness(1.06); }
 }
@@ -526,20 +573,39 @@ select {
 @keyframes breathe  { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.02); opacity: 0.88; } }
 @keyframes jellyBounce {
   0%   { transform: scale(1); }
-  30%  { transform: scale(0.96, 1.04); }
-  55%  { transform: scale(1.03, 0.97); }
-  75%  { transform: scale(0.99, 1.01); }
+  28%  { transform: scale(0.93, 1.07); }
+  52%  { transform: scale(1.05, 0.95); }
+  72%  { transform: scale(0.98, 1.02); }
+  88%  { transform: scale(1.01, 0.99); }
   100% { transform: scale(1); }
 }
+/* Specular sweep — diagonal shine across glass surfaces */
+@keyframes specularSweep {
+  0%   { background-position: -200% -200%; opacity: 0; }
+  20%  { opacity: 0.6; }
+  80%  { opacity: 0.6; }
+  100% { background-position: 200% 200%; opacity: 0; }
+}
+@keyframes glassGlow {
+  0%, 100% { box-shadow: var(--shadow-sm), 0 0 0 0 rgba(196,113,74,0); }
+  50%       { box-shadow: var(--shadow-md), 0 0 28px 4px rgba(196,113,74,0.08); }
+}
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.8) translateY(12px); }
+  60%  { transform: scale(1.04) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
 
-.an-screen  { animation: screenIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.an-up      { animation: floatUp  0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.an-slide   { animation: slideUp  0.28s cubic-bezier(0.16, 1, 0.3, 1) both; }
-.an-fade    { animation: fadeIn   0.20s ease both; }
+.an-screen  { animation: screenIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.an-up      { animation: floatUp  0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.an-slide   { animation: slideUp  0.32s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.an-fade    { animation: fadeIn   0.22s ease both; }
 .an-pulse   { animation: pulse    1.6s ease infinite; }
 .an-spin    { animation: spin     0.8s linear infinite; }
 .an-float   { animation: float    3s ease-in-out infinite; }
 .an-breathe { animation: breathe  4s ease-in-out infinite; }
+.an-pop     { animation: popIn    0.44s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.an-jelly   { animation: jellyBounce 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
 
 .stagger-1 { animation-delay: 0.05s; }
 .stagger-2 { animation-delay: 0.10s; }
@@ -723,6 +789,28 @@ select {
   --success-bg:    rgba(0, 255, 136, 0.18);
   --danger:        #FF5555;
   --danger-bg:     rgba(255, 85, 85, 0.18);
+}
+
+/* ─── v2 Card — glass surface shorthand ─────────────────────── */
+/* Drop this class on any card div instead of repeating inline styles */
+.v2-card {
+  background: oklch(97% 0.01 80 / 0.82);
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  border-style: solid;
+  border-width: 1px;
+  border-color: oklch(100% 0 0 / 0.10);
+  border-top-color: oklch(100% 0 0 / 0.36);
+  border-left-color: oklch(100% 0 0 / 0.22);
+  border-bottom-color: rgba(26,20,16,0.07);
+  border-right-color: rgba(26,20,16,0.05);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 16px rgba(26,20,16,0.08);
+}
+[data-dark="true"] .v2-card {
+  background: oklch(18% 0.02 80 / 0.85);
+  border-top-color: oklch(100% 0 0 / 0.14);
+  border-color: oklch(100% 0 0 / 0.06);
 }
 
 /* ─── Scroll utilities ───────────────────────────────────────── */
