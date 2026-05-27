@@ -46,7 +46,8 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
           backdropFilter: 'var(--glass-blur)',
           WebkitBackdropFilter: 'var(--glass-blur)',
           borderBottom: '1px solid var(--border)',
-          borderBottomColor: 'oklch(0% 0 0 / 0.08)',
+          borderBottomColor: 'rgba(67,97,238,0.10)',
+          boxShadow: '0 1px 0 rgba(67,97,238,0.06)',
           height: 'var(--nav-h)',
         }}
       >
@@ -105,17 +106,20 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                     gap: 6,
                     padding: '8px 14px',
                     borderRadius: 'var(--radius-md)',
-                    border: isActive ? '1px solid rgba(196,113,74,0.3)' : '1px solid transparent',
-                    background: isActive ? 'var(--terra-muted)' : 'transparent',
+                    border: isActive ? '1px solid rgba(67,97,238,0.25)' : '1px solid transparent',
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgba(247,37,133,0.12) 0%, rgba(67,97,238,0.12) 100%)'
+                      : 'transparent',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 11,
-                    fontWeight: isActive ? 600 : 500,
+                    fontWeight: isActive ? 700 : 500,
                     letterSpacing: '0.10em',
                     textTransform: 'uppercase' as const,
-                    color: isActive ? 'var(--terra)' : 'var(--text-2)',
+                    color: isActive ? 'var(--brand)' : 'var(--text-2)',
                     cursor: 'pointer',
                     outline: 'none',
-                    transition: 'background 0.18s ease, color 0.18s ease, border-color 0.18s ease',
+                    transition: 'background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
+                    boxShadow: isActive ? '0 2px 10px rgba(67,97,238,0.14)' : 'none',
                     WebkitTapHighlightColor: 'transparent',
                     touchAction: 'manipulation',
                   }}
@@ -142,9 +146,11 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                   height: 36,
                   marginInlineStart: 4,
                   borderRadius: 'var(--radius-md)',
-                  border: active === 'settings' ? '1px solid rgba(196,113,74,0.3)' : '1px solid transparent',
-                  background: active === 'settings' ? 'var(--terra-muted)' : 'transparent',
-                  color: active === 'settings' ? 'var(--terra)' : 'var(--text-2)',
+                  border: active === 'settings' ? '1px solid rgba(67,97,238,0.25)' : '1px solid transparent',
+                  background: active === 'settings'
+                    ? 'linear-gradient(135deg, rgba(247,37,133,0.12) 0%, rgba(67,97,238,0.12) 100%)'
+                    : 'transparent',
+                  color: active === 'settings' ? 'var(--brand)' : 'var(--text-2)',
                   cursor: 'pointer',
                   outline: 'none',
                   transition: 'background 0.18s ease, color 0.18s ease',
@@ -173,8 +179,8 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
           background: 'var(--nav-surface)',
           backdropFilter: 'var(--glass-blur)',
           WebkitBackdropFilter: 'var(--glass-blur)',
-          border: '1px solid var(--border)',
-          borderTopColor: 'oklch(100% 0 0 / 0.22)',
+          border: '1px solid rgba(67,97,238,0.14)',
+          borderTopColor: 'oklch(100% 0 0 / 0.26)',
           borderRadius: 'var(--radius-full)',
 
           padding: 'var(--space-2) var(--space-2)',
@@ -184,9 +190,9 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
           gap: 0,
 
           boxShadow: `
-            0 1px 0 oklch(100% 0 0 / 0.12) inset,
-            0 8px 32px oklch(0% 0 0 / 0.12),
-            0 2px 8px oklch(0% 0 0 / 0.08)
+            0 1px 0 oklch(100% 0 0 / 0.14) inset,
+            0 8px 40px rgba(67,97,238,0.18),
+            0 2px 10px rgba(0,0,0,0.10)
           `,
         }}
       >
@@ -212,10 +218,10 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                 border: 'none',
                 background: 'transparent',
                 cursor: 'pointer',
-                color: isActive ? 'var(--terra)' : 'var(--text-3)',
+                color: isActive ? 'var(--brand)' : 'var(--text-3)',
                 minHeight: 44,
                 minWidth: 44,
-                transition: 'color 0.18s ease',
+                transition: 'color 0.15s ease',
                 WebkitTapHighlightColor: 'transparent',
                 touchAction: 'manipulation',
                 userSelect: 'none',
@@ -235,8 +241,9 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                         position: 'absolute',
                         inset: 0,
                         borderRadius: 9,
-                        background: 'var(--terra-muted)',
-                        border: '1px solid rgba(196,113,74,0.22)',
+                        background: 'linear-gradient(135deg, rgba(247,37,133,0.18) 0%, rgba(67,97,238,0.16) 100%)',
+                        border: '1px solid rgba(67,97,238,0.22)',
+                        boxShadow: '0 2px 10px rgba(67,97,238,0.15)',
                         pointerEvents: 'none',
                       }}
                     />
@@ -253,8 +260,8 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                 textTransform: 'uppercase',
                 textAlign: 'center',
                 lineHeight: 1.2,
-                color: isActive ? 'var(--terra)' : 'var(--text-3)',
-                transition: 'color 0.18s ease',
+                color: isActive ? 'var(--brand)' : 'var(--text-3)',
+                transition: 'color 0.15s ease',
               }}>
                 {t(tab.labelKey)}
               </span>

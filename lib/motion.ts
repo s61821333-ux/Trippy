@@ -3,30 +3,37 @@ import type { Transition, Variants } from 'framer-motion';
 export const spring = {
   snap: {
     type: 'spring',
-    stiffness: 500,
-    damping: 35,
-    mass: 0.8,
+    stiffness: 620,
+    damping: 22,
+    mass: 0.65,
   } satisfies Transition,
 
   default: {
     type: 'spring',
-    stiffness: 320,
-    damping: 28,
-    mass: 1,
+    stiffness: 400,
+    damping: 22,
+    mass: 0.9,
   } satisfies Transition,
 
   gentle: {
     type: 'spring',
-    stiffness: 220,
-    damping: 26,
-    mass: 1.2,
+    stiffness: 260,
+    damping: 24,
+    mass: 1.0,
   } satisfies Transition,
 
   float: {
     type: 'spring',
-    stiffness: 120,
-    damping: 22,
-    mass: 1.5,
+    stiffness: 160,
+    damping: 20,
+    mass: 1.2,
+  } satisfies Transition,
+
+  bounce: {
+    type: 'spring',
+    stiffness: 520,
+    damping: 16,
+    mass: 0.75,
   } satisfies Transition,
 
   instant: {
@@ -36,26 +43,26 @@ export const spring = {
 
 export const duration = {
   instant: 0.01,
-  fast:    0.12,
-  normal:  0.22,
-  slow:    0.38,
-  crawl:   0.6,
+  fast:    0.08,
+  normal:  0.16,
+  slow:    0.28,
+  crawl:   0.48,
 } as const;
 
 export const stagger = {
-  fast:   0.04,
-  normal: 0.06,
-  slow:   0.1,
+  fast:   0.03,
+  normal: 0.05,
+  slow:   0.08,
 } as const;
 
 export const slideVariants = (isRTL = false): Variants => ({
   enter: (direction: 'forward' | 'back') => ({
-    x: direction === 'forward' ? (isRTL ? -40 : 40) : (isRTL ? 40 : -40),
+    x: direction === 'forward' ? (isRTL ? -56 : 56) : (isRTL ? 56 : -56),
     opacity: 0,
   }),
   center: { x: 0, opacity: 1 },
   exit: (direction: 'forward' | 'back') => ({
-    x: direction === 'forward' ? (isRTL ? 40 : -40) : (isRTL ? -40 : 40),
+    x: direction === 'forward' ? (isRTL ? 56 : -56) : (isRTL ? -56 : 56),
     opacity: 0,
   }),
 });
@@ -73,18 +80,29 @@ export const fadeVariants: Variants = {
 };
 
 export const scaleVariants: Variants = {
-  hidden:  { scale: 0.92, opacity: 0 },
+  hidden:  { scale: 0.86, opacity: 0 },
   visible: { scale: 1, opacity: 1 },
-  exit:    { scale: 0.96, opacity: 0 },
+  exit:    { scale: 0.94, opacity: 0 },
 };
 
 export const screenVariants: Variants = {
-  initial: { opacity: 0, y: 8 },
+  initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
-  exit:    { opacity: 0, y: -4 },
+  exit:    { opacity: 0, y: -10 },
 };
 
 export const listItemVariants: Variants = {
-  hidden:  { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
+  hidden:  { opacity: 0, y: 18, scale: 0.96 },
+  visible: { opacity: 1, y: 0,  scale: 1    },
+};
+
+export const popVariants: Variants = {
+  initial: { scale: 0, opacity: 0 },
+  animate: { scale: 1, opacity: 1 },
+  exit:    { scale: 0, opacity: 0 },
+};
+
+export const cardVariants: Variants = {
+  hidden:  { opacity: 0, y: 24, scale: 0.95 },
+  visible: { opacity: 1, y: 0,  scale: 1    },
 };
