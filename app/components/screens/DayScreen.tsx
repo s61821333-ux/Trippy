@@ -498,11 +498,15 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
         transition={rescheduling || isConflict ? { duration: 0.18 } : { duration: 0.6, ease: 'easeOut' }}
         style={{
           flex: 1, width: '100%',
-          background: 'var(--surface)',
-          borderRadius: 18,
-          border: rescheduling ? '1.5px solid var(--terra)' : isConflict ? '1.5px solid var(--danger)' : '1px solid var(--border)',
+          background: rescheduling
+            ? 'rgba(196,113,74,0.08)'
+            : 'rgba(255,255,255,0.55)',
+          backdropFilter: 'blur(40px) saturate(1.8)',
+          WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+          borderRadius: 20,
+          border: rescheduling ? '1.5px solid var(--terra)' : isConflict ? '1.5px solid var(--danger)' : '1px solid rgba(255,255,255,0.80)',
           overflow: 'hidden',
-          transition: 'border 0.18s',
+          transition: 'border 0.18s, background 0.18s',
         }}>
         {isConflict && !rescheduling && (
           <div style={{ width: '100%', height: 4, background: 'var(--danger)' }} />
@@ -1449,11 +1453,14 @@ export default function DayScreen() {
         }}>
           <div style={{
             display: 'flex',
-            background: 'var(--surface)',
-            border: '1px solid var(--border)',
+            background: 'rgba(255,255,255,0.55)',
+            backdropFilter: 'blur(40px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+            border: '1px solid rgba(255,255,255,0.80)',
             borderRadius: 'var(--radius-sm)',
             padding: 2,
             gap: 2,
+            boxShadow: '0 4px 16px rgba(26,20,16,0.06)',
           }}>
             {(['list', 'timeline'] as const).map(mode => (
               <motion.button

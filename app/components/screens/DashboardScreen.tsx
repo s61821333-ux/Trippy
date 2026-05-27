@@ -6,10 +6,9 @@ import GlassBtn from '../ui/GlassBtn';
 import Chip from '../ui/Chip';
 import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
-import { StampIcon } from '../ui/StampIcon';
 import { useAppStore } from '@/lib/store';
 import { dbGetTripEmailInvitations, dbCancelInvitation } from '@/lib/db';
-import { fmtDate, getGaps, toMins, getDayIcon, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget, estimateCarbonKg } from '@/lib/utils';
+import { fmtDate, getGaps, toMins, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget, estimateCarbonKg } from '@/lib/utils';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
 import { getCurrencySymbol, getCountryCurrency, getExchangeRates } from '@/lib/currency';
@@ -272,7 +271,11 @@ export default function DashboardScreen() {
             transition={{ delay: 0.04, type: 'spring', stiffness: 360, damping: 32 }}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}
           >
-            <p className="eyebrow">{t('activeTrip')}</p>
+            <p style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11, fontWeight: 600, letterSpacing: '0.14em',
+              textTransform: 'uppercase', color: 'var(--terra)',
+            }}>{t('activeTrip')}</p>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{ display: 'flex' }}>
                 {trip.participants.slice(0, 4).map((p, i) => (
@@ -372,18 +375,17 @@ export default function DashboardScreen() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.13 }}
             onClick={() => setScreen('supplies')}
-            className="premium-hover specular-card"
+            className="premium-hover"
             style={{
-              background: 'oklch(97% 0.01 80 / 0.82)',
+              background: 'rgba(255,255,255,0.55)',
               backdropFilter: 'blur(40px) saturate(1.8)',
               WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-              borderStyle: 'solid', borderWidth: 1,
-              borderColor: 'oklch(100% 0 0 / 0.10)',
-              borderTopColor: 'oklch(100% 0 0 / 0.36)',
+              border: '1px solid rgba(255,255,255,0.80)',
               borderRadius: 'var(--radius-lg)',
               padding: '14px 18px',
               cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(26,20,16,0.08)',
+              boxShadow: '0 12px 40px rgba(26,20,16,0.08)',
+              position: 'relative', overflow: 'hidden',
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
@@ -1154,8 +1156,7 @@ export default function DashboardScreen() {
                 const lastEnd = last
                   ? `${Math.floor((toMins(last.time) + last.duration) / 60).toString().padStart(2, '0')}:${String((toMins(last.time) + last.duration) % 60).padStart(2, '0')}`
                   : '—';
-                const dayIcon = getDayIcon(evs, meta?.emoji ?? 'mountain');
-                const dayWeather = weather[i] ?? null;
+const dayWeather = weather[i] ?? null;
                 const longestEv = evs.length ? [...evs].sort((a, b) => b.duration - a.duration)[0] : null;
                 const weatherLocation = longestEv?.location ?? meta?.region ?? '';
                 const isToday = currentTripDay === dayNum;
@@ -1167,102 +1168,102 @@ export default function DashboardScreen() {
                       onClick={() => handleDayClick(dayNum)}
                       className="premium-hover"
                       style={{
-                        background: isToday ? 'var(--terra-muted)' : 'var(--surface)',
-                        border: `1px solid ${isToday ? 'var(--terra)' : 'var(--border)'}`,
-                        borderRadius: 'var(--radius-lg)',
-                        padding: '14px 16px',
+                        background: isToday ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.45)',
+                        backdropFilter: 'blur(40px) saturate(1.8)',
+                        WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+                        border: '1px solid rgba(255,255,255,0.80)',
+                        borderRadius: 24,
+                        padding: '18px 20px',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: 14,
-                        boxShadow: isToday ? '0 0 0 3px var(--terra-muted)' : 'var(--shadow-xs)',
+                        gap: 16,
+                        boxShadow: isToday ? '0 40px 80px rgba(26,20,16,0.15)' : '0 12px 40px rgba(26,20,16,0.08)',
                         position: 'relative',
                         overflow: 'hidden',
-                        transition: 'box-shadow 0.2s',
                       }}
                     >
-                      {/* Left accent line */}
+                      {/* Specular diagonal shine */}
                       <div style={{
-                        position: 'absolute', left: 0, top: 0, bottom: 0,
-                        width: 3,
-                        background: isToday
-                          ? 'linear-gradient(180deg, var(--terra) 0%, #b85f3a 100%)'
-                          : 'linear-gradient(180deg, var(--terra) 0%, var(--terra) 100%)',
-                        opacity: isToday ? 0.9 : 0.35,
-                        borderRadius: '4px 0 0 4px',
+                        position: 'absolute', inset: 0,
+                        background: 'linear-gradient(135deg, rgba(255,255,255,0.40) 0%, transparent 50%, rgba(255,255,255,0.10) 100%)',
+                        pointerEvents: 'none', borderRadius: 'inherit', zIndex: 0,
                       }} />
 
-                      {/* Icon with day badge */}
-                      <div style={{ position: 'relative', flexShrink: 0 }}>
+                      {/* CURRENTLY ACTIVE badge */}
+                      {isToday && (
                         <div style={{
-                          width: 52, height: 52, borderRadius: 18,
-                          background: isToday
-                            ? 'linear-gradient(150deg, #d4845a 0%, var(--terra) 100%)'
-                            : 'linear-gradient(150deg, var(--surface) 0%, var(--terra-muted) 100%)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 26,
+                          position: 'absolute', top: 0, right: 0,
+                          background: 'var(--brand)', color: 'white',
+                          fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
+                          letterSpacing: '0.12em', textTransform: 'uppercase',
+                          padding: '5px 12px', borderBottomLeftRadius: 14, zIndex: 2,
+                        }}>
+                          CURRENTLY ACTIVE
+                        </div>
+                      )}
+
+                      {/* Paper-ring day number badge */}
+                      <div style={{
+                        position: 'relative', flexShrink: 0, zIndex: 1,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+                      }}>
+                        {trip.startDate && (
+                          <span style={{
+                            fontFamily: 'var(--font-mono)',
+                            fontSize: 9, fontWeight: 600, letterSpacing: '0.12em',
+                            color: isToday ? 'var(--terra)' : 'var(--text-3)',
+                            textTransform: 'uppercase', whiteSpace: 'nowrap',
+                          }}>
+                            {fmtDate(trip.startDate, i, locale).split(' ').slice(0, 2).join(' ')}
+                          </span>
+                        )}
+                        <div style={{
+                          width: 56, height: 56, borderRadius: '50%',
+                          background: '#fff',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(0,0,0,0.05)',
                           position: 'relative',
-                          overflow: 'hidden',
-                          boxShadow: isToday
-                            ? '0 4px 16px rgba(196,113,74,0.32), inset 0 1px 0 rgba(255,255,255,0.25)'
-                            : 'inset 0 1px 0 rgba(255,255,255,0.85), 0 1px 4px rgba(0,0,0,0.07)',
-                          border: isToday ? 'none' : '1px solid var(--border)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}>
                           <div style={{
-                            position: 'absolute', top: 0, left: 0, right: 0, height: '45%',
-                            background: 'linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%)',
-                            pointerEvents: 'none',
+                            position: 'absolute', inset: 5, borderRadius: '50%',
+                            border: '1px dashed rgba(43,83,64,0.25)',
+                            opacity: isToday ? 1 : 0.7,
                           }} />
-                          <StampIcon iconKey={dayIcon} size={32} style={{ position: 'relative', zIndex: 1 }} />
-                        </div>
-                        <div style={{
-                          position: 'absolute', bottom: -3, right: -3,
-                          background: 'var(--terra)', color: 'white',
-                          fontSize: 10, fontWeight: 800,
-                          width: 22, height: 22, borderRadius: '50%',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          border: '2px solid var(--surface)',
-                          boxShadow: '0 1px 4px rgba(0,0,0,0.22)',
-                        }}>
-                          {dayNum}
+                          <span style={{
+                            fontSize: 20, fontWeight: 800,
+                            color: isToday ? 'var(--brand)' : '#2B5340',
+                            fontFamily: 'var(--font-sans)',
+                            letterSpacing: '-0.04em',
+                            position: 'relative', zIndex: 1,
+                          }}>{dayNum}</span>
                         </div>
                       </div>
 
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>
-                            {t('day')} {dayNum}
+                      {/* Middle: title + chips */}
+                      <div style={{ flex: 1, minWidth: 0, position: 'relative', zIndex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em' }}>
+                            {t(meta?.region ?? `${t('day')} ${dayNum}`)}
                           </span>
-                          {trip.startDate && (
-                            <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500 }}>
-                              {fmtDate(trip.startDate, i, locale)}
-                            </span>
-                          )}
-                          {isToday && (
-                            <span style={{
-                              fontSize: 10, fontWeight: 800, letterSpacing: '0.06em',
-                              background: 'var(--terra)', color: 'white',
-                              borderRadius: 10, padding: '2px 7px', textTransform: 'uppercase',
-                            }}>
-                              Today
-                            </span>
-                          )}
                           {!isToday && isNextEventDayCard && (
                             <span style={{
-                              fontSize: 10, fontWeight: 800, letterSpacing: '0.06em',
+                              fontSize: 9, fontWeight: 700, letterSpacing: '0.10em',
                               background: 'var(--terra)', color: 'white',
-                              borderRadius: 10, padding: '2px 7px', textTransform: 'uppercase',
+                              borderRadius: 9999, padding: '2px 7px', textTransform: 'uppercase',
                             }}>
                               Up Next
                             </span>
                           )}
                         </div>
-                        <p style={{
-                          fontSize: 13, color: 'var(--text-2)', marginBottom: 9,
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
-                          {t(meta?.region ?? `Day ${dayNum}`)}{meta?.desc ? ` — ${t(meta.desc)}` : ''}
-                        </p>
+                        {meta?.desc && (
+                          <p style={{
+                            fontSize: 12, color: 'var(--text-2)', marginBottom: 8,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {t(meta.desc)}
+                          </p>
+                        )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
                           <Chip v="neutral" style={{ fontSize: 10 }}>
                             {evs.length} {t('events')}
@@ -1280,7 +1281,8 @@ export default function DashboardScreen() {
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+                      {/* Right: weather + chevron button */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0, zIndex: 1 }}>
                         {dayWeather && (
                           <a
                             href={getWeatherUrl(weatherLocation || trip.name)}
@@ -1290,23 +1292,30 @@ export default function DashboardScreen() {
                             title={`${dayWeather.label} · ${dayWeather.tempMax}°/${dayWeather.tempMin}°C`}
                             style={{
                               display: 'flex', flexDirection: 'column', alignItems: 'center',
-                              fontSize: 18, lineHeight: 1, textDecoration: 'none',
-                              background: isToday ? 'rgba(255,255,255,0.6)' : 'var(--terra-muted)',
-                              borderRadius: 8, padding: '4px 6px', gap: 1,
-                              border: isToday ? '1px solid rgba(255,255,255,0.8)' : 'none',
-                              minWidth: 44,
+                              textDecoration: 'none',
+                              background: 'rgba(255,255,255,0.60)',
+                              borderRadius: 12, padding: '5px 7px', gap: 1,
+                              border: '1px solid rgba(255,255,255,0.80)',
+                              minWidth: 42,
                             }}
                           >
-                            <span>{dayWeather.icon}</span>
+                            <span style={{ fontSize: 18, lineHeight: 1 }}>{dayWeather.icon}</span>
                             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>
                               {dayWeather.tempMax}°
                             </span>
-                            <span style={{ fontSize: 11, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: 10, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
                               {dayWeather.tempMin}°
                             </span>
                           </a>
                         )}
-                        <Icon name="chevR" size={15} style={{ color: 'var(--text-3)' }} />
+                        <div style={{
+                          width: 34, height: 34, borderRadius: '50%',
+                          background: isToday ? 'var(--brand)' : 'rgba(26,20,16,0.08)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          boxShadow: isToday ? '0 4px 12px rgba(59,110,82,0.30)' : 'none',
+                        }}>
+                          <Icon name="chevR" size={14} style={{ color: isToday ? '#fff' : 'var(--text-3)' }} />
+                        </div>
                       </div>
                     </div>
                   </motion.div>

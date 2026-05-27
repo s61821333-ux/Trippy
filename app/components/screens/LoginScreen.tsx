@@ -101,17 +101,13 @@ function AuthStep() {
         {/* Auth card */}
         <motion.div custom={1} variants={card} initial="hidden" animate="visible" style={{ marginBottom: 10 }}>
           <div style={{
-            background: 'oklch(97% 0.01 80 / 0.85)',
+            background: 'rgba(255,255,255,0.65)',
             backdropFilter: 'blur(40px) saturate(1.8)',
             WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-            borderWidth: 1, borderStyle: 'solid',
-            borderColor: 'oklch(100% 0 0 / 0.10)',
-            borderTopColor: 'oklch(100% 0 0 / 0.42)',
-            borderLeftColor: 'oklch(100% 0 0 / 0.28)',
-            borderBottomColor: 'rgba(26,20,16,0.07)',
-            borderRightColor: 'rgba(26,20,16,0.05)',
+            border: '1px solid rgba(255,255,255,0.80)',
             borderRadius: 32, padding: '28px',
-            boxShadow: '0 12px 40px rgba(26,20,16,0.10), 0 1px 0 oklch(100% 0 0 / 0.12) inset',
+            boxShadow: '0 12px 40px rgba(26,20,16,0.10)',
+            position: 'relative', overflow: 'hidden',
           }}>
             <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)', marginBottom: 18, letterSpacing: '-0.02em' }}>
               {t('loginBtn')}
@@ -162,15 +158,13 @@ function AuthStep() {
           style={{ marginTop: 32 }}
         >
           <div style={{
-            background: 'linear-gradient(135deg, rgba(196,113,74,0.13) 0%, rgba(200,148,74,0.09) 100%)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            borderWidth: 1, borderStyle: 'solid',
-            borderColor: 'rgba(196,113,74,0.20)',
-            borderTopColor: 'rgba(196,113,74,0.40)',
+            background: 'rgba(255,255,255,0.45)',
+            backdropFilter: 'blur(40px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+            border: '1px solid rgba(255,255,255,0.80)',
             borderRadius: 28,
             padding: '20px 22px',
-            boxShadow: '0 4px 16px rgba(196,113,74,0.08)',
+            boxShadow: '0 12px 40px rgba(26,20,16,0.08)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <div style={{

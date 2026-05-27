@@ -14,7 +14,6 @@ interface NavBarProps {
   onSettings?: () => void;
 }
 
-// V2 tab structure: Overview · Days · Map · Supplies · Crew
 const TABS: {
   id: Screen;
   icon: 'grid' | 'compass' | 'map' | 'checklist' | 'users';
@@ -42,11 +41,11 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
       <div
         className="hidden md:flex relative z-50 w-full shrink-0"
         style={{
-          background: 'var(--nav-surface)',
-          backdropFilter: 'var(--glass-blur)',
-          WebkitBackdropFilter: 'var(--glass-blur)',
-          borderBottom: '1px solid var(--border)',
-          borderBottomColor: 'oklch(0% 0 0 / 0.08)',
+          background: 'rgba(255, 255, 255, 0.65)',
+          backdropFilter: 'blur(40px) saturate(1.8)',
+          WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+          borderBottom: '1px solid rgba(255,255,255,0.80)',
+          boxShadow: '0 12px 40px rgba(26,20,16,0.08)',
           height: 'var(--nav-h)',
         }}
       >
@@ -81,8 +80,17 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
             }}
           >
             <CompassMark size={32} />
-            <span className="wordmark" style={{ fontSize: 20, color: 'var(--text)' }}>
-              Trippy<span className="dot">.</span>
+            <span style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: '-0.04em',
+              color: 'var(--text)',
+              lineHeight: 1,
+              direction: 'ltr',
+              unicodeBidi: 'isolate',
+            }}>
+              Trippy<span style={{ color: 'var(--terra)' }}>.</span>
             </span>
           </m.button>
 
@@ -95,7 +103,7 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                   key={tab.id}
                   data-tour={`nav-${tab.id}`}
                   onClick={() => handleChange(tab.id)}
-                  whileTap={{ scale: 0.95 }}
+                  whileTap={{ scale: 0.93 }}
                   transition={spring.snap}
                   aria-label={tab.ariaLabel}
                   aria-current={isActive ? 'page' : undefined}
@@ -103,21 +111,22 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 6,
-                    padding: '8px 14px',
-                    borderRadius: 'var(--radius-md)',
-                    border: isActive ? '1px solid rgba(196,113,74,0.3)' : '1px solid transparent',
-                    background: isActive ? 'var(--terra-muted)' : 'transparent',
+                    padding: '8px 16px',
+                    borderRadius: 9999,
+                    border: 'none',
+                    background: isActive ? 'var(--brand)' : 'transparent',
                     fontFamily: 'var(--font-mono)',
                     fontSize: 11,
-                    fontWeight: isActive ? 600 : 500,
-                    letterSpacing: '0.10em',
+                    fontWeight: 600,
+                    letterSpacing: '0.12em',
                     textTransform: 'uppercase' as const,
-                    color: isActive ? 'var(--terra)' : 'var(--text-2)',
+                    color: isActive ? '#ffffff' : 'rgba(26,20,16,0.45)',
                     cursor: 'pointer',
                     outline: 'none',
-                    transition: 'background 0.18s ease, color 0.18s ease, border-color 0.18s ease',
+                    transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
                     WebkitTapHighlightColor: 'transparent',
                     touchAction: 'manipulation',
+                    boxShadow: isActive ? '0 8px 20px rgba(59,110,82,0.28)' : 'none',
                   }}
                 >
                   <Icon name={tab.icon} size={15} />
@@ -126,11 +135,10 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
               );
             })}
 
-            {/* Settings gear — accessible from top bar without taking a primary tab slot */}
             {onSettings && (
               <m.button
                 onClick={onSettings}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.93 }}
                 transition={spring.snap}
                 aria-label="Settings"
                 aria-current={active === 'settings' ? 'page' : undefined}
@@ -138,16 +146,16 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: 36,
-                  height: 36,
+                  width: 38,
+                  height: 38,
                   marginInlineStart: 4,
-                  borderRadius: 'var(--radius-md)',
-                  border: active === 'settings' ? '1px solid rgba(196,113,74,0.3)' : '1px solid transparent',
-                  background: active === 'settings' ? 'var(--terra-muted)' : 'transparent',
-                  color: active === 'settings' ? 'var(--terra)' : 'var(--text-2)',
+                  borderRadius: '50%',
+                  border: 'none',
+                  background: active === 'settings' ? 'var(--brand)' : 'transparent',
+                  color: active === 'settings' ? '#ffffff' : 'rgba(26,20,16,0.45)',
                   cursor: 'pointer',
                   outline: 'none',
-                  transition: 'background 0.18s ease, color 0.18s ease',
+                  transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
                   WebkitTapHighlightColor: 'transparent',
                   touchAction: 'manipulation',
                 }}
@@ -159,35 +167,32 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
         </div>
       </div>
 
-      {/* ── Mobile: floating glass pill nav ── */}
+      {/* ── Mobile: floating Jelly Pill nav — matches prototype exactly ── */}
       <nav
         className="md:hidden"
         role="navigation"
         aria-label="Main navigation"
         style={{
           position: 'fixed',
-          insetInline: 'var(--space-4)',
-          bottom: 'calc(var(--space-4) + env(safe-area-inset-bottom, 0px))',
+          bottom: 'calc(32px + env(safe-area-inset-bottom, 0px))',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: 'calc(100% - 48px)',
+          maxWidth: 380,
           zIndex: 100,
 
-          background: 'var(--nav-surface)',
-          backdropFilter: 'var(--glass-blur)',
-          WebkitBackdropFilter: 'var(--glass-blur)',
-          border: '1px solid var(--border)',
-          borderTopColor: 'oklch(100% 0 0 / 0.22)',
-          borderRadius: 'var(--radius-full)',
+          background: 'rgba(255, 255, 255, 0.65)',
+          backdropFilter: 'blur(40px) saturate(1.8)',
+          WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+          border: '1px solid rgba(255, 255, 255, 0.80)',
+          borderRadius: 9999,
+          padding: '8px',
 
-          padding: 'var(--space-2) var(--space-2)',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
-          gap: 0,
 
-          boxShadow: `
-            0 1px 0 oklch(100% 0 0 / 0.12) inset,
-            0 8px 32px oklch(0% 0 0 / 0.12),
-            0 2px 8px oklch(0% 0 0 / 0.08)
-          `,
+          boxShadow: '0 40px 80px rgba(26, 20, 16, 0.15)',
         }}
       >
         {TABS.map(tab => {
@@ -197,77 +202,39 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
               key={tab.id}
               data-tour={`nav-${tab.id}`}
               onClick={() => handleChange(tab.id)}
-              whileTap={{ scale: 0.85 }}
-              transition={spring.snap}
+              whileTap={{ scale: 0.88, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
+              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
               aria-label={tab.ariaLabel}
               aria-current={isActive ? 'page' : undefined}
               style={{
-                flex: 1,
                 display: 'flex',
-                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: 2,
-                padding: '5px 2px',
+                width: isActive ? 56 : 48,
+                height: isActive ? 56 : 48,
+                borderRadius: '50%',
                 border: 'none',
-                background: 'transparent',
+                background: isActive ? 'var(--brand)' : 'transparent',
+                color: isActive ? '#ffffff' : 'rgba(26,20,16,0.40)',
                 cursor: 'pointer',
-                color: isActive ? 'var(--terra)' : 'var(--text-3)',
-                minHeight: 44,
-                minWidth: 44,
-                transition: 'color 0.18s ease',
+                transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
                 WebkitTapHighlightColor: 'transparent',
                 touchAction: 'manipulation',
-                userSelect: 'none',
+                boxShadow: isActive ? '0 12px 24px rgba(59,110,82,0.30)' : 'none',
+                flexShrink: 0,
               }}
             >
-              {/* Icon with animated pill indicator */}
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, height: 28 }}>
-                <AnimatePresence>
-                  {isActive && (
-                    <m.div
-                      key="pill"
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.5, opacity: 0 }}
-                      transition={spring.snap}
-                      style={{
-                        position: 'absolute',
-                        inset: 0,
-                        borderRadius: 9,
-                        background: 'var(--terra-muted)',
-                        border: '1px solid rgba(196,113,74,0.22)',
-                        pointerEvents: 'none',
-                      }}
-                    />
-                  )}
-                </AnimatePresence>
-                <Icon name={tab.icon} size={isActive ? 19 : 18} style={{ position: 'relative', zIndex: 1 }} />
-              </div>
-
-              <span style={{
-                fontSize: 9,
-                fontWeight: isActive ? 700 : 500,
-                fontFamily: 'var(--font-mono)',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                textAlign: 'center',
-                lineHeight: 1.2,
-                color: isActive ? 'var(--terra)' : 'var(--text-3)',
-                transition: 'color 0.18s ease',
-              }}>
-                {t(tab.labelKey)}
-              </span>
+              <Icon name={tab.icon} size={isActive ? 22 : 20} />
             </m.button>
           );
         })}
       </nav>
 
-      {/* Spacer so content scrolls above the floating pill on mobile */}
+      {/* Spacer for mobile pill */}
       <div
         className="md:hidden"
         style={{
-          height: 'calc(var(--nav-h) + var(--space-4) + env(safe-area-inset-bottom, 0px))',
+          height: 'calc(32px + 56px + 32px + env(safe-area-inset-bottom, 0px))',
           flexShrink: 0,
           pointerEvents: 'none',
         }}
