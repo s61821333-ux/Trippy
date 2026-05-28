@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trippy - Theme Picker</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Newsreader:opsz,wght@6..72,400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#e7e2db",
+                        "primary-fixed-dim": "#9cd3b1",
+                        "ink": "#1A1410",
+                        "forest-lt": "#8BB39A",
+                        "tertiary-fixed-dim": "#f5bc6e",
+                        "surface-container-low": "#f8f3ec",
+                        "on-tertiary-fixed-variant": "#633f00",
+                        "secondary-container": "#ffa277",
+                        "on-tertiary": "#ffffff",
+                        "surface-bright": "#fef9f2",
+                        "primary": "#22553b",
+                        "on-background": "#1d1b17",
+                        "coral-glow": "#E05A3A",
+                        "outline": "#717972",
+                        "on-secondary": "#ffffff",
+                        "glass-float": "rgba(255, 255, 255, 0.65)",
+                        "inverse-surface": "#32302c",
+                        "on-primary-fixed-variant": "#1c5036",
+                        "primary-fixed": "#b8efcc",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#291800",
+                        "on-primary-fixed": "#002112",
+                        "on-secondary-container": "#783614",
+                        "tertiary-fixed": "#ffddb4",
+                        "surface-dim": "#ded9d3",
+                        "on-primary-container": "#b7eecb",
+                        "surface-container": "#f2ede6",
+                        "ink-soft": "#3A2E26",
+                        "gold-lt": "#E6B574",
+                        "background": "#fef9f2",
+                        "on-secondary-fixed": "#351000",
+                        "error-container": "#ffdad6",
+                        "tertiary-container": "#875b15",
+                        "on-surface-variant": "#414943",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#753311",
+                        "glass-base": "rgba(255, 255, 255, 0.45)",
+                        "primary-container": "#3b6e52",
+                        "secondary-fixed": "#ffdbcd",
+                        "tertiary": "#6a4400",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f5f0e9",
+                        "on-primary": "#ffffff",
+                        "surface": "#fef9f2",
+                        "on-tertiary-container": "#ffdcb1",
+                        "surface-tint": "#35684d",
+                        "terra-lt": "#E0916B",
+                        "outline-variant": "#c0c9c1",
+                        "secondary": "#934a27",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#e7e2db",
+                        "surface-container-high": "#ece7e1",
+                        "secondary-fixed-dim": "#ffb595",
+                        "inverse-primary": "#9cd3b1",
+                        "forest-dk": "#2B5340",
+                        "on-surface": "#1d1b17"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "12px",
+                        "stack-md": "24px",
+                        "jelly-gap": "20px",
+                        "gutter": "48px",
+                        "stack-lg": "64px",
+                        "page-margin": "120px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Bricolage Grotesque"],
+                        "display": ["Bricolage Grotesque"],
+                        "label-mono": ["JetBrains Mono"],
+                        "headline-md": ["Bricolage Grotesque"],
+                        "body-lg": ["Bricolage Grotesque"],
+                        "body-sm": ["Bricolage Grotesque"],
+                        "headline-lg-mobile": ["Bricolage Grotesque"],
+                        "serif-editorial": ["Newsreader"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["72px", { "lineHeight": "1.1", "letterSpacing": "-0.035em", "fontWeight": "700" }],
+                        "display": ["120px", { "lineHeight": "1.1", "letterSpacing": "-0.04em", "fontWeight": "700" }],
+                        "label-mono": ["14px", { "lineHeight": "1", "letterSpacing": "0.18em", "fontWeight": "500" }],
+                        "headline-md": ["48px", { "lineHeight": "1.2", "letterSpacing": "-0.025em", "fontWeight": "600" }],
+                        "body-lg": ["22px", { "lineHeight": "1.45", "fontWeight": "400" }],
+                        "body-sm": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.035em", "fontWeight": "700" }],
+                        "serif-editorial": ["36px", { "lineHeight": "1.4", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #fef9f2;
+            overflow-x: hidden;
+            transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .jelly-shape {
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            mask-image: linear-gradient(to bottom, black 0%, black 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 0%, black 100%);
+        }
+
+        .liquid-border {
+            position: relative;
+        }
+
+        .liquid-border::before {
+            content: "";
+            position: absolute;
+            inset: -4px;
+            padding: 4px;
+            border-radius: inherit;
+            background: linear-gradient(135deg, #E6B574 0%, #E0916B 50%, #FFDBB4 100%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .active-theme .liquid-border::before {
+            opacity: 1;
+        }
+
+        .specular-highlight {
+            position: absolute;
+            top: 2px;
+            left: 20%;
+            right: 20%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.4);
+            filter: blur(1px);
+            border-radius: 9999px;
+        }
+
+        .bg-transition {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .bg-transition.active {
+            opacity: 0.15;
+        }
+
+        .glass-shell {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 12px 40px rgba(26, 20, 16, 0.08);
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .bento-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .floating-label {
+            text-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .theme-desert { background-color: #F8F3EC; }
+        .theme-nature { background-color: #E8F0E9; }
+        .theme-city { background-color: #E6E8EA; }
+        .theme-beach { background-color: #E6F3F5; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen text-ink font-body-sm">
+<!-- Background Layer for Transitions -->
+<div class="fixed inset-0 pointer-events-none transition-all duration-1000" id="bg-layer">
+<div class="bg-transition inset-0 absolute" id="bg-desert" style="background: radial-gradient(circle at 50% 50%, #E0916B 0%, transparent 70%);"></div>
+<div class="bg-transition inset-0 absolute" id="bg-nature" style="background: radial-gradient(circle at 50% 50%, #22553B 0%, transparent 70%);"></div>
+<div class="bg-transition inset-0 absolute" id="bg-city" style="background: radial-gradient(circle at 50% 50%, #3A2E26 0%, transparent 70%);"></div>
+<div class="bg-transition inset-0 absolute" id="bg-beach" style="background: radial-gradient(circle at 50% 50%, #E6B574 0%, transparent 70%);"></div>
+</div>
+<!-- Header Section -->
+<header class="fixed top-0 left-0 w-full z-50 bg-glass-float backdrop-blur-[40px] px-page-margin-mobile md:px-page-margin py-6 flex justify-between items-center no-border shadow-[0_12px_40px_rgba(26,20,16,0.08)]">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md text-forest-dk dark:text-primary-fixed tracking-tight">Trippy</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="w-10 h-10 rounded-full flex items-center justify-center bg-surface-container hover:scale-105 transition-all">
+<span class="material-symbols-outlined text-ink">close</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-grow flex flex-col items-center justify-center px-6 pt-32 pb-40">
+<div class="max-w-4xl w-full text-center mb-16 space-y-4">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-ink tracking-tight">Set your <span class="italic font-serif-editorial text-secondary">vibe</span>.</h1>
+<p class="font-body-lg text-body-lg text-ink-soft opacity-70">Choose a theme to personalize your next adventure.</p>
+</div>
+<div class="bento-grid w-full max-w-6xl">
+<!-- Desert Theme -->
+<button class="group relative flex flex-col items-center p-8 rounded-[3rem] bg-glass-float backdrop-blur-[40px] jelly-shape liquid-border hover:scale-105 active:scale-95 transition-all" id="theme-desert-btn" onclick="selectTheme('desert')">
+<div class="specular-highlight"></div>
+<div class="w-24 h-24 mb-6 rounded-full bg-[#FFE4D1] flex items-center justify-center text-5xl group-hover:scale-110 transition-transform">🏜️</div>
+<span class="font-label-mono text-label-mono uppercase tracking-[0.2em] text-ink-soft">Desert</span>
+<div class="mt-4 opacity-0 group-[.active-theme]:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-gold-lt" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+<!-- Nature Theme -->
+<button class="group relative flex flex-col items-center p-8 rounded-[3rem] bg-glass-float backdrop-blur-[40px] jelly-shape liquid-border hover:scale-105 active:scale-95 transition-all" id="theme-nature-btn" onclick="selectTheme('nature')">
+<div class="specular-highlight"></div>
+<div class="w-24 h-24 mb-6 rounded-full bg-[#D1EEDC] flex items-center justify-center text-5xl group-hover:scale-110 transition-transform">🌲</div>
+<span class="font-label-mono text-label-mono uppercase tracking-[0.2em] text-ink-soft">Nature</span>
+<div class="mt-4 opacity-0 group-[.active-theme]:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-gold-lt" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+<!-- City Theme -->
+<button class="group relative flex flex-col items-center p-8 rounded-[3rem] bg-glass-float backdrop-blur-[40px] jelly-shape liquid-border hover:scale-105 active:scale-95 transition-all" id="theme-city-btn" onclick="selectTheme('city')">
+<div class="specular-highlight"></div>
+<div class="w-24 h-24 mb-6 rounded-full bg-[#E2E2E2] flex items-center justify-center text-5xl group-hover:scale-110 transition-transform">🌆</div>
+<span class="font-label-mono text-label-mono uppercase tracking-[0.2em] text-ink-soft">City</span>
+<div class="mt-4 opacity-0 group-[.active-theme]:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-gold-lt" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+<!-- Beach Theme -->
+<button class="group relative flex flex-col items-center p-8 rounded-[3rem] bg-glass-float backdrop-blur-[40px] jelly-shape liquid-border hover:scale-105 active:scale-95 transition-all" id="theme-beach-btn" onclick="selectTheme('beach')">
+<div class="specular-highlight"></div>
+<div class="w-24 h-24 mb-6 rounded-full bg-[#D1F2F7] flex items-center justify-center text-5xl group-hover:scale-110 transition-transform">🌊</div>
+<span class="font-label-mono text-label-mono uppercase tracking-[0.2em] text-ink-soft">Beach</span>
+<div class="mt-4 opacity-0 group-[.active-theme]:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-gold-lt" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</button>
+</div>
+</main>
+<!-- Floating Navigation Shell -->
+<nav class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex justify-center items-center w-[90%] max-w-md">
+<div class="bg-glass-float backdrop-blur-[40px] w-full rounded-full p-4 flex items-center justify-between shadow-[0_40px_80px_rgba(26,20,16,0.15)]">
+<button class="w-12 h-12 flex items-center justify-center text-ink-soft hover:scale-110 transition-all">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex-grow flex justify-center px-4">
+<div class="flex gap-2">
+<div class="w-2 h-2 rounded-full bg-ink opacity-20"></div>
+<div class="w-6 h-2 rounded-full bg-primary transition-all"></div>
+<div class="w-2 h-2 rounded-full bg-ink opacity-20"></div>
+</div>
+</div>
+<button class="px-8 py-3 bg-primary text-on-primary rounded-full font-label-mono text-label-mono uppercase flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-lg">
+                Continue
+                <span class="material-symbols-outlined text-[18px]">east</span>
+</button>
+</div>
+</nav>
+<script>
+        function selectTheme(theme) {
+            // Remove active classes
+            document.querySelectorAll('.bento-grid button').forEach(btn => {
+                btn.classList.remove('active-theme');
+            });
+            document.querySelectorAll('.bg-transition').forEach(bg => {
+                bg.classList.remove('active');
+            });
+
+            // Add active class to clicked button
+            document.getElementById(`theme-${theme}-btn`).classList.add('active-theme');
+            
+            // Add active background effect
+            document.getElementById(`bg-${theme}`).classList.add('active');
+
+            // Change body background tone slightly
+            const themeColors = {
+                desert: '#F8F3EC',
+                nature: '#E8F0E9',
+                city: '#E6E8EA',
+                beach: '#E6F3F5'
+            };
+            document.body.style.backgroundColor = themeColors[theme];
+        }
+
+        // Initialize with Desert as default
+        window.onload = () => {
+            selectTheme('desert');
+        };
+    </script>
+</body></html>

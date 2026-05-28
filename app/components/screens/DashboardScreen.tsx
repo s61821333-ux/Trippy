@@ -250,7 +250,7 @@ export default function DashboardScreen() {
         <div style={{
           position: 'relative',
           paddingTop: 'var(--page-pt)',
-          paddingBottom: 24,
+          paddingBottom: 16,
           paddingLeft: 'var(--page-px)',
           paddingRight: 'var(--page-px)',
           marginBottom: 4,
@@ -369,6 +369,118 @@ export default function DashboardScreen() {
             </p>
           </motion.div>
 
+          {/* ── Journey Path Card ── */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12, type: 'spring', stiffness: 300, damping: 30 }}
+            style={{
+              background: 'rgba(255,255,255,0.82)',
+              backdropFilter: 'blur(40px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+              border: '1px solid rgba(255,255,255,0.90)',
+              borderRadius: 28,
+              padding: '20px 20px 16px',
+              boxShadow: '0 8px 32px rgba(26,20,16,0.08)',
+              marginBottom: 12,
+              position: 'relative', overflow: 'hidden',
+            }}
+          >
+            {/* Current stop label */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div>
+                <p style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
+                  letterSpacing: '0.18em', color: 'var(--terra)',
+                  textTransform: 'uppercase', marginBottom: 4,
+                }}>
+                  {currentTripDay !== null ? 'CURRENT STOP' : daysUntil !== null && daysUntil > 0 ? 'STARTING SOON' : 'JOURNEY'}
+                </p>
+                <h2 style={{
+                  fontSize: 'clamp(1.2rem, 4vw, 1.7rem)', fontWeight: 700,
+                  color: 'var(--forest-dk)', letterSpacing: '-0.03em', lineHeight: 1.1,
+                }}>
+                  {currentTripDay !== null
+                    ? (trip.dayMeta?.[currentTripDay - 1]?.region || `Day ${currentTripDay}`)
+                    : trip.name}
+                </h2>
+              </div>
+              <button
+                onClick={() => setScreen('map')}
+                style={{
+                  width: 40, height: 40, borderRadius: '50%',
+                  background: 'rgba(255,255,255,0.90)', border: '1px solid rgba(255,255,255,0.90)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer', flexShrink: 0,
+                  boxShadow: '0 2px 8px rgba(26,20,16,0.08)',
+                }}
+              >
+                <Icon name="compass" size={18} style={{ color: 'var(--forest-dk)' }} />
+              </button>
+            </div>
+
+            {/* SVG path visualization */}
+            <div style={{ position: 'relative', height: 56, marginBottom: 12 }}>
+              <svg width="100%" height="56" viewBox={`0 0 ${Math.max(trip.days * 40, 200)} 56`} preserveAspectRatio="xMidYMid meet">
+                {/* Dashed path */}
+                <path
+                  d={`M 20 28 ${Array.from({ length: trip.days - 1 }, (_, i) => {
+                    const x1 = 20 + i * (Math.max(trip.days * 40, 200) - 40) / Math.max(trip.days - 1, 1);
+                    const x2 = 20 + (i + 1) * (Math.max(trip.days * 40, 200) - 40) / Math.max(trip.days - 1, 1);
+                    const cy = i % 2 === 0 ? 12 : 44;
+                    return `Q ${(x1 + x2) / 2} ${cy} ${x2} 28`;
+                  }).join(' ')}`}
+                  fill="none"
+                  stroke="rgba(43,83,64,0.25)"
+                  strokeWidth="2"
+                  strokeDasharray="6 8"
+                />
+                {/* Day dots */}
+                {Array.from({ length: trip.days }, (_, i) => {
+                  const x = 20 + i * (Math.max(trip.days * 40, 200) - 40) / Math.max(trip.days - 1, 1);
+                  const isThisToday = (currentTripDay ?? 0) - 1 === i;
+                  const isPast = currentTripDay !== null && i < currentTripDay - 1;
+                  return (
+                    <g key={i}>
+                      <circle
+                        cx={x} cy={28}
+                        r={isThisToday ? 8 : 5}
+                        fill={isThisToday ? '#2B5340' : isPast ? '#8BB39A' : 'rgba(43,83,64,0.20)'}
+                        stroke={isThisToday ? 'white' : 'transparent'}
+                        strokeWidth={isThisToday ? 2.5 : 0}
+                      />
+                      {isThisToday && (
+                        <circle cx={x} cy={28} r={14} fill="none" stroke="rgba(43,83,64,0.15)" strokeWidth="1.5" />
+                      )}
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+
+            {/* Stats row */}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+                  DURATION
+                </p>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--forest-dk)' }}>
+                  {trip.days} DAYS
+                </p>
+              </div>
+              {currentTripDay !== null && (
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+                    PROGRESS
+                  </p>
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--terra)' }}>
+                    DAY {currentTripDay}/{trip.days}
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
           {/* Supplies progress */}
           <motion.div
             initial={{ opacity: 0, y: 6 }}
@@ -377,14 +489,14 @@ export default function DashboardScreen() {
             onClick={() => setScreen('supplies')}
             className="premium-hover"
             style={{
-              background: 'rgba(255,255,255,0.55)',
+              background: 'rgba(255,255,255,0.80)',
               backdropFilter: 'blur(40px) saturate(1.8)',
               WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-              border: '1px solid rgba(255,255,255,0.80)',
+              border: '1px solid rgba(255,255,255,0.90)',
               borderRadius: 'var(--radius-lg)',
               padding: '14px 18px',
               cursor: 'pointer',
-              boxShadow: '0 12px 40px rgba(26,20,16,0.08)',
+              boxShadow: '0 4px 16px rgba(26,20,16,0.06)',
               position: 'relative', overflow: 'hidden',
             }}
           >
@@ -1136,14 +1248,18 @@ export default function DashboardScreen() {
 
           {/* ── Days ── */}
           <div style={{ marginTop: 6 }}>
-            <p className="eyebrow" style={{ marginBottom: 12 }}>{t('days')}</p>
+            <p style={{
+              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: 'var(--text-3)', marginBottom: 16,
+            }}>{t('days')}</p>
 
             <motion.div
               data-tour="day-cards"
               variants={stagger}
               initial="hidden"
               animate="visible"
-              className="flex flex-col gap-3 md:grid md:grid-cols-2 md:gap-4"
+              style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
             >
               {Array.from({ length: trip.days }, (_, i) => {
                 const dayNum  = i + 1;
@@ -1156,11 +1272,12 @@ export default function DashboardScreen() {
                 const lastEnd = last
                   ? `${Math.floor((toMins(last.time) + last.duration) / 60).toString().padStart(2, '0')}:${String((toMins(last.time) + last.duration) % 60).padStart(2, '0')}`
                   : '—';
-const dayWeather = weather[i] ?? null;
+                const dayWeather = weather[i] ?? null;
                 const longestEv = evs.length ? [...evs].sort((a, b) => b.duration - a.duration)[0] : null;
                 const weatherLocation = longestEv?.location ?? meta?.region ?? '';
                 const isToday = currentTripDay === dayNum;
-                const isNextEventDayCard = nextEventData?.dayNum === dayNum;
+                const isFutureLocked = !isToday && startDate !== null && today < startDate ? false
+                  : (!isToday && startDate !== null && new Date(startDate.getTime() + (dayNum - 1) * 86400000) > today && currentTripDay !== null);
 
                 return (
                   <motion.div key={dayNum} variants={item}>
@@ -1168,28 +1285,25 @@ const dayWeather = weather[i] ?? null;
                       onClick={() => handleDayClick(dayNum)}
                       className="premium-hover"
                       style={{
-                        background: isToday ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.45)',
+                        background: isToday ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.80)',
                         backdropFilter: 'blur(40px) saturate(1.8)',
                         WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-                        border: '1px solid rgba(255,255,255,0.80)',
-                        borderRadius: 24,
-                        padding: '18px 20px',
+                        border: '1px solid rgba(255,255,255,0.90)',
+                        borderRadius: 28,
+                        padding: '24px 24px 20px',
                         cursor: 'pointer',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        gap: 16,
-                        boxShadow: isToday ? '0 40px 80px rgba(26,20,16,0.15)' : '0 12px 40px rgba(26,20,16,0.08)',
+                        textAlign: 'center',
+                        boxShadow: isToday
+                          ? '0 40px 80px rgba(26,20,16,0.15)'
+                          : '0 4px 20px rgba(26,20,16,0.06)',
                         position: 'relative',
                         overflow: 'hidden',
+                        opacity: isFutureLocked ? 0.55 : 1,
                       }}
                     >
-                      {/* Specular diagonal shine */}
-                      <div style={{
-                        position: 'absolute', inset: 0,
-                        background: 'linear-gradient(135deg, rgba(255,255,255,0.40) 0%, transparent 50%, rgba(255,255,255,0.10) 100%)',
-                        pointerEvents: 'none', borderRadius: 'inherit', zIndex: 0,
-                      }} />
-
                       {/* CURRENTLY ACTIVE badge */}
                       {isToday && (
                         <div style={{
@@ -1197,125 +1311,125 @@ const dayWeather = weather[i] ?? null;
                           background: 'var(--brand)', color: 'white',
                           fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
                           letterSpacing: '0.12em', textTransform: 'uppercase',
-                          padding: '5px 12px', borderBottomLeftRadius: 14, zIndex: 2,
+                          padding: '6px 14px', borderBottomLeftRadius: 18, zIndex: 2,
                         }}>
                           CURRENTLY ACTIVE
                         </div>
                       )}
 
-                      {/* Paper-ring day number badge */}
-                      <div style={{
-                        position: 'relative', flexShrink: 0, zIndex: 1,
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
-                      }}>
-                        {trip.startDate && (
-                          <span style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: 9, fontWeight: 600, letterSpacing: '0.12em',
-                            color: isToday ? 'var(--terra)' : 'var(--text-3)',
-                            textTransform: 'uppercase', whiteSpace: 'nowrap',
-                          }}>
-                            {fmtDate(trip.startDate, i, locale).split(' ').slice(0, 2).join(' ')}
-                          </span>
-                        )}
-                        <div style={{
-                          width: 56, height: 56, borderRadius: '50%',
-                          background: '#fff',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.05), inset 0 0 0 1px rgba(0,0,0,0.05)',
-                          position: 'relative',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      {/* Date label */}
+                      {trip.startDate && (
+                        <span style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: 10, fontWeight: 600, letterSpacing: '0.14em',
+                          color: isToday ? 'var(--terra)' : 'var(--text-3)',
+                          textTransform: 'uppercase', marginBottom: 10,
                         }}>
-                          <div style={{
-                            position: 'absolute', inset: 5, borderRadius: '50%',
-                            border: '1px dashed rgba(43,83,64,0.25)',
-                            opacity: isToday ? 1 : 0.7,
-                          }} />
+                          {fmtDate(trip.startDate, i, locale).split(' ').slice(0, 2).join(' ')}
+                        </span>
+                      )}
+
+                      {/* Paper-ring day number — CENTERED, LARGE */}
+                      <div style={{
+                        width: 72, height: 72, borderRadius: '50%',
+                        background: isToday ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.90)',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.05)',
+                        position: 'relative',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        marginBottom: 16, flexShrink: 0,
+                        filter: isFutureLocked ? 'grayscale(0.6) opacity(0.6)' : 'none',
+                      }}>
+                        <div style={{
+                          position: 'absolute', inset: 7, borderRadius: '50%',
+                          border: '1px dashed rgba(43,83,64,0.28)',
+                        }} />
+                        <span style={{
+                          fontSize: 26, fontWeight: 800,
+                          color: isToday ? 'var(--brand)' : 'var(--forest-dk)',
+                          fontFamily: 'var(--font-sans)',
+                          letterSpacing: '-0.04em',
+                          position: 'relative', zIndex: 1,
+                        }}>{dayNum}</span>
+                      </div>
+
+                      {/* Location name */}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, justifyContent: 'center' }}>
+                        <Icon name="pin" size={14} style={{ color: isToday ? 'var(--brand)' : 'var(--text-3)', flexShrink: 0 }} />
+                        <span style={{
+                          fontSize: 17, fontWeight: 700,
+                          color: isToday ? 'var(--text)' : 'var(--text)',
+                          letterSpacing: '-0.02em',
+                        }}>
+                          {t(meta?.region ?? `${t('day')} ${dayNum}`)}
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      {meta?.desc && (
+                        <p style={{
+                          fontSize: 13, color: 'var(--text-2)', marginBottom: 14,
+                          lineHeight: 1.5, maxWidth: 260,
+                        }}>
+                          {t(meta.desc)}
+                        </p>
+                      )}
+
+                      {/* Chips row */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+                        <span style={{
+                          padding: '4px 12px', borderRadius: 9999,
+                          background: 'var(--bg-alt)', color: 'var(--text-2)',
+                          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
+                        }}>
+                          {evs.length} {t('events')}
+                        </span>
+                        {evs.length > 0 && (
                           <span style={{
-                            fontSize: 20, fontWeight: 800,
-                            color: isToday ? 'var(--brand)' : '#2B5340',
-                            fontFamily: 'var(--font-sans)',
-                            letterSpacing: '-0.04em',
-                            position: 'relative', zIndex: 1,
-                          }}>{dayNum}</span>
-                        </div>
-                      </div>
-
-                      {/* Middle: title + chips */}
-                      <div style={{ flex: 1, minWidth: 0, position: 'relative', zIndex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3, flexWrap: 'wrap' }}>
-                          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.02em' }}>
-                            {t(meta?.region ?? `${t('day')} ${dayNum}`)}
-                          </span>
-                          {!isToday && isNextEventDayCard && (
-                            <span style={{
-                              fontSize: 9, fontWeight: 700, letterSpacing: '0.10em',
-                              background: 'var(--terra)', color: 'white',
-                              borderRadius: 9999, padding: '2px 7px', textTransform: 'uppercase',
-                            }}>
-                              Up Next
-                            </span>
-                          )}
-                        </div>
-                        {meta?.desc && (
-                          <p style={{
-                            fontSize: 12, color: 'var(--text-2)', marginBottom: 8,
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                            padding: '4px 12px', borderRadius: 9999,
+                            background: 'var(--bg-alt)', color: 'var(--text-2)',
+                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
                           }}>
-                            {t(meta.desc)}
-                          </p>
+                            {first} – {lastEnd}
+                          </span>
                         )}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
-                          <Chip v="neutral" style={{ fontSize: 10 }}>
-                            {evs.length} {t('events')}
-                          </Chip>
-                          {evs.length > 0 && (
-                            <Chip v="neutral" style={{ fontSize: 10 }}>
-                              {first} – {lastEnd}
-                            </Chip>
-                          )}
-                          {gaps.length > 0 && (
-                            <Chip v="gap" style={{ fontSize: 10 }}>
-                              ⚡ {gaps.length} {gaps.length > 1 ? t('gapsPlural') : t('gaps')}
-                            </Chip>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Right: weather + chevron button */}
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0, zIndex: 1 }}>
+                        {gaps.length > 0 && (
+                          <span style={{
+                            padding: '4px 12px', borderRadius: 9999,
+                            background: 'rgba(196,113,74,0.12)', color: 'var(--terra)',
+                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
+                          }}>
+                            {gaps.length} {gaps.length > 1 ? t('gapsPlural') : t('gaps')} found
+                          </span>
+                        )}
                         {dayWeather && (
                           <a
                             href={getWeatherUrl(weatherLocation || trip.name)}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            target="_blank" rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
-                            title={`${dayWeather.label} · ${dayWeather.tempMax}°/${dayWeather.tempMin}°C`}
                             style={{
-                              display: 'flex', flexDirection: 'column', alignItems: 'center',
-                              textDecoration: 'none',
-                              background: 'rgba(255,255,255,0.60)',
-                              borderRadius: 12, padding: '5px 7px', gap: 1,
-                              border: '1px solid rgba(255,255,255,0.80)',
-                              minWidth: 42,
+                              padding: '4px 10px', borderRadius: 9999,
+                              background: 'var(--bg-alt)', color: 'var(--text-2)',
+                              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+                              textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4,
                             }}
                           >
-                            <span style={{ fontSize: 18, lineHeight: 1 }}>{dayWeather.icon}</span>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', whiteSpace: 'nowrap' }}>
-                              {dayWeather.tempMax}°
-                            </span>
-                            <span style={{ fontSize: 10, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
-                              {dayWeather.tempMin}°
-                            </span>
+                            {dayWeather.icon} {dayWeather.tempMax}°
                           </a>
                         )}
-                        <div style={{
-                          width: 34, height: 34, borderRadius: '50%',
-                          background: isToday ? 'var(--brand)' : 'rgba(26,20,16,0.08)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: isToday ? '0 4px 12px rgba(59,110,82,0.30)' : 'none',
-                        }}>
-                          <Icon name="chevR" size={14} style={{ color: isToday ? '#fff' : 'var(--text-3)' }} />
-                        </div>
+                      </div>
+
+                      {/* Arrow button at bottom center */}
+                      <div style={{
+                        width: 40, height: 40, borderRadius: '50%',
+                        background: isToday ? 'var(--brand)' : isFutureLocked ? 'rgba(26,20,16,0.08)' : 'var(--forest-dk)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: isToday ? '0 6px 18px rgba(59,110,82,0.35)' : 'none',
+                        color: 'white',
+                      }}>
+                        {isFutureLocked
+                          ? <Icon name="lock" size={15} style={{ color: 'var(--text-3)' }} />
+                          : <span style={{ fontSize: 16, lineHeight: 1 }}>{isToday ? '↓' : '→'}</span>
+                        }
                       </div>
                     </div>
                   </motion.div>

@@ -348,44 +348,49 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, tripStartD
         )}
       </AnimatePresence>
 
-      {/* ── Bottom row: timeline dash + free time + actions ── */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ width: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+      {/* ── Gap / free time row — matches demo dashed pill style ── */}
+      {isFree ? (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '8px 16px',
+          border: '1.5px dashed rgba(26,20,16,0.18)',
+          borderRadius: 9999, gap: 10,
+        }}>
+          <span style={{
+            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+            color: 'var(--text-3)', letterSpacing: '0.10em', textTransform: 'uppercase',
+          }}>
+            {fmtDuration(gapMins)} FREE TIME
+          </span>
+          <motion.button
+            whileTap={{ scale: 0.90 }}
+            onClick={onSuggest}
+            style={{
+              background: 'var(--brand)',
+              border: 'none',
+              borderRadius: 9999, padding: '6px 14px',
+              fontSize: 11, fontWeight: 700, color: '#fff',
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
+              flexShrink: 0,
+            }}
+          >
+            <Icon name="sparkle" size={10} /> {t('suggestBtn')}
+          </motion.button>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 4 }}>
           {[0, 1, 2].map(i => (
             <div key={i} style={{
-              width: 2, height: 6, borderRadius: 1, marginBottom: 3,
+              width: 5, height: 5, borderRadius: '50%',
               background: dashColor,
-              opacity: isFree ? (1 - i * 0.25) : 0.45,
+              opacity: 1 - i * 0.3,
             }} />
           ))}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1, flexWrap: 'wrap' }}>
-          {isFree && (
-            <>
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                ⚡ {fmtDuration(gapMins)} {t('freeTime')}
-              </span>
-              <motion.button
-                whileTap={{ scale: 0.90 }}
-                onClick={onSuggest}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(91,79,207,0.12) 0%, rgba(59,126,212,0.12) 100%)',
-                  border: '1px solid rgba(91,79,207,0.25)',
-                  borderRadius: 100, padding: '4px 12px',
-                  fontSize: 10, fontWeight: 700, color: '#5B4FCF',
-                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
-                }}
-              >
-                <Icon name="sparkle" size={10} /> {t('suggestBtn')}
-              </motion.button>
-            </>
-          )}
-
           <motion.button
             whileTap={{ scale: 0.90 }}
             onClick={onAdd}
             style={{
+              marginLeft: 4,
               background: 'var(--terra-muted)',
               border: '1px solid rgba(196,113,74,0.25)',
               borderRadius: 100, padding: '4px 10px',
@@ -396,7 +401,7 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, tripStartD
             <Icon name="plus" size={10} />
           </motion.button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -485,7 +490,32 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
       transition={{ type: 'spring', stiffness: 380, damping: 34 }}
       style={{ display: 'flex', alignItems: 'flex-start', padding: '0 var(--page-px)' }}
     >
-      {/* Card — full width, no timeline dot */}
+      {/* Timeline left column: dot + line */}
+      <div style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        width: 28, flexShrink: 0, marginTop: 4, marginRight: 12,
+      }}>
+        <div style={{
+          width: 10, height: 10, borderRadius: '50%',
+          background: isConflict ? 'var(--danger)' : 'var(--terra)',
+          border: '2px solid var(--bg)',
+          boxShadow: `0 0 0 2px ${isConflict ? 'var(--danger)' : 'var(--terra)'}`,
+          flexShrink: 0,
+        }} />
+      </div>
+
+      <div style={{ flex: 1, minWidth: 0, paddingBottom: 8 }}>
+        {/* Time label above card */}
+        <p style={{
+          fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
+          color: 'var(--terra)', letterSpacing: '0.04em',
+          marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6,
+        }}>
+          {goldenHour === 'sunrise' ? '☀️ ' : goldenHour === 'sunset' ? '🌅 ' : ''}
+          {event.time} {Number(event.time.split(':')[0]) < 12 ? 'AM' : 'PM'}
+        </p>
+
+      {/* Card */}
       <motion.div
         initial={isNew ? { boxShadow: '0 0 0 4px var(--terra-muted), 0 4px 20px rgba(196,113,74,0.18)' } : false}
         animate={{
@@ -493,23 +523,20 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
             ? '0 0 0 2px var(--terra), 0 4px 20px rgba(0,0,0,0.12)'
             : isConflict
               ? '0 0 0 1.5px var(--danger), 0 2px 8px rgba(0,0,0,0.07)'
-              : '0 2px 8px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)',
+              : '0 2px 12px rgba(26,20,16,0.06), 0 1px 3px rgba(26,20,16,0.03)',
         }}
         transition={rescheduling || isConflict ? { duration: 0.18 } : { duration: 0.6, ease: 'easeOut' }}
         style={{
           flex: 1, width: '100%',
-          background: rescheduling
-            ? 'rgba(196,113,74,0.08)'
-            : 'rgba(255,255,255,0.55)',
-          backdropFilter: 'blur(40px) saturate(1.8)',
-          WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+          background: rescheduling ? 'rgba(196,113,74,0.06)' : 'rgba(255,255,255,0.92)',
           borderRadius: 20,
-          border: rescheduling ? '1.5px solid var(--terra)' : isConflict ? '1.5px solid var(--danger)' : '1px solid rgba(255,255,255,0.80)',
+          border: rescheduling ? '1.5px solid var(--terra)' : isConflict ? '1.5px solid var(--danger)' : '1px solid rgba(255,255,255,0.95)',
           overflow: 'hidden',
           transition: 'border 0.18s, background 0.18s',
+          borderLeft: isConflict ? '3px solid var(--danger)' : `3px solid ${meta.bg || 'var(--terra)'}`,
         }}>
         {isConflict && !rescheduling && (
-          <div style={{ width: '100%', height: 4, background: 'var(--danger)' }} />
+          <div style={{ width: '100%', height: 3, background: 'var(--danger)' }} />
         )}
 
         {/* Main content row — tap to focus event */}
@@ -830,6 +857,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
           )}
         </AnimatePresence>
       </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -1265,42 +1293,51 @@ export default function DayScreen() {
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
         style={{
-          display: 'flex', alignItems: 'center', gap: 8,
           padding: 'var(--page-pt) var(--page-px) 0',
           flexShrink: 0,
         }}
       >
-        <motion.button
-          whileTap={{ scale: 0.88 }}
-          onClick={() => setScreen('dashboard')}
-          style={{
-            background: 'transparent', border: 'none',
-            cursor: 'pointer', color: 'var(--text-2)',
-            display: 'flex', alignItems: 'center', padding: '4px 2px',
-          }}
-        >
-          <Icon name="chevL" size={22} />
-        </motion.button>
+        {/* Back + eyebrow row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <motion.button
+            whileTap={{ scale: 0.88 }}
+            onClick={() => setScreen('dashboard')}
+            style={{
+              background: 'rgba(255,255,255,0.80)', border: '1px solid rgba(255,255,255,0.90)',
+              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+              width: 36, height: 36, borderRadius: '50%',
+              cursor: 'pointer', color: 'var(--text-2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexShrink: 0, boxShadow: '0 2px 8px rgba(26,20,16,0.06)',
+            }}
+          >
+            <Icon name="chevL" size={18} />
+          </motion.button>
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+            letterSpacing: '0.18em', color: 'var(--terra)',
+            textTransform: 'uppercase',
+          }}>
+            ADVENTURE
+          </p>
+        </div>
 
+        {/* Big heading: Day N: Region */}
         <h1 style={{
-          flex: 1,
-          fontSize: 22, fontWeight: 800,
-          color: 'var(--text)', letterSpacing: '-0.02em',
+          fontSize: 'clamp(1.6rem, 6vw, 2.4rem)',
+          fontWeight: 800,
+          color: 'var(--text)',
+          letterSpacing: '-0.03em',
+          lineHeight: 1.1,
+          marginBottom: 0,
         }}>
-          {t('yourJourney')}
+          {`${t('day')} ${activeDay}`}
+          {meta?.region && (
+            <span style={{ color: 'var(--text-2)', fontWeight: 500 }}>
+              : <span style={{ fontWeight: 700, color: 'var(--text)' }}>{meta.region}</span>
+            </span>
+          )}
         </h1>
-
-        <span style={{
-          background: isOnline ? 'rgba(40,160,90,0.10)' : 'rgba(0,0,0,0.06)',
-          color: isOnline ? 'var(--success)' : 'var(--text-3)',
-          borderRadius: 100, padding: '4px 11px',
-          fontSize: 11, fontWeight: 700,
-          border: `1px solid ${isOnline ? 'rgba(40,160,90,0.25)' : 'var(--border)'}`,
-          transition: 'all 0.3s',
-        }}>
-          {isOnline ? t('onlineBadge') : t('offlineBadge')}
-        </span>
-
       </motion.div>
 
       {/* ── Day strip ────────────────────────────────────────── */}
@@ -1310,52 +1347,39 @@ export default function DayScreen() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.08 }}
         style={{
-          display: 'flex', gap: 4,
-          padding: '14px var(--page-px) 10px',
-          paddingRight: 'var(--page-px)',
+          display: 'flex', gap: 6,
+          padding: '14px var(--page-px) 12px',
           overflowX: 'auto',
           flexShrink: 0,
           scrollbarWidth: 'none',
         }}
       >
-        {Array.from({ length: trip.days }, (_, i) => {
+        {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
           const dayNum = i + 1;
           const isActive = dayNum === activeDay;
-          const { abbrev, dateNum } = getDayInfo(dayNum);
           return (
             <motion.button
               key={dayNum}
               onClick={() => navigateToDay(dayNum)}
               whileTap={{ scale: 0.88 }}
               style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center',
-                gap: 4, padding: '4px 8px', minWidth: 50,
-                background: 'transparent', border: 'none',
-                cursor: 'pointer', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '6px 14px', flexShrink: 0,
+                background: isActive ? 'var(--brand)' : 'rgba(255,255,255,0.70)',
+                border: isActive ? 'none' : '1px solid rgba(255,255,255,0.90)',
+                backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                borderRadius: 9999, cursor: 'pointer',
+                boxShadow: isActive ? '0 4px 14px rgba(59,110,82,0.30)' : '0 2px 6px rgba(26,20,16,0.05)',
+                transition: 'all 0.2s ease',
               }}
             >
               <span style={{
-                fontSize: 10, fontWeight: 800, letterSpacing: '0.07em',
-                color: isActive ? 'var(--terra)' : 'var(--text-3)',
-                fontFamily: 'var(--font-sans)',
+                fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+                letterSpacing: '0.10em', textTransform: 'uppercase',
+                color: isActive ? '#fff' : 'var(--text-3)',
               }}>
-                {abbrev}
+                DAY {dayNum}
               </span>
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%',
-                background: isActive ? 'var(--terra)' : 'transparent',
-                border: isActive ? 'none' : '1.5px solid var(--border)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'background 0.18s ease, border 0.18s ease',
-              }}>
-                <span style={{
-                  fontSize: 17, fontWeight: 800,
-                  color: isActive ? 'white' : 'var(--text-2)',
-                  fontFamily: 'var(--font-sans)',
-                }}>
-                  {dateNum}
-                </span>
-              </div>
             </motion.button>
           );
         })}

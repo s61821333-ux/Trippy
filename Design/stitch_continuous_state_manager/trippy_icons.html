@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Trippy — Icon Library</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --forest:    #3B6E52;
+  --forest-lt: #8BB39A;
+  --forest-dk: #2B5340;
+  --terra:     #C4714A;
+  --terra-lt:  #E0916B;
+  --gold:      #C8944A;
+  --gold-lt:   #E6B574;
+  --paper:     #F4EFE8;
+  --paper-hi:  #FBF7F0;
+  --paper-lo:  #ECE5DA;
+  --ink:       #1A1410;
+  --ink-soft:  #3A2E26;
+  --rule:      rgba(26, 20, 16, 0.12);
+
+  /* Event category color tokens (per VISUAL_ASSETS.md §6) */
+  --c-amber:  #C8813A;
+  --c-brown:  #A0641E;
+  --c-teal:   #1E91AF;
+  --c-purple: #A03CB4;
+  --c-green:  #28A05A;
+  --c-blue:   #3C64C8;
+  --c-navy:   #1446B4;
+  --c-terra:  #B45A32;
+  --c-gold:   #D4A017;
+  --c-rose:   #D4175A;
+  --c-forest: #1A7840;
+  --c-slate:  #4A6080;
+  --c-coral:  #E05A3A;
+  --c-lavender:#8A6ABE;
+  --c-cyan:   #30B4D2;
+
+  --sans:  'Bricolage Grotesque', -apple-system, system-ui, sans-serif;
+  --serif: 'Newsreader', Georgia, serif;
+  --mono:  'JetBrains Mono', ui-monospace, monospace;
+
+  --stroke: 1.5;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--paper); }
+body {
+  font-family: var(--sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Page chrome ──────────────────────────────────────────── */
+.chrome {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  padding: 28px 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+.chrome .brand { display: flex; align-items: center; gap: 18px; }
+.chrome .brand svg { width: 44px; height: 44px; }
+.chrome .wm {
+  font-family: var(--sans);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-size: 32px;
+  line-height: 1;
+}
+.chrome .wm .dot { color: var(--terra); }
+.chrome .meta {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.chrome .right {
+  display: flex; align-items: center; gap: 24px;
+}
+.search-input {
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--rule);
+  background: var(--paper-hi);
+  padding: 12px 18px 12px 42px;
+  border-radius: 999px;
+  width: 280px;
+  color: var(--ink);
+  outline: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231A1410' stroke-width='1.5' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='M16 16l5 5'/></svg>");
+  background-repeat: no-repeat;
+  background-position: 14px center;
+  background-size: 18px 18px;
+}
+.search-input:focus { border-color: var(--terra); }
+
+.stroke-control {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.stroke-control input[type=range] {
+  width: 110px;
+  accent-color: var(--terra);
+}
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.hero {
+  padding: 100px 80px 80px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 64px;
+  align-items: end;
+  border-bottom: 1px solid var(--rule);
+}
+.hero .eyebrow {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--terra);
+  font-weight: 500;
+  margin-bottom: 28px;
+}
+.hero h1 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 120px;
+  letter-spacing: -0.04em;
+  line-height: 0.92;
+  margin: 0;
+  max-width: 14ch;
+  text-wrap: balance;
+}
+.hero h1 em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--terra);
+}
+.hero .lede {
+  font-size: 22px;
+  line-height: 1.45;
+  max-width: 28em;
+  color: var(--ink-soft);
+  margin-top: 32px;
+}
+.hero .counts {
+  display: flex; flex-direction: column; gap: 4px;
+  border-left: 1px solid var(--rule);
+  padding-left: 32px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.hero .counts .row { display: flex; gap: 20px; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--rule); min-width: 320px; }
+.hero .counts .row span:last-child { color: var(--terra); font-weight: 600; }
+
+/* ── Section ─────────────────────────────────────────────── */
+section.block {
+  padding: 96px 80px 24px;
+  border-bottom: 1px solid var(--rule);
+}
+section.block .head {
+  display: grid;
+  grid-template-columns: 220px 1fr auto;
+  gap: 48px;
+  align-items: end;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: 48px;
+}
+section.block .head .num {
+  font-family: var(--mono);
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--terra);
+}
+section.block .head h2 {
+  font-family: var(--sans);
+  font-weight: 700;
+  font-size: 64px;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  margin: 0;
+}
+section.block .head h2 em {
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  color: var(--terra);
+}
+section.block .head .specs {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  display: flex; flex-direction: column; gap: 4px;
+  text-align: right;
+  opacity: 0.7;
+}
+
+/* Group label (used inside event/sticker sections) */
+.group-head {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 48px;
+  padding: 48px 0 24px;
+  align-items: baseline;
+}
+.group-head .lbl {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--terra);
+}
+.group-head .title {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+}
+
+/* ── Icon grids ──────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+.cell {
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 28px 18px 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: var(--paper-hi);
+  cursor: pointer;
+  position: relative;
+  transition: background 120ms ease;
+  min-height: 168px;
+}
+.cell:hover { background: var(--paper); }
+.cell .ic {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink);
+}
+.cell .ic svg {
+  width: 36px; height: 36px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: var(--stroke);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  display: block;
+}
+.cell.event .ic svg { stroke: var(--cat); }
+.cell .swatch-dot {
+  position: absolute;
+  top: 12px; left: 12px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--cat, var(--terra));
+  opacity: 0.85;
+}
+.cell .label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: lowercase;
+  color: var(--ink-soft);
+  text-align: center;
+  word-break: break-word;
+  line-height: 1.3;
+}
+.cell .copy-hint {
+  position: absolute;
+  top: 12px; right: 12px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--terra);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.cell:hover .copy-hint { opacity: 1; }
+
+/* Trip badges — larger, illustrated */
+.grid-badges {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+.grid-badges .cell { min-height: 280px; padding: 40px 24px 28px; gap: 28px; }
+.grid-badges .ic { width: 120px; height: 120px; }
+.grid-badges .ic svg { width: 120px; height: 120px; stroke: none; fill: none; }
+.grid-badges .label { font-size: 13px; letter-spacing: 0.08em; color: var(--ink); font-weight: 500; }
+.grid-badges .sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  opacity: 0.65;
+}
+
+/* Stickers — biggest, decorative */
+.grid-stickers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+}
+.grid-stickers .cell { min-height: 280px; padding: 36px 24px 24px; gap: 24px; background: var(--paper); }
+.grid-stickers .ic { width: 144px; height: 144px; }
+.grid-stickers .ic svg { width: 144px; height: 144px; stroke: none; fill: none; filter: drop-shadow(0 6px 12px rgba(26,20,16,0.12)); }
+.grid-stickers .label { font-size: 14px; letter-spacing: -0.005em; color: var(--ink); font-weight: 500; text-transform: none; font-family: var(--sans); }
+
+/* ── Toast ──────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  bottom: 32px; left: 50%;
+  transform: translateX(-50%) translateY(120%);
+  background: var(--ink);
+  color: var(--paper);
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  box-shadow: 0 20px 40px rgba(26,20,16,0.3);
+  z-index: 100;
+  transition: transform 200ms cubic-bezier(.2,.9,.3,1.2);
+  display: flex; align-items: center; gap: 12px;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--terra); }
+
+/* ── Footer ──────────────────────────────────────────────── */
+.foot {
+  padding: 64px 80px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 48px;
+  align-items: end;
+  background: var(--ink);
+  color: var(--paper);
+}
+.foot .lede {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 36px;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  max-width: 16ch;
+}
+.foot .meta {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  text-align: right;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+/* Color swatch row for event-categories legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+.legend .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 8px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--paper-hi);
+}
+.legend .chip .sw { width: 12px; height: 12px; border-radius: 50%; }
+
+/* Misc: hidden cells when filtering */
+.cell.hidden { display: none; }
+
+/* No-results message */
+.no-results {
+  padding: 48px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border: 1px dashed var(--rule);
+}
+.no-results.hidden { display: none; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .chrome { padding: 18px 24px; flex-wrap: wrap; }
+  .search-input { width: 200px; }
+  .hero { padding: 56px 24px 40px; grid-template-columns: 1fr; }
+  .hero h1 { font-size: 72px; }
+  section.block { padding: 56px 24px 16px; }
+  section.block .head { grid-template-columns: 1fr; gap: 16px; padding-bottom: 24px; margin-bottom: 24px; }
+  section.block .head h2 { font-size: 40px; }
+  .group-head { grid-template-columns: 1fr; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- compass symbol reused in chrome -->
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
+  <symbol id="compass" viewBox="0 0 240 240">
+    <circle cx="120" cy="120" r="90" fill="none" stroke="var(--ink)" stroke-width="6"/>
+    <path d="M120 36 L138 120 L120 124 L102 120 Z" fill="var(--terra)"/>
+    <path d="M120 204 L102 120 L120 116 L138 120 Z" fill="var(--forest)"/>
+    <path d="M204 120 L120 102 L116 120 L120 138 Z" fill="var(--gold)" opacity="0.85"/>
+    <path d="M36 120 L120 138 L124 120 L120 102 Z" fill="var(--gold)" opacity="0.85"/>
+    <circle cx="120" cy="120" r="8" fill="var(--ink)"/>
+  </symbol>
+</svg>
+
+<!-- sticky chrome -->
+<header class="chrome">
+  <div class="brand">
+    <svg><use href="#compass"/></svg>
+    <div class="wm">Trippy<span class="dot">.</span></div>
+    <div class="meta" style="margin-left:18px;">Icon Library · v1.0</div>
+  </div>
+  <div class="right">
+    <div class="stroke-control">
+      <span>Stroke</span>
+      <input id="stroke-slider" type="range" min="1" max="2.5" step="0.1" value="1.5" />
+      <span id="stroke-val" style="color:var(--terra);min-width:32px;">1.5</span>
+    </div>
+    <input id="search" class="search-input" placeholder="Search icons" />
+  </div>
+</header>
+
+<!-- hero -->
+<div class="hero">
+  <div>
+    <div class="eyebrow">Trippy · Icon System</div>
+    <h1>One hundred and sixty marks for <em>every kind of trip.</em></h1>
+    <p class="lede">
+      Built to the Trippy brand spec: a 24-unit grid, 1.5&nbsp;pixel stroke,
+      round caps and joins, color inherited from <span style="font-family:var(--mono);font-size:18px;">currentColor</span>.
+      Tap any icon to copy its SVG.
+    </p>
+  </div>
+  <div class="counts">
+    <div class="row"><span>UI &amp; Navigation</span><span id="ct-ui">—</span></div>
+    <div class="row"><span>Event Categories</span><span id="ct-ev">—</span></div>
+    <div class="row"><span>Trip Type Badges</span><span id="ct-tr">—</span></div>
+    <div class="row"><span>Supplies &amp; Packing</span><span id="ct-su">—</span></div>
+    <div class="row"><span>Event Stickers</span><span id="ct-st">—</span></div>
+    <div class="row" style="border-bottom:none;"><span>Total</span><span id="ct-all">—</span></div>
+  </div>
+</div>
+
+<!-- ─── 01 · UI Icons ─────────────────────────────────────── -->
+<section class="block">
+  <div class="head">
+    <div class="num">01 · UI System</div>
+    <h2>The <em>everyday</em> set.</h2>
+    <div class="specs">
+      <div>24 × 24 viewBox</div>
+      <div>1.5 stroke · round</div>
+      <div>fill: none · currentColor</div>
+    </div>
+  </div>
+  <div id="grid-ui" class="grid"></div>
+</section>
+
+<!-- ─── 02 · Event Categories ───────────────────────────── -->
+<section class="block">
+  <div class="head">
+    <div class="num">02 · Event Categories</div>
+    <h2>Eight worlds, <em>seventy-five</em> moments.</h2>
+    <div class="specs">
+      <div>24 × 24 viewBox</div>
+      <div>colored per category token</div>
+      <div>see legend below</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="chip"><span class="sw" style="background:var(--c-amber)"></span>Amber · food</span>
+    <span class="chip"><span class="sw" style="background:var(--c-brown)"></span>Brown · cafe</span>
+    <span class="chip"><span class="sw" style="background:var(--c-teal)"></span>Teal · sights</span>
+    <span class="chip"><span class="sw" style="background:var(--c-purple)"></span>Purple · hotel</span>
+    <span class="chip"><span class="sw" style="background:var(--c-green)"></span>Green · rest</span>
+    <span class="chip"><span class="sw" style="background:var(--c-blue)"></span>Blue · transport</span>
+    <span class="chip"><span class="sw" style="background:var(--c-navy)"></span>Navy · flight</span>
+    <span class="chip"><span class="sw" style="background:var(--c-terra)"></span>Terra · other</span>
+    <span class="chip"><span class="sw" style="background:var(--c-gold)"></span>Gold · luxury</span>
+    <span class="chip"><span class="sw" style="background:var(--c-rose)"></span>Rose · romance</span>
+    <span class="chip"><span class="sw" style="background:var(--c-forest)"></span>Forest · outdoor</span>
+    <span class="chip"><span class="sw" style="background:var(--c-slate)"></span>Slate · practical</span>
+    <span class="chip"><span class="sw" style="background:var(--c-coral)"></span>Coral · adventure</span>
+    <span class="chip"><span class="sw" style="background:var(--c-cyan)"></span>Cyan · water</span>
+  </div>
+
+  <div id="grid-events"></div>
+</section>
+
+<!-- ─── 03 · Trip Type Badges ───────────────────────────── -->
+<section class="block">
+  <div class="head">
+    <div class="num">03 · Trip Type Badges</div>
+    <h2>Twenty <em>ways</em> to travel.</h2>
+    <div class="specs">
+      <div>48 × 48 viewBox</div>
+      <div>filled · illustrated</div>
+      <div>brand palette only</div>
+    </div>
+  </div>
+  <div id="grid-trips" class="grid-badges"></div>
+</section>
+
+<!-- ─── 04 · Supplies ───────────────────────────────────── -->
+<section class="block">
+  <div class="head">
+    <div class="num">04 · Supplies &amp; Packing</div>
+    <h2>Twenty <em>things</em> to bring.</h2>
+    <div class="specs">
+      <div>24 × 24 viewBox</div>
+      <div>1.5 stroke · round</div>
+      <div>consistent with UI set</div>
+    </div>
+  </div>
+  <div id="grid-supplies" class="grid"></div>
+</section>
+
+<!-- ─── 05 · Stickers ───────────────────────────────────── -->
+<section class="block">
+  <div class="head">
+    <div class="num">05 · Event Stickers</div>
+    <h2>Fourteen <em>moments</em> worth marking.</h2>
+    <div class="specs">
+      <div>64 × 64 viewBox</div>
+      <div>filled · decorative</div>
+      <div>three colors max</div>
+    </div>
+  </div>
+  <div id="grid-stickers" class="grid-stickers"></div>
+</section>
+
+<!-- no results -->
+<div id="no-results" class="no-results hidden" style="margin:48px 80px;">No icons match that search.</div>
+
+<!-- footer -->
+<footer class="foot">
+  <div class="lede">Plan it together. Mark it nicely.</div>
+  <div class="meta">
+    <div>Trippy · Icon Library v1.0</div>
+    <div>Built to spec · May 2026</div>
+    <div style="color:var(--gold-lt);">160 marks · 24 / 48 / 64 grids</div>
+  </div>
+</footer>
+
+<div id="toast" class="toast"><span class="dot"></span><span id="toast-text">SVG copied</span></div>
+
+<script src="icons-data.js"></script>
+<script>
+(function() {
+  const { UI_ICONS, EVENT_GROUPS, SUPPLY_ICONS, TRIP_TYPES, STICKERS } = window.TRIPPY_ICONS;
+
+  // ── helpers ────────────────────────────────────────────
+  function el(html) {
+    const t = document.createElement('template');
+    t.innerHTML = html.trim();
+    return t.content.firstChild;
+  }
+
+  function buildLineSvg(inner, opts = {}) {
+    // 24x24 line icon, uses currentColor stroke
+    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="${opts.stroke || 1.5}" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
+  }
+
+  function buildBadgeSvg(inner) {
+    // 48x48 filled badge — inline-defines brand color vars locally
+    return `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="--f:#3B6E52;--t:#C4714A;--g:#C8944A;--p:#F4EFE8;--i:#1A1410;">${inner}</svg>`;
+  }
+
+  function buildStickerSvg(inner) {
+    return `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" style="--f:#3B6E52;--t:#C4714A;--g:#C8944A;--p:#F4EFE8;--i:#1A1410;">${inner}</svg>`;
+  }
+
+  function colorVar(token) {
+    const map = {
+      amber:'--c-amber', brown:'--c-brown', teal:'--c-teal', purple:'--c-purple',
+      green:'--c-green', blue:'--c-blue', navy:'--c-navy', terra:'--c-terra',
+      gold:'--c-gold', rose:'--c-rose', forest:'--c-forest', slate:'--c-slate',
+      coral:'--c-coral', lavender:'--c-lavender', cyan:'--c-cyan',
+    };
+    return `var(${map[token] || '--ink'})`;
+  }
+
+  // ── UI grid ────────────────────────────────────────────
+  const gridUI = document.getElementById('grid-ui');
+  UI_ICONS.forEach(ic => {
+    const svg = buildLineSvg(ic.svg);
+    const cell = el(`
+      <div class="cell" data-key="${ic.key}" data-svg="${encodeURIComponent(svg)}">
+        <div class="copy-hint">copy</div>
+        <div class="ic">${svg}</div>
+        <div class="label">${ic.key}</div>
+      </div>`);
+    gridUI.appendChild(cell);
+  });
+
+  // ── Event groups ───────────────────────────────────────
+  const gridEv = document.getElementById('grid-events');
+  let eventCount = 0;
+  EVENT_GROUPS.forEach((group, gi) => {
+    const head = el(`
+      <div class="group-head">
+        <div class="lbl">Group ${String.fromCharCode(65 + gi)}</div>
+        <div class="title">${group.title} · <span style="color:var(--ink-soft);opacity:0.6;font-family:var(--mono);font-size:14px;letter-spacing:0.12em;text-transform:uppercase;">${group.icons.length} icons</span></div>
+      </div>`);
+    gridEv.appendChild(head);
+    const grid = el(`<div class="grid"></div>`);
+    group.icons.forEach(ic => {
+      eventCount++;
+      const svg = buildLineSvg(ic.svg);
+      const cell = el(`
+        <div class="cell event" data-key="${ic.key}" data-svg="${encodeURIComponent(svg)}" style="--cat:${colorVar(ic.color)};">
+          <div class="copy-hint">copy</div>
+          <div class="swatch-dot"></div>
+          <div class="ic">${svg}</div>
+          <div class="label">${ic.key}</div>
+        </div>`);
+      grid.appendChild(cell);
+    });
+    gridEv.appendChild(grid);
+  });
+
+  // ── Trip Badges ────────────────────────────────────────
+  const gridTrips = document.getElementById('grid-trips');
+  TRIP_TYPES.forEach(b => {
+    const svg = buildBadgeSvg(b.svg);
+    const cell = el(`
+      <div class="cell" data-key="${b.key}" data-svg="${encodeURIComponent(svg)}">
+        <div class="copy-hint">copy</div>
+        <div class="ic">${svg}</div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <div class="label">${b.key.replace(/_/g, ' ')}</div>
+          <div class="sub">${b.key}</div>
+        </div>
+      </div>`);
+    gridTrips.appendChild(cell);
+  });
+
+  // ── Supplies ───────────────────────────────────────────
+  const gridSu = document.getElementById('grid-supplies');
+  SUPPLY_ICONS.forEach(ic => {
+    const svg = buildLineSvg(ic.svg);
+    const cell = el(`
+      <div class="cell" data-key="${ic.key}" data-svg="${encodeURIComponent(svg)}">
+        <div class="copy-hint">copy</div>
+        <div class="ic">${svg}</div>
+        <div class="label">${ic.key}</div>
+      </div>`);
+    gridSu.appendChild(cell);
+  });
+
+  // ── Stickers ───────────────────────────────────────────
+  const gridSt = document.getElementById('grid-stickers');
+  STICKERS.forEach(s => {
+    const svg = buildStickerSvg(s.svg);
+    const cell = el(`
+      <div class="cell" data-key="${s.key}" data-svg="${encodeURIComponent(svg)}">
+        <div class="copy-hint">copy</div>
+        <div class="ic">${svg}</div>
+        <div class="label">${s.label}</div>
+      </div>`);
+    gridSt.appendChild(cell);
+  });
+
+  // ── Counts ─────────────────────────────────────────────
+  document.getElementById('ct-ui').textContent = UI_ICONS.length;
+  document.getElementById('ct-ev').textContent = eventCount;
+  document.getElementById('ct-tr').textContent = TRIP_TYPES.length;
+  document.getElementById('ct-su').textContent = SUPPLY_ICONS.length;
+  document.getElementById('ct-st').textContent = STICKERS.length;
+  document.getElementById('ct-all').textContent =
+    UI_ICONS.length + eventCount + TRIP_TYPES.length + SUPPLY_ICONS.length + STICKERS.length;
+
+  // ── Copy on click ──────────────────────────────────────
+  const toast = document.getElementById('toast');
+  const toastText = document.getElementById('toast-text');
+  let toastTimer = null;
+  function showToast(msg) {
+    toastText.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+  document.addEventListener('click', e => {
+    const cell = e.target.closest('.cell');
+    if (!cell) return;
+    const svg = decodeURIComponent(cell.dataset.svg);
+    const key = cell.dataset.key;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(svg).then(
+        () => showToast(`${key} · svg copied`),
+        () => showToast('copy failed')
+      );
+    } else {
+      // fallback
+      const ta = document.createElement('textarea');
+      ta.value = svg;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); showToast(`${key} · svg copied`); }
+      catch (e) { showToast('copy failed'); }
+      ta.remove();
+    }
+  });
+
+  // ── Stroke slider ──────────────────────────────────────
+  const slider = document.getElementById('stroke-slider');
+  const sval = document.getElementById('stroke-val');
+  slider.addEventListener('input', () => {
+    const v = parseFloat(slider.value).toFixed(1);
+    sval.textContent = v;
+    document.documentElement.style.setProperty('--stroke', v);
+  });
+
+  // ── Search filter ──────────────────────────────────────
+  const search = document.getElementById('search');
+  const noResults = document.getElementById('no-results');
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    let any = false;
+    document.querySelectorAll('.cell').forEach(c => {
+      const k = c.dataset.key.toLowerCase();
+      const match = !q || k.includes(q);
+      c.classList.toggle('hidden', !match);
+      if (match) any = true;
+    });
+    // hide empty group titles
+    document.querySelectorAll('.group-head').forEach(gh => {
+      const next = gh.nextElementSibling;
+      if (next && next.classList.contains('grid')) {
+        const visible = [...next.querySelectorAll('.cell')].some(c => !c.classList.contains('hidden'));
+        gh.style.display = visible ? '' : 'none';
+        next.style.display = visible ? '' : 'none';
+      }
+    });
+    noResults.classList.toggle('hidden', any);
+  });
+})();
+</script>
+</body>
+</html>

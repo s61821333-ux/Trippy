@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Trippy v2 — Master Prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forest: #3B6E52;
+    --terra: #C4714A;
+    --gold: #C8944A;
+    --paper: #F4EFE8;
+    --ink: #1A1410;
+    --glass-white: rgba(255, 255, 255, 0.45);
+    --glass-float: rgba(255, 255, 255, 0.65);
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: 'Bricolage Grotesque', sans-serif;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Immersive Background Scene */
+  .scene-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, #F9F5EF 0%, #E8DFD4 100%);
+  }
+
+  .dune-shape {
+    position: absolute;
+    bottom: -10%;
+    left: -20%;
+    width: 140%;
+    height: 60%;
+    background: radial-gradient(circle at 50% 0%, #D4B87A 0%, transparent 70%);
+    filter: blur(80px);
+    opacity: 0.4;
+    border-radius: 50%;
+  }
+
+  /* Jelly Glass Surface */
+  .glass {
+    background: var(--glass-white);
+    backdrop-filter: blur(40px) saturate(1.8);
+    -webkit-backdrop-filter: blur(40px) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 12px 40px rgba(26, 20, 16, 0.08);
+    border-radius: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Specular Highlight Effect */
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%, rgba(255,255,255,0.1) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Specular Shine Motion */
+  .shine-move {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 45%, rgba(255,255,255,0.6) 50%, transparent 55%);
+    top: -50%;
+    left: -50%;
+    transform: rotate(0deg);
+    pointer-events: none;
+    transition: transform 0.1s ease-out;
+  }
+
+  /* Interactive Jelly Slider */
+  .jelly-slider-container {
+    height: 12px;
+    background: rgba(26, 20, 16, 0.08);
+    border-radius: 99px;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .jelly-slider-thumb {
+    width: 28px;
+    height: 28px;
+    background: var(--terra);
+    border: 3px solid white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 4px 12px rgba(196, 113, 74, 0.4);
+    transition: width 0.2s, height 0.2s;
+  }
+
+  .jelly-slider-thumb:active {
+    width: 36px;
+    height: 36px;
+    background: var(--ink);
+  }
+
+  /* Tiny Compass Emblem */
+  .emblem-ring {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .emblem-ring:hover {
+    transform: rotate(90deg) scale(1.1);
+  }
+
+  .emblem-diamond {
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    position: absolute;
+  }
+
+  .diamond-n { border-bottom: 14px solid var(--terra); top: 8px; }
+  .diamond-s { border-top: 14px solid var(--forest); bottom: 8px; }
+  .diamond-e { border-left: 14px solid var(--gold); right: 8px; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+  .diamond-w { border-right: 14px solid var(--gold); left: 8px; border-top: 6px solid transparent; border-bottom: 6px solid transparent; }
+
+  /* Typography */
+  .display-title { font-size: 48px; font-weight: 700; letter-spacing: -0.04em; line-height: 0.95; }
+  .serif-italic { font-family: 'Newsreader', serif; font-style: italic; font-weight: 500; }
+  .mono-label { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--terra); font-weight: 600; }
+
+  /* Animations */
+  @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .animate-float { animation: float 6s ease-in-out infinite; }
+
+  /* Prototype specific layout */
+  .app-container {
+    max-width: 430px;
+    margin: 0 auto;
+    min-height: 100vh;
+    padding: 24px;
+    padding-bottom: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .nav-pill {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 48px);
+    max-width: 380px;
+    background: var(--glass-float);
+    backdrop-filter: blur(40px);
+    border-radius: 99px;
+    padding: 8px;
+    display: flex;
+    justify-content: space-around;
+    z-index: 100;
+    box-shadow: 0 40px 80px rgba(26, 20, 16, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+
+  .nav-item {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .nav-item.active {
+    background: var(--forest);
+    color: white;
+    box-shadow: 0 12px 24px rgba(59, 110, 82, 0.3);
+  }
+
+  .nav-item:not(.active) {
+    color: var(--ink);
+    opacity: 0.4;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="scene-bg">
+  <div class="dune-shape"></div>
+</div>
+
+<main class="app-container">
+  <!-- Header Section -->
+  <header class="flex justify-between items-end mt-12">
+    <div class="stack">
+      <div class="mono-label">Active Adventure</div>
+      <h1 class="display-title">Negev <span class="serif-italic text-[#C4714A]">Days.</span></h1>
+    </div>
+    <div class="emblem-ring relative">
+      <div class="emblem-diamond diamond-n"></div>
+      <div class="emblem-diamond diamond-s"></div>
+      <div class="emblem-diamond diamond-e"></div>
+      <div class="emblem-diamond diamond-w"></div>
+      <div class="w-1.5 h-1.5 bg-[#1A1410] rounded-full z-10"></div>
+    </div>
+  </header>
+
+  <!-- Hero Glass Card -->
+  <div class="glass p-8 min-h-[280px] flex flex-col justify-between group">
+    <div class="shine-move"></div>
+    <div>
+      <div class="flex justify-between items-start">
+        <div class="px-3 py-1 bg-[#3B6E52] text-white text-[10px] font-bold tracking-widest uppercase rounded-full">Day 02</div>
+        <div class="text-right">
+          <div class="text-2xl font-bold">38°C</div>
+          <div class="text-xs opacity-60">High noon</div>
+        </div>
+      </div>
+      <h2 class="text-3xl font-bold mt-4 leading-tight">Sunrise at the <span class="serif-italic">Crater Rim.</span></h2>
+    </div>
+    <div class="flex gap-4 items-center">
+      <div class="flex -space-x-3">
+        <div class="w-10 h-10 rounded-full border-2 border-white bg-[#C4714A]"></div>
+        <div class="w-10 h-10 rounded-full border-2 border-white bg-[#C8944A]"></div>
+        <div class="w-10 h-10 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-bold">+4</div>
+      </div>
+      <p class="text-sm opacity-70">Gather the tribe for coffee.</p>
+    </div>
+  </div>
+
+  <!-- Interactive Motion Area -->
+  <section class="stack space-y-4">
+    <div class="mono-label px-2">Planning Dynamics</div>
+    
+    <div class="glass p-6 space-y-6">
+      <div class="space-y-4">
+        <div class="flex justify-between items-center">
+          <span class="font-semibold">Trip Intensity</span>
+          <span id="slider-val" class="mono-label text-xs">Level 4</span>
+        </div>
+        <div class="jelly-slider-container" id="jelly-slider">
+          <div class="jelly-slider-thumb" id="slider-thumb" style="left: 40%;"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <button class="glass bg-white/60 p-4 flex flex-col gap-2 active:scale-95 transition-transform">
+          <div class="w-8 h-8 rounded-lg bg-[#3B6E52]/10 flex items-center justify-center text-xl">☕</div>
+          <span class="text-sm font-bold">Cafe Hunt</span>
+        </button>
+        <button class="glass bg-white/60 p-4 flex flex-col gap-2 active:scale-95 transition-transform">
+          <div class="w-8 h-8 rounded-lg bg-[#C4714A]/10 flex items-center justify-center text-xl">🧭</div>
+          <span class="text-sm font-bold">New Route</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Feed -->
+  <section class="space-y-4">
+    <div class="mono-label px-2">Live Timeline</div>
+    
+    <div class="flex gap-4">
+      <div class="flex flex-col items-center gap-2 pt-2">
+        <div class="w-2.5 h-2.5 rounded-full bg-[#C4714A] ring-4 ring-[#C4714A]/20"></div>
+        <div class="w-0.5 flex-1 bg-gradient-to-b from-[#C4714A] to-transparent rounded-full opacity-20"></div>
+      </div>
+      <div class="flex-1 pb-8">
+        <div class="text-[11px] font-bold uppercase tracking-tighter opacity-40 mb-1">06:30 AM</div>
+        <h3 class="font-bold text-lg">Makhtesh Ramon Hike</h3>
+        <p class="text-sm opacity-60 leading-relaxed">Experience the desert awakening with a private coffee service.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav class="nav-pill">
+  <div class="nav-item active">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+  </div>
+  <div class="nav-item">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+  </div>
+  <div class="nav-item">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+  </div>
+  <div class="nav-item">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+  </div>
+</nav>
+
+<script>
+  // Jelly Slider Logic
+  const slider = document.getElementById('jelly-slider');
+  const thumb = document.getElementById('slider-thumb');
+  const valLabel = document.getElementById('slider-val');
+  let isDragging = false;
+
+  const updateSlider = (e) => {
+    const rect = slider.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    let x = ((clientX - rect.left) / rect.width) * 100;
+    x = Math.max(0, Math.min(100, x));
+    thumb.style.left = x + '%';
+    const level = Math.ceil(x / 20);
+    valLabel.textContent = 'Level ' + (level === 0 ? 1 : level);
+  };
+
+  slider.addEventListener('mousedown', (e) => { isDragging = true; updateSlider(e); });
+  window.addEventListener('mousemove', (e) => { if (isDragging) updateSlider(e); });
+  window.addEventListener('mouseup', () => { isDragging = false; });
+  slider.addEventListener('touchstart', (e) => { isDragging = true; updateSlider(e); });
+  window.addEventListener('touchmove', (e) => { if (isDragging) updateSlider(e); });
+  window.addEventListener('touchend', () => { isDragging = false; });
+
+  // Specular Shine Physics (Tilt/Mouse)
+  const glassCards = document.querySelectorAll('.glass');
+  document.addEventListener('mousemove', (e) => {
+    const x = (e.clientX / window.innerWidth - 0.5) * 40;
+    const y = (e.clientY / window.innerHeight - 0.5) * 40;
+    
+    glassCards.forEach(card => {
+      const shine = card.querySelector('.shine-move');
+      if (shine) {
+        shine.style.transform = `translate(${x}px, ${y}px) rotate(45deg)`;
+      }
+    });
+  });
+
+  // Mobile Orientation (Parallax)
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      const x = e.gamma * 2; // Left to right
+      const y = e.beta * 2;  // Front to back
+      
+      glassCards.forEach(card => {
+        const shine = card.querySelector('.shine-move');
+        if (shine) {
+          shine.style.transform = `translate(${x}px, ${y}px) rotate(45deg)`;
+        }
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
