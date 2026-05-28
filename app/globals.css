@@ -25,11 +25,13 @@
   --border:        #E3DBD1;
   --border-strong: #C9BDB0;
 
-  /* Brand — deep forest green */
-  --brand:         #3B6E52;
-  --brand-hover:   #2D5540;
-  --brand-light:   #EAF2EE;
-  --brand-muted:   rgba(59, 110, 82, 0.10);
+  /* Brand — deep forest green (primary: #22553b per Jelly Glass design spec) */
+  --brand:              #22553b;
+  --brand-hover:        #1a4430;
+  --brand-light:        #EAF2EE;
+  --brand-muted:        rgba(34, 85, 59, 0.10);
+  --primary-container:  #3b6e52;  /* lighter forest, maps to design primary-container */
+  --coral-glow:         #E05A3A;  /* coral accent per Jelly Glass spec */
 
   /* Accent — warm terracotta */
   --terra:         #C4714A;
@@ -166,8 +168,8 @@
   --accent:    var(--brand);
   --accent-2:  var(--brand);
   --accent-bg: var(--brand-muted);
-  --teal:      var(--brand);
-  --teal-dark: var(--brand-hover);
+  --teal:      var(--primary-container);
+  --teal-dark: var(--brand);
   --ink-teal:  var(--brand);
   --gold:      var(--sand);
   --gold-dark: var(--sand);
@@ -234,10 +236,12 @@
   --border:        #352C24;
   --border-strong: #4A3E34;
 
-  --brand:         #5CA878;
-  --brand-hover:   #4A9A65;
-  --brand-light:   rgba(92, 168, 120, 0.18);
-  --brand-muted:   rgba(92, 168, 120, 0.15);
+  --brand:              #5CA878;
+  --brand-hover:        #4A9A65;
+  --brand-light:        rgba(92, 168, 120, 0.18);
+  --brand-muted:        rgba(92, 168, 120, 0.15);
+  --primary-container:  #4a8d68;
+  --coral-glow:         #E87050;
 
   --terra:         #E07252;
   --terra-hover:   #C85C3E;
@@ -822,6 +826,81 @@ select {
   --success-bg:    rgba(0, 255, 136, 0.18);
   --danger:        #FF5555;
   --danger-bg:     rgba(255, 85, 85, 0.18);
+}
+
+/* ─── Tiny Compass — tri-color gradient clipped to text ─────── */
+/* Matches the demo's gradient: terracotta → gold → forest-dk    */
+.tiny-compass {
+  background: linear-gradient(135deg, #E05A3A 0%, #E6B574 50%, #2B5340 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* ─── Specular highlight — radial shine on glass cards ───────── */
+.specular-highlight {
+  position: relative;
+  overflow: hidden;
+}
+.specular-highlight::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.40) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Cursor glow — ambient mouse-tracking light ─────────────── */
+.cursor-glow {
+  position: fixed;
+  width: 256px;
+  height: 256px;
+  border-radius: 50%;
+  background: rgba(59,110,82,0.05);
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* ─── V2 Donut progress ring ──────────────────────────────────── */
+.donut-ring {
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* ─── Timeline accent line (left border style in day timeline) ── */
+.timeline-line {
+  position: absolute;
+  left: 19px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--terra) 0%, var(--brand) 60%, transparent 100%);
+  border-radius: 2px;
+}
+
+/* ─── Timeline node dot ───────────────────────────────────────── */
+.timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--terra);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--terra);
+  flex-shrink: 0;
+}
+.timeline-dot-active {
+  width: 14px;
+  height: 14px;
+  background: var(--brand);
+  box-shadow: 0 0 0 2px var(--brand), 0 0 12px rgba(59,110,82,0.35);
 }
 
 /* ─── Dune background blob — ambient warm glow on paper bg ──── */

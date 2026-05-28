@@ -113,14 +113,10 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           onFocusCapture={handleFocusCapture}
           style={{
             width: '100%',
-            background: 'oklch(97% 0.01 80 / 0.92)',
+            background: 'rgba(255,255,255,0.88)',
             backdropFilter: 'blur(40px) saturate(1.8)',
             WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
             color: 'var(--text)',
-            borderStyle: 'solid',
-            borderWidth: '1.5px 1px 0 1px',
-            borderColor: 'oklch(100% 0 0 / 0.10)',
-            borderTopColor: 'oklch(100% 0 0 / 0.50)',
             borderRadius: '40px 40px 0 0',
             padding: 'var(--space-2) var(--space-5)',
             paddingBottom: kbH > 0
@@ -129,7 +125,9 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
             maxHeight: '92dvh',
             overflowY: 'auto',
             boxShadow: `
-              0 2px 0 oklch(100% 0 0 / 0.14) inset,
+              inset 0 1.5px 0 rgba(255,255,255,0.65),
+              inset 1px 0 0 rgba(255,255,255,0.15),
+              inset -1px 0 0 rgba(255,255,255,0.15),
               0 -12px 56px rgba(26,20,16,0.18)
             `,
             touchAction: 'pan-y',

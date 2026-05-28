@@ -31,9 +31,11 @@ export default function Glass({ children, level = 2, style = {}, className = '',
       className={`glass glass-${level} ${className}`}
       style={{
         background: BG[level - 1],
+        backdropFilter: 'var(--glass-blur)',
+        WebkitBackdropFilter: 'var(--glass-blur)',
         borderRadius: 'var(--radius-lg)',
         cursor: onClick ? 'pointer' : undefined,
-        boxShadow: SHADOWS[level - 1],
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.40), ${SHADOWS[level - 1]}`,
         ...style,
       }}
     >

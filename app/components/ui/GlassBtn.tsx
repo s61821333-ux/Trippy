@@ -31,21 +31,21 @@ function getVariantStyles(variant: Variant) {
         bg: 'var(--brand)',
         color: 'white',
         border: 'none',
-        shadow: 'var(--shadow-sm)',
+        shadow: '0 6px 20px rgba(34,85,59,0.28), inset 0 1px 0 rgba(255,255,255,0.15)',
       };
     case 'coral':
       return {
-        bg: 'var(--terra)',
+        bg: 'var(--coral-glow, var(--terra))',
         color: 'white',
         border: 'none',
-        shadow: 'var(--shadow-sm)',
+        shadow: '0 6px 20px rgba(224,90,58,0.28), inset 0 1px 0 rgba(255,255,255,0.15)',
       };
     case 'danger':
       return {
         bg: 'var(--danger-bg)',
         color: 'var(--danger)',
-        border: '1px solid rgba(192,57,43,0.18)',
-        shadow: 'none',
+        border: 'none',
+        shadow: 'inset 0 0 0 1px rgba(192,57,43,0.18)',
       };
     case 'ghost':
       return {
@@ -58,16 +58,16 @@ function getVariantStyles(variant: Variant) {
       return {
         bg: 'var(--surface)',
         color: 'var(--text)',
-        border: '1px solid var(--border)',
-        shadow: 'none',
+        border: 'none',
+        shadow: 'inset 0 0 0 1px rgba(26,20,16,0.08), inset 0 1px 0 rgba(255,255,255,0.40)',
+        backdropFilter: 'blur(20px) saturate(1.6)',
       };
     default:
       return {
-        bg: 'oklch(97% 0.01 80 / 0.82)',
+        bg: 'rgba(255,255,255,0.72)',
         color: 'var(--text)',
-        border: '1px solid oklch(100% 0 0 / 0.10)',
-        borderTop: '1px solid oklch(100% 0 0 / 0.36)',
-        shadow: '0 2px 8px rgba(26,20,16,0.07)',
+        border: 'none',
+        shadow: 'inset 0 1px 0 rgba(255,255,255,0.60), 0 2px 8px rgba(26,20,16,0.07)',
         backdropFilter: 'blur(20px) saturate(1.6)',
       };
   }
@@ -100,7 +100,7 @@ export default function GlassBtn({
         cursor: disabled ? 'not-allowed' : 'pointer',
         border: vs.border || 'none',
         borderTopColor: (vs as any).borderTop ? undefined : undefined,
-        borderRadius: 'var(--radius-md)',
+        borderRadius: 9999,
         color: vs.color,
         background: vs.bg,
         boxShadow: vs.shadow,

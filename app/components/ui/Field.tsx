@@ -17,14 +17,17 @@ interface FieldProps {
 
 const INPUT_STYLE: CSSProperties = {
   background: 'var(--surface)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius-md)',
+  backdropFilter: 'blur(20px) saturate(1.6)',
+  WebkitBackdropFilter: 'blur(20px) saturate(1.6)',
+  border: 'none',
+  borderRadius: 9999,
   color: 'var(--text)',
   fontFamily: 'var(--font-sans)',
   fontSize: 16,
-  padding: '11px 14px',
+  padding: '11px 20px',
   width: '100%',
   outline: 'none',
+  boxShadow: 'inset 0 0 0 1px rgba(26,20,16,0.07), inset 0 1px 0 rgba(255,255,255,0.40)',
 };
 
 export default function Field({ label, type = 'text', placeholder, value, onChange, onKeyDown, icon, autoFocus, rows, style = {} }: FieldProps) {
@@ -45,7 +48,7 @@ export default function Field({ label, type = 'text', placeholder, value, onChan
       <div style={{ position: 'relative' }}>
         {icon && (
           <span style={{
-            position: 'absolute', left: 12, top: '50%',
+            position: 'absolute', left: 18, top: '50%',
             transform: 'translateY(-50%)',
             color: 'var(--text-3)',
             display: 'flex', pointerEvents: 'none',
@@ -72,7 +75,7 @@ export default function Field({ label, type = 'text', placeholder, value, onChan
             autoFocus={autoFocus}
             inputMode={type === 'number' || type === 'tel' ? 'numeric' : type === 'email' ? 'email' : undefined}
             className="input-premium"
-            style={{ ...INPUT_STYLE, paddingLeft: icon ? 38 : 14, minHeight: 44, ...style }}
+            style={{ ...INPUT_STYLE, paddingLeft: icon ? 44 : 20, minHeight: 44, ...style }}
           />
         )}
       </div>

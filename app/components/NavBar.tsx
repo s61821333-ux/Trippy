@@ -44,8 +44,7 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
           background: 'rgba(255, 255, 255, 0.65)',
           backdropFilter: 'blur(40px) saturate(1.8)',
           WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-          borderBottom: '1px solid rgba(255,255,255,0.80)',
-          boxShadow: '0 12px 40px rgba(26,20,16,0.08)',
+          boxShadow: '0 12px 40px rgba(26,20,16,0.08), inset 0 -1px 0 rgba(255,255,255,0.60)',
           height: 'var(--nav-h)',
         }}
       >
@@ -126,7 +125,7 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                     transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
                     WebkitTapHighlightColor: 'transparent',
                     touchAction: 'manipulation',
-                    boxShadow: isActive ? '0 8px 20px rgba(59,110,82,0.28)' : 'none',
+                    boxShadow: isActive ? '0 8px 20px rgba(34,85,59,0.30), inset 0 1px 0 rgba(255,255,255,0.15)' : 'none',
                   }}
                 >
                   <Icon name={tab.icon} size={15} />
@@ -184,7 +183,6 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
           background: 'rgba(255, 255, 255, 0.65)',
           backdropFilter: 'blur(40px) saturate(1.8)',
           WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-          border: '1px solid rgba(255, 255, 255, 0.80)',
           borderRadius: 9999,
           padding: '8px',
 
@@ -192,7 +190,7 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
           justifyContent: 'space-around',
           alignItems: 'center',
 
-          boxShadow: '0 40px 80px rgba(26, 20, 16, 0.15)',
+          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.70), 0 40px 80px rgba(26, 20, 16, 0.15)',
         }}
       >
         {TABS.map(tab => {
@@ -220,7 +218,7 @@ export default function NavBar({ active, onChange, onSettings }: NavBarProps) {
                 transition: 'all 0.3s cubic-bezier(0.23, 1, 0.32, 1)',
                 WebkitTapHighlightColor: 'transparent',
                 touchAction: 'manipulation',
-                boxShadow: isActive ? '0 12px 24px rgba(59,110,82,0.30)' : 'none',
+                boxShadow: isActive ? '0 12px 24px rgba(34,85,59,0.32), inset 0 1px 0 rgba(255,255,255,0.15)' : 'none',
                 flexShrink: 0,
               }}
             >

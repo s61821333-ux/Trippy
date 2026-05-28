@@ -70,9 +70,9 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
       background: 'var(--surface)',
       backdropFilter: 'var(--glass-blur)',
       WebkitBackdropFilter: 'var(--glass-blur)',
-      border: '1px solid var(--border)',
       borderRadius: 'var(--radius-lg)',
       overflow: 'hidden',
+      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.40), 0 4px 16px rgba(26,20,16,0.07)',
       ...style,
     }}>
       {children}
@@ -173,141 +173,148 @@ export default function CrewScreen() {
       overflowY: 'auto',
       overscrollBehaviorY: 'contain',
       paddingBottom: 'var(--space-8)',
+      position: 'relative',
+      background: 'var(--bg)',
     }}>
-      {/* ── Header ── */}
+      {/* ── Multi-layer warm desert background ── */}
       <div style={{
-        padding: 'var(--space-5) var(--page-px) var(--space-3)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
+        position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: 'linear-gradient(170deg, #F5D4B8 0%, #ECC49A 30%, #D4A87A 60%, #C49060 100%)',
+        opacity: 0.35,
+      }} />
+      <div style={{
+        position: 'fixed', top: '-20%', right: '-20%', width: 400, height: 400,
+        borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
+        background: 'radial-gradient(circle, rgba(255,220,170,0.50) 0%, transparent 70%)',
+        filter: 'blur(60px)',
+      }} />
+      <div style={{
+        position: 'fixed', bottom: '10%', left: '-15%', width: 350, height: 350,
+        borderRadius: '50%', zIndex: 0, pointerEvents: 'none',
+        background: 'radial-gradient(circle, rgba(200,150,90,0.35) 0%, transparent 70%)',
+        filter: 'blur(50px)',
+      }} />
+
+      {/* Content (above background) */}
+      <div style={{ position: 'relative', zIndex: 1 }}>
+
+      {/* ── Header pill ── */}
+      <div style={{
+        padding: 'var(--page-pt) var(--page-px) 0',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       }}>
-        <h1 style={{
-          fontFamily: 'var(--font-sans)',
-          fontSize: 'var(--text-xl)',
-          fontWeight: 800,
-          letterSpacing: '-0.03em',
-          color: 'var(--text)',
-          margin: 0,
-        }}>
-          {t('crewTitle')}
-        </h1>
         <div style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          color: 'var(--text-3)',
-          letterSpacing: '0.08em',
+          display: 'flex', alignItems: 'center', gap: 10,
+          background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.90)',
+          borderRadius: 9999, padding: '8px 16px',
+          boxShadow: '0 2px 8px rgba(26,20,16,0.06)',
         }}>
-          {participants.length} {participants.length === 1 ? t('onePerson') : t('people')}
+          <Icon name="grid" size={16} style={{ color: 'var(--text-2)' }} />
+          <span dir="ltr" style={{ fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--forest-dk)' }}>
+            Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+          </span>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.80)', backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255,255,255,0.90)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 2px 8px rgba(26,20,16,0.06)',
+          }}>
+            <Icon name="compass" size={16} style={{ color: 'var(--text-2)' }} />
+          </div>
         </div>
       </div>
 
-      {/* ── Members section ── */}
-      <SectionHeader label={t('crewMembers')} />
-      <Card>
-        {participants.length === 0 ? (
+      {/* ── Floating compass circle ── */}
+      <div style={{
+        display: 'flex', justifyContent: 'center', paddingTop: 24, paddingBottom: 8,
+      }}>
+        <m.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.1 }}
+          style={{
+            width: 120, height: 120, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.92)',
+            backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
+            border: '1px solid rgba(255,255,255,0.95)',
+            boxShadow: '0 16px 48px rgba(26,20,16,0.12)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'relative', overflow: 'hidden',
+          }}
+        >
+          {/* Compass line divider */}
+          <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'rgba(26,20,16,0.12)' }} />
+          <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: 'rgba(26,20,16,0.12)' }} />
+          {/* Center dot */}
+          <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--text)', zIndex: 1 }} />
+          {/* North arrow */}
           <div style={{
-            padding: 'var(--space-6)',
-            textAlign: 'center',
-            color: 'var(--text-3)',
-            fontFamily: 'var(--font-sans)',
-            fontSize: 'var(--text-sm)',
-          }}>
-            {t('crewNoMembers')}
-          </div>
-        ) : (
-          <m.div variants={sectionVariants} initial="hidden" animate="visible">
-            {participants.map((p, i) => {
-              const isMe = p.name === nickname;
-              const isPrimary = i === 0;
-              const roleLabel = isPrimary ? t('crewOwnerLabel') : t('crewMemberLabel');
-
-              return (
-                <React.Fragment key={p.id ?? p.name}>
-                  <m.div
-                    variants={listItemVariants}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--space-3)',
-                      padding: 'var(--space-3) var(--space-4)',
-                    }}
-                  >
-                    <Avatar name={p.name} color={p.color} size={40} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontWeight: 600,
-                        fontSize: 'var(--text-base)',
-                        color: 'var(--text)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 6,
-                      }}>
-                        {p.name}
-                        {isMe && (
-                          <span style={{
-                            fontFamily: 'var(--font-mono)',
-                            fontSize: 10,
-                            fontWeight: 600,
-                            letterSpacing: '0.08em',
-                            textTransform: 'uppercase',
-                            color: 'var(--terra)',
-                            background: 'var(--terra-muted)',
-                            padding: '1px 6px',
-                            borderRadius: 'var(--radius-full)',
-                          }}>
-                            you
-                          </span>
-                        )}
-                      </div>
-                      <div style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 11,
-                        color: isPrimary ? 'var(--brand)' : 'var(--text-3)',
-                        letterSpacing: '0.06em',
-                        marginTop: 2,
-                      }}>
-                        {roleLabel}
-                      </div>
-                    </div>
-
-                    {/* Owner indicator */}
-                    {isPrimary && (
-                      <div style={{
-                        width: 28,
-                        height: 28,
-                        borderRadius: '50%',
-                        background: 'var(--brand-muted, rgba(59,110,82,0.12))',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 14,
-                      }}>
-                        ✦
-                      </div>
-                    )}
-                  </m.div>
-                  {i < participants.length - 1 && <Divider />}
-                </React.Fragment>
-              );
-            })}
-          </m.div>
-        )}
-      </Card>
-
-      {/* ── Invite section (owner only or anyone with link) ── */}
-      <div style={{ marginTop: 'var(--space-5)' }}>
-        <SectionHeader label={t('crewInviteTitle')} />
-        <Card>
-          {/* Email invite row */}
+            position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
+            width: 0, height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderBottom: '28px solid var(--terra)',
+          }} />
+          {/* South arrow */}
           <div style={{
-            padding: 'var(--space-3) var(--space-4)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--space-2)',
-            borderBottom: '1px solid var(--border)',
+            position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)',
+            width: 0, height: 0,
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: '28px solid var(--brand)',
+          }} />
+        </m.div>
+      </div>
+
+      {/* ── Main invite card ── */}
+      <div style={{ padding: '0 var(--page-px) 16px' }}>
+        <m.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 280, damping: 28, delay: 0.15 }}
+          style={{
+            background: 'rgba(255,255,255,0.90)',
+            backdropFilter: 'blur(40px)',
+            WebkitBackdropFilter: 'blur(40px)',
+            border: '1px solid rgba(255,255,255,0.95)',
+            borderRadius: 28,
+            padding: '24px 20px',
+            boxShadow: '0 8px 32px rgba(26,20,16,0.10)',
+          }}
+        >
+          {/* Heading */}
+          <h2 style={{
+            fontSize: 22, fontWeight: 700,
+            color: 'var(--text)', letterSpacing: '-0.02em',
+            lineHeight: 1.2, marginBottom: 8,
           }}>
-            <Icon name="user" size={18} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
+            Gather the tribe.
+          </h2>
+          <p style={{
+            fontSize: 14, color: 'var(--text-2)',
+            lineHeight: 1.55, marginBottom: 20,
+          }}>
+            Add friends by email to sync itineraries and share memories in real-time.
+          </p>
+
+          {/* Email input */}
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.18em', color: 'var(--text-3)',
+            textTransform: 'uppercase', marginBottom: 8,
+          }}>
+            {t('inviteByEmail')}
+          </p>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: 'var(--bg)', border: '1px solid var(--border)',
+            borderRadius: 14, padding: '10px 14px', marginBottom: 12,
+          }}>
             <input
               ref={emailRef}
               type="email"
@@ -318,179 +325,128 @@ export default function CrewScreen() {
               placeholder={t('inviteEmailPlaceholder')}
               aria-label={t('inviteByEmail')}
               style={{
-                flex: 1,
-                border: 'none',
-                background: 'transparent',
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'var(--text-sm)',
-                color: 'var(--text)',
-                outline: 'none',
-                minWidth: 0,
+                flex: 1, border: 'none', background: 'transparent',
+                fontFamily: 'var(--font-sans)', fontSize: 14,
+                color: 'var(--text)', outline: 'none', minWidth: 0,
               }}
             />
-            <m.button
-              onClick={handleSendInvite}
-              disabled={sending || !emailValue.trim().includes('@')}
-              whileTap={{ scale: 0.95 }}
-              transition={spring.snap}
-              aria-label={t('sendInvite')}
-              style={{
-                background: sending || !emailValue.trim().includes('@') ? 'var(--surface-strong)' : 'var(--terra)',
-                color: sending || !emailValue.trim().includes('@') ? 'var(--text-3)' : '#fff',
-                border: 'none',
-                borderRadius: 'var(--radius-md)',
-                padding: '6px 14px',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12,
-                fontWeight: 600,
-                letterSpacing: '0.06em',
-                cursor: sending || !emailValue.trim().includes('@') ? 'not-allowed' : 'pointer',
-                transition: 'background 0.18s ease, color 0.18s ease',
-                touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent',
-                flexShrink: 0,
-              }}
-            >
-              {sending ? '…' : t('sendInvite')}
-            </m.button>
+            <Icon name="user" size={16} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
           </div>
 
-          {/* Copy link row */}
+          {/* Send invites button */}
           <m.button
-            onClick={handleCopyLink}
-            whileTap={{ scale: 0.98 }}
-            transition={spring.snap}
-            aria-label={t('copyLink')}
+            onClick={handleSendInvite}
+            disabled={sending || !emailValue.trim().includes('@')}
+            whileTap={{ scale: 0.97 }}
             style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-3)',
-              padding: 'var(--space-3) var(--space-4)',
-              background: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              touchAction: 'manipulation',
-              WebkitTapHighlightColor: 'transparent',
-              userSelect: 'none',
-              textAlign: 'start',
+              width: '100%', padding: '15px 20px', minHeight: 52,
+              background: sending || !emailValue.trim().includes('@') ? 'rgba(59,110,82,0.45)' : 'var(--brand)',
+              color: '#fff', border: 'none', borderRadius: 9999,
+              fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 700,
+              letterSpacing: '-0.01em', cursor: 'pointer',
+              boxShadow: '0 6px 20px rgba(59,110,82,0.28)',
+              marginBottom: 20,
             }}
           >
-            <div style={{
-              width: 36,
-              height: 36,
-              borderRadius: 'var(--radius-md)',
-              background: 'var(--surface-strong)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 16,
-              flexShrink: 0,
-            }}>
-              🔗
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'var(--text-sm)',
-                fontWeight: 600,
-                color: 'var(--text)',
-              }}>
-                {t('crewCopyLink')}
-              </div>
-              <div style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'var(--text-xs)',
-                color: 'var(--text-3)',
-                marginTop: 1,
-              }}>
-                {t('quickLinkLabel')}
-              </div>
-            </div>
-            <AnimatePresence mode="wait">
-              {linkCopying ? (
-                <m.span
-                  key="check"
-                  initial={{ scale: 0.6, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.6, opacity: 0 }}
-                  transition={spring.snap}
-                  style={{ color: 'var(--brand)', fontSize: 18 }}
-                >
-                  ✓
-                </m.span>
-              ) : (
-                <m.span key="chevron" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Icon name="chevR" size={16} style={{ color: 'var(--text-3)' }} />
-                </m.span>
-              )}
-            </AnimatePresence>
+            {sending ? '…' : 'Send Invites'}
           </m.button>
-        </Card>
+
+          {/* Current crew */}
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.18em', color: 'var(--text-3)',
+            textTransform: 'uppercase', marginBottom: 12,
+          }}>
+            CURRENT CREW ({participants.length})
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
+            {participants.slice(0, 4).map((p, i) => (
+              <m.div
+                key={p.id ?? p.name}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2 + i * 0.05, type: 'spring', stiffness: 400, damping: 24 }}
+                style={{
+                  width: 40, height: 40, borderRadius: '50%',
+                  background: p.color || AVATAR_COLORS[i % AVATAR_COLORS.length],
+                  color: '#fff', fontSize: 14, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: '2.5px solid rgba(255,255,255,0.90)',
+                  marginLeft: i > 0 ? -12 : 0,
+                  boxShadow: '0 2px 8px rgba(26,20,16,0.10)',
+                  flexShrink: 0, letterSpacing: '-0.02em',
+                }}
+              >
+                {p.name[0]?.toUpperCase()}
+              </m.div>
+            ))}
+            {participants.length > 4 && (
+              <div style={{
+                width: 40, height: 40, borderRadius: '50%',
+                background: 'var(--terra)', color: '#fff',
+                fontSize: 12, fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '2.5px solid rgba(255,255,255,0.90)',
+                marginLeft: -12, flexShrink: 0,
+              }}>
+                +{participants.length - 4}
+              </div>
+            )}
+          </div>
+
+          {/* Magic link */}
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.18em', color: 'var(--text-3)',
+            textTransform: 'uppercase', marginBottom: 10,
+          }}>
+            MAGIC LINK
+          </p>
+          <m.button
+            onClick={handleCopyLink}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              width: '100%', padding: '13px 20px',
+              background: 'var(--bg)', border: '1px solid var(--border)',
+              borderRadius: 9999, cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 10,
+              fontFamily: 'var(--font-sans)', fontSize: 14,
+              fontWeight: 600, color: 'var(--text)',
+            }}
+          >
+            <span style={{ fontSize: 18 }}>🔗</span>
+            <span style={{ flex: 1, textAlign: 'left' }}>
+              {linkCopying ? '✓ Copied!' : 'Copy Trip Link'}
+            </span>
+          </m.button>
+        </m.div>
+      </div>
+
+      {/* ── Footer note ── */}
+      <div style={{ padding: '0 var(--page-px) 16px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+        <span style={{ fontSize: 16, flexShrink: 0 }}>ℹ️</span>
+        <p style={{ fontSize: 12, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--text-2)', lineHeight: 1.6 }}>
+          Invited crew members will have full access to view and add suggested stops to the &quot;{trip.name}&quot; itinerary.
+        </p>
       </div>
 
       {/* ── Pending invitations ── */}
       {pendingInvitations.length > 0 && (
-        <div style={{ marginTop: 'var(--space-5)' }}>
-          <SectionHeader label={t('crewPending')} />
-          <Card>
-            <m.div variants={sectionVariants} initial="hidden" animate="visible">
-              {pendingInvitations.map((inv, i) => (
-                <React.Fragment key={inv.id}>
-                  <m.div
-                    variants={listItemVariants}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--space-3)',
-                      padding: 'var(--space-3) var(--space-4)',
-                    }}
-                  >
-                    <div style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: '50%',
-                      background: 'var(--surface-strong)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0,
-                    }}>
-                      <Icon name="user" size={18} style={{ color: 'var(--text-3)' }} />
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 'var(--text-sm)',
-                        fontWeight: 600,
-                        color: 'var(--text)',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}>
-                        {inv.tripName}
-                      </div>
-                      <div style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 10,
-                        color: 'var(--text-3)',
-                        letterSpacing: '0.06em',
-                        marginTop: 2,
-                      }}>
-                        {t('pendingLabel')}
-                      </div>
-                    </div>
-                  </m.div>
-                  {i < pendingInvitations.length - 1 && <Divider />}
-                </React.Fragment>
-              ))}
-            </m.div>
-          </Card>
-        </div>
+        <div style={{ padding: '0 var(--page-px) 16px' }}>
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+            letterSpacing: '0.18em', color: 'var(--text-3)',
+            textTransform: 'uppercase', marginBottom: 10,
+          }}>
+            PENDING ({pendingInvitations.length})
+          </p>
+      </div>
       )}
 
-      {/* ── Bottom spacer for FAB area ── */}
+      {/* ── Bottom spacer ── */}
       <div style={{ height: 'var(--space-8)' }} />
+
+      </div>{/* end position:relative zIndex:1 content wrapper */}
     </div>
   );
 }
