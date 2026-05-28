@@ -67,7 +67,8 @@
       "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\app\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\\"\\), '' })",
       "PowerShell(if \\(Test-Path \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\components\"\\) { Get-ChildItem -Path \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\components\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\\"\\), '' } } else { Write-Host \"components directory not found\" })",
       "PowerShell(if \\(Test-Path \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\styles\"\\) { Get-ChildItem -Path \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\styles\" -Recurse | Select-Object FullName | ForEach-Object { $_.FullName -replace [regex]::Escape\\(\"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\\"\\), '' } } else { Write-Host \"styles directory not found\" })",
-      "PowerShell(cd \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\"; npx next build 2>&1 | Where-Object { $_ -match \"error|Error|warning|✓ Compiled|✓ Generating\" } | Select-Object -First 20)"
+      "PowerShell(cd \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\"; npx next build 2>&1 | Where-Object { $_ -match \"error|Error|warning|✓ Compiled|✓ Generating\" } | Select-Object -First 20)",
+      "Bash(Get-ChildItem -Recurse -Depth 2)"
     ],
     "additionalDirectories": [
       "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"
