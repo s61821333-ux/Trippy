@@ -88,3 +88,47 @@ export const listItemVariants: Variants = {
   hidden:  { opacity: 0, y: 10 },
   visible: { opacity: 1, y: 0 },
 };
+
+// ── 2027 blur-fade patterns ──────────────────────────────────────────────────
+
+// Signature entrance: opacity + drift + blur
+export const blurUpVariants: Variants = {
+  hidden:  { opacity: 0, y: 16, filter: 'blur(6px)' },
+  visible: { opacity: 1, y: 0,  filter: 'blur(0px)',
+    transition: { duration: 0.45, ease: [0.25, 0, 0, 1] },
+  },
+  exit: { opacity: 0, y: -8, filter: 'blur(4px)',
+    transition: { duration: 0.22, ease: [0.4, 0, 1, 1] },
+  },
+};
+
+// Container with stagger for children
+export const staggerContainer: Variants = {
+  hidden:  {},
+  visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+};
+
+// Fast stagger for dense lists
+export const staggerFast: Variants = {
+  hidden:  {},
+  visible: { transition: { staggerChildren: 0.04, delayChildren: 0.02 } },
+};
+
+// Page-level blur transition (used by PageTransition wrapper)
+export const pageVariants: Variants = {
+  initial: { opacity: 0, y: 8,  filter: 'blur(6px)' },
+  animate: { opacity: 1, y: 0,  filter: 'blur(0px)',
+    transition: { duration: 0.38, ease: [0.25, 0, 0, 1] },
+  },
+  exit:    { opacity: 0, y: -6, filter: 'blur(4px)',
+    transition: { duration: 0.22, ease: [0.4, 0, 1, 1] },
+  },
+};
+
+// Pop-in for modals, cards, badges
+export const popInVariants: Variants = {
+  hidden:  { opacity: 0, scale: 0.88, filter: 'blur(4px)' },
+  visible: { opacity: 1, scale: 1,    filter: 'blur(0px)',
+    transition: { duration: 0.4, ease: [0.34, 1.56, 0.64, 1] },
+  },
+};

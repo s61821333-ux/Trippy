@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate as motionAnimate } from 'framer-motion';
+import { blurUpVariants, staggerContainer } from '@/lib/motion';
 import GlassBtn from '../ui/GlassBtn';
 import Chip from '../ui/Chip';
 import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
+import CompassMark from '../ui/CompassMark';
 import { useAppStore } from '@/lib/store';
 import { dbGetTripEmailInvitations, dbCancelInvitation } from '@/lib/db';
 import { fmtDate, getGaps, toMins, getNextEvent, generateInsights, CAT_META, fmtDuration, getTripBudget, estimateCarbonKg } from '@/lib/utils';
@@ -24,16 +26,9 @@ function fmtAmt(n: number, decimals = 2): string {
   return n.toLocaleString('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
 }
 
-const item = {
-  hidden:  { opacity: 0, y: 14 },
-  visible: { opacity: 1, y: 0,
-    transition: { type: 'spring' as const, stiffness: 340, damping: 30 } },
-};
-
-const stagger = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
-};
+// 2027 blur-fade stagger patterns from design system
+const item    = blurUpVariants;
+const stagger = staggerContainer;
 
 const INSIGHT_COLORS: Record<string, { bg: string; border: string; text: string }> = {
   gap:     { bg: 'var(--insight-gap-bg)',     border: 'var(--insight-gap-border)',     text: 'var(--insight-gap-text)'     },
@@ -44,6 +39,150 @@ const INSIGHT_COLORS: Record<string, { bg: string; border: string; text: string 
   pacing:  { bg: 'var(--insight-pacing-bg)',  border: 'var(--insight-pacing-border)',  text: 'var(--insight-pacing-text)'  },
   relax:   { bg: 'var(--insight-relax-bg)',   border: 'var(--insight-relax-border)',   text: 'var(--insight-relax-text)'   },
 };
+
+/* ── Animated Compass Loader — Globe Loader spec ─────────────── */
+function CompassLoader({ size = 48, label }: { size?: number; label?: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+      <div style={{ position: 'relative', width: size, height: size }}>
+        {/* Halo pulse */}
+        <motion.div
+          animate={{ scale: [0.86, 1.04, 0.86], opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
+          style={{
+            position: 'absolute', inset: 0, borderRadius: '50%',
+            background: 'radial-gradient(circle at 50% 50%, rgba(196,113,74,0.22) 0%, rgba(196,113,74,0.10) 28%, transparent 58%)',
+          }}
+        />
+        {/* Faint forest streak, very slow */}
+        <motion.svg animate={{ rotate: 360 }} transition={{ duration: 9, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', inset: 0 }} viewBox="0 0 200 200" width={size} height={size}>
+          <circle cx="100" cy="100" r="96" fill="none" stroke="var(--forest)" strokeWidth="1"
+            strokeDasharray="170 433" strokeLinecap="round" opacity="0.35" />
+        </motion.svg>
+        {/* Terracotta arc outer, slow */}
+        <motion.svg animate={{ rotate: 360 }} transition={{ duration: 5.4, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', inset: 0 }} viewBox="0 0 200 200" width={size} height={size}>
+          <circle cx="100" cy="100" r="92" fill="none" stroke="var(--terra)" strokeWidth="1.5"
+            strokeDasharray="120 84 18 357" strokeLinecap="round" opacity="0.75" />
+          <circle cx="100" cy="8" r="3.2" fill="var(--terra)" />
+        </motion.svg>
+        {/* Gold counter-rotating mid */}
+        <motion.svg animate={{ rotate: -360 }} transition={{ duration: 3.6, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', inset: 0 }} viewBox="0 0 200 200" width={size} height={size}>
+          <circle cx="100" cy="100" r="84" fill="none" stroke="var(--sand)" strokeWidth="1.5"
+            strokeDasharray="58 38 22 410" strokeLinecap="round" opacity="0.9" />
+          <g transform="translate(100 184) rotate(45)">
+            <rect x="-3.6" y="-3.6" width="7.2" height="7.2" fill="var(--sand)" />
+          </g>
+        </motion.svg>
+        {/* Forest arcs fast inner */}
+        <motion.svg animate={{ rotate: 360 }} transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', inset: 0 }} viewBox="0 0 200 200" width={size} height={size}>
+          <circle cx="100" cy="100" r="76" fill="none" stroke="var(--forest)" strokeWidth="2"
+            strokeDasharray="44 60 18 356" strokeLinecap="round" opacity="0.92" />
+          <circle cx="176" cy="100" r="3.6" fill="var(--forest)" />
+        </motion.svg>
+        {/* Compass mark slowly rotating */}
+        <motion.svg animate={{ rotate: 360 }} transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+          style={{ position: 'absolute', inset: 0 }} viewBox="0 0 240 240" width={size} height={size}>
+          <circle cx="120" cy="120" r="90" stroke="var(--compass-ring)" strokeWidth="4" fill="none" />
+          <path d="M120 36 L138 120 L120 124 L102 120 Z" fill="var(--compass-n)" />
+          <path d="M120 204 L102 120 L120 116 L138 120 Z" fill="var(--compass-s)" />
+          <path d="M204 120 L120 102 L116 120 L120 138 Z" fill="var(--compass-ew)" opacity="0.85" />
+          <path d="M36 120 L120 138 L124 120 L120 102 Z" fill="var(--compass-ew)" opacity="0.85" />
+          <circle cx="120" cy="120" r="6" fill="var(--compass-hub)" />
+        </motion.svg>
+      </div>
+      {label && (
+        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          {label}
+        </span>
+      )}
+    </div>
+  );
+}
+
+/* ── Section eyebrow with compass accent ─────────────────────── */
+function SectionLabel({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 7,
+      fontFamily: 'var(--font-mono)',
+      fontSize: 11, fontWeight: 700, color: 'var(--terra)',
+      letterSpacing: '0.14em', textTransform: 'uppercase',
+      marginBottom: 10,
+      ...style,
+    }}>
+      <CompassMark size={14} />
+      {children}
+    </div>
+  );
+}
+
+/* ── Paper-ring day badge ─────────────────────────────────────── */
+function PaperRingBadge({
+  dayNum, color, emoji, isLocked, isToday, dayOfWeek,
+}: {
+  dayNum: number; color: string; emoji?: string; isLocked: boolean; isToday: boolean; dayOfWeek: string;
+}) {
+  return (
+    <div style={{
+      position: 'relative',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '16px 0', gap: 3,
+    }}>
+      {/* Color left-edge stripe */}
+      <div style={{
+        position: 'absolute', left: 0, top: 0, bottom: 0,
+        width: 4, background: color,
+        borderRadius: '0 2px 2px 0',
+      }} />
+      {/* Ring circle */}
+      <div style={{
+        position: 'relative',
+        width: 48, height: 48,
+        borderRadius: '50%',
+        background: isLocked ? 'rgba(26,20,16,0.04)' : 'rgba(255,255,255,0.85)',
+        boxShadow: isToday
+          ? `0 0 0 2px ${color}50, 0 4px 12px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(0,0,0,0.04)`
+          : '0 2px 8px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.04)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+      }}>
+        {/* Dashed inner ring SVG */}
+        <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="19" fill="none"
+            stroke={isLocked ? 'rgba(26,20,16,0.12)' : `${color}55`}
+            strokeWidth="1" strokeDasharray="4 5" />
+        </svg>
+        {isLocked
+          ? <Icon name="lock" size={14} style={{ color: 'var(--text-3)' }} />
+          : <span style={{
+              fontSize: 18, fontWeight: 800, lineHeight: 1,
+              color: color,
+              letterSpacing: '-0.04em',
+              fontFamily: 'var(--font-sans)',
+            }}>
+              {String(dayNum).padStart(2, '0')}
+            </span>
+        }
+      </div>
+      {!isLocked && emoji && (
+        <span style={{ fontSize: 13, lineHeight: 1, marginTop: 2 }}>{emoji}</span>
+      )}
+      <span style={{
+        fontSize: 7, fontWeight: 700, letterSpacing: '0.10em',
+        textTransform: 'uppercase', color: 'var(--text-3)',
+        fontFamily: 'var(--font-mono)',
+      }}>
+        {dayOfWeek}
+      </span>
+    </div>
+  );
+}
 
 export default function DashboardScreen() {
   const {
@@ -63,13 +202,11 @@ export default function DashboardScreen() {
   const [resendSuccessId, setResendSuccessId] = useState<string | null>(null);
   const MAX_INVITES = 4;
 
-  // Currency
   const currency = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
   const currSym  = getCurrencySymbol(currency);
   const [localRate, setLocalRate]       = useState<number | null>(null);
   const [localCurrency, setLocalCurrency] = useState<string>('');
 
-  // Weather
   const [weather, setWeather] = useState<WeatherDay[]>([]);
   const [weatherLoading, setWeatherLoading] = useState(false);
   const [weatherError, setWeatherError] = useState<string | null>(null);
@@ -87,14 +224,12 @@ export default function DashboardScreen() {
 
     let lat: number | undefined, lng: number | undefined;
 
-    // Try dayMeta coords (skip Israel-default)
     for (const meta of trip.dayMeta ?? []) {
       if (meta.lat && meta.lng && !isDefaultIsrael(meta.lat, meta.lng)) {
         lat = meta.lat; lng = meta.lng; break;
       }
     }
 
-    // Try events with coords
     if (!lat) {
       outer: for (let d = 1; d <= trip.days; d++) {
         for (const ev of trip.events[d] ?? []) {
@@ -105,7 +240,6 @@ export default function DashboardScreen() {
       }
     }
 
-    // Fall back to destination country capital
     if (!lat && trip.countries?.length) {
       const capital = getCapitalCoords(trip.countries[0]);
       if (capital) { lat = capital.lat; lng = capital.lng; }
@@ -119,7 +253,6 @@ export default function DashboardScreen() {
       .catch(() => { setWeatherError("Couldn't load weather"); setWeatherLoading(false); });
   }, [trip?.startDate, trip?.days, dayCoordsKey, trip?.countries?.join(','), weatherRetry]);
 
-  // Exchange rates
   const [rateLoading, setRateLoading] = useState(false);
   const [rateError, setRateError] = useState<string | null>(null);
   const [rateRetry, setRateRetry] = useState(0);
@@ -128,7 +261,6 @@ export default function DashboardScreen() {
     if (!trip) { setLocalRate(null); setLocalCurrency(''); return; }
 
     if (currency === 'ILS') {
-      // Trip budget is in ILS → show destination local currency equivalent
       const firstCountry = trip.countries?.[0];
       const localC = firstCountry ? getCountryCurrency(firstCountry) : 'USD';
       if (localC === 'ILS') { setLocalRate(null); setLocalCurrency(''); return; }
@@ -140,7 +272,6 @@ export default function DashboardScreen() {
         setRateLoading(false);
       }).catch(() => { setRateError("Couldn't load exchange rates"); setRateLoading(false); });
     } else {
-      // Trip budget is in foreign currency → show ILS equivalent
       setLocalCurrency('ILS');
       setRateLoading(true);
       setRateError(null);
@@ -151,35 +282,29 @@ export default function DashboardScreen() {
     }
   }, [currency, trip?.countries?.join(','), rateRetry]);
 
-
   useEffect(() => {
     if (!showShare || !tripDbId) return;
     dbGetTripEmailInvitations(tripDbId)
       .then(invites => setPendingEmails(invites))
       .catch(() => {});
   }, [showShare, tripDbId]);
+
   const [showExpenses, setShowExpenses] = useState(false);
   const [expDesc, setExpDesc]           = useState('');
   const [expAmount, setExpAmount]       = useState('');
   const [expPaidBy, setExpPaidBy]       = useState('');
   const [expSplit, setExpSplit]         = useState(() => String(trip?.participants?.length ?? 2));
-  // V2 — Settlement
   const [showSettlement, setShowSettlement] = useState(false);
-  // V2 — DNA Card
   const [dnaLoading, setDnaLoading]     = useState(false);
-  // V2 — Budget limit
   const [showBudgetInput, setShowBudgetInput] = useState(false);
   const [budgetInput, setBudgetInput]         = useState('');
 
   if (!trip) return null;
 
-  // WorldClock: derive destination timezone from trip countries or dayMeta
   const destTimezone = (() => {
-    // Try fetched timezone from first dayMeta with coords (set on event-edit)
     for (const ev of Object.values(trip.events).flat()) {
       if ((ev as any).timezone) return (ev as any).timezone as string;
     }
-    // Fall back to bundled country map
     if (trip.countries?.[0]) {
       const tz = getTimezoneForCountry(trip.countries[0]);
       if (tz) return tz;
@@ -200,7 +325,6 @@ export default function DashboardScreen() {
 
   const totalEvents = Object.values(trip.events).reduce((s, evs) => s + evs.length, 0);
 
-  // Trip countdown
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const startDate = trip.startDate ? new Date(trip.startDate + 'T00:00:00') : null;
   const endDate = startDate ? new Date(startDate.getTime() + (trip.days - 1) * 86400000) : null;
@@ -234,272 +358,275 @@ export default function DashboardScreen() {
     return controls.stop;
   }, [totalExpenses]);
 
+  const STRIPE_COLORS = ['#C4714A', '#C8944A', '#3B6E52', '#6B5CE7', '#E05A3A', '#2B8A6E', '#B45309'];
+
+  /* ── Glass surface helpers ── */
+  const glass = {
+    background: 'rgba(255,255,255,0.65)',
+    backdropFilter: 'blur(32px) saturate(1.8)',
+    WebkitBackdropFilter: 'blur(32px) saturate(1.8)',
+    border: '1px solid rgba(255,255,255,0.82)',
+    boxShadow: 'var(--shadow-sm)',
+  } as const;
+
   return (
     <div
       className="h-full w-full overflow-y-auto"
       style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--border-strong) transparent' }}
     >
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.25 }}
+        initial={{ opacity: 0, filter: 'blur(4px)' }}
+        animate={{ opacity: 1, filter: 'blur(0px)' }}
+        transition={{ duration: 0.35, ease: [0.25, 0, 0, 1] }}
         style={{ paddingBottom: 48 }}
       >
 
-        {/* ═══ Hero ═══ */}
+        {/* ═══ Hero Panel ═══ */}
         <div style={{
           position: 'relative',
-          paddingTop: 'var(--page-pt)',
-          paddingBottom: 16,
-          paddingLeft: 'var(--page-px)',
-          paddingRight: 'var(--page-px)',
-          marginBottom: 4,
           overflow: 'hidden',
+          background: 'linear-gradient(158deg, #2A5040 0%, #1E1810 48%, #5C2918 100%)',
+          borderRadius: '0 0 44px 44px',
+          paddingTop: 'calc(var(--page-pt) + env(safe-area-inset-top, 0px))',
+          paddingBottom: 32,
+          boxShadow: '0 24px 64px rgba(26,20,16,0.22)',
         }}>
-          {/* Decorative gradient blob */}
-          <div style={{
-            position: 'absolute', top: -40, right: -60,
-            width: 220, height: 220, borderRadius: '50%',
-            background: 'radial-gradient(circle, var(--terra-muted) 0%, transparent 70%)',
-            opacity: 0.55, pointerEvents: 'none', zIndex: 0,
-          }} />
+          {/* Ambient blobs */}
+          <div style={{ position: 'absolute', top: -100, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,148,74,0.32) 0%, transparent 65%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: -80, left: -60, width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,110,82,0.28) 0%, transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '35%', left: '45%', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(196,113,74,0.18) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
 
-          {/* Eyebrow + avatars + share */}
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.04, type: 'spring', stiffness: 360, damping: 32 }}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}
-          >
-            <p style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 11, fontWeight: 600, letterSpacing: '0.14em',
-              textTransform: 'uppercase', color: 'var(--terra)',
-            }}>{t('activeTrip')}</p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div style={{ display: 'flex' }}>
-                {trip.participants.slice(0, 4).map((p, i) => (
-                  <motion.div
-                    key={p.id}
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.1 + i * 0.05, type: 'spring', stiffness: 440, damping: 26 }}
+          <div style={{ padding: '0 var(--page-px)', position: 'relative', zIndex: 1 }}>
+            {/* Eyebrow + avatars + share */}
+            <motion.div
+              initial={{ opacity: 0, y: -8, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+              transition={{ delay: 0.04, duration: 0.4, ease: [0.25, 0, 0, 1] }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {/* Slowly rotating compass brand mark */}
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
+                >
+                  <CompassMark size={20} style={{ opacity: 0.65 }} />
+                </motion.div>
+                <p style={{
+                  fontFamily: 'var(--font-mono)',
+                  fontSize: 10, fontWeight: 700, letterSpacing: '0.20em',
+                  textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)',
+                }}>{t('activeTrip')}</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ display: 'flex' }}>
+                  {trip.participants.slice(0, 4).map((p, i) => (
+                    <motion.div
+                      key={p.id}
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.1 + i * 0.05, type: 'spring', stiffness: 440, damping: 26 }}
+                      style={{
+                        width: 30, height: 30, borderRadius: '50%',
+                        background: p.color, color: 'white',
+                        fontSize: 10, fontWeight: 700,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        border: '2.5px solid rgba(255,255,255,0.22)',
+                        marginLeft: i > 0 ? -9 : 0,
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
+                      }}
+                    >
+                      {p.initials}
+                    </motion.div>
+                  ))}
+                </div>
+                <span data-tour="share-btn" style={{ display: 'inline-flex' }}>
+                  <GlassBtn
+                    size="sm"
+                    onClick={() => setShowShare(true)}
                     style={{
-                      width: 30, height: 30, borderRadius: '50%',
-                      background: p.color, color: 'white',
-                      fontSize: 10, fontWeight: 700,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      border: '2.5px solid var(--bg)',
-                      marginLeft: i > 0 ? -9 : 0,
-                      boxShadow: 'var(--shadow-sm)',
+                      width: 44, height: 44, padding: 0,
+                      borderRadius: 'var(--radius-sm)', minWidth: 0,
+                      background: 'rgba(255,255,255,0.15)',
+                      border: '1px solid rgba(255,255,255,0.22)',
+                      color: 'white',
                     }}
                   >
-                    {p.initials}
-                  </motion.div>
-                ))}
+                    <Icon name="share" size={14} />
+                  </GlassBtn>
+                </span>
               </div>
-              <span data-tour="share-btn" style={{ display: 'inline-flex' }}>
-                <GlassBtn
-                  size="sm"
-                  onClick={() => setShowShare(true)}
-                  style={{ width: 44, height: 44, padding: 0, borderRadius: 'var(--radius-sm)', minWidth: 0 }}
-                >
-                  <Icon name="share" size={14} />
-                </GlassBtn>
-              </span>
-            </div>
-          </motion.div>
+            </motion.div>
 
-          {/* Title + subtitle */}
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08, type: 'spring', stiffness: 340, damping: 30 }}
-            style={{ marginBottom: 18, position: 'relative', zIndex: 1 }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
+            {/* Trip name */}
+            <motion.div
+              initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
+              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+              transition={{ delay: 0.08, duration: 0.5, ease: [0.25, 0, 0, 1] }}
+              style={{ marginBottom: 18 }}
+            >
               <h1 style={{
-                fontSize: 'clamp(1.7rem, 5.5vw, 2.8rem)',
+                fontFamily: 'var(--font-serif)',
+                fontStyle: 'italic',
+                fontSize: 'clamp(2.5rem, 9vw, 5rem)',
                 fontWeight: 700,
-                letterSpacing: '-0.04em',
-                color: 'var(--text)',
-                lineHeight: 1.0,
+                color: 'white',
+                letterSpacing: '-0.025em',
+                lineHeight: 0.90,
+                textShadow: '0 4px 48px rgba(0,0,0,0.28)',
               }}>
                 {trip.name}
               </h1>
-              {currentTripDay !== null && (
-                <motion.span
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.3, type: 'spring', stiffness: 440, damping: 24 }}
-                  style={{
-                    fontSize: 11, fontWeight: 800,
-                    background: 'var(--terra)', color: 'white',
-                    borderRadius: 20, padding: '3px 10px',
-                    letterSpacing: '0.06em', textTransform: 'uppercase',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                    flexShrink: 0,
-                  }}
-                >
-                  {t('day')} {currentTripDay}
-                </motion.span>
-              )}
-              {daysUntil !== null && daysUntil > 0 && (
-                <motion.span
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.3, type: 'spring', stiffness: 440, damping: 24 }}
-                  style={{
-                    fontSize: 11, fontWeight: 800,
-                    background: 'var(--terra)', color: 'white',
-                    borderRadius: 20, padding: '3px 10px',
-                    letterSpacing: '0.06em',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-                    flexShrink: 0,
-                  }}
-                >
-                  🗓 {daysUntil}d
-                </motion.span>
-              )}
-            </div>
-            <p style={{ fontSize: 14, color: 'var(--text-2)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-              {trip.days} {t('days')}
-              {totalEvents > 0 && <span style={{ color: 'var(--text-3)' }}>· {totalEvents} events</span>}
-              <span>· {t('hi')}, {nickname} 👋</span>
-            </p>
-          </motion.div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+                {currentTripDay !== null && (
+                  <motion.span
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.30, type: 'spring', stiffness: 440, damping: 24 }}
+                    style={{
+                      fontSize: 11, fontWeight: 800,
+                      background: 'rgba(196,113,74,0.38)', color: 'white',
+                      borderRadius: 20, padding: '3px 10px',
+                      letterSpacing: '0.06em', textTransform: 'uppercase',
+                      border: '1px solid rgba(196,113,74,0.55)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {t('day')} {currentTripDay}
+                  </motion.span>
+                )}
+                {daysUntil !== null && daysUntil > 0 && (
+                  <motion.span
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.30, type: 'spring', stiffness: 440, damping: 24 }}
+                    style={{
+                      fontSize: 11, fontWeight: 800,
+                      background: 'rgba(200,148,74,0.30)', color: 'rgba(255,255,255,0.92)',
+                      borderRadius: 20, padding: '3px 10px',
+                      letterSpacing: '0.06em',
+                      border: '1px solid rgba(200,148,74,0.48)',
+                      flexShrink: 0,
+                    }}
+                  >
+                    🗓 {daysUntil}d
+                  </motion.span>
+                )}
+              </div>
+            </motion.div>
 
-          {/* ── Journey Path Card ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12, type: 'spring', stiffness: 300, damping: 30 }}
-            style={{
-              background: 'rgba(255,255,255,0.82)',
-              backdropFilter: 'blur(40px) saturate(1.8)',
-              WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-              border: '1px solid rgba(255,255,255,0.90)',
-              borderRadius: 28,
-              padding: '20px 20px 16px',
-              boxShadow: '0 8px 32px rgba(26,20,16,0.08)',
-              marginBottom: 12,
-              position: 'relative', overflow: 'hidden',
-            }}
-          >
-            {/* Current stop label */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
-              <div>
-                <p style={{
+            {/* Stats pills */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12 }}
+              style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 22 }}
+            >
+              <span className="hero-stat-pill-v3">{trip.days} {t('days').toUpperCase()}</span>
+              {totalEvents > 0 && <span className="hero-stat-pill-v3">{totalEvents} EVENTS</span>}
+              <span className="hero-stat-pill-v3" style={{ opacity: 0.65 }}>{t('hi')}, {nickname} 👋</span>
+            </motion.div>
+
+            {/* Journey path visualization */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+              <div style={{ position: 'relative', height: 56, overflow: 'visible', marginBottom: 8 }}>
+                <svg
+                  width="100%" height="56"
+                  viewBox={`0 0 ${Math.max(trip.days * 44, 280)} 56`}
+                  preserveAspectRatio="xMidYMid meet"
+                >
+                  <path
+                    d={`M 20 28 ${Array.from({ length: trip.days - 1 }, (_, i) => {
+                      const total = Math.max(trip.days * 44, 280);
+                      const x1 = 20 + i * (total - 40) / Math.max(trip.days - 1, 1);
+                      const x2 = 20 + (i + 1) * (total - 40) / Math.max(trip.days - 1, 1);
+                      const cy = i % 2 === 0 ? 10 : 46;
+                      return `Q ${(x1 + x2) / 2} ${cy} ${x2} 28`;
+                    }).join(' ')}`}
+                    fill="none"
+                    stroke="rgba(255,255,255,0.20)"
+                    strokeWidth="1.5"
+                    strokeDasharray="5 8"
+                  />
+                  {Array.from({ length: trip.days }, (_, i) => {
+                    const total = Math.max(trip.days * 44, 280);
+                    const x = 20 + i * (total - 40) / Math.max(trip.days - 1, 1);
+                    const isThisToday = (currentTripDay ?? 0) - 1 === i;
+                    const isPast = currentTripDay !== null && i < currentTripDay - 1;
+                    return (
+                      <g key={i}>
+                        <circle
+                          cx={x} cy={28}
+                          r={isThisToday ? 8 : 4}
+                          fill={isThisToday ? 'white' : isPast ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)'}
+                        />
+                        {isThisToday && (
+                          <>
+                            <circle cx={x} cy={28} r={15} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" />
+                            <circle cx={x} cy={28} r={8} fill="white" opacity="0.5">
+                              <animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite" />
+                              <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite" />
+                            </circle>
+                          </>
+                        )}
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{
                   fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
-                  letterSpacing: '0.18em', color: 'var(--terra)',
-                  textTransform: 'uppercase', marginBottom: 4,
+                  letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)',
                 }}>
-                  {currentTripDay !== null ? 'CURRENT STOP' : daysUntil !== null && daysUntil > 0 ? 'STARTING SOON' : 'JOURNEY'}
-                </p>
-                <h2 style={{
-                  fontSize: 'clamp(1.2rem, 4vw, 1.7rem)', fontWeight: 700,
-                  color: 'var(--forest-dk)', letterSpacing: '-0.03em', lineHeight: 1.1,
-                }}>
-                  {currentTripDay !== null
-                    ? (trip.dayMeta?.[currentTripDay - 1]?.region || `Day ${currentTripDay}`)
-                    : trip.name}
-                </h2>
+                  {trip.days}-DAY JOURNEY
+                </span>
+                <button
+                  onClick={() => setScreen('map')}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    background: 'rgba(255,255,255,0.10)',
+                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255,255,255,0.16)',
+                    borderRadius: 9999,
+                    padding: '4px 12px',
+                    fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
+                    letterSpacing: '0.14em', textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.58)',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Icon name="map" size={10} style={{ color: 'rgba(255,255,255,0.58)' }} />
+                  VIEW MAP
+                </button>
               </div>
-              <button
-                onClick={() => setScreen('map')}
-                style={{
-                  width: 40, height: 40, borderRadius: '50%',
-                  background: 'rgba(255,255,255,0.90)', border: '1px solid rgba(255,255,255,0.90)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', flexShrink: 0,
-                  boxShadow: '0 2px 8px rgba(26,20,16,0.08)',
-                }}
-              >
-                <Icon name="compass" size={18} style={{ color: 'var(--forest-dk)' }} />
-              </button>
-            </div>
+            </motion.div>
+          </div>
+        </div>
 
-            {/* SVG path visualization */}
-            <div style={{ position: 'relative', height: 56, marginBottom: 12 }}>
-              <svg width="100%" height="56" viewBox={`0 0 ${Math.max(trip.days * 40, 200)} 56`} preserveAspectRatio="xMidYMid meet">
-                {/* Dashed path */}
-                <path
-                  d={`M 20 28 ${Array.from({ length: trip.days - 1 }, (_, i) => {
-                    const x1 = 20 + i * (Math.max(trip.days * 40, 200) - 40) / Math.max(trip.days - 1, 1);
-                    const x2 = 20 + (i + 1) * (Math.max(trip.days * 40, 200) - 40) / Math.max(trip.days - 1, 1);
-                    const cy = i % 2 === 0 ? 12 : 44;
-                    return `Q ${(x1 + x2) / 2} ${cy} ${x2} 28`;
-                  }).join(' ')}`}
-                  fill="none"
-                  stroke="rgba(43,83,64,0.25)"
-                  strokeWidth="2"
-                  strokeDasharray="6 8"
-                />
-                {/* Day dots */}
-                {Array.from({ length: trip.days }, (_, i) => {
-                  const x = 20 + i * (Math.max(trip.days * 40, 200) - 40) / Math.max(trip.days - 1, 1);
-                  const isThisToday = (currentTripDay ?? 0) - 1 === i;
-                  const isPast = currentTripDay !== null && i < currentTripDay - 1;
-                  return (
-                    <g key={i}>
-                      <circle
-                        cx={x} cy={28}
-                        r={isThisToday ? 8 : 5}
-                        fill={isThisToday ? '#2B5340' : isPast ? '#8BB39A' : 'rgba(43,83,64,0.20)'}
-                        stroke={isThisToday ? 'white' : 'transparent'}
-                        strokeWidth={isThisToday ? 2.5 : 0}
-                      />
-                      {isThisToday && (
-                        <circle cx={x} cy={28} r={14} fill="none" stroke="rgba(43,83,64,0.15)" strokeWidth="1.5" />
-                      )}
-                    </g>
-                  );
-                })}
-              </svg>
-            </div>
-
-            {/* Stats row */}
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end' }}>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-                  DURATION
-                </p>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--forest-dk)' }}>
-                  {trip.days} DAYS
-                </p>
-              </div>
-              {currentTripDay !== null && (
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)', letterSpacing: '0.14em', textTransform: 'uppercase' }}>
-                    PROGRESS
-                  </p>
-                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 13, fontWeight: 700, color: 'var(--terra)' }}>
-                    DAY {currentTripDay}/{trip.days}
-                  </p>
-                </div>
-              )}
-            </div>
-          </motion.div>
-
+        {/* Post-hero: Supplies + WorldClock */}
+        <div style={{ padding: '0 var(--page-px)', marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {/* Supplies progress */}
           <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.13 }}
+            initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+            transition={{ delay: 0.13, duration: 0.42, ease: [0.25, 0, 0, 1] }}
             onClick={() => setScreen('supplies')}
-            className="premium-hover"
+            className="jelly-glow liquid-hover"
             style={{
-              background: 'rgba(255,255,255,0.80)',
-              backdropFilter: 'blur(40px) saturate(1.8)',
-              WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-              border: '1px solid rgba(255,255,255,0.90)',
+              ...glass,
               borderRadius: 'var(--radius-lg)',
               padding: '14px 18px',
               cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(26,20,16,0.06)',
               position: 'relative', overflow: 'hidden',
             }}
           >
+            <div style={{
+              position: 'absolute', top: '-50%', left: '-50%',
+              width: '200%', height: '200%',
+              background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.35) 0%, transparent 40%)',
+              pointerEvents: 'none',
+            }} />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 9 }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
                 🎒 {t('suppliesLabel')}
@@ -523,13 +650,12 @@ export default function DashboardScreen() {
             </div>
           </motion.div>
 
-          {/* WorldClock — shown when destination timezone is known (§08 §1.4) */}
+          {/* WorldClock */}
           {destTimezone && (
             <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.17 }}
-              style={{ marginTop: 10 }}
+              initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+              transition={{ delay: 0.17, duration: 0.42, ease: [0.25, 0, 0, 1] }}
             >
               <WorldClock destinationTimezone={destTimezone} destinationCity={destCity} />
             </motion.div>
@@ -539,20 +665,13 @@ export default function DashboardScreen() {
         {/* ═══ Body ═══ */}
         <div style={{ padding: '16px var(--page-px) 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
 
-          {/* ═══ Next Event ═══ */}
+          {/* Next Event */}
           <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.16, type: 'spring', stiffness: 340, damping: 32 }}
+            initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+            transition={{ delay: 0.16, duration: 0.45, ease: [0.25, 0, 0, 1] }}
           >
-            <p style={{
-              fontFamily: 'var(--font-mono)',
-              fontSize: 12, fontWeight: 500, color: 'var(--terra)',
-              letterSpacing: '0.12em', textTransform: 'uppercase',
-              marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5,
-            }}>
-              {t('nextEvent')}
-            </p>
+            <SectionLabel>{t('nextEvent')}</SectionLabel>
             {nextEventData ? (() => {
               const nextWeather = weather[nextEventData.dayNum - 1] ?? null;
               const weatherLocation = nextEventData.event.location
@@ -562,26 +681,25 @@ export default function DashboardScreen() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
                   <div
                     onClick={() => { setActiveDay(nextEventData.dayNum); setScreen('day'); }}
-                    className="premium-hover"
+                    className="jelly-glow liquid-hover"
                     style={{
                       background: CAT_META[nextEventData.event.category].bg,
-                      border: '1.5px solid rgba(0,0,0,0.07)',
+                      backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+                      border: '1.5px solid rgba(255,255,255,0.60)',
                       borderRadius: nextWeather ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
                       padding: '14px 16px',
                       cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 12,
+                      display: 'flex', alignItems: 'center', gap: 12,
                       boxShadow: 'var(--shadow-sm)',
                     }}
                   >
                     <div style={{
                       width: 52, height: 52, borderRadius: 18, flexShrink: 0,
-                      background: 'var(--surface)',
+                      background: 'rgba(255,255,255,0.85)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 26,
-                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.60), 0 2px 10px rgba(0,0,0,0.10)',
-                      border: '1px solid var(--border)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.70), 0 2px 10px rgba(0,0,0,0.08)',
+                      border: '1px solid rgba(255,255,255,0.75)',
                     }}>
                       {CAT_META[nextEventData.event.category].icon}
                     </div>
@@ -606,9 +724,10 @@ export default function DashboardScreen() {
                     {nextWeather && (
                       <div style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'center',
-                        background: 'var(--surface)', borderRadius: 12,
+                        background: 'rgba(255,255,255,0.78)', borderRadius: 14,
                         padding: '6px 10px', gap: 1, flexShrink: 0,
-                        border: '1px solid var(--border)',
+                        border: '1px solid rgba(255,255,255,0.85)',
+                        backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
                       }}>
                         <span style={{ fontSize: 22, lineHeight: 1 }}>{nextWeather.icon}</span>
                         <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--text)', lineHeight: 1.2 }}>
@@ -625,7 +744,6 @@ export default function DashboardScreen() {
                     <Icon name="chevR" size={16} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
                   </div>
 
-                  {/* Weather footer strip for next event location */}
                   {nextWeather && (
                     <a
                       href={`https://www.google.com/search?q=${encodeURIComponent(weatherLocation + ' weather forecast')}`}
@@ -633,16 +751,13 @@ export default function DashboardScreen() {
                       rel="noopener noreferrer"
                       onClick={e => e.stopPropagation()}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         padding: '8px 14px',
                         background: 'rgba(0,0,0,0.04)',
-                        border: '1.5px solid rgba(0,0,0,0.07)',
+                        border: '1.5px solid rgba(255,255,255,0.60)',
                         borderTop: 'none',
                         borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
-                        textDecoration: 'none',
-                        gap: 8,
+                        textDecoration: 'none', gap: 8,
                       }}
                     >
                       <span style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -657,20 +772,16 @@ export default function DashboardScreen() {
                 </div>
               );
             })() : (
-              <motion.div
-                animate={{ rotate: [0, -5, 5, -5, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', repeatDelay: 3 }}
+              <div
                 style={{
-                  background: 'var(--surface)',
-                  border: '1px dashed var(--border)',
+                  ...glass,
                   borderRadius: 'var(--radius-lg)',
                   padding: '28px 16px',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+                  border: '1px dashed var(--border)',
                 }}
               >
-                <div style={{ width: 72, height: 72, borderRadius: 24, background: 'var(--terra-muted)', border: '1.5px solid rgba(196,113,74,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Icon name="compass" size={36} style={{ color: 'var(--terra)' }} />
-                </div>
+                <CompassLoader size={64} />
                 <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', textAlign: 'center', margin: 0 }}>
                   Add events to start planning
                 </p>
@@ -689,30 +800,21 @@ export default function DashboardScreen() {
                 >
                   Plan Day 1
                 </motion.button>
-              </motion.div>
+              </div>
             )}
           </motion.div>
 
-          {/* ═══ Weather Forecast Strip ═══ */}
+          {/* Weather Forecast Strip */}
           {(weatherLoading || weatherError || weather.length > 0) && (
             <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.20 }}
+              initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+              transition={{ delay: 0.20, duration: 0.45, ease: [0.25, 0, 0, 1] }}
             >
-              <p style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12, fontWeight: 500, color: 'var(--terra)',
-                letterSpacing: '0.12em', textTransform: 'uppercase',
-                marginBottom: 8,
-              }}>
-                {t('forecast') || 'Forecast'}
-              </p>
+              <SectionLabel>{t('forecast') || 'Forecast'}</SectionLabel>
               {weatherLoading ? (
-                <div style={{ display: 'flex', gap: 6 }}>
-                  {[0,1,2,3,4].map(i => (
-                    <div key={i} className="skeleton" style={{ flexShrink: 0, width: 58, height: 88, borderRadius: 'var(--radius-md)' }} />
-                  ))}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 0' }}>
+                  <CompassLoader size={52} label="Loading forecast…" />
                 </div>
               ) : weatherError ? (
                 <AsyncError message="Couldn't load weather" onRetry={() => setWeatherRetry(c => c + 1)} compact />
@@ -741,17 +843,19 @@ export default function DashboardScreen() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.22 + i * 0.05, type: 'spring', stiffness: 340, damping: 30 }}
                         onClick={e => e.stopPropagation()}
+                        className="jelly-glow"
                         style={{
                           flexShrink: 0,
                           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
                           padding: '10px 12px',
                           borderRadius: 'var(--radius-md)',
-                          background: isNextEventDay ? 'var(--terra-muted)' : 'var(--surface)',
-                          border: `1px solid ${isNextEventDay ? 'var(--terra)' : 'var(--border)'}`,
+                          background: isNextEventDay ? 'rgba(196,113,74,0.12)' : 'rgba(255,255,255,0.65)',
+                          backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)',
+                          border: `1px solid ${isNextEventDay ? 'rgba(196,113,74,0.38)' : 'rgba(255,255,255,0.82)'}`,
                           minWidth: 58,
                           textDecoration: 'none',
                           cursor: 'pointer',
-                          boxShadow: isNextEventDay ? '0 0 0 2px var(--terra-muted)' : 'none',
+                          boxShadow: isNextEventDay ? '0 4px 16px rgba(196,113,74,0.15)' : 'var(--shadow-xs)',
                           transition: 'all 0.15s',
                         }}
                       >
@@ -769,22 +873,23 @@ export default function DashboardScreen() {
             </motion.div>
           )}
 
-          {/* Budget + Carbon chips */}
+          {/* Budget + Carbon */}
           {((tripBudget > 0 && !hideBudget) || (showCarbonBudget && carbonKg > 0)) && (
             <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.16 }}
+              initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+              transition={{ delay: 0.16, duration: 0.42, ease: [0.25, 0, 0, 1] }}
               style={{ display: 'flex', gap: 8 }}
             >
               {tripBudget > 0 && !hideBudget && (
-                <div style={{
+                <div className="jelly-glow" style={{
                   flex: 1,
-                  background: 'var(--success-bg)',
-                  border: '1px solid rgba(40,160,90,0.22)',
+                  ...glass,
+                  border: '1px solid rgba(40,160,90,0.30)',
                   borderRadius: 'var(--radius-md)',
                   padding: '11px 14px',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  boxShadow: '0 4px 16px rgba(40,160,90,0.08)',
                 }}>
                   <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--success)', display: 'flex', alignItems: 'center', gap: 5 }}>
                     💰 {t('tripBudget')}
@@ -792,7 +897,9 @@ export default function DashboardScreen() {
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ fontSize: 15, fontWeight: 800, color: 'var(--success)' }}>{currSym}{fmtAmt(tripBudget, 0)}</span>
                     {rateLoading ? (
-                      <div className="skeleton" style={{ width: 72, height: 12, borderRadius: 4, marginTop: 3 }} />
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 3 }}>
+                        <CompassLoader size={16} />
+                      </div>
                     ) : rateError ? (
                       <button onClick={() => setRateRetry(c => c + 1)} style={{ fontSize: 9, color: 'var(--danger)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block', marginTop: 2 }}>⚠ retry</button>
                     ) : localRate && localCurrency ? (
@@ -804,9 +911,9 @@ export default function DashboardScreen() {
                 </div>
               )}
               {showCarbonBudget && carbonKg > 0 && (
-                <div style={{
+                <div className="jelly-glow" style={{
                   flex: 1,
-                  background: 'rgba(30,140,90,0.08)',
+                  ...glass,
                   border: '1px solid rgba(30,140,90,0.22)',
                   borderRadius: 'var(--radius-md)',
                   padding: '11px 14px',
@@ -823,21 +930,19 @@ export default function DashboardScreen() {
 
           {/* Expenses */}
           <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
+            initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+            transition={{ delay: 0.18, duration: 0.42, ease: [0.25, 0, 0, 1] }}
           >
             <motion.div
               onClick={() => setShowExpenses(v => !v)}
-              className="premium-hover"
+              className="jelly-glow liquid-hover"
               style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
+                ...glass,
                 borderRadius: showExpenses ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
                 padding: '11px 16px',
                 cursor: 'pointer',
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                boxShadow: 'var(--shadow-xs)',
               }}
             >
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -870,12 +975,11 @@ export default function DashboardScreen() {
                   style={{ overflow: 'hidden' }}
                 >
                   <div style={{
-                    background: 'var(--surface)',
-                    border: '1px solid var(--border)',
+                    ...glass,
+                    background: 'rgba(255,255,255,0.55)',
                     borderTop: 'none',
                     borderRadius: '0 0 var(--radius-lg) var(--radius-lg)',
                     padding: '12px 16px',
-                    boxShadow: 'var(--shadow-xs)',
                   }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
                       <div style={{ display: 'flex', gap: 6 }}>
@@ -956,8 +1060,10 @@ export default function DashboardScreen() {
                         {expenses.map(exp => (
                           <div key={exp.id} style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
-                            background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
-                            border: '1px solid var(--border)', padding: '8px 10px',
+                            background: 'rgba(255,255,255,0.65)',
+                            backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                            borderRadius: 'var(--radius-sm)',
+                            border: '1px solid rgba(255,255,255,0.82)', padding: '8px 10px',
                           }}>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -987,18 +1093,17 @@ export default function DashboardScreen() {
             </AnimatePresence>
           </motion.div>
 
-          {/* ── V2: Budget limit setter ── */}
+          {/* Budget limit setter */}
           {!hideBudget && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
               <motion.div
                 onClick={() => setShowBudgetInput(v => !v)}
-                className="premium-hover"
+                className="jelly-glow liquid-hover"
                 style={{
-                  background: 'var(--surface)', border: '1px solid var(--border)',
+                  ...glass,
                   borderRadius: showBudgetInput ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
                   padding: '11px 16px', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  boxShadow: 'var(--shadow-xs)',
                 }}
               >
                 <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1022,9 +1127,11 @@ export default function DashboardScreen() {
                     style={{ overflow: 'hidden' }}
                   >
                     <div style={{
-                      background: 'var(--surface)', border: '1px solid var(--border)', borderTop: 'none',
+                      ...glass,
+                      background: 'rgba(255,255,255,0.55)',
+                      borderTop: 'none',
                       borderRadius: '0 0 var(--radius-lg) var(--radius-lg)', padding: '12px 16px',
-                      boxShadow: 'var(--shadow-xs)', display: 'flex', gap: 8,
+                      display: 'flex', gap: 8,
                     }}>
                       <input
                         type="number" min="0" placeholder={t('budgetPlaceholder')}
@@ -1062,20 +1169,19 @@ export default function DashboardScreen() {
             </motion.div>
           )}
 
-          {/* ── V2: Settlement — Who Owes Who ── */}
+          {/* Settlement */}
           {expenses.length >= 2 && (() => {
             const settlements = calculateSettlements(expenses, currency);
             return (
               <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
                 <motion.div
                   onClick={() => setShowSettlement(v => !v)}
-                  className="premium-hover"
+                  className="jelly-glow liquid-hover"
                   style={{
-                    background: 'var(--surface)', border: '1px solid var(--border)',
+                    ...glass,
                     borderRadius: showSettlement ? 'var(--radius-lg) var(--radius-lg) 0 0' : 'var(--radius-lg)',
                     padding: '11px 16px', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    boxShadow: 'var(--shadow-xs)',
                   }}
                 >
                   <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1097,9 +1203,10 @@ export default function DashboardScreen() {
                       style={{ overflow: 'hidden' }}
                     >
                       <div style={{
-                        background: 'var(--surface)', border: '1px solid var(--border)', borderTop: 'none',
+                        ...glass,
+                        background: 'rgba(255,255,255,0.55)',
+                        borderTop: 'none',
                         borderRadius: '0 0 var(--radius-lg) var(--radius-lg)', padding: '12px 16px',
-                        boxShadow: 'var(--shadow-xs)',
                       }}>
                         <p style={{ fontSize: 11, color: 'var(--text-3)', marginBottom: 10 }}>{t('settlementSub')}</p>
                         {settlements.length === 0 ? (
@@ -1111,8 +1218,10 @@ export default function DashboardScreen() {
                             {settlements.map((s, i) => (
                               <div key={i} style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                background: 'var(--bg)', borderRadius: 'var(--radius-sm)',
-                                border: '1px solid var(--border)', padding: '10px 12px',
+                                background: 'rgba(255,255,255,0.65)',
+                                backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                                borderRadius: 'var(--radius-sm)',
+                                border: '1px solid rgba(255,255,255,0.82)', padding: '10px 12px',
                               }}>
                                 <div>
                                   <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--text)' }}>{s.from}</span>
@@ -1134,9 +1243,11 @@ export default function DashboardScreen() {
             );
           })()}
 
-          {/* ── V2: Trip DNA Card ── */}
+          {/* Trip DNA + Map */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26 }}
+            initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+            transition={{ delay: 0.26, duration: 0.45, ease: [0.25, 0, 0, 1] }}
             style={{ display: 'flex', gap: 8 }}
           >
             <motion.button
@@ -1151,6 +1262,7 @@ export default function DashboardScreen() {
               disabled={dnaLoading}
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+              className="jelly-glow"
               style={{
                 flex: 1,
                 padding: '12px 16px',
@@ -1161,26 +1273,29 @@ export default function DashboardScreen() {
                 fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14,
                 cursor: dnaLoading ? 'not-allowed' : 'pointer',
                 opacity: dnaLoading ? 0.7 : 1,
-                boxShadow: 'var(--shadow-sm)',
+                boxShadow: '0 8px 24px rgba(196,113,74,0.28)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
               }}
             >
-              {dnaLoading ? '⏳' : '✨'} {t('dnaBtnShare')}
+              {dnaLoading
+                ? <><CompassLoader size={18} /> Generating…</>
+                : <>{t('dnaBtnShare')}</>
+              }
             </motion.button>
             <motion.button
               onClick={() => setScreen('map')}
               whileTap={{ scale: 0.97 }}
               transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+              className="jelly-glow"
               style={{
                 padding: '12px 16px',
-                background: 'var(--surface)',
-                border: '1px solid var(--border)',
+                ...glass,
+                border: '1px solid rgba(255,255,255,0.82)',
                 borderRadius: 'var(--radius-lg)',
                 color: 'var(--text)',
                 fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 14,
                 cursor: 'pointer',
-                boxShadow: 'var(--shadow-xs)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
               }}
@@ -1189,21 +1304,14 @@ export default function DashboardScreen() {
             </motion.button>
           </motion.div>
 
-          {/* Insights horizontal scroll */}
+          {/* Insights */}
           {insights.length > 0 && (
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.25 }}
+              initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
+              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+              transition={{ delay: 0.25, duration: 0.45, ease: [0.25, 0, 0, 1] }}
             >
-              <p style={{
-                fontFamily: 'var(--font-mono)',
-                fontSize: 12, fontWeight: 500, color: 'var(--terra)',
-                letterSpacing: '0.12em', textTransform: 'uppercase',
-                marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5,
-              }}>
-                {t('tripInsights')}
-              </p>
+              <SectionLabel>{t('tripInsights')}</SectionLabel>
               <div style={{
                 display: 'flex', gap: 8,
                 overflowX: 'auto', paddingBottom: 4,
@@ -1221,15 +1329,25 @@ export default function DashboardScreen() {
                       initial={{ opacity: 0, scale: 0.94 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.29 + i * 0.07, type: 'spring', stiffness: 340, damping: 32 }}
+                      className="jelly-glow"
                       style={{
                         flexShrink: 0,
                         minWidth: 172, maxWidth: 210,
                         background: colors.bg,
+                        backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
                         border: `1px solid ${colors.border}`,
                         borderRadius: 'var(--radius-lg)',
                         padding: '11px 13px',
+                        position: 'relative', overflow: 'hidden',
                       }}
                     >
+                      {/* Specular top-left shine */}
+                      <div style={{
+                        position: 'absolute', top: '-60%', left: '-30%',
+                        width: '140%', height: '140%',
+                        background: 'radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25) 0%, transparent 50%)',
+                        pointerEvents: 'none',
+                      }} />
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
                         <span style={{ fontSize: 16 }}>{ins.icon}</span>
                         <span style={{ fontSize: 12, fontWeight: 700, color: colors.text, lineHeight: 1.2 }}>
@@ -1246,20 +1364,16 @@ export default function DashboardScreen() {
             </motion.div>
           )}
 
-          {/* ── Days ── */}
+          {/* Days */}
           <div style={{ marginTop: 6 }}>
-            <p style={{
-              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
-              letterSpacing: '0.14em', textTransform: 'uppercase',
-              color: 'var(--text-3)', marginBottom: 16,
-            }}>{t('days')}</p>
+            <SectionLabel style={{ marginBottom: 14 }}>{t('days')}</SectionLabel>
 
             <motion.div
               data-tour="day-cards"
               variants={stagger}
               initial="hidden"
               animate="visible"
-              style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
+              style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
             >
               {Array.from({ length: trip.days }, (_, i) => {
                 const dayNum  = i + 1;
@@ -1267,11 +1381,11 @@ export default function DashboardScreen() {
                 const meta    = trip.dayMeta[i];
                 const gaps    = getGaps(evs, dayEndMins);
                 const sorted  = [...evs].sort((a, b) => toMins(a.time) - toMins(b.time));
-                const first   = sorted[0]?.time ?? '—';
+                const first   = sorted[0]?.time ?? null;
                 const last    = sorted[sorted.length - 1];
                 const lastEnd = last
                   ? `${Math.floor((toMins(last.time) + last.duration) / 60).toString().padStart(2, '0')}:${String((toMins(last.time) + last.duration) % 60).padStart(2, '0')}`
-                  : '—';
+                  : null;
                 const dayWeather = weather[i] ?? null;
                 const longestEv = evs.length ? [...evs].sort((a, b) => b.duration - a.duration)[0] : null;
                 const weatherLocation = longestEv?.location ?? meta?.region ?? '';
@@ -1279,157 +1393,136 @@ export default function DashboardScreen() {
                 const isFutureLocked = !isToday && startDate !== null && today < startDate ? false
                   : (!isToday && startDate !== null && new Date(startDate.getTime() + (dayNum - 1) * 86400000) > today && currentTripDay !== null);
 
+                const stripeColor = isFutureLocked ? 'var(--border)' : STRIPE_COLORS[i % STRIPE_COLORS.length];
+
+                const dayOfWeek = trip.startDate
+                  ? new Date(new Date(trip.startDate + 'T00:00:00').getTime() + i * 86400000)
+                      .toLocaleDateString('en', { weekday: 'short' }).toUpperCase()
+                  : `D${dayNum}`;
+
                 return (
                   <motion.div key={dayNum} variants={item}>
                     <div
                       onClick={() => handleDayClick(dayNum)}
-                      className="premium-hover"
+                      className={`day-card-v3 jelly-glow`}
                       style={{
-                        background: isToday ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.80)',
-                        backdropFilter: 'blur(40px) saturate(1.8)',
-                        WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-                        border: '1px solid rgba(255,255,255,0.90)',
-                        borderRadius: 28,
-                        padding: '24px 24px 20px',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        textAlign: 'center',
+                        background: isToday
+                          ? 'rgba(255,255,255,0.90)'
+                          : 'rgba(255,255,255,0.62)',
+                        backdropFilter: 'blur(32px) saturate(1.6)',
+                        WebkitBackdropFilter: 'blur(32px) saturate(1.6)',
+                        border: isToday
+                          ? `1.5px solid ${STRIPE_COLORS[i % STRIPE_COLORS.length]}55`
+                          : '1px solid rgba(255,255,255,0.82)',
                         boxShadow: isToday
-                          ? '0 40px 80px rgba(26,20,16,0.15)'
-                          : '0 4px 20px rgba(26,20,16,0.06)',
-                        position: 'relative',
-                        overflow: 'hidden',
+                          ? `0 8px 32px ${STRIPE_COLORS[i % STRIPE_COLORS.length]}28, inset 0 1px 0 rgba(255,255,255,0.70)`
+                          : 'var(--shadow-xs)',
                         opacity: isFutureLocked ? 0.55 : 1,
                       }}
                     >
-                      {/* CURRENTLY ACTIVE badge */}
-                      {isToday && (
-                        <div style={{
-                          position: 'absolute', top: 0, right: 0,
-                          background: 'var(--brand)', color: 'white',
-                          fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
-                          letterSpacing: '0.12em', textTransform: 'uppercase',
-                          padding: '6px 14px', borderBottomLeftRadius: 18, zIndex: 2,
-                        }}>
-                          CURRENTLY ACTIVE
-                        </div>
-                      )}
+                      {/* Left: paper-ring badge */}
+                      <PaperRingBadge
+                        dayNum={dayNum}
+                        color={typeof stripeColor === 'string' && stripeColor.startsWith('#') ? stripeColor : '#C4714A'}
+                        emoji={meta?.emoji}
+                        isLocked={isFutureLocked}
+                        isToday={isToday}
+                        dayOfWeek={dayOfWeek}
+                      />
 
-                      {/* Date label */}
-                      {trip.startDate && (
-                        <span style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: 10, fontWeight: 600, letterSpacing: '0.14em',
-                          color: isToday ? 'var(--terra)' : 'var(--text-3)',
-                          textTransform: 'uppercase', marginBottom: 10,
-                        }}>
-                          {fmtDate(trip.startDate, i, locale).split(' ').slice(0, 2).join(' ')}
-                        </span>
-                      )}
-
-                      {/* Paper-ring day number — CENTERED, LARGE */}
+                      {/* Middle */}
                       <div style={{
-                        width: 72, height: 72, borderRadius: '50%',
-                        background: isToday ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.90)',
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.06), inset 0 0 0 1px rgba(0,0,0,0.05)',
-                        position: 'relative',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        marginBottom: 16, flexShrink: 0,
-                        filter: isFutureLocked ? 'grayscale(0.6) opacity(0.6)' : 'none',
+                        padding: '14px 10px 14px 12px',
+                        display: 'flex', flexDirection: 'column',
+                        justifyContent: 'center', gap: 3, minWidth: 0,
                       }}>
-                        <div style={{
-                          position: 'absolute', inset: 7, borderRadius: '50%',
-                          border: '1px dashed rgba(43,83,64,0.28)',
-                        }} />
-                        <span style={{
-                          fontSize: 26, fontWeight: 800,
-                          color: isToday ? 'var(--brand)' : 'var(--forest-dk)',
-                          fontFamily: 'var(--font-sans)',
-                          letterSpacing: '-0.04em',
-                          position: 'relative', zIndex: 1,
-                        }}>{dayNum}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 1 }}>
+                          <span style={{
+                            fontSize: 15, fontWeight: 700, color: 'var(--text)',
+                            letterSpacing: '-0.02em',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {t(meta?.region ?? `${t('day')} ${dayNum}`)}
+                          </span>
+                          {isToday && (
+                            <span style={{
+                              flexShrink: 0, fontSize: 9, fontWeight: 800,
+                              background: STRIPE_COLORS[i % STRIPE_COLORS.length], color: 'white',
+                              borderRadius: 6, padding: '2px 7px',
+                              letterSpacing: '0.08em', textTransform: 'uppercase',
+                            }}>
+                              NOW
+                            </span>
+                          )}
+                        </div>
+                        {meta?.desc && (
+                          <p style={{
+                            fontSize: 11, color: 'var(--text-2)', lineHeight: 1.4,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {t(meta.desc)}
+                          </p>
+                        )}
+                        {trip.startDate && (
+                          <p style={{ fontSize: 10, color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', marginTop: 1 }}>
+                            {fmtDate(trip.startDate, i, locale).split(' ').slice(0, 2).join(' ')}
+                          </p>
+                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2, flexWrap: 'wrap' }}>
+                          {evs.length > 0 ? (
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.04em' }}>
+                              {evs.length} ev · {first} → {lastEnd}
+                            </span>
+                          ) : (
+                            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 500, color: 'var(--text-3)', fontStyle: 'italic' }}>
+                              No events yet
+                            </span>
+                          )}
+                          {gaps.length > 0 && (
+                            <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--terra)', background: 'var(--terra-muted)', borderRadius: 4, padding: '1px 6px' }}>
+                              {gaps.length} gap{gaps.length > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Location name */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 6, justifyContent: 'center' }}>
-                        <Icon name="pin" size={14} style={{ color: isToday ? 'var(--brand)' : 'var(--text-3)', flexShrink: 0 }} />
-                        <span style={{
-                          fontSize: 17, fontWeight: 700,
-                          color: isToday ? 'var(--text)' : 'var(--text)',
-                          letterSpacing: '-0.02em',
-                        }}>
-                          {t(meta?.region ?? `${t('day')} ${dayNum}`)}
-                        </span>
-                      </div>
-
-                      {/* Description */}
-                      {meta?.desc && (
-                        <p style={{
-                          fontSize: 13, color: 'var(--text-2)', marginBottom: 14,
-                          lineHeight: 1.5, maxWidth: 260,
-                        }}>
-                          {t(meta.desc)}
-                        </p>
-                      )}
-
-                      {/* Chips row */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-                        <span style={{
-                          padding: '4px 12px', borderRadius: 9999,
-                          background: 'var(--bg-alt)', color: 'var(--text-2)',
-                          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
-                        }}>
-                          {evs.length} {t('events')}
-                        </span>
-                        {evs.length > 0 && (
-                          <span style={{
-                            padding: '4px 12px', borderRadius: 9999,
-                            background: 'var(--bg-alt)', color: 'var(--text-2)',
-                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
-                          }}>
-                            {first} – {lastEnd}
-                          </span>
-                        )}
-                        {gaps.length > 0 && (
-                          <span style={{
-                            padding: '4px 12px', borderRadius: 9999,
-                            background: 'rgba(196,113,74,0.12)', color: 'var(--terra)',
-                            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em',
-                          }}>
-                            {gaps.length} {gaps.length > 1 ? t('gapsPlural') : t('gaps')} found
-                          </span>
-                        )}
-                        {dayWeather && (
+                      {/* Right: weather + chevron */}
+                      <div style={{
+                        padding: '12px 14px 12px 6px',
+                        display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'center',
+                        gap: 6, flexShrink: 0,
+                      }}>
+                        {dayWeather ? (
                           <a
                             href={getWeatherUrl(weatherLocation || trip.name)}
                             target="_blank" rel="noopener noreferrer"
                             onClick={e => e.stopPropagation()}
+                            className="jelly-glow"
                             style={{
-                              padding: '4px 10px', borderRadius: 9999,
-                              background: 'var(--bg-alt)', color: 'var(--text-2)',
-                              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
-                              textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4,
+                              display: 'flex', flexDirection: 'column', alignItems: 'center',
+                              background: 'rgba(255,255,255,0.78)',
+                              backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                              borderRadius: 12,
+                              padding: '6px 10px', gap: 1,
+                              border: '1px solid rgba(255,255,255,0.88)',
+                              textDecoration: 'none',
+                              boxShadow: 'var(--shadow-xs)',
                             }}
                           >
-                            {dayWeather.icon} {dayWeather.tempMax}°
+                            <span style={{ fontSize: 18, lineHeight: 1 }}>{dayWeather.icon}</span>
+                            <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--text)', lineHeight: 1.2 }}>
+                              {dayWeather.tempMax}°
+                            </span>
                           </a>
-                        )}
-                      </div>
-
-                      {/* Arrow button at bottom center */}
-                      <div style={{
-                        width: 40, height: 40, borderRadius: '50%',
-                        background: isToday ? 'var(--brand)' : isFutureLocked ? 'rgba(26,20,16,0.08)' : 'var(--forest-dk)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: isToday ? '0 6px 18px rgba(59,110,82,0.35)' : 'none',
-                        color: 'white',
-                      }}>
-                        {isFutureLocked
-                          ? <Icon name="lock" size={15} style={{ color: 'var(--text-3)' }} />
-                          : <span style={{ fontSize: 16, lineHeight: 1 }}>{isToday ? '↓' : '→'}</span>
-                        }
+                        ) : null}
+                        <div style={{
+                          width: 28, height: 28, borderRadius: '50%',
+                          background: isFutureLocked ? 'rgba(26,20,16,0.06)' : `${STRIPE_COLORS[i % STRIPE_COLORS.length]}18`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          <Icon name="chevR" size={13} style={{ color: isFutureLocked ? 'var(--text-3)' : STRIPE_COLORS[i % STRIPE_COLORS.length] }} />
+                        </div>
                       </div>
                     </div>
                   </motion.div>
@@ -1441,16 +1534,15 @@ export default function DashboardScreen() {
         </div>
       </motion.div>
 
-      {/* ── Share Sheet ── */}
+      {/* Share Sheet */}
       {showShare && (
         <Sheet
           onClose={() => { setShowShare(false); setInviteEmail(''); setPendingEmails([]); }}
           title={t('shareTrip')}
           subtitle={t('shareSub')}
         >
-          {/* Trip name + current team */}
           <div style={{
-            background: 'var(--bg)', border: '1px solid var(--border)',
+            ...glass,
             borderRadius: 'var(--radius-md)', padding: '14px 16px', marginBottom: 16,
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
@@ -1472,7 +1564,6 @@ export default function DashboardScreen() {
             </div>
           </div>
 
-          {/* Invite by email — max 4 pending */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-2)' }}>
               {t('inviteByEmail')}
@@ -1486,7 +1577,6 @@ export default function DashboardScreen() {
             </span>
           </div>
 
-          {/* Email input — always visible, disabled at limit */}
           <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
             <div style={{ flex: 1, position: 'relative' }}>
               <input
@@ -1539,7 +1629,6 @@ export default function DashboardScreen() {
             </GlassBtn>
           </div>
 
-          {/* Pending invite list */}
           <div style={{ marginBottom: 16, marginTop: 12 }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-3)', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8 }}>
               Pending invites
@@ -1552,7 +1641,6 @@ export default function DashboardScreen() {
                 const isResending = resendingId === inv.id;
                 const didResend = resendSuccessId === inv.id;
 
-                // Relative timestamp
                 const relTime = (() => {
                   if (!inv.created_at) return null;
                   const diff = Date.now() - new Date(inv.created_at).getTime();
@@ -1567,7 +1655,8 @@ export default function DashboardScreen() {
                 return (
                   <div key={inv.id} style={{
                     padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                    background: 'var(--bg)', border: '1px solid var(--border)', marginBottom: 6,
+                    ...glass,
+                    marginBottom: 6,
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                       <div style={{ minWidth: 0 }}>

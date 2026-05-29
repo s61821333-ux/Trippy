@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       style={{ height: '100%' }}
       className={`${bricolage.variable} ${newsreader.variable} ${jetbrainsMono.variable} ${hebrewFont.variable}`}
     >
-      <body style={{ height: '100%' }}>
+      <body className="grain" style={{ height: '100%' }}>
         <MotionProvider>
           {children}
         </MotionProvider>
