@@ -1,7 +1,7 @@
 'use client';
 
 import { m, AnimatePresence, useScroll, useMotionValueEvent } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { spring } from '@/lib/motion';
 import { haptic } from '@/lib/haptics';
 import Icon from './ui/Icon';
@@ -14,6 +14,8 @@ interface NavBarProps {
   active: Screen;
   onChange: (s: Screen) => void;
   onSettings?: () => void;
+  onSwitchTrip?: () => void;
+  onAdd?: () => void;
   isLoading?: boolean;
 }
 
@@ -30,9 +32,10 @@ const TABS: {
   { id: 'crew',      icon: 'users',     labelKey: 'navCrew',    ariaLabel: 'Crew' },
 ];
 
-export default function NavBar({ active, onChange, onSettings, isLoading }: NavBarProps) {
-  const { t } = useI18n();
+export default function NavBar({ active, onChange, onSettings, onSwitchTrip, onAdd, isLoading }: NavBarProps) {
+  const { t, isRTL } = useI18n();
   const [scrolled, setScrolled] = useState(false);
+  const [expandOpen, setExpandOpen] = useState(false);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, 'change', (y) => setScrolled(y > 16));
@@ -190,8 +193,8 @@ export default function NavBar({ active, onChange, onSettings, isLoading }: NavB
                           position: 'absolute',
                           inset: 0,
                           borderRadius: 9999,
-                          background: 'var(--brand)',
-                          boxShadow: '0 6px 18px oklch(42% 0.092 155 / 32%), inset 0 1px 0 oklch(100% 0 0 / 18%)',
+                          background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
+                          boxShadow: 'var(--lg-glow-terra), inset 0 1px 0 oklch(100% 0 0 / 30%)',
                           zIndex: 0,
                         }}
                       />
@@ -222,14 +225,14 @@ export default function NavBar({ active, onChange, onSettings, isLoading }: NavB
                   marginInlineStart: 2,
                   borderRadius: '50%',
                   border: 'none',
-                  background: active === 'settings' ? 'var(--brand)' : 'transparent',
+                  background: active === 'settings' ? 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))' : 'transparent',
                   color: active === 'settings' ? '#ffffff' : 'rgba(26,20,16,0.42)',
                   cursor: 'pointer',
                   outline: 'none',
                   transition: 'all 0.2s ease',
                   WebkitTapHighlightColor: 'transparent',
                   touchAction: 'manipulation',
-                  boxShadow: active === 'settings' ? '0 8px 20px rgba(34,85,59,0.30)' : 'none',
+                  boxShadow: active === 'settings' ? 'var(--lg-glow-terra)' : 'none',
                 }}
               >
                 <Icon name="settings" size={15} />
@@ -239,115 +242,238 @@ export default function NavBar({ active, onChange, onSettings, isLoading }: NavB
         </div>
       </m.div>
 
-      {/* ── Mobile: floating Jelly Pill nav ── */}
-      <m.nav
-        className="md:hidden"
-        role="navigation"
-        aria-label="Main navigation"
-        initial={{ y: 24, opacity: 0, filter: 'blur(8px)' }}
-        animate={{ y: 0,  opacity: 1, filter: 'blur(0px)' }}
-        transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1], delay: 0.1 }}
-        style={{
-          position: 'fixed',
-          bottom: 'calc(20px + env(safe-area-inset-bottom, 0px))',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: 'calc(100% - 36px)',
-          maxWidth: 390,
-          zIndex: 100,
-          background: 'oklch(99% 0.004 80 / 78%)',
-          backdropFilter: 'blur(48px) saturate(1.9)',
-          WebkitBackdropFilter: 'blur(48px) saturate(1.9)',
-          borderRadius: 9999,
-          padding: '5px 6px',
-          display: 'flex',
-          justifyContent: 'space-around',
-          alignItems: 'center',
-          boxShadow: [
-            'inset 0 1px 0 oklch(100% 0 0 / 82%)',
-            '0 24px 60px oklch(13% 0.012 55 / 16%)',
-            '0 4px 12px oklch(13% 0.012 55 / 7%)',
-          ].join(', '),
-          border: '1px solid oklch(100% 0 0 / 70%)',
-        }}
-      >
-        {TABS.map(tab => {
-          const isActive = active === tab.id;
-          return (
-            <m.button
-              key={tab.id}
-              data-tour={`nav-${tab.id}`}
-              onClick={() => handleChange(tab.id)}
-              whileTap={{ scale: 0.86, transition: { type: 'spring', stiffness: 500, damping: 22 } }}
-              transition={{ type: 'spring', stiffness: 360, damping: 28 }}
-              aria-label={tab.ariaLabel}
-              aria-current={isActive ? 'page' : undefined}
-              style={{
-                position: 'relative',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 3,
-                padding: isActive ? '8px 13px' : '8px 9px',
-                borderRadius: isActive ? 22 : 18,
-                border: 'none',
-                background: 'transparent',
-                color: isActive ? '#ffffff' : 'rgba(26,20,16,0.36)',
-                cursor: 'pointer',
-                transition: 'color 0.22s ease',
-                WebkitTapHighlightColor: 'transparent',
-                touchAction: 'manipulation',
-                flexShrink: 0,
-                minWidth: 44,
-                minHeight: 44,
-              }}
-            >
-              {/* Shared animated background pill */}
-              <AnimatePresence>
-                {isActive && (
-                  <m.span
-                    layoutId="mobile-nav-active"
-                    initial={{ opacity: 0, scale: 0.80 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{   opacity: 0, scale: 0.80 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      borderRadius: 22,
-                      background: 'var(--brand)',
-                      boxShadow: '0 6px 20px oklch(42% 0.092 155 / 34%), inset 0 1px 0 oklch(100% 0 0 / 20%)',
-                      zIndex: 0,
-                    }}
-                  />
-                )}
-              </AnimatePresence>
-
-              <span style={{ position: 'relative', zIndex: 1, display: 'contents' }}>
-                <Icon name={tab.icon} size={isActive ? 18 : 17} />
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 8,
-                  fontWeight: 700,
-                  letterSpacing: '0.10em',
-                  textTransform: 'uppercase',
-                  lineHeight: 1,
-                  opacity: isActive ? 1 : 0.60,
-                }}>
-                  {t(tab.labelKey)}
-                </span>
-              </span>
-            </m.button>
-          );
-        })}
-      </m.nav>
-
-      {/* Spacer for mobile pill */}
+      {/* ── Mobile: floating pill nav ── */}
       <div
         className="md:hidden"
         style={{
-          height: 'calc(20px + 62px + 20px + env(safe-area-inset-bottom, 0px))',
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          paddingBottom: 'env(safe-area-inset-bottom, 14px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 10,
+          pointerEvents: 'none',
+        }}
+      >
+        {/* Expansion panel — Switch trip / Settings */}
+        <AnimatePresence>
+          {expandOpen && (
+            <m.div
+              key="expand-panel"
+              initial={{ opacity: 0, y: 10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+              className="lg lg-strong"
+              style={{
+                display: 'flex',
+                gap: 8,
+                padding: 8,
+                borderRadius: 9999,
+                pointerEvents: 'auto',
+              }}
+            >
+              {onSwitchTrip && (
+                <m.button
+                  onClick={() => { setExpandOpen(false); onSwitchTrip(); }}
+                  whileTap={{ scale: 0.94 }}
+                  className="lg-btn"
+                  style={{
+                    height: 42,
+                    padding: '0 16px',
+                    gap: 7,
+                    background: 'transparent',
+                    color: 'var(--lg-ink)',
+                    fontSize: 13,
+                    fontWeight: 600,
+                  }}
+                >
+                  <Icon name="swap" size={17} style={{ color: 'var(--lg-terra)' }} />
+                  <span>{t('switchTrip') as string || 'Switch trip'}</span>
+                </m.button>
+              )}
+              {onSwitchTrip && onSettings && (
+                <div style={{ width: 1, background: 'oklch(50% 0.02 60 / 22%)', margin: '6px 0' }} />
+              )}
+              {onSettings && (
+                <m.button
+                  onClick={() => { setExpandOpen(false); onSettings(); }}
+                  whileTap={{ scale: 0.94 }}
+                  className="lg-btn"
+                  style={{
+                    height: 42,
+                    padding: '0 16px',
+                    gap: 7,
+                    background: 'transparent',
+                    color: 'var(--lg-ink)',
+                    fontSize: 13,
+                    fontWeight: 600,
+                  }}
+                >
+                  <Icon name="settings" size={17} style={{ color: 'var(--lg-forest)' }} />
+                  <span>{t('settings') as string || 'Settings'}</span>
+                </m.button>
+              )}
+            </m.div>
+          )}
+        </AnimatePresence>
+
+        {/* Main row: pill nav + FAB */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', pointerEvents: 'auto' }}>
+          {/* Pill container */}
+          <m.nav
+            role="navigation"
+            aria-label="Main navigation"
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.4, ease: [0.25, 0, 0, 1], delay: 0.08 }}
+            className="lg lg-strong"
+            style={{
+              position: 'relative',
+              display: 'flex',
+              alignItems: 'center',
+              padding: 7,
+              borderRadius: 9999,
+              height: 64,
+            }}
+          >
+            {/* Sliding terra active indicator */}
+            <m.div
+              animate={{ x: (isRTL ? -1 : 1) * TABS.findIndex(t => t.id === active) * 58 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+              style={{
+                position: 'absolute',
+                top: 7,
+                [isRTL ? 'right' : 'left']: 7 + 44,
+                width: 58,
+                height: 50,
+                borderRadius: 9999,
+                background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
+                boxShadow: 'var(--lg-glow-terra)',
+                zIndex: 0,
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* Expand handle */}
+            <m.button
+              onClick={() => setExpandOpen(o => !o)}
+              whileTap={{ scale: 0.92 }}
+              aria-label="Menu"
+              aria-expanded={expandOpen}
+              style={{
+                width: 44,
+                height: 50,
+                border: 0,
+                background: 'transparent',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1,
+                flexShrink: 0,
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <m.span
+                animate={{ rotate: expandOpen ? 180 : 0 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+                style={{ display: 'flex' }}
+              >
+                <Icon name="menu" size={18} style={{ color: 'var(--text-3)' }} />
+              </m.span>
+            </m.button>
+
+            {/* Tab buttons */}
+            {TABS.map(tab => {
+              const isActive = active === tab.id;
+              return (
+                <m.button
+                  key={tab.id}
+                  data-tour={`nav-${tab.id}`}
+                  onClick={() => { handleChange(tab.id); setExpandOpen(false); }}
+                  whileTap={{ scale: 0.92 }}
+                  aria-label={tab.ariaLabel}
+                  aria-current={isActive ? 'page' : undefined}
+                  style={{
+                    position: 'relative',
+                    zIndex: 1,
+                    width: 58,
+                    height: 50,
+                    border: 0,
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 2,
+                    color: isActive ? '#fff' : 'var(--text-3)',
+                    transition: 'color 0.3s',
+                    WebkitTapHighlightColor: 'transparent',
+                    touchAction: 'manipulation',
+                    flexShrink: 0,
+                  }}
+                >
+                  <m.span
+                    animate={{
+                      scale: isActive ? 1.08 : 1,
+                      y: isActive ? -1 : 0,
+                    }}
+                    transition={{ type: 'spring', stiffness: 380, damping: 28 }}
+                    style={{ display: 'flex' }}
+                  >
+                    <Icon name={tab.icon} size={20} color={isActive ? '#fff' : 'var(--text-3)'} />
+                  </m.span>
+                  <span style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 8.5,
+                    fontWeight: 600,
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase' as const,
+                    lineHeight: 1,
+                  }}>
+                    {t(tab.labelKey)}
+                  </span>
+                </m.button>
+              );
+            })}
+          </m.nav>
+
+          {/* Forest FAB */}
+          {onAdd && (
+            <m.button
+              onClick={onAdd}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.4, ease: [0.25, 0, 0, 1], delay: 0.12 }}
+              whileTap={{ scale: 0.92 }}
+              className="lg-btn lg-btn-forest an-float"
+              aria-label="Add"
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: 9999,
+                flexShrink: 0,
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
+              }}
+            >
+              <Icon name="plus" size={26} color="#fff" />
+            </m.button>
+          )}
+        </div>
+      </div>
+
+      {/* Spacer for floating pill nav */}
+      <div
+        className="md:hidden"
+        style={{
+          height: 'calc(90px + env(safe-area-inset-bottom, 0px))',
           flexShrink: 0,
           pointerEvents: 'none',
         }}

@@ -369,6 +369,16 @@ export default function DashboardScreen() {
     boxShadow: 'var(--shadow-sm)',
   } as const;
 
+  /* ── Today's events ── */
+  const currentDisplayDay = currentTripDay ?? 1;
+  const todayEvs = [...(trip.events[currentDisplayDay] ?? [])].sort((a, b) => toMins(a.time) - toMins(b.time));
+
+  const THEME_ICONS: Record<string, string> = {
+    desert: '🌵', nature: '🌲', city: '🏛️', beach: '🏖️',
+    mountain: '⛰️', snow: '❄️',
+  };
+  const themeIcon = THEME_ICONS[(trip as any).theme ?? 'city'] ?? '🗺️';
+
   return (
     <div
       className="h-full w-full overflow-y-auto"
@@ -381,231 +391,199 @@ export default function DashboardScreen() {
         style={{ paddingBottom: 48 }}
       >
 
-        {/* ═══ Hero Panel ═══ */}
-        <div style={{
-          position: 'relative',
-          overflow: 'hidden',
-          background: 'linear-gradient(158deg, oklch(35% 0.080 155) 0%, oklch(10% 0.012 55) 48%, oklch(32% 0.090 38) 100%)',
-          borderRadius: '0 0 44px 44px',
-          paddingTop: 'calc(var(--page-pt) + env(safe-area-inset-top, 0px))',
-          paddingBottom: 32,
-          boxShadow: '0 24px 64px oklch(13% 0.012 55 / 22%)',
-        }}>
-          {/* Ambient blobs (oklch) */}
-          <div style={{ position: 'absolute', top: -100, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, oklch(68% 0.108 75 / 32%) 0%, transparent 65%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: -80, left: -60, width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle, oklch(50% 0.100 155 / 28%) 0%, transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', top: '35%', left: '45%', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, oklch(62% 0.115 40 / 18%) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
+        {/* ── Cinematic hero ── */}
+        <motion.div
+          className="hero-mesh"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, ease: [0.25, 0, 0, 1] }}
+          style={{
+            position: 'relative',
+            paddingTop: 'calc(env(safe-area-inset-top, 0px) + 52px)',
+            paddingBottom: 22,
+            paddingLeft: 22,
+            paddingRight: 22,
+            borderRadius: '0 0 var(--lg-r-lg) var(--lg-r-lg)',
+            overflow: 'hidden',
+            marginBottom: 18,
+          }}
+        >
+          {/* Terra accent blob */}
+          <div style={{
+            position: 'absolute', top: -40, insetInlineEnd: -30,
+            width: 220, height: 220, borderRadius: '50%',
+            background: 'radial-gradient(circle, oklch(62% 0.17 40 / 45%), transparent 70%)',
+            pointerEvents: 'none',
+          }} />
 
-          <div style={{ padding: '0 var(--page-px)', position: 'relative', zIndex: 1 }}>
-            {/* Eyebrow + avatars + share */}
-            <motion.div
-              initial={{ opacity: 0, y: -8, filter: 'blur(4px)' }}
-              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-              transition={{ delay: 0.04, duration: 0.4, ease: [0.25, 0, 0, 1] }}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                {/* Slowly rotating compass brand mark */}
-                <motion.div
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                >
-                  <CompassMark size={20} style={{ opacity: 0.65 }} />
-                </motion.div>
-                <p style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 10, fontWeight: 700, letterSpacing: '0.20em',
-                  textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)',
-                }}>{t('activeTrip')}</p>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div style={{ display: 'flex' }}>
-                  {trip.participants.slice(0, 4).map((p, i) => (
-                    <motion.div
-                      key={p.id}
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.1 + i * 0.05, type: 'spring', stiffness: 440, damping: 26 }}
-                      style={{
-                        width: 30, height: 30, borderRadius: '50%',
-                        background: p.color, color: 'white',
-                        fontSize: 10, fontWeight: 700,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        border: '2.5px solid rgba(255,255,255,0.22)',
-                        marginLeft: i > 0 ? -9 : 0,
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.25)',
-                      }}
-                    >
-                      {p.initials}
-                    </motion.div>
-                  ))}
-                </div>
-                <span data-tour="share-btn" style={{ display: 'inline-flex' }}>
-                  <GlassBtn
-                    size="sm"
-                    onClick={() => setShowShare(true)}
-                    style={{
-                      width: 44, height: 44, padding: 0,
-                      borderRadius: 'var(--radius-sm)', minWidth: 0,
-                      background: 'rgba(255,255,255,0.15)',
-                      border: '1px solid rgba(255,255,255,0.22)',
-                      color: 'white',
-                    }}
-                  >
-                    <Icon name="share" size={14} />
-                  </GlassBtn>
-                </span>
-              </div>
-            </motion.div>
-
-            {/* Trip name */}
-            <motion.div
-              initial={{ opacity: 0, y: 18, filter: 'blur(8px)' }}
-              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-              transition={{ delay: 0.08, duration: 0.5, ease: [0.25, 0, 0, 1] }}
-              style={{ marginBottom: 18 }}
-            >
-              <h1 style={{
-                fontFamily: 'var(--font-serif)',
-                fontStyle: 'italic',
-                fontSize: 'clamp(2.5rem, 9vw, 5rem)',
-                fontWeight: 700,
-                color: 'white',
-                letterSpacing: '-0.025em',
-                lineHeight: 0.90,
-                textShadow: '0 4px 48px rgba(0,0,0,0.28)',
-              }}>
-                {trip.name}
-              </h1>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
-                {currentTripDay !== null && (
-                  <motion.span
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.30, type: 'spring', stiffness: 440, damping: 24 }}
-                    style={{
-                      fontSize: 11, fontWeight: 800,
-                      background: 'rgba(196,113,74,0.38)', color: 'white',
-                      borderRadius: 20, padding: '3px 10px',
-                      letterSpacing: '0.06em', textTransform: 'uppercase',
-                      border: '1px solid rgba(196,113,74,0.55)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    {t('day')} {currentTripDay}
-                  </motion.span>
-                )}
-                {daysUntil !== null && daysUntil > 0 && (
-                  <motion.span
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.30, type: 'spring', stiffness: 440, damping: 24 }}
-                    style={{
-                      fontSize: 11, fontWeight: 800,
-                      background: 'rgba(200,148,74,0.30)', color: 'rgba(255,255,255,0.92)',
-                      borderRadius: 20, padding: '3px 10px',
-                      letterSpacing: '0.06em',
-                      border: '1px solid rgba(200,148,74,0.48)',
-                      flexShrink: 0,
-                    }}
-                  >
-                    🗓 {daysUntil}d
-                  </motion.span>
-                )}
-              </div>
-            </motion.div>
-
-            {/* Stats pills */}
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.12 }}
-              style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 22 }}
-            >
-              <span className="hero-stat-pill-v3">{trip.days} {t('days').toUpperCase()}</span>
-              {totalEvents > 0 && <span className="hero-stat-pill-v3">{totalEvents} EVENTS</span>}
-              <span className="hero-stat-pill-v3" style={{ opacity: 0.65 }}>{t('hi')}, {nickname} 👋</span>
-            </motion.div>
-
-            {/* Journey path visualization */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
-              <div style={{ position: 'relative', height: 56, overflow: 'visible', marginBottom: 8 }}>
-                <svg
-                  width="100%" height="56"
-                  viewBox={`0 0 ${Math.max(trip.days * 44, 280)} 56`}
-                  preserveAspectRatio="xMidYMid meet"
-                >
-                  <path
-                    d={`M 20 28 ${Array.from({ length: trip.days - 1 }, (_, i) => {
-                      const total = Math.max(trip.days * 44, 280);
-                      const x1 = 20 + i * (total - 40) / Math.max(trip.days - 1, 1);
-                      const x2 = 20 + (i + 1) * (total - 40) / Math.max(trip.days - 1, 1);
-                      const cy = i % 2 === 0 ? 10 : 46;
-                      return `Q ${(x1 + x2) / 2} ${cy} ${x2} 28`;
-                    }).join(' ')}`}
-                    fill="none"
-                    stroke="rgba(255,255,255,0.20)"
-                    strokeWidth="1.5"
-                    strokeDasharray="5 8"
-                  />
-                  {Array.from({ length: trip.days }, (_, i) => {
-                    const total = Math.max(trip.days * 44, 280);
-                    const x = 20 + i * (total - 40) / Math.max(trip.days - 1, 1);
-                    const isThisToday = (currentTripDay ?? 0) - 1 === i;
-                    const isPast = currentTripDay !== null && i < currentTripDay - 1;
-                    return (
-                      <g key={i}>
-                        <circle
-                          cx={x} cy={28}
-                          r={isThisToday ? 8 : 4}
-                          fill={isThisToday ? 'white' : isPast ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.22)'}
-                        />
-                        {isThisToday && (
-                          <>
-                            <circle cx={x} cy={28} r={15} fill="none" stroke="rgba(255,255,255,0.28)" strokeWidth="1.5" />
-                            <circle cx={x} cy={28} r={8} fill="white" opacity="0.5">
-                              <animate attributeName="r" values="8;16;8" dur="2s" repeatCount="indefinite" />
-                              <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite" />
-                            </circle>
-                          </>
-                        )}
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 600,
-                  letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.30)',
+          {/* Top row: eyebrow + crew avatars */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+            <span className="eyebrow-lg" style={{ color: 'oklch(98% 0.005 80 / 72%)' }}>
+              {currentTripDay !== null ? t('day').toUpperCase() + ' ' + currentTripDay : 'Active trip'}
+            </span>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              {trip.participants.slice(0, 4).map((p, i) => (
+                <div key={p.id} style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: p.color ?? STRIPE_COLORS[i % STRIPE_COLORS.length],
+                  color: 'white', fontSize: 11, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: '2px solid oklch(20% 0.03 60)',
+                  marginInlineStart: i > 0 ? -8 : 0,
+                  boxShadow: 'var(--lg-shadow)',
+                  letterSpacing: '-0.02em',
                 }}>
-                  {trip.days}-DAY JOURNEY
+                  {p.initials}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Trip title block */}
+          <div style={{ marginTop: 24, position: 'relative' }}>
+            {(trip.countries?.length ?? 0) > 0 && (
+              <p className="eyebrow-lg a-rise" style={{ color: 'var(--lg-sand)', margin: '0 0 4px' }}>
+                {(trip.countries ?? []).join(' · ')}
+              </p>
+            )}
+            <h1 className="display-xl a-rise d1" style={{ fontSize: 'clamp(2.4rem, 10vw, 3.2rem)', color: '#fff', margin: 0 }}>
+              {trip.name}
+            </h1>
+
+            {/* Stat pills */}
+            <div className="a-rise d2" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+              {daysUntil !== null && daysUntil > 0 && (
+                <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }} />
+                  {daysUntil} {t('days')}
                 </span>
+              )}
+              {currentTripDay !== null && (
+                <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
+                  <span style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }} />
+                  {t('day')} {currentTripDay} {'of ' + trip.days}
+                </span>
+              )}
+              {trip.startDate && endDate && (
+                <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 5, fontFamily: 'var(--font-mono)', fontWeight: 500, fontSize: 12 }}>
+                  {fmtDate(trip.startDate, 0, locale)} → {fmtDate(trip.startDate, trip.days - 1, locale)}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Day journey scroller */}
+          <div className="lg-scroll a-rise d3" style={{ display: 'flex', gap: 8, marginTop: 20, overflowX: 'auto', paddingBottom: 2 }}>
+            {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
+              const dayNum = i + 1;
+              const isActive = dayNum === (currentTripDay ?? 1);
+              return (
                 <button
-                  onClick={() => setScreen('map')}
+                  key={dayNum}
+                  onClick={() => handleDayClick(dayNum)}
                   style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
-                    background: 'rgba(255,255,255,0.10)',
-                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                    border: '1px solid rgba(255,255,255,0.16)',
-                    borderRadius: 9999,
-                    padding: '4px 12px',
-                    fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-                    letterSpacing: '0.14em', textTransform: 'uppercase',
-                    color: 'rgba(255,255,255,0.58)',
-                    cursor: 'pointer',
+                    flexShrink: 0, width: 50, height: 62, borderRadius: 16, border: 0, cursor: 'pointer',
+                    background: isActive
+                      ? 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))'
+                      : 'oklch(100% 0 0 / 12%)',
+                    boxShadow: isActive ? 'var(--lg-glow-terra)' : 'inset 0 0 0 1px oklch(100% 0 0 / 14%)',
+                    color: '#fff',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    gap: 1, backdropFilter: 'blur(10px)',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 >
-                  <Icon name="map" size={10} style={{ color: 'rgba(255,255,255,0.58)' }} />
-                  VIEW MAP
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, opacity: 0.8, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                    {t('day')}
+                  </span>
+                  <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, lineHeight: 1 }}>{dayNum}</span>
                 </button>
-              </div>
-            </motion.div>
+              );
+            })}
           </div>
-        </div>
+        </motion.div>
+
+        {/* AI Insight card — forest gradient */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12, duration: 0.42, ease: [0.25, 0, 0, 1] }}
+          style={{ padding: '0 var(--page-px)', marginBottom: 20 }}
+          onClick={() => setScreen('day')}
+        >
+          <div style={{
+            borderRadius: 'var(--lg-r-card)', padding: '14px 16px',
+            background: 'linear-gradient(135deg, var(--lg-forest), var(--lg-forest-deep))',
+            boxShadow: 'var(--lg-glow-forest)',
+            cursor: 'pointer', position: 'relative', overflow: 'hidden',
+          }}>
+            {/* Background sparkle */}
+            <div style={{ position: 'absolute', top: -20, insetInlineEnd: -10, opacity: 0.16, pointerEvents: 'none' }}>
+              <Icon name="sparkle" size={90} color="#fff" />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
+              <Icon name="sparkle" size={16} color="var(--lg-sand)" />
+              <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)' }}>
+                {t('tripInsights') as string || 'Trip insights'}
+              </span>
+            </div>
+            <p style={{ fontSize: 14, lineHeight: 1.55, color: '#fff', fontWeight: 500, margin: 0 }}>
+              {insights.length > 0
+                ? insights[0].title + ' — ' + insights[0].description
+                : trip.days + ' ' + t('days') + ' · ' + totalEvents + ' events planned.'}
+            </p>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 12, color: '#fff', fontWeight: 600, fontSize: 13 }}>
+              {t('viewDay') as string || 'See the plan'}
+              <Icon name="chevR" size={15} color="#fff" style={{ transform: locale === 'he' ? 'scaleX(-1)' : 'none' }} />
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Today schedule */}
+        {todayEvs.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.16 }}
+            style={{ padding: '0 var(--page-px)', marginBottom: 20 }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--terra)', margin: 0 }}>
+                {'TODAY · ' + t('day').toUpperCase() + ' ' + currentDisplayDay}
+              </p>
+              <button
+                onClick={() => handleDayClick(currentDisplayDay)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}
+              >
+                {'See all ' + trip.days + ' days'}
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid rgba(26,20,16,0.07)', boxShadow: '0 2px 12px rgba(26,20,16,0.05)' }}>
+              {todayEvs.slice(0, 4).map((ev, i) => (
+                <motion.div
+                  key={ev.id}
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.18 + i * 0.05 }}
+                  onClick={() => handleDayClick(currentDisplayDay)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'white', borderBottom: i < Math.min(todayEvs.length, 4) - 1 ? '1px solid rgba(26,20,16,0.06)' : 'none', cursor: 'pointer' }}
+                >
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600, color: 'var(--text-3)', letterSpacing: '0.02em', flexShrink: 0, width: 42 }}>{ev.time}</span>
+                  <div style={{ width: 38, height: 38, borderRadius: 13, flexShrink: 0, background: CAT_META[ev.category].bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
+                    {CAT_META[ev.category].icon}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t(ev.name)}</p>
+                    {ev.location && <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{'📍 ' + ev.location}</p>}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {/* Post-hero: Supplies + WorldClock */}
-        <div style={{ padding: '0 var(--page-px)', marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ padding: '0 var(--page-px)', marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
           {/* Supplies progress */}
           <motion.div
             initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}

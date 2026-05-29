@@ -465,11 +465,12 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
   const [rescheduling, setRescheduling] = useState(false);
   const [pendingTime, setPendingTime] = useState(event.time);
   const [moving, setMoving] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   // Reset local time whenever the store updates the event
   useEffect(() => { setPendingTime(event.time); }, [event.time]);
 
-  const openReschedule = () => { setPendingTime(event.time); setRescheduling(true); setMoving(false); };
+  const openReschedule = () => { setPendingTime(event.time); setRescheduling(true); setMoving(false); setExpanded(false); };
   const cancelReschedule = () => setRescheduling(false);
   const shift = (mins: number) =>
     setPendingTime(t => toTime(Math.max(0, Math.min(23 * 60 + 55, toMins(t) + mins))));
@@ -520,20 +521,20 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
         initial={isNew ? { boxShadow: '0 0 0 4px var(--terra-muted), 0 4px 20px rgba(196,113,74,0.18)' } : false}
         animate={{
           boxShadow: rescheduling
-            ? '0 0 0 2px var(--terra), 0 4px 20px rgba(0,0,0,0.12)'
+            ? 'var(--lg-shadow), 0 0 0 2px var(--lg-terra)'
             : isConflict
-              ? '0 0 0 1.5px var(--danger), 0 2px 8px rgba(0,0,0,0.07)'
-              : '0 2px 12px rgba(26,20,16,0.06), 0 1px 3px rgba(26,20,16,0.03)',
+              ? 'var(--lg-shadow), 0 0 0 1.5px var(--danger)'
+              : 'var(--lg-shadow)',
         }}
         transition={rescheduling || isConflict ? { duration: 0.18 } : { duration: 0.6, ease: 'easeOut' }}
+        className="lg"
         style={{
           flex: 1, width: '100%',
-          background: rescheduling ? 'rgba(196,113,74,0.06)' : 'rgba(255,255,255,0.92)',
-          borderRadius: 20,
-          border: rescheduling ? '1.5px solid var(--terra)' : isConflict ? '1.5px solid var(--danger)' : '1px solid rgba(255,255,255,0.95)',
+          borderRadius: 'var(--lg-r-card)',
+          borderInlineStart: isConflict ? '3px solid var(--danger)' : `3px solid ${meta.bg || 'var(--lg-terra)'}`,
+          background: rescheduling ? 'oklch(99% 0.004 80 / 72%)' : undefined,
           overflow: 'hidden',
-          transition: 'border 0.18s, background 0.18s',
-          borderLeft: isConflict ? '3px solid var(--danger)' : `3px solid ${meta.bg || 'var(--terra)'}`,
+          transition: 'border 0.18s',
         }}>
         {isConflict && !rescheduling && (
           <div style={{ width: '100%', height: 3, background: 'var(--danger)' }} />
@@ -542,7 +543,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
         {/* Main content row — tap to focus event */}
         <div
           style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', cursor: 'pointer' }}
-          onClick={() => onFocus(event)}
+          onClick={() => { setExpanded(e => !e); onFocus(event); }}
         >
           <EventThumbnail category={event.category} />
 
@@ -709,8 +710,86 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
               }}>
               <Icon name="trash" size={13} />
             </motion.button>
+            {/* Expand toggle */}
+            <motion.button
+              whileTap={{ scale: 0.88 }}
+              onClick={e => { e.stopPropagation(); setExpanded(v => !v); }}
+              animate={{ rotate: expanded ? 90 : 0 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+              style={{
+                width: 32, height: 32, borderRadius: 9, background: expanded ? 'var(--brand-muted)' : 'var(--bg)',
+                border: expanded ? '1px solid rgba(59,110,82,0.25)' : '1px solid var(--border)',
+                cursor: 'pointer', color: expanded ? 'var(--brand)' : 'var(--text-3)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'background 0.15s, color 0.15s',
+              }}>
+              <Icon name="chevR" size={13} />
+            </motion.button>
           </div>
         </div>
+
+        {/* ── Quick Actions accordion ── */}
+        <AnimatePresence>
+          {expanded && (
+            <motion.div
+              key="quick-actions"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.25, 0, 0, 1] }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div style={{ borderTop: '1px solid var(--border)', padding: '10px 12px 12px', background: 'var(--bg-alt)', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {/* Event details summary */}
+                <div style={{ display: 'flex', gap: 16 }}>
+                  <div>
+                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)' }}>{t('duration')}</span>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{event.time}–{endT}</div>
+                  </div>
+                  {event.cost != null && event.cost > 0 && (
+                    <div>
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--text-3)' }}>{t('cost')}</span>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--success)' }}>{getCurrencySymbol('USD')}{event.cost}</div>
+                    </div>
+                  )}
+                </div>
+                {event.notes && (
+                  <p style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--text-2)', margin: 0 }}>{event.notes}</p>
+                )}
+                {/* Quick action buttons */}
+                <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+                  <motion.button
+                    whileTap={{ scale: 0.94 }}
+                    onClick={e => { e.stopPropagation(); setExpanded(false); onEdit(event); }}
+                    className="lg-btn lg-btn-glass"
+                    style={{ height: 38, padding: '0 12px', gap: 6, fontSize: 12, fontWeight: 600, flexShrink: 0 }}
+                  >
+                    <Icon name="edit" size={14} style={{ color: 'var(--lg-forest)' }} />
+                    {t('quickEdit') || 'Quick edit'}
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.94 }}
+                    onClick={e => { e.stopPropagation(); setExpanded(false); openReschedule(); }}
+                    className="lg-btn lg-btn-glass"
+                    style={{ height: 38, padding: '0 12px', gap: 6, fontSize: 12, fontWeight: 600, flexShrink: 0 }}
+                  >
+                    <Icon name="clock" size={14} style={{ color: 'var(--lg-terra)' }} />
+                    {t('reschedule') || 'Reschedule'}
+                  </motion.button>
+                  <motion.button
+                    whileTap={{ scale: 0.94 }}
+                    onClick={e => { e.stopPropagation(); setExpanded(false); }}
+                    className="lg-btn lg-btn-glass"
+                    style={{ height: 38, padding: '0 12px', gap: 6, fontSize: 12, fontWeight: 600, flexShrink: 0 }}
+                  >
+                    <Icon name="sparkle" size={14} style={{ color: 'var(--lg-sand)' }} />
+                    {t('suggestNearby') || 'Suggest nearby'}
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Inline reschedule panel */}
         <AnimatePresence>
@@ -1297,35 +1376,19 @@ export default function DayScreen() {
           flexShrink: 0,
         }}
       >
-        {/* Back + eyebrow row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <motion.button
-            whileTap={{ scale: 0.88 }}
-            onClick={() => setScreen('dashboard')}
-            style={{
-              background: 'rgba(255,255,255,0.80)', border: '1px solid rgba(255,255,255,0.90)',
-              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-              width: 36, height: 36, borderRadius: '50%',
-              cursor: 'pointer', color: 'var(--text-2)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0, boxShadow: '0 2px 8px rgba(26,20,16,0.06)',
-            }}
-          >
-            <Icon name="chevL" size={18} />
-          </motion.button>
-          <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
-            letterSpacing: '0.18em', color: 'var(--terra)',
-            textTransform: 'uppercase',
-          }}>
-            ADVENTURE
-          </p>
-        </div>
+        {/* Eyebrow */}
+        <p style={{
+          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+          letterSpacing: '0.20em', color: 'var(--terra)',
+          textTransform: 'uppercase', margin: '0 0 8px',
+        }}>
+          HOUR BY HOUR
+        </p>
 
-        {/* Big heading: Day N: Region */}
+        {/* Big heading: Day N · Region */}
         <h1 style={{
           fontFamily: 'var(--font-serif)',
-          fontSize: 'clamp(1.8rem, 6vw, 2.8rem)',
+          fontSize: 'clamp(1.9rem, 6vw, 2.8rem)',
           fontWeight: 400,
           fontStyle: 'italic',
           color: 'var(--text)',
@@ -1335,8 +1398,8 @@ export default function DayScreen() {
         }}>
           {`${t('day')} ${activeDay}`}
           {meta?.region && (
-            <span style={{ color: 'var(--text-2)', fontWeight: 500 }}>
-              : <span style={{ fontWeight: 700, color: 'var(--text)' }}>{meta.region}</span>
+            <span style={{ color: 'var(--text-2)' }}>
+              {'·'}<span style={{ fontWeight: 700, color: 'var(--text)', marginLeft: 4 }}>{meta.region}</span>
             </span>
           )}
         </h1>
@@ -1359,28 +1422,37 @@ export default function DayScreen() {
         {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
           const dayNum = i + 1;
           const isActive = dayNum === activeDay;
+          const { abbrev, dateNum } = getDayInfo(dayNum);
+          const MONTH_ABBREVS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+          const base2 = trip.startDate ? new Date(trip.startDate + 'T00:00:00') : new Date();
+          base2.setDate(base2.getDate() + i);
+          const monthAbbrev = MONTH_ABBREVS[base2.getMonth()];
           return (
             <motion.button
               key={dayNum}
               onClick={() => navigateToDay(dayNum)}
               whileTap={{ scale: 0.88 }}
               style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '6px 14px', flexShrink: 0,
-                background: isActive ? 'var(--brand)' : 'rgba(255,255,255,0.70)',
-                border: isActive ? 'none' : '1px solid rgba(255,255,255,0.90)',
-                backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                padding: '8px 15px', flexShrink: 0, gap: 1,
+                background: isActive
+                  ? 'linear-gradient(180deg, var(--lg-forest), var(--lg-forest-deep))'
+                  : 'var(--lg-panel)',
+                backdropFilter: 'var(--lg-blur)',
+                WebkitBackdropFilter: 'var(--lg-blur)',
+                border: 'none',
                 borderRadius: 9999, cursor: 'pointer',
-                boxShadow: isActive ? '0 4px 14px rgba(59,110,82,0.30)' : '0 2px 6px rgba(26,20,16,0.05)',
-                transition: 'all 0.2s ease',
+                boxShadow: isActive ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                color: isActive ? '#fff' : 'var(--text-2)',
+                transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                whiteSpace: 'nowrap',
               }}
             >
-              <span style={{
-                fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                letterSpacing: '0.10em', textTransform: 'uppercase',
-                color: isActive ? '#fff' : 'var(--text-3)',
-              }}>
-                DAY {dayNum}
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', opacity: isActive ? 0.85 : 0.7, lineHeight: 1 }}>
+                {monthAbbrev}
+              </span>
+              <span style={{ fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 800, lineHeight: 1.1 }}>
+                {dateNum}
               </span>
             </motion.button>
           );
@@ -1477,36 +1549,26 @@ export default function DayScreen() {
           padding: '0 var(--page-px) 8px',
           flexShrink: 0,
         }}>
-          <div style={{
-            display: 'flex',
-            background: 'rgba(255,255,255,0.55)',
-            backdropFilter: 'blur(40px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-            border: '1px solid rgba(255,255,255,0.80)',
-            borderRadius: 'var(--radius-sm)',
-            padding: 2,
-            gap: 2,
-            boxShadow: '0 4px 16px rgba(26,20,16,0.06)',
-          }}>
+          <div className="lg" style={{ display: 'flex', padding: 4, borderRadius: 9999, gap: 2 }}>
             {(['list', 'timeline'] as const).map(mode => (
               <motion.button
                 key={mode}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => setViewMode(mode)}
                 style={{
-                  padding: '5px 12px',
-                  borderRadius: 6,
-                  fontSize: 11, fontWeight: 700,
+                  padding: '7px 13px',
+                  borderRadius: 9999,
+                  fontSize: 10, fontWeight: 600,
                   fontFamily: 'var(--font-mono)',
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase' as const,
-                  background: viewMode === mode ? 'var(--terra)' : 'transparent',
-                  color: viewMode === mode ? 'white' : 'var(--text-3)',
+                  background: viewMode === mode ? 'var(--lg-terra)' : 'transparent',
+                  color: viewMode === mode ? '#fff' : 'var(--text-3)',
                   border: 'none', cursor: 'pointer',
-                  transition: 'background 0.18s, color 0.18s',
+                  transition: 'all 0.3s',
                 }}
               >
-                {mode === 'list' ? '≡ List' : '⏱ Timeline'}
+                {mode === 'list' ? t('list') as string || 'List' : t('timeline') as string || 'Timeline'}
               </motion.button>
             ))}
           </div>
@@ -1531,50 +1593,81 @@ export default function DayScreen() {
           const hotel = pos === 'top' ? topHotel : bottomHotel;
           if (pos === 'top' && topHotel == null) return null;
           return (
-          <div
-            onClick={() => openHotelSheet(hotel?.id)}
-            style={{
-              margin: pos === 'top' ? '8px var(--page-px) 4px' : '4px var(--page-px) 8px',
-              padding: '10px 14px',
-              background: hotel ? 'rgba(59,126,212,0.08)' : 'transparent',
-              border: `1px ${hotel ? 'solid' : 'dashed'} ${hotel ? 'rgba(59,126,212,0.25)' : 'var(--border)'}`,
-              borderRadius: 12,
-              display: 'flex', alignItems: 'center', gap: 8,
-              cursor: 'pointer',
-              transition: 'background 0.15s',
-            }}
-          >
-            <span style={{ fontSize: 18 }}>🏨</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              {hotel ? (
-                <p dir="ltr" style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'start' }}>
-                  {hotel.location}
-                </p>
-              ) : (
-                <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500, margin: 0 }}>
-                  {locale === 'he' ? 'הוסף מלון / לינה' : 'Add hotel / accommodation'}
-                </p>
+            <div
+              className="lg"
+              onClick={() => openHotelSheet(hotel?.id)}
+              style={{
+                margin: pos === 'top' ? '8px var(--page-px) 6px' : '6px var(--page-px) 8px',
+                display: 'flex', alignItems: 'center', gap: 12,
+                padding: '11px 14px',
+                cursor: 'pointer',
+                background: hotel ? 'var(--lg-panel)' : 'transparent',
+                backdropFilter: hotel ? 'var(--lg-blur)' : 'none',
+                WebkitBackdropFilter: hotel ? 'var(--lg-blur)' : 'none',
+                border: hotel ? 'none' : '1px dashed var(--border)',
+                borderRadius: 18,
+                boxShadow: hotel ? 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 60%)' : 'none',
+              }}
+            >
+              <span style={{ fontSize: 22, flexShrink: 0 }}>🏨</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5, marginBottom: 1, display: 'block' }}>
+                  {pos === 'bottom' && hotel ? (locale === 'he' ? 'צ\'ק-אאוט' : 'Checkout') : (locale === 'he' ? 'לינה' : 'Stay')}
+                </span>
+                {hotel ? (
+                  <p dir="ltr" style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'start' }}>
+                    {hotel.location}
+                  </p>
+                ) : (
+                  <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500, margin: 0 }}>
+                    {locale === 'he' ? 'הוסף מלון / לינה' : 'Add hotel / accommodation'}
+                  </p>
+                )}
+              </div>
+              {hotel && hotel.lat != null && hotel.lng != null && (
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${hotel.lat},${hotel.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  style={{ display: 'flex', alignItems: 'center', color: 'var(--terra)', flexShrink: 0 }}
+                >
+                  <Icon name="pin" size={16} />
+                </a>
+              )}
+              {hotel && (
+                <span style={{ fontSize: 11, color: 'var(--lg-forest)', fontWeight: 700 }}>
+                  {locale === 'he' ? 'ערוך' : 'Edit'}
+                </span>
               )}
             </div>
-            {hotel && hotel.lat != null && hotel.lng != null && (
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${hotel.lat},${hotel.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={e => e.stopPropagation()}
-                style={{ display: 'flex', alignItems: 'center', color: 'var(--accent)', flexShrink: 0 }}
-              >
-                <Icon name="pin" size={16} />
-              </a>
-            )}
-            {hotel && (
-              <span style={{ fontSize: 10, color: 'var(--text-3)', fontWeight: 600 }}>
-                {locale === 'he' ? 'ערוך' : 'Edit'}
-              </span>
-            )}
-          </div>
           );
         };
+
+        /* ─── Weather + Day Budget bar ─── */
+        const weatherBudgetBar = (weather || dayBudget > 0) && (
+          <div style={{ display: 'flex', gap: 10, margin: '0 var(--page-px) 8px' }}>
+            {weather && (
+              <div className="lg" style={{ flex: 1, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span style={{ fontSize: 22 }}>{weather.icon ?? weatherEmoji(weather.code)}</span>
+                <div>
+                  <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5, marginBottom: 1 }}>{locale === 'he' ? 'מזג אוויר' : 'Weather'}</span>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{weather.temp}° · {weather.label ?? ''}</div>
+                </div>
+              </div>
+            )}
+            {dayBudget > 0 && (
+              <div className="lg" style={{ flex: 1, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}
+                onClick={() => { setBudgetEdit(Object.fromEntries(evs.map(ev => [ev.id, ev.cost != null ? String(ev.cost) : '']))); setShowBudget(true); }}>
+                <Icon name="download" size={20} style={{ color: 'var(--lg-terra)', flexShrink: 0 }} />
+                <div>
+                  <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5, marginBottom: 1 }}>{locale === 'he' ? 'תקציב יום' : 'Day budget'}</span>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{currSym}{dayBudget}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
         return (
           <div
             className="flex-1 overflow-y-auto day-list-pb"
@@ -1606,6 +1699,7 @@ export default function DayScreen() {
                 exit="exit"
                 transition={spring.gentle}
               >
+            {weatherBudgetBar}
             {hotelBanner('top')}
             {(() => {
               const firstWithCoords = evs.find(e => e.lat != null && e.lng != null);
