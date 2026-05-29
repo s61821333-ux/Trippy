@@ -1,0 +1,73 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin:0; padding:0; background:var(--bg); overflow:hidden; }
+  .stage { display:flex; align-items:center; gap:34px; padding:22px 36px; }
+  .loader { width:140px; height:140px; position:relative; flex:none; }
+  .loader svg, .loader .layer { position:absolute; inset:0; overflow:visible; }
+
+  .spin-mark{animation:cw 7s linear infinite;transform-origin:50% 50%;}
+  .spin-fast{animation:cw 2.4s linear infinite;transform-origin:50% 50%;}
+  .spin-med{animation:ccw 3.6s linear infinite;transform-origin:50% 50%;}
+  .spin-slow{animation:cw 5.4s linear infinite;transform-origin:50% 50%;}
+  .spin-orbit{animation:cw 4.2s cubic-bezier(0.5,0,0.5,1) infinite;transform-origin:50% 50%;}
+  .spin-radar{animation:cw 3s linear infinite;transform-origin:50% 50%;}
+  @keyframes cw{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  @keyframes ccw{from{transform:rotate(360deg)}to{transform:rotate(0)}}
+
+  /* Radar sweep — conic terracotta glow */
+  .radar{position:absolute;inset:8px;border-radius:50%;
+    background:conic-gradient(from 0deg, rgba(196,113,74,0) 0deg, rgba(196,113,74,0) 250deg, rgba(196,113,74,0.18) 320deg, rgba(196,113,74,0.42) 360deg);
+    -webkit-mask:radial-gradient(circle, transparent 30%, #000 31%, #000 100%);
+    mask:radial-gradient(circle, transparent 30%, #000 31%, #000 100%);}
+  /* Breathing halo */
+  .halo{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 50% 50%,rgba(200,148,74,0.20) 0%,rgba(196,113,74,0.10) 30%,rgba(244,239,232,0) 60%);animation:breath 2.8s ease-in-out infinite;}
+  @keyframes breath{0%,100%{transform:scale(0.84);opacity:.65}50%{transform:scale(1.06);opacity:1}}
+  /* Twinkle sparkles */
+  .tw{animation:tw 1.9s ease-in-out infinite;transform-origin:center;}
+  @keyframes tw{0%,100%{opacity:.25;transform:scale(0.7)}50%{opacity:1;transform:scale(1.15)}}
+  h6 { margin:0 0 4px; font-family:var(--font-sans); }
+  .cap { font-family:var(--font-mono); font-size:11px; color:var(--text-3); letter-spacing:.04em; max-width:280px; line-height:1.6; }
+</style></head>
+<body>
+  <div class="stage">
+    <div class="loader" role="status" aria-label="Loading">
+      <div class="layer halo"></div>
+      <div class="layer radar spin-radar"></div>
+
+      <!-- Outer terracotta dashed orbit -->
+      <svg class="spin-slow" viewBox="0 0 200 200"><circle cx="100" cy="100" r="94" fill="none" stroke="#C4714A" stroke-width="1.5" stroke-dasharray="3 11" stroke-linecap="round" opacity="0.55"/></svg>
+      <!-- Mid gold streak -->
+      <svg class="spin-med" viewBox="0 0 200 200"><circle cx="100" cy="100" r="82" fill="none" stroke="#C8944A" stroke-width="2" stroke-dasharray="60 40 24 280" stroke-linecap="round" opacity="0.9"/></svg>
+      <!-- Inner forest crisp arc + leading dot -->
+      <svg class="spin-fast" viewBox="0 0 200 200"><circle cx="100" cy="100" r="70" fill="none" stroke="#3B6E52" stroke-width="2.5" stroke-dasharray="40 70 16 314" stroke-linecap="round" opacity="0.92"/></svg>
+      <svg class="spin-fast" viewBox="0 0 200 200"><circle cx="170" cy="100" r="3.5" fill="#3B6E52"/></svg>
+
+      <!-- Orbiting compass-point diamonds (the 4 rose colors) -->
+      <svg class="spin-orbit" viewBox="0 0 200 200">
+        <g transform="translate(100 12) rotate(45)"><rect x="-4" y="-4" width="8" height="8" rx="1.2" fill="#C4714A"/></g>
+        <g transform="translate(188 100) rotate(45)"><rect x="-3.4" y="-3.4" width="6.8" height="6.8" rx="1" fill="#C8944A"/></g>
+        <g transform="translate(100 188) rotate(45)"><rect x="-4" y="-4" width="8" height="8" rx="1.2" fill="#3B6E52"/></g>
+        <g transform="translate(12 100) rotate(45)"><rect x="-3.4" y="-3.4" width="6.8" height="6.8" rx="1" fill="#C8944A"/></g>
+      </svg>
+
+      <!-- Sparkles -->
+      <svg viewBox="0 0 200 200"><g class="tw" style="animation-delay:.2s"><path d="M150 38 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2z" fill="#E6B574"/></g>
+        <g class="tw" style="animation-delay:1s"><path d="M40 150 l1.6 5 5 1.6 -5 1.6 -1.6 5 -1.6 -5 -5 -1.6 5 -1.6z" fill="#E0916B"/></g></svg>
+
+      <!-- Compass mark, slow full-color spin -->
+      <svg class="spin-mark" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="56" stroke="#1A1410" stroke-width="4" fill="none"/>
+        <path d="M120 70 L131 120 L120 124 L109 120 Z" fill="#C4714A"/>
+        <path d="M120 170 L109 120 L120 116 L131 120 Z" fill="#3B6E52"/>
+        <path d="M170 120 L120 109 L116 120 L120 131 Z" fill="#C8944A"/>
+        <path d="M70 120 L120 131 L124 120 L120 109 Z" fill="#C8944A"/>
+        <circle cx="120" cy="120" r="5" fill="#1A1410"/>
+      </svg>
+    </div>
+    <div>
+      <h6>Compass Loader</h6>
+      <div class="cap">The mark spins inside a radar sweep, three brand-colored orbits and four drifting compass-point diamonds — Trippy’s signature wait state.</div>
+    </div>
+  </div>
+</body></html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../assets/jelly-glass.css">
+<script src="../assets/trippy-icons.js"></script>
+<style>
+  body { margin:0; padding:26px 32px; background:var(--bg); }
+  h6 { margin:0 0 16px; font-family:var(--font-sans); }
+  .field { max-width:430px; display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+  label { font-size:12px; font-weight:600; letter-spacing:.03em; color:var(--text-2); }
+  label.foc { color:var(--brand); }
+  .wrap { position:relative; }
+  .ico { position:absolute; left:16px; top:50%; transform:translateY(-50%); color:var(--text-3); display:flex; }
+  .ico.foc { color:var(--brand); }
+  input { width:100%; box-sizing:border-box; height:46px; border:0; border-radius:14px;
+    background:oklch(97% 0.008 80 / 58%); backdrop-filter:var(--blur-sm); padding:0 18px 0 46px;
+    font-family:var(--font-sans); font-size:16px; color:var(--text); outline:none;
+    box-shadow:inset 0 0 0 1px oklch(13% 0.012 55 / 8%), inset 0 1px 0 oklch(100% 0 0 / 50%); }
+  .focused input { background:var(--glass-float); box-shadow:inset 0 0 0 1.5px var(--brand), 0 0 0 3px var(--brand-muted); }
+  .hint { font-size:12px; color:var(--text-3); padding-left:4px; }
+</style></head>
+<body>
+  <h6>Form Fields <span style="color:var(--text-3); font-weight:400;">— glass inputs, 16px text, 44px min target</span></h6>
+  <div class="field focused">
+    <label class="foc">Where to?</label>
+    <div class="wrap"><span class="ico foc" id="i1"></span><input value="Lisbon, Portugal"></div>
+    <span class="hint" style="color:var(--brand);">Focused · forest ring + soft glow</span>
+  </div>
+  <div class="field">
+    <label>Trip name</label>
+    <div class="wrap"><span class="ico" id="i2"></span><input placeholder="Lisbon, slowly"></div>
+  </div>
+  <script>
+    document.getElementById('i1').innerHTML = TrippyIcon('pin',{size:20});
+    document.getElementById('i2').innerHTML = TrippyIcon('edit',{size:20});
+  </script>
+</body></html>

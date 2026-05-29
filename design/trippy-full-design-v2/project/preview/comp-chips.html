@@ -1,0 +1,43 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="../assets/trippy-icons.js"></script>
+<style>
+  body { margin:0; padding:26px 32px; background:
+    radial-gradient(circle at 12% 20%, oklch(92% 0.048 75) 0%, transparent 38%),
+    radial-gradient(circle at 88% 90%, oklch(94% 0.032 155) 0%, transparent 42%),
+    var(--bg); }
+  h6 { margin:0 0 16px; font-family:var(--font-sans); }
+  .row { display:flex; gap:11px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+  .chip { position:relative; display:inline-flex; align-items:center; gap:5px; padding:5px 13px;
+    border-radius:9999px; font-size:11.5px; font-weight:600; font-family:var(--font-sans); overflow:hidden;
+    backdrop-filter:blur(14px) saturate(1.7); -webkit-backdrop-filter:blur(14px) saturate(1.7);
+    box-shadow:inset 0 1px 0 oklch(100% 0 0 / 55%), inset 0 0 0 1px var(--rim), 0 2px 8px oklch(13% 0.012 55 / 9%); }
+  /* diagonal specular sheen */
+  .chip::before { content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 46%); }
+  .chip > * { position:relative; z-index:1; }
+  .ic svg { width:13px; height:13px; }
+  .neutral { background:oklch(99% 0.004 80 / 55%); color:var(--text-2); --rim:oklch(13% 0.012 55 / 10%); }
+  .open    { background:oklch(94% 0.030 155 / 60%); color:var(--success); --rim:oklch(50% 0.090 155 / 30%); }
+  .gap     { background:oklch(95% 0.040 75 / 62%);  color:var(--warning); --rim:oklch(55% 0.110 68 / 30%); }
+  .accent  { background:oklch(94% 0.032 155 / 60%); color:var(--brand);   --rim:oklch(42% 0.092 155 / 30%); }
+  .warn    { background:oklch(95% 0.028 40 / 62%);  color:var(--terra);   --rim:oklch(62% 0.115 40 / 30%); }
+  .solid-terra { background:var(--terra); color:#fff; --rim:transparent; box-shadow:inset 0 1px 0 oklch(100% 0 0 / 30%), 0 4px 14px oklch(62% 0.115 40 / 32%); }
+  .solid-terra::before { background:linear-gradient(135deg, rgba(255,255,255,0.32) 0%, transparent 50%); }
+</style></head>
+<body>
+  <h6>Chips &amp; Status Badges <span style="color:var(--text-3); font-weight:400;">— jelly-glass pills</span></h6>
+  <div class="row">
+    <span class="chip neutral">Neutral</span>
+    <span class="chip open"><span class="ic" id="c1"></span>Confirmed</span>
+    <span class="chip gap"><span class="ic" id="c2"></span>2 gaps</span>
+    <span class="chip accent"><span class="ic" id="c4"></span>AI pick</span>
+    <span class="chip warn">Pending vote</span>
+    <span class="chip solid-terra"><span class="ic" id="c5"></span>Locked in</span>
+  </div>
+  <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-2); letter-spacing:.03em;">Translucent tinted glass · 14px backdrop-blur · diagonal specular sheen · inset rim + soft drop shadow</div>
+  <script>
+    c1.innerHTML=TrippyIcon('check'); c2.innerHTML=TrippyIcon('clock');
+    c4.innerHTML=TrippyIcon('sparkle'); c5.innerHTML=TrippyIcon('check',{color:'#fff'});
+  </script>
+</body></html>

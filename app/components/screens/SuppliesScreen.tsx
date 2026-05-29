@@ -61,111 +61,51 @@ export default function SuppliesScreen() {
 
       {/* ── Header ── */}
       <motion.div
-        initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
-        animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-        transition={{ duration: 0.42, ease: [0.25, 0, 0, 1] }}
+        initial={{ opacity: 0, y: -6 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.38, ease: [0.25, 0, 0, 1] }}
         className="shrink-0"
-        style={{ paddingTop: 'var(--page-pt)', paddingBottom: 16, paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}
+        style={{
+          paddingTop: 'calc(var(--page-pt) + 8px)',
+          paddingBottom: 16,
+          paddingLeft: 'var(--page-px)',
+          paddingRight: 'var(--page-px)',
+        }}
       >
-        {/* Eyebrow + title */}
+        {/* Eyebrow */}
         <p style={{
-          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
-          letterSpacing: '0.18em', color: 'var(--terra)',
-          textTransform: 'uppercase', marginBottom: 6,
+          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+          letterSpacing: '0.20em', textTransform: 'uppercase',
+          color: 'var(--terra)', margin: '0 0 6px',
         }}>
-          ADVENTURE PREP
+          DON&apos;T FORGET
         </p>
+        {/* Title */}
         <h1 style={{
           fontFamily: 'var(--font-serif)',
-          fontSize: 'clamp(1.8rem, 5vw, 2.8rem)',
-          fontWeight: 400,
-          fontStyle: 'italic',
+          fontSize: 'clamp(2rem, 6vw, 3rem)',
+          fontWeight: 400, fontStyle: 'italic',
           letterSpacing: '-0.02em',
-          color: 'var(--text)',
-          lineHeight: 1.05,
-          marginBottom: 16,
+          color: 'var(--text)', lineHeight: 1.05, margin: '0 0 4px',
         }}>
           {t('suppliesLabel')}
         </h1>
+        {/* Subtitle */}
+        <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 14px', fontWeight: 500 }}>
+          {packed} of {total} sorted · shared with the crew
+        </p>
 
-        {/* Circular donut progress card */}
-        <div style={{
-          background: 'rgba(255,255,255,0.88)',
-          backdropFilter: 'blur(40px)',
-          WebkitBackdropFilter: 'blur(40px)',
-          border: '1px solid rgba(255,255,255,0.95)',
-          borderRadius: 28,
-          padding: '24px 20px',
-          marginBottom: 16,
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          textAlign: 'center',
-          boxShadow: '0 4px 20px rgba(26,20,16,0.06)',
-        }}>
-          {/* Donut SVG */}
-          <div style={{ position: 'relative', width: 100, height: 100, marginBottom: 16 }}>
-            <svg width="100" height="100" viewBox="0 0 100 100">
-              {/* Track */}
-              <circle cx="50" cy="50" r="38" fill="none" stroke="var(--border)" strokeWidth="8" />
-              {/* Progress arc */}
-              <motion.circle
-                cx="50" cy="50" r="38"
-                fill="none"
-                stroke={progressColor}
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 38}`}
-                initial={{ strokeDashoffset: 2 * Math.PI * 38 }}
-                animate={{ strokeDashoffset: 2 * Math.PI * 38 * (1 - pct / 100) }}
-                transition={{ delay: 0.2, duration: 0.7, ease: 'easeOut' }}
-                style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%' }}
-              />
-            </svg>
-            {/* Center text */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <span style={{
-                fontSize: 20, fontWeight: 800, color: 'var(--text)',
-                fontFamily: 'var(--font-sans)', letterSpacing: '-0.03em',
-              }}>
-                {pct}%
-              </span>
-            </div>
-          </div>
-
-          {/* Status message */}
-          <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', marginBottom: 6, letterSpacing: '-0.02em' }}>
-            {pct === 100 ? '🎉 All packed!' : pct >= 80 ? 'Almost ready to go!' : pct >= 50 ? 'Making progress!' : 'Let\'s get packing!'}
-          </p>
-          <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5, marginBottom: 14, maxWidth: 240 }}>
-            You&apos;ve packed {packed} of {total} items.
-            {!allCriticalDone && supplies.some(s => s.critical) && ' The team still needs to confirm critical items.'}
-          </p>
-
-          {/* Confirmed / Pending pills */}
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              padding: '5px 14px', borderRadius: 9999,
-              background: 'rgba(40,160,90,0.10)', border: '1px solid rgba(40,160,90,0.25)',
-              fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-              letterSpacing: '0.08em', color: 'var(--success)',
-            }}>
-              <Icon name="check" size={10} /> {packed} Items Confirmed
-            </span>
-            {total - packed > 0 && (
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '5px 14px', borderRadius: 9999,
-                background: 'rgba(192,57,43,0.08)', border: '1px solid rgba(192,57,43,0.20)',
-                fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                letterSpacing: '0.08em', color: 'var(--danger)',
-              }}>
-                <Icon name="clock" size={10} /> {total - packed} Pending
-              </span>
-            )}
-          </div>
+        {/* Linear progress bar */}
+        <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              height: '100%', borderRadius: 3,
+              background: pct === 100 ? 'var(--success)' : 'linear-gradient(90deg, var(--brand), oklch(55% 0.12 155))',
+            }}
+          />
         </div>
 
         {/* Category filter pills */}
@@ -176,18 +116,17 @@ export default function SuppliesScreen() {
               whileTap={{ scale: 0.92 }}
               onClick={() => setFilter(c)}
               style={{
-                flexShrink: 0, padding: '7px 16px', borderRadius: 9999,
+                flexShrink: 0, padding: '6px 14px', borderRadius: 9999,
                 fontSize: 12, fontWeight: 700,
-                background: filter === c ? 'var(--brand)' : 'rgba(255,255,255,0.80)',
+                background: filter === c ? 'var(--terra)' : 'white',
                 color: filter === c ? 'white' : 'var(--text-2)',
-                border: filter === c ? 'none' : '1px solid rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-                boxShadow: filter === c ? '0 4px 14px rgba(59,110,82,0.28)' : '0 2px 6px rgba(26,20,16,0.04)',
+                border: filter === c ? 'none' : '1px solid rgba(26,20,16,0.10)',
+                boxShadow: filter === c ? '0 4px 12px rgba(196,113,74,0.28)' : '0 1px 3px rgba(26,20,16,0.04)',
                 cursor: 'pointer',
                 transition: 'all 0.18s ease',
               }}
             >
-              {c === 'All' ? 'All Items' : c}
+              {c === 'All' ? 'All' : c}
             </motion.button>
           ))}
         </div>

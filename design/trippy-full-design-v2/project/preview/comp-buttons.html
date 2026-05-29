@@ -1,0 +1,34 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../assets/jelly-glass.css">
+<style>
+  body { margin:0; padding:26px 32px; background:var(--bg); }
+  h6 { margin:0 0 16px; font-family:var(--font-sans); }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:14px; }
+  .btn { border:0; cursor:pointer; height:44px; padding:0 22px; border-radius:9999px;
+    font-family:var(--font-sans); font-weight:500; font-size:14px; letter-spacing:-0.01em;
+    display:inline-flex; align-items:center; gap:8px; transition:all .15s var(--ease-smooth); }
+  .primary { background:var(--brand); color:var(--text-inv); box-shadow:var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 18%); }
+  .accent  { background:var(--terra); color:var(--text-inv); box-shadow:var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 18%); }
+  .secondary { background:var(--glass-float); color:var(--text); box-shadow:var(--shadow-sm), inset 0 0 0 1px oklch(13% 0.012 55 / 8%); backdrop-filter:var(--blur-sm); }
+  .ghost { background:transparent; color:var(--text-2); }
+  .ghost:hover { background:oklch(13% 0.012 55 / 6%); color:var(--text); }
+  .danger { background:var(--danger-bg); color:var(--danger); box-shadow:inset 0 0 0 1px oklch(48% 0.130 25 / 18%); }
+  .sm { height:36px; padding:0 16px; font-size:13px; }
+  .lg { height:52px; padding:0 28px; font-size:15px; }
+</style></head>
+<body>
+  <h6>Buttons <span style="color:var(--text-3); font-weight:400;">— fully pill, spring tap (scale 0.96)</span></h6>
+  <div class="row">
+    <button class="btn primary">Plan a trip</button>
+    <button class="btn accent">Lock it in</button>
+    <button class="btn secondary">Invite crew</button>
+    <button class="btn ghost">Maybe later</button>
+    <button class="btn danger">Delete</button>
+  </div>
+  <div class="row">
+    <button class="btn primary sm">Small</button>
+    <button class="btn primary">Medium</button>
+    <button class="btn primary lg">Large</button>
+  </div>
+</body></html>

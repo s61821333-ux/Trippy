@@ -1,0 +1,120 @@
+/* ════════════════════════════════════════════════════════════════
+   Trippy — Jelly Liquid Glass utilities
+   Pair with colors_and_type.css. Mirrors app/globals.css glass system.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Grain texture — applied to body in the real app (class="grain") */
+.grain::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* ── Base glass surface ──────────────────────────────────────── */
+.glass {
+  background: var(--glass-base);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  border: 1px solid oklch(100% 0 0 / 10%);
+  border-top-color: oklch(100% 0 0 / 48%);
+  border-left-color: oklch(100% 0 0 / 28%);
+  border-bottom-color: oklch(13% 0.012 55 / 6%);
+  border-right-color: oklch(13% 0.012 55 / 4%);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md), inset 0 1px 0 oklch(100% 0 0 / 60%);
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--dur-slow) var(--ease-spring), box-shadow var(--dur-slow) ease;
+}
+/* Diagonal specular highlight inside every glass surface */
+.glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.40) 0%, transparent 50%, rgba(255,255,255,0.10) 100%);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* ── Elevated / floating glass ───────────────────────────────── */
+.glass-float, .glass-panel {
+  background: var(--glass-float);
+  backdrop-filter: blur(48px) saturate(1.9);
+  -webkit-backdrop-filter: blur(48px) saturate(1.9);
+  border: 1px solid oklch(100% 0 0 / 12%);
+  border-top-color: oklch(100% 0 0 / 56%);
+  border-left-color: oklch(100% 0 0 / 32%);
+  border-bottom-color: oklch(13% 0.012 55 / 8%);
+  border-right-color: oklch(13% 0.012 55 / 5%);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 72%);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-dark="true"] .glass,
+[data-dark="true"] .glass-float,
+[data-dark="true"] .glass-panel {
+  background: var(--glass-dark);
+  border-color: oklch(100% 0 0 / 8%);
+  border-top-color: oklch(100% 0 0 / 18%);
+  border-left-color: oklch(100% 0 0 / 12%);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 14%);
+}
+
+/* ── Liquid hover — spring scale + lift + deepen blur ────────── */
+.liquid-hover { transition: all var(--dur-slow) var(--ease-spring); }
+@media (hover: hover) and (pointer: fine) {
+  .liquid-hover:hover {
+    transform: scale(1.02) translateY(-4px);
+    backdrop-filter: var(--blur-xl);
+    -webkit-backdrop-filter: var(--blur-xl);
+    box-shadow: 0 40px 80px oklch(13% 0.012 55 / 15%);
+  }
+}
+
+/* ── Solid card (opaque, warm) ───────────────────────────────── */
+.card-solid {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-top-color: oklch(100% 0 0 / 60%);
+  border-left-color: oklch(100% 0 0 / 40%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 50%);
+}
+
+/* ── Pill badge (brand book) ─────────────────────────────────── */
+.bb-pill {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 8px 18px;
+  border: 1.5px solid currentColor;
+  border-radius: 9999px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500;
+}
+
+/* ── Focus (WCAG AA) ─────────────────────────────────────────── */
+:focus-visible { outline: 2px solid var(--terra); outline-offset: 2px; border-radius: var(--radius-sm); }
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── Signature animations ────────────────────────────────────── */
+@keyframes blurFadeUp { from { opacity:0; transform:translateY(14px); filter:blur(6px); } to { opacity:1; transform:none; filter:blur(0); } }
+@keyframes popIn { 0%{opacity:0;transform:scale(0.8) translateY(12px);} 60%{transform:scale(1.04) translateY(-2px);} 100%{opacity:1;transform:scale(1) translateY(0);} }
+@keyframes jellyBounce { 0%{transform:scale(1);} 28%{transform:scale(0.93,1.07);} 52%{transform:scale(1.05,0.95);} 72%{transform:scale(0.98,1.02);} 100%{transform:scale(1);} }
+@keyframes spin { from{transform:rotate(0);} to{transform:rotate(360deg);} }
+@keyframes float { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-6px);} }
+.an-blur-up { animation: blurFadeUp 0.45s var(--ease-snap) forwards; }
+.an-pop { animation: popIn 0.44s cubic-bezier(0.16,1,0.3,1) forwards; }
+.an-jelly { animation: jellyBounce 0.55s cubic-bezier(0.16,1,0.3,1) both; }
+.an-float { animation: float 3s ease-in-out infinite; }
+.stagger-1{animation-delay:.05s;} .stagger-2{animation-delay:.10s;} .stagger-3{animation-delay:.15s;} .stagger-4{animation-delay:.20s;}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

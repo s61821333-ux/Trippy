@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { DM_Sans, Instrument_Serif, JetBrains_Mono, Noto_Sans_Hebrew } from 'next/font/google';
+import { DM_Sans, Instrument_Serif, JetBrains_Mono, Noto_Sans_Hebrew, Heebo } from 'next/font/google';
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
 import MotionProvider from './components/MotionProvider';
@@ -35,6 +35,13 @@ const hebrewFont = Noto_Sans_Hebrew({
   weight: ['400', '500', '600', '700'],
 });
 
+const heebo = Heebo({
+  subsets: ['hebrew', 'latin'],
+  variable: '--font-heebo',
+  display: 'swap',
+  weight: ['400', '500', '600', '700', '800'],
+});
+
 export const metadata: Metadata = {
   title: 'Trippy - Friendly Trip Planner',
   description: 'AI-powered collaborative trip planner with hour-by-hour itinerary planning.',
@@ -65,7 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       dir={dir}
       suppressHydrationWarning
       style={{ height: '100%' }}
-      className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${hebrewFont.variable}`}
+      className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${hebrewFont.variable} ${heebo.variable}`}
     >
       <body className="grain" style={{ height: '100%' }}>
         <MotionProvider>

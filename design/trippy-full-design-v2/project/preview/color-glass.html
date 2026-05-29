@@ -1,0 +1,22 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../assets/jelly-glass.css">
+<style>
+  body { margin:0; padding:0; background:
+    radial-gradient(circle at 20% 30%, var(--sand) 0%, transparent 45%),
+    radial-gradient(circle at 80% 70%, var(--terra) 0%, transparent 50%),
+    radial-gradient(circle at 50% 100%, var(--forest) 0%, transparent 55%),
+    var(--bg-alt); }
+  .wrap { padding:26px 32px; display:flex; gap:16px; align-items:stretch; }
+  .panel { flex:1; padding:18px; display:flex; flex-direction:column; gap:6px; }
+  .lab { font-family:var(--font-sans); font-weight:600; font-size:14px; color:var(--text); }
+  .v { font-family:var(--font-mono); font-size:10px; color:var(--text-2); }
+</style></head>
+<body>
+  <div class="wrap">
+    <div class="glass panel"><span class="lab" style="position:relative;z-index:2;">.glass</span><span class="v" style="position:relative;z-index:2;">52% · blur 40</span></div>
+    <div class="glass-float panel"><span class="lab" style="position:relative;z-index:2;">.glass-float</span><span class="v" style="position:relative;z-index:2;">72% · blur 48</span></div>
+    <div class="panel card-solid"><span class="lab">.card-solid</span><span class="v">opaque warm</span></div>
+  </div>
+  <div style="padding:0 32px 22px; font-family:var(--font-mono); font-size:11px; color:var(--text-2); letter-spacing:.03em;">Translucent white over warm paper · directional 1px rim (bright top-left, shadow bottom-right) · inner specular highlight</div>
+</body></html>

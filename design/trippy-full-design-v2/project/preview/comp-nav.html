@@ -1,0 +1,58 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../assets/jelly-glass.css">
+<script src="../assets/trippy-icons.js"></script>
+<script src="../assets/trippy-stamps.js"></script>
+<style>
+  body { margin:0; padding:24px 32px; background:
+    radial-gradient(circle at 30% 0%, var(--brand-light) 0%, transparent 50%), var(--bg); }
+  h6 { margin:0 0 16px; font-family:var(--font-sans); }
+  .col { display:flex; flex-direction:column; gap:14px; align-items:flex-start; }
+  /* Switch-trip pill */
+  .switch { display:inline-flex; align-items:center; gap:10px; padding:7px 9px 7px 8px; border-radius:9999px; cursor:pointer; }
+  .switch .stamp { width:30px; height:30px; flex:none; }
+  .switch .meta { display:flex; flex-direction:column; line-height:1.1; }
+  .switch .k { font-family:var(--font-mono); font-size:8.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); }
+  .switch .nm { font-family:var(--font-serif); font-size:16px; color:var(--text); }
+  .switch .swap { width:28px; height:28px; border-radius:50%; background:var(--terra); display:flex; align-items:center; justify-content:center; margin-left:2px; }
+  /* Nav bar */
+  .nav { display:flex; gap:3px; padding:7px; border-radius:9999px; width:fit-content; }
+  .tab { display:flex; flex-direction:column; align-items:center; gap:3px; padding:9px 13px; border-radius:9999px;
+    color:var(--text-3); position:relative; z-index:2; cursor:pointer; }
+  .tab .lab { font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; }
+  .tab.active { background:var(--terra); color:#fff; box-shadow:var(--shadow-sm); }
+  .tab svg { display:block; }
+  .divider { width:1px; align-self:stretch; margin:6px 4px; background:var(--rule); }
+</style></head>
+<body>
+  <h6>Bottom Navigation <span style="color:var(--text-3); font-weight:400;">— switch trip · 5 destinations · settings</span></h6>
+  <div class="col">
+    <div class="switch glass-float">
+      <span class="stamp" id="st" style="position:relative;z-index:2;"></span>
+      <span class="meta" style="position:relative;z-index:2;"><span class="k">Active trip</span><span class="nm">Lisbon, slowly.</span></span>
+      <span class="swap" id="sw" style="position:relative;z-index:2;"></span>
+    </div>
+
+    <div class="nav glass-float">
+      <div class="tab active"><span id="t1"></span><span class="lab">Camp</span></div>
+      <div class="tab"><span id="t2"></span><span class="lab">Explore</span></div>
+      <div class="tab"><span id="t3"></span><span class="lab">Map</span></div>
+      <div class="tab"><span id="t4"></span><span class="lab">Pack</span></div>
+      <div class="tab"><span id="t5"></span><span class="lab">Crew</span></div>
+      <div class="divider"></div>
+      <div class="tab"><span id="t6"></span><span class="lab">Settings</span></div>
+    </div>
+  </div>
+  <script>
+    function wrapStamp(bg,sym){ return `<svg viewBox="0 0 80 80" style="width:100%;height:100%;display:block"><circle cx="40" cy="40" r="38" fill="${bg}"/><circle cx="40" cy="40" r="34" fill="none" stroke="#F4EFE8" stroke-width="1" opacity="0.4"/>${sym.trim()}</svg>`; }
+    const mus = window.TRIPPY_ATLAS.ATLAS.flatMap(c=>c.icons).find(i=>i.key==='museum');
+    document.getElementById('st').innerHTML = wrapStamp(mus.bg, mus.sym);
+    sw.innerHTML=TrippyIcon('swap',{size:16,color:'#fff'});
+    t1.innerHTML=TrippyIcon('grid',{size:18,color:'#fff'});
+    t2.innerHTML=TrippyIcon('compass',{size:18});
+    t3.innerHTML=TrippyIcon('map',{size:18});
+    t4.innerHTML=TrippyIcon('checklist',{size:18});
+    t5.innerHTML=TrippyIcon('users',{size:18});
+    t6.innerHTML=TrippyIcon('settings',{size:18});
+  </script>
+</body></html>

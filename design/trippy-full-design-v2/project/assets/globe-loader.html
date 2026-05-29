@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Compass Loader — Trippy</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --forest:    #3B6E52;
+    --forest-lt: #8BB39A;
+    --terra:     #C4714A;
+    --terra-lt:  #E0916B;
+    --gold:      #C8944A;
+    --gold-lt:   #E6B574;
+    --paper:     #F4EFE8;
+    --paper-hi:  #FBF7F0;
+    --ink:       #1A1410;
+  }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  .loader {
+    width: 200px;
+    height: 200px;
+    position: relative;
+  }
+  .loader-inner { width: 100%; height: 100%; position: relative; }
+  .loader svg, .loader .layer {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+
+  /* ── Spin layers ─────────────────────────────────────────── */
+  .spin-mark   { animation: spin-cw  6.0s linear infinite; transform-origin: 50% 50%; }
+  .spin-fast   { animation: spin-cw  2.4s linear infinite; transform-origin: 50% 50%; }
+  .spin-med    { animation: spin-ccw 3.6s linear infinite; transform-origin: 50% 50%; }
+  .spin-slow   { animation: spin-cw  5.4s linear infinite; transform-origin: 50% 50%; }
+  .spin-vslow  { animation: spin-ccw 9.0s linear infinite; transform-origin: 50% 50%; }
+
+  @keyframes spin-cw  { from { transform: rotate(0deg);   } to { transform: rotate(360deg); } }
+  @keyframes spin-ccw { from { transform: rotate(360deg); } to { transform: rotate(0deg);   } }
+
+  /* ── Compass mark ────────────────────────────────────────── */
+  .mark .ring { stroke: var(--ink); fill: none; }
+  .mark .n    { fill: var(--terra); }
+  .mark .s    { fill: var(--forest); }
+  .mark .e,
+  .mark .w    { fill: var(--gold); }
+  .mark .hub  { fill: var(--ink); }
+
+  /* ── Pulse halo behind the mark ──────────────────────────── */
+  .halo {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 50%,
+        rgba(196,113,74,0.22) 0%,
+        rgba(196,113,74,0.10) 28%,
+        rgba(244,239,232,0) 58%);
+    animation: halo-breath 2.8s ease-in-out infinite;
+  }
+  @keyframes halo-breath {
+    0%, 100% { transform: scale(0.86); opacity: 0.7; }
+    50%      { transform: scale(1.04); opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+
+
+  <div class="loader" role="status" aria-label="Loading">
+    <div class="loader-inner">
+
+      <!-- Soft terracotta halo glow -->
+      <div class="layer halo"></div>
+
+      <!-- Outermost: faint forest streak, very slow -->
+      <svg class="spin-vslow" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="96" fill="none" stroke="var(--forest)" stroke-width="1" stroke-dasharray="170 433" stroke-linecap="round" opacity="0.35"></circle>
+      </svg>
+
+      <!-- Outer: terracotta long arc, slow -->
+      <svg class="spin-slow" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="92" fill="none" stroke="var(--terra)" stroke-width="1.5" stroke-dasharray="120 84 18 357" stroke-linecap="round" opacity="0.75"></circle>
+      </svg>
+
+      <!-- Tiny terracotta dot following the outer orbit -->
+      <svg class="spin-slow" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="8" r="3.2" fill="var(--terra)"></circle>
+      </svg>
+
+      <!-- Mid: gold counter-rotating streaks -->
+      <svg class="spin-med" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="84" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-dasharray="58 38 22 410" stroke-linecap="round" opacity="0.9"></circle>
+      </svg>
+
+      <!-- Gold diamond bead on the mid orbit (opposite side) -->
+      <svg class="spin-med" viewBox="0 0 200 200" aria-hidden="true">
+        <g transform="translate(100 184) rotate(45)">
+          <rect x="-3.6" y="-3.6" width="7.2" height="7.2" fill="var(--gold)"></rect>
+        </g>
+      </svg>
+
+      <!-- Inner: forest crisp short arcs, fast -->
+      <svg class="spin-fast" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="100" cy="100" r="76" fill="none" stroke="var(--forest)" stroke-width="2" stroke-dasharray="44 60 18 356" stroke-linecap="round" opacity="0.92"></circle>
+      </svg>
+
+      <!-- Forest dot leading the inner orbit -->
+      <svg class="spin-fast" viewBox="0 0 200 200" aria-hidden="true">
+        <circle cx="176" cy="100" r="3.6" fill="var(--forest)"></circle>
+        <!-- Small companion sparkle -->
+        <circle cx="100" cy="24" r="2.2" fill="var(--terra-lt)" opacity="0.9"></circle>
+      </svg>
+
+      <!-- The Trippy compass mark, slowly rotating in full color -->
+      <svg class="mark spin-mark" viewBox="0 0 240 240" aria-hidden="true">
+        <circle class="ring" cx="120" cy="120" r="90" stroke-width="4"></circle>
+        <path class="n" d="M120 36 L138 120 L120 124 L102 120 Z"></path>
+        <path class="s" d="M120 204 L102 120 L120 116 L138 120 Z"></path>
+        <path class="e" d="M204 120 L120 102 L116 120 L120 138 Z"></path>
+        <path class="w" d="M36 120 L120 138 L124 120 L120 102 Z"></path>
+        <circle class="hub" cx="120" cy="120" r="6"></circle>
+      </svg>
+
+    </div>
+  </div>
+
+
+
+</body></html>

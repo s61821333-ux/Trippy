@@ -1,0 +1,26 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin:0; padding:24px 32px; background:var(--bg); }
+  h6 { margin:0 0 4px; font-family:var(--font-sans); }
+  .sub { font-family:var(--font-serif); font-style:italic; font-size:20px; color:var(--text-2); margin-bottom:18px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .bubble { border-radius:var(--radius-md); padding:14px 16px; border:1px solid var(--rule); background:var(--paper-hi); font-size:13px; line-height:1.5; color:var(--text); }
+  .who { font-family:var(--font-mono); font-size:9px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-3); margin-bottom:8px; }
+  .forest { background:var(--brand); color:var(--text-inv); border-color:transparent; }
+  .forest .who { color:var(--sand-300); }
+  .avoid { border-style:dashed; border-color:var(--terra); }
+  .avoid .who { color:var(--terra); }
+  .strike { text-decoration:line-through; opacity:.6; }
+  .rule { font-family:var(--font-mono); font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:var(--terra); margin-top:10px; }
+</style></head>
+<body>
+  <h6>Voice &amp; Tone</h6>
+  <div class="sub">Like a thoughtful friend who’s done this before.</div>
+  <div class="grid">
+    <div class="bubble"><div class="who">Welcome</div>Hey — ready to plan something? Add a few friends and tell us roughly where you’re heading. We’ll do the rest.</div>
+    <div class="bubble forest"><div class="who">Push</div>Mia voted for the Lisbon week. You’re up — 3 days, then we lock it in.</div>
+    <div class="bubble avoid"><div class="who">Avoid</div><span class="strike">OMG! Let’s gooo!! 🎉 Time to plan your epic adventure 🚀</span><div class="rule">No emoji · no hype · no exclamation stacking</div></div>
+  </div>
+  <div style="font-family:var(--font-mono); font-size:11px; color:var(--text-3); margin-top:14px; letter-spacing:.02em;">Warm, never breezy. Confident, never bossy. Plain words, short sentences. Second person to the group.</div>
+</body></html>

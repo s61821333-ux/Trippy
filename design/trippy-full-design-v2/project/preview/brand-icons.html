@@ -1,0 +1,35 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="../assets/trippy-icons.js"></script>
+<style>
+  body { margin:0; padding:24px 32px; background:var(--bg); }
+  h6 { margin:0 0 16px; font-family:var(--font-sans); }
+  .grid { display:grid; grid-template-columns:repeat(11,1fr); gap:16px 10px; }
+  .ic { display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .chip { width:42px; height:42px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,0.45), 0 2px 6px oklch(13% 0.012 55 / 8%); }
+  .nm { font-family:var(--font-mono); font-size:8px; color:var(--text-3); letter-spacing:.02em; }
+</style></head>
+<body>
+  <h6>Line Icons <span style="color:var(--text-3); font-weight:400;">— 24×24 · stroke 1.5 · tinted on brand-palette seats</span></h6>
+  <div class="grid" id="grid"></div>
+  <script>
+    // Brand palette: forest, terracotta, gold, sky, plum, moss — cycled for rhythm
+    const PAL = [
+      ['#3B6E52','oklch(94% 0.032 155)'],
+      ['#C4714A','oklch(95% 0.028 40)'],
+      ['#C8944A','oklch(92% 0.048 75)'],
+      ['#1E91AF','oklch(94% 0.03 220)'],
+      ['#A03CB4','oklch(94% 0.03 320)'],
+      ['#5A8047','oklch(94% 0.03 140)'],
+    ];
+    const names = Object.keys(window.TRIPPY_ICON_PATHS);
+    const g = document.getElementById('grid');
+    names.forEach((n,i) => {
+      const [fg,bg] = PAL[i % PAL.length];
+      const d = document.createElement('div'); d.className='ic';
+      d.innerHTML = `<span class="chip" style="background:${bg}">${TrippyIcon(n,{size:23,color:fg})}</span><span class="nm">${n}</span>`;
+      g.appendChild(d);
+    });
+  </script>
+</body></html>

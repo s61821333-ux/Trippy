@@ -1,0 +1,40 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<link rel="stylesheet" href="../assets/jelly-glass.css">
+<script src="../assets/trippy-icons.js"></script>
+<style>
+  body { margin:0; padding:26px 32px; background:
+    radial-gradient(circle at 85% 15%, var(--sand-light) 0%, transparent 40%), var(--bg); }
+  .card { width:340px; padding:0; }
+  .top { padding:16px 18px 12px; }
+  .meta { font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--success); }
+  .title { font-family:var(--font-serif); font-size:26px; line-height:1.05; margin:6px 0 0; position:relative; z-index:2; }
+  .crew { display:flex; margin-top:14px; }
+  .av { width:28px; height:28px; border-radius:50%; border:2px solid var(--paper-hi); margin-left:-8px; }
+  .av:first-child { margin-left:0; }
+  .foot { display:flex; align-items:center; justify-content:space-between; padding:12px 18px; border-top:1px solid var(--rule); position:relative; z-index:2; }
+  .days { font-size:13px; color:var(--text-2); display:flex; align-items:center; gap:6px; }
+  .go { width:34px; height:34px; border-radius:50%; background:var(--terra); color:#fff; display:flex; align-items:center; justify-content:center; }
+</style></head>
+<body>
+  <div class="card glass-float">
+    <div class="top">
+      <div class="meta" style="position:relative;z-index:2;">Confirmed · Oct 12 → 18</div>
+      <h3 class="title">Lisbon, slowly.</h3>
+      <div class="crew" style="position:relative;z-index:2;">
+        <div class="av" style="background:var(--terra);"></div>
+        <div class="av" style="background:var(--sand);"></div>
+        <div class="av" style="background:var(--brand);"></div>
+        <div class="av" style="background:var(--terra-300);"></div>
+      </div>
+    </div>
+    <div class="foot">
+      <span class="days" id="d"></span>
+      <span class="go" id="g"></span>
+    </div>
+  </div>
+  <script>
+    d.innerHTML = TrippyIcon('calendar',{size:16,color:'var(--text-3)'}) + '6 days · 4 friends';
+    g.innerHTML = TrippyIcon('chevR',{size:18,color:'#fff'});
+  </script>
+</body></html>

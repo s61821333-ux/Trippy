@@ -1,0 +1,22 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin:0; padding:26px 32px; background:var(--bg); }
+  .row { display:flex; gap:14px; align-items:flex-end; }
+  .box { background:var(--brand-light); border:1.5px solid var(--brand); display:flex; align-items:flex-start; justify-content:flex-end; }
+  .lab { font-family:var(--font-mono); font-size:10px; color:var(--brand); margin-top:8px; text-align:center; letter-spacing:.03em; }
+  h6 { margin:0 0 16px; font-family:var(--font-sans); }
+  .col { display:flex; flex-direction:column; align-items:center; }
+</style></head>
+<body>
+  <h6>Border Radius <span style="color:var(--text-3); font-weight:400;">— Jelly Glass: organic curves, 16px minimum</span></h6>
+  <div class="row">
+    <div class="col"><div class="box" style="width:64px;height:64px;border-radius:var(--radius-xs);"></div><span class="lab">xs · 10</span></div>
+    <div class="col"><div class="box" style="width:64px;height:64px;border-radius:var(--radius-sm);"></div><span class="lab">sm · 16</span></div>
+    <div class="col"><div class="box" style="width:64px;height:64px;border-radius:var(--radius-md);"></div><span class="lab">md · 20</span></div>
+    <div class="col"><div class="box" style="width:64px;height:64px;border-radius:var(--radius-lg);"></div><span class="lab">lg · 24</span></div>
+    <div class="col"><div class="box" style="width:64px;height:64px;border-radius:var(--radius-xl);"></div><span class="lab">xl · 32</span></div>
+    <div class="col"><div class="box" style="width:64px;height:64px;border-radius:var(--radius-2xl);"></div><span class="lab">2xl · 40</span></div>
+    <div class="col"><div class="box" style="width:64px;height:64px;border-radius:var(--radius-full);"></div><span class="lab">full</span></div>
+  </div>
+</body></html>

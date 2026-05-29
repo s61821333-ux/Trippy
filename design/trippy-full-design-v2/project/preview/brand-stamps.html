@@ -1,0 +1,24 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<script src="../assets/trippy-stamps.js"></script>
+<style>
+  body { margin:0; padding:24px 32px; background:var(--bg); }
+  h6 { margin:0 0 6px; font-family:var(--font-sans); }
+  .cap { font-family:var(--font-mono); font-size:11px; color:var(--text-3); letter-spacing:.03em; margin-bottom:16px; }
+  .wall { display:grid; grid-template-columns:repeat(12,1fr); gap:12px; }
+  .wall svg { width:100%; height:auto; display:block; filter:drop-shadow(0 2px 5px oklch(13% 0.012 55 / 12%)); }
+</style></head>
+<body>
+  <h6>Stamp Icons <span style="color:var(--text-3); font-weight:400;">— illustrated brand-colored seals</span></h6>
+  <div class="cap">200 stamps · 12 chapters · 80×80 · filled brand palette · echoes the compass paper ring</div>
+  <div class="wall" id="wall"></div>
+  <script>
+    const ATL = window.TRIPPY_ATLAS.ATLAS;
+    function wrap(bg,sym){ return `<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="38" fill="${bg}"/><circle cx="40" cy="40" r="34" fill="none" stroke="#F4EFE8" stroke-width="1" opacity="0.4"/>${sym.trim()}</svg>`; }
+    const all = ATL.flatMap(c=>c.icons);
+    const picks = ['compass','plane','train','sailboat','bike','hot_air_balloon','coffee','map','tent','sun','mountain','camera','passport','backpack','globe','cable_car','kayak','cactus','wine','croissant','umbrella','postcard','clock','heart']
+      .map(k=>all.find(i=>i.key===k)).filter(Boolean);
+    const wall = document.getElementById('wall');
+    picks.forEach(ic=>{ const d=document.createElement('div'); d.innerHTML=wrap(ic.bg,ic.sym); wall.appendChild(d); });
+  </script>
+</body></html>
