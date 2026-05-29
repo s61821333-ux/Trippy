@@ -294,7 +294,7 @@ function AuthStep() {
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             width: '100%', padding: '18px 28px', minHeight: 62,
-            background: 'linear-gradient(135deg, var(--brand) 0%, var(--primary-container) 100%)',
+            background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
             border: 'none',
             borderRadius: 9999,
             color: '#fff',
@@ -305,7 +305,7 @@ function AuthStep() {
             textTransform: 'uppercase',
             cursor: googleLoading ? 'wait' : 'pointer',
             opacity: googleLoading ? 0.75 : 1,
-            boxShadow: '0 10px 32px rgba(34,85,59,0.42), inset 0 1px 0 rgba(255,255,255,0.18)',
+            boxShadow: 'var(--lg-glow-terra), inset 0 1px 0 oklch(100% 0 0 / 30%)',
             WebkitTapHighlightColor: 'transparent',
             touchAction: 'manipulation',
             position: 'relative', zIndex: 1,
@@ -450,19 +450,20 @@ function TripStep() {
       WebkitOverflowScrolling: 'touch' as any,
     }}>
       {/* ── Top hero strip ── */}
-      <div style={{
-        position: 'relative',
-        background: 'linear-gradient(158deg, #2A5040 0%, #1E1810 50%, #5C2918 100%)',
-        paddingTop: 'calc(env(safe-area-inset-top, 16px) + 20px)',
-        paddingBottom: 36,
-        paddingLeft: 24, paddingRight: 24,
-        overflow: 'hidden',
-        borderRadius: '0 0 40px 40px',
-        boxShadow: '0 20px 56px rgba(26,20,16,0.20)',
-      }}>
-        {/* Ambient orbs */}
-        <div style={{ position: 'absolute', top: -80, right: -60, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,148,74,0.30) 0%, transparent 70%)', filter: 'blur(48px)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: -60, left: -40, width: 220, height: 220, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,110,82,0.25) 0%, transparent 70%)', filter: 'blur(56px)', pointerEvents: 'none' }} />
+      <div
+        className="hero-mesh"
+        style={{
+          position: 'relative',
+          paddingTop: 'calc(env(safe-area-inset-top, 16px) + 20px)',
+          paddingBottom: 36,
+          paddingLeft: 24, paddingRight: 24,
+          overflow: 'hidden',
+          borderRadius: '0 0 40px 40px',
+          boxShadow: '0 24px 64px oklch(13% 0.012 55 / 28%)',
+        }}
+      >
+        {/* Terra accent blob */}
+        <div style={{ position: 'absolute', top: -40, insetInlineEnd: -30, width: 220, height: 220, borderRadius: '50%', background: 'radial-gradient(circle, oklch(62% 0.17 40 / 45%), transparent 70%)', pointerEvents: 'none' }} />
 
         {/* Nav row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28, position: 'relative', zIndex: 1 }}>
@@ -489,13 +490,13 @@ function TripStep() {
 
         {/* Greeting */}
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.20em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.40)', marginBottom: 6 }}>
-            {t('hi')}, {authUser?.username} 👋
-          </p>
-          <h1 style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 'clamp(1.9rem, 7vw, 2.8rem)', fontWeight: 700, color: 'rgba(255,255,255,0.94)', letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 4 }}>
+          <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)', marginBottom: 6 }}>
+            {t('hi')}, {authUser?.username}
+          </span>
+          <h1 className="display-xl" style={{ fontSize: 'clamp(2.2rem, 8vw, 3.4rem)', color: '#fff', margin: '6px 0 10px' }}>
             Where to next?
           </h1>
-          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'rgba(255,255,255,0.50)', fontWeight: 400 }}>
+          <p style={{ fontFamily: 'var(--font-sans)', fontSize: 14, color: 'oklch(98% 0.005 80 / 72%)', fontWeight: 400, margin: 0 }}>
             Your adventures are waiting.
           </p>
         </div>
@@ -514,16 +515,12 @@ function TripStep() {
             onClick={() => setShowCreate(true)}
             whileHover={{ scale: 1.012, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.97, transition: { type: 'spring', stiffness: 500, damping: 22 } }}
-            className="specular-hover btn-morphic"
+            className="lg-btn lg-btn-forest specular-hover"
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               width: '100%', padding: '16px 22px', minHeight: 58,
-              background: 'linear-gradient(135deg, var(--brand) 0%, var(--primary-container) 100%)',
-              border: 'none', borderRadius: 9999,
-              color: '#fff', fontFamily: 'var(--font-mono)', fontSize: 12,
-              fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase',
-              cursor: 'pointer',
-              boxShadow: '0 10px 30px rgba(34,85,59,0.36), inset 0 1px 0 rgba(255,255,255,0.16)',
+              fontFamily: 'var(--font-mono)', fontSize: 12,
+              letterSpacing: '0.14em', textTransform: 'uppercase',
               WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
               overflow: 'hidden', position: 'relative',
             }}
@@ -559,7 +556,7 @@ function TripStep() {
               WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
             }}
           >
-            ✨ {t('tryDemo')}
+            <Icon name="sparkle" size={13} style={{ opacity: 0.8 }} /> {t('tryDemo')}
           </motion.button>
         </motion.div>
 
@@ -572,7 +569,7 @@ function TripStep() {
               transition={{ type: 'spring', stiffness: 320, damping: 28 }}
               style={{ marginBottom: 20 }}
             >
-              <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--terra)', marginBottom: 10 }}>
+              <p className="eyebrow-lg" style={{ color: 'var(--terra)', marginBottom: 10 }}>
                 {t('invitations')}
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -590,10 +587,9 @@ function TripStep() {
                     }}>
                       <div style={{
                         width: 44, height: 44, borderRadius: 16, flexShrink: 0,
-                        background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 22, border: `1.5px solid ${meta.stripe}22`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        {meta.emoji}
+                        <StampIcon iconKey={THEMES.find(th => th.id === inv.tripTheme)?.stampKey ?? 'compass'} size={32} />
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.02em' }}>{inv.tripName}</div>
@@ -623,7 +619,7 @@ function TripStep() {
             transition={{ delay: 0.20, duration: 0.45, ease: [0.25, 0, 0, 1] }}
             style={{ marginBottom: 24 }}
           >
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 10 }}>
+            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
               {t('myTrips')}
             </p>
 
@@ -668,13 +664,9 @@ function TripStep() {
                       {/* Theme thumbnail */}
                       <div style={{
                         width: 52, height: 52, borderRadius: 18, flexShrink: 0,
-                        background: meta.bg,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: 26,
-                        border: `1.5px solid ${meta.stripe}20`,
-                        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.60)`,
                       }}>
-                        {meta.emoji}
+                        <StampIcon iconKey={THEMES.find(th => th.id === trip.theme)?.stampKey ?? 'compass'} size={40} />
                       </div>
 
                       {/* Info */}

@@ -8,6 +8,7 @@ import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '../ui/Toast';
 import Icon from '../ui/Icon';
+import { StampIcon } from '../ui/StampIcon';
 
 // ─── Colour ring for participant avatars ────────────────────────────────────
 
@@ -47,13 +48,8 @@ function Avatar({ name, color, size = 40 }: { name: string; color?: string; size
 
 function SectionHeader({ label }: { label: string }) {
   return (
-    <div style={{
+    <div className="eyebrow-lg" style={{
       padding: 'var(--space-2) var(--page-px)',
-      fontFamily: 'var(--font-mono)',
-      fontSize: 11,
-      fontWeight: 600,
-      letterSpacing: '0.10em',
-      textTransform: 'uppercase',
       color: 'var(--text-3)',
     }}>
       {label}
@@ -229,85 +225,56 @@ export default function CrewScreen() {
         </div>
       </div>
 
-      {/* ── Floating compass circle ── */}
-      <div style={{
-        display: 'flex', justifyContent: 'center', paddingTop: 24, paddingBottom: 8,
-      }}>
+      {/* ── Hero header ── */}
+      <m.div
+        className="hero-mesh"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.45, ease: [0.25, 0, 0, 1] }}
+        style={{ padding: '32px var(--page-px) 36px', borderRadius: '0 0 32px 32px', textAlign: 'center', position: 'relative', overflow: 'hidden', marginBottom: 4 }}
+      >
         <m.div
+          className="a-float"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 260, damping: 22, delay: 0.1 }}
           style={{
-            width: 120, height: 120, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.92)',
-            backdropFilter: 'blur(40px)', WebkitBackdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255,255,255,0.95)',
-            boxShadow: '0 16px 48px rgba(26,20,16,0.12)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            position: 'relative', overflow: 'hidden',
+            width: 80, height: 80, borderRadius: '50%',
+            background: '#F4EFE8',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 18px 44px oklch(20% 0.03 60 / 36%)',
+            marginBottom: 14,
           }}
         >
-          {/* Compass line divider */}
-          <div style={{ position: 'absolute', top: 0, bottom: 0, left: '50%', width: 1, background: 'rgba(26,20,16,0.12)' }} />
-          <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: 'rgba(26,20,16,0.12)' }} />
-          {/* Center dot */}
-          <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--text)', zIndex: 1 }} />
-          {/* North arrow */}
-          <div style={{
-            position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
-            width: 0, height: 0,
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderBottom: '28px solid var(--terra)',
-          }} />
-          {/* South arrow */}
-          <div style={{
-            position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)',
-            width: 0, height: 0,
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderTop: '28px solid var(--brand)',
-          }} />
+          <Icon name="users" size={36} style={{ color: 'var(--lg-forest)' }} />
         </m.div>
-      </div>
+        <h1 className="display-xl" style={{ fontSize: 'clamp(2rem, 6vw, 3rem)', color: '#fff', margin: '0 0 8px' }}>
+          {t('crewTitle') as string || 'Gather the tribe'}
+        </h1>
+        <p style={{ fontSize: 14, color: 'oklch(98% 0.005 80 / 78%)', margin: 0 }}>
+          Add friends to sync itineraries and share memories in real time.
+        </p>
+      </m.div>
 
       {/* ── Main invite card ── */}
       <div style={{ padding: '0 var(--page-px) 16px' }}>
         <m.div
+          className="lg"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: 'spring', stiffness: 280, damping: 28, delay: 0.15 }}
-          style={{
-            background: 'rgba(255,255,255,0.90)',
-            backdropFilter: 'blur(40px)',
-            WebkitBackdropFilter: 'blur(40px)',
-            border: '1px solid rgba(255,255,255,0.95)',
-            borderRadius: 28,
-            padding: '24px 20px',
-            boxShadow: '0 8px 32px rgba(26,20,16,0.10)',
-          }}
+          style={{ padding: '24px 20px' }}
         >
           {/* Heading */}
-          <h2 style={{
-            fontSize: 22, fontWeight: 700,
-            color: 'var(--text)', letterSpacing: '-0.02em',
-            lineHeight: 1.2, marginBottom: 8,
-          }}>
-            Gather the tribe.
+          <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 22, fontWeight: 400, fontStyle: 'italic', color: 'var(--text)', lineHeight: 1.2, marginBottom: 8 }}>
+            {t('crewInviteHeading') as string || 'Add your crew'}
           </h2>
-          <p style={{
-            fontSize: 14, color: 'var(--text-2)',
-            lineHeight: 1.55, marginBottom: 20,
-          }}>
+          <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.55, marginBottom: 20 }}>
             Add friends by email to sync itineraries and share memories in real-time.
           </p>
 
           {/* Email input */}
-          <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-            letterSpacing: '0.18em', color: 'var(--text-3)',
-            textTransform: 'uppercase', marginBottom: 8,
-          }}>
+          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 8 }}>
             {t('inviteByEmail')}
           </p>
           <div style={{
@@ -340,11 +307,13 @@ export default function CrewScreen() {
             whileTap={{ scale: 0.97 }}
             style={{
               width: '100%', padding: '15px 20px', minHeight: 52,
-              background: sending || !emailValue.trim().includes('@') ? 'rgba(59,110,82,0.45)' : 'var(--brand)',
+              background: sending || !emailValue.trim().includes('@')
+                ? 'oklch(58% 0.175 36 / 45%)'
+                : 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
               color: '#fff', border: 'none', borderRadius: 9999,
               fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 700,
               letterSpacing: '-0.01em', cursor: 'pointer',
-              boxShadow: '0 6px 20px rgba(59,110,82,0.28)',
+              boxShadow: sending || !emailValue.trim().includes('@') ? 'none' : 'var(--lg-glow-terra)',
               marginBottom: 20,
             }}
           >
@@ -352,11 +321,7 @@ export default function CrewScreen() {
           </m.button>
 
           {/* Current crew */}
-          <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-            letterSpacing: '0.18em', color: 'var(--text-3)',
-            textTransform: 'uppercase', marginBottom: 12,
-          }}>
+          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 12 }}>
             CURRENT CREW ({participants.length})
           </p>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
@@ -395,11 +360,7 @@ export default function CrewScreen() {
           </div>
 
           {/* Magic link */}
-          <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-            letterSpacing: '0.18em', color: 'var(--text-3)',
-            textTransform: 'uppercase', marginBottom: 10,
-          }}>
+          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
             MAGIC LINK
           </p>
           <m.button
@@ -414,8 +375,8 @@ export default function CrewScreen() {
               fontWeight: 600, color: 'var(--text)',
             }}
           >
-            <span style={{ fontSize: 18 }}>🔗</span>
-            <span style={{ flex: 1, textAlign: 'left' }}>
+            <Icon name={linkCopying ? 'check' : 'share'} size={16} style={{ color: 'var(--text-2)', flexShrink: 0 }} />
+            <span style={{ flex: 1, textAlign: 'start' }}>
               {linkCopying ? '✓ Copied!' : 'Copy Trip Link'}
             </span>
           </m.button>
@@ -424,7 +385,7 @@ export default function CrewScreen() {
 
       {/* ── Footer note ── */}
       <div style={{ padding: '0 var(--page-px) 16px', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 16, flexShrink: 0 }}>ℹ️</span>
+        <Icon name="users" size={15} style={{ color: 'var(--text-3)', flexShrink: 0, marginTop: 2 }} />
         <p style={{ fontSize: 12, fontFamily: 'var(--font-serif)', fontStyle: 'italic', color: 'var(--text-2)', lineHeight: 1.6 }}>
           Invited crew members will have full access to view and add suggested stops to the &quot;{trip.name}&quot; itinerary.
         </p>
@@ -433,11 +394,7 @@ export default function CrewScreen() {
       {/* ── Pending invitations ── */}
       {pendingInvitations.length > 0 && (
         <div style={{ padding: '0 var(--page-px) 16px' }}>
-          <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700,
-            letterSpacing: '0.18em', color: 'var(--text-3)',
-            textTransform: 'uppercase', marginBottom: 10,
-          }}>
+          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
             PENDING ({pendingInvitations.length})
           </p>
       </div>

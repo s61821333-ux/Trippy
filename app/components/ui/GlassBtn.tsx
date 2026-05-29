@@ -28,10 +28,10 @@ function getVariantStyles(variant: Variant) {
   switch (variant) {
     case 'accent':
       return {
-        bg: 'var(--brand)',
+        bg: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
         color: 'white',
         border: 'none',
-        shadow: '0 6px 20px rgba(34,85,59,0.28), inset 0 1px 0 rgba(255,255,255,0.15)',
+        shadow: 'var(--lg-glow-terra), inset 0 1px 0 oklch(100% 0 0 / 30%)',
       };
     case 'coral':
       return {
@@ -88,7 +88,7 @@ export default function GlassBtn({
       onClick={onClick}
       disabled={disabled}
       whileTap={disabled ? {} : { scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
-      whileHover={disabled ? {} : { scale: 1.01 }}
+      whileHover={disabled ? {} : { scale: 1.02, y: -4 }}
       transition={{ type: 'spring', stiffness: 500, damping: 26 }}
       style={{
         height: sz.h,

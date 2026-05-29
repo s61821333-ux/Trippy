@@ -63,10 +63,12 @@ export default function Field({
       {label && (
         <label style={{
           display: 'block',
-          fontSize: 12,
+          fontFamily: 'var(--font-mono)',
+          fontSize: 10,
           fontWeight: 600,
-          letterSpacing: '0.03em',
-          color: focused ? 'var(--brand)' : 'var(--text-2)',
+          letterSpacing: '0.10em',
+          textTransform: 'uppercase' as const,
+          color: focused ? 'var(--brand)' : 'var(--text-3)',
           transition: 'color 0.2s ease',
         }}>
           {label}

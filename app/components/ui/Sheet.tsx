@@ -3,6 +3,7 @@
 import React, { ReactNode, useRef, useEffect, useState, useId } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { spring } from '@/lib/motion';
+import Icon from './Icon';
 
 interface SheetProps {
   children: ReactNode;
@@ -113,23 +114,20 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           onFocusCapture={handleFocusCapture}
           style={{
             width: '100%',
-            background: 'rgba(255,255,255,0.88)',
-            backdropFilter: 'blur(40px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+            background: 'var(--lg-panel-strong)',
+            backdropFilter: 'var(--lg-blur-strong)',
+            WebkitBackdropFilter: 'var(--lg-blur-strong)',
             color: 'var(--text)',
-            borderRadius: '40px 40px 0 0',
+            borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0',
+            border: '1px solid oklch(100% 0 0 / 22%)',
+            borderBottom: 'none',
             padding: 'var(--space-2) var(--space-5)',
             paddingBottom: kbH > 0
               ? 'max(20px, env(safe-area-inset-bottom, 20px))'
               : 'max(40px, env(safe-area-inset-bottom, 40px))',
             maxHeight: '92dvh',
             overflowY: 'auto',
-            boxShadow: `
-              inset 0 1.5px 0 rgba(255,255,255,0.65),
-              inset 1px 0 0 rgba(255,255,255,0.15),
-              inset -1px 0 0 rgba(255,255,255,0.15),
-              0 -12px 56px rgba(26,20,16,0.18)
-            `,
+            boxShadow: 'var(--lg-shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 70%)',
             touchAction: 'pan-y',
             overscrollBehavior: 'contain',
           }}
@@ -149,18 +147,16 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
               <button
                 onClick={onClose}
                 aria-label="Close"
+                className="lg-btn lg-btn-glass"
                 style={{
                   position: 'absolute', insetInlineEnd: 0,
-                  width: 44, height: 44, borderRadius: '50%',
-                  background: 'transparent', border: 'none',
-                  cursor: 'pointer', color: 'var(--text-2)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 16, fontWeight: 700,
+                  width: 36, height: 36,
+                  cursor: 'pointer',
                   WebkitTapHighlightColor: 'transparent',
                   touchAction: 'manipulation',
                 }}
               >
-                ✕
+                <Icon name="x" size={16} style={{ color: 'var(--lg-ink)' }} />
               </button>
             )}
           </div>
