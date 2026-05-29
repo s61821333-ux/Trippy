@@ -1,11 +1,11 @@
 import type { Metadata, Viewport } from 'next';
-import { Bricolage_Grotesque, Newsreader, JetBrains_Mono, Noto_Sans_Hebrew } from 'next/font/google';
+import { DM_Sans, Instrument_Serif, JetBrains_Mono, Noto_Sans_Hebrew } from 'next/font/google';
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
 import MotionProvider from './components/MotionProvider';
 import './globals.css';
 
-const bricolage = Bricolage_Grotesque({
+const dmSans = DM_Sans({
   subsets: ['latin'],
   variable: '--font-sans',
   display: 'swap',
@@ -13,13 +13,12 @@ const bricolage = Bricolage_Grotesque({
   weight: 'variable',
 });
 
-const newsreader = Newsreader({
+const instrumentSerif = Instrument_Serif({
   subsets: ['latin'],
   variable: '--font-serif',
   display: 'swap',
   style: ['normal', 'italic'],
-  axes: ['opsz'],
-  weight: 'variable',
+  weight: '400',
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -66,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       dir={dir}
       suppressHydrationWarning
       style={{ height: '100%' }}
-      className={`${bricolage.variable} ${newsreader.variable} ${jetbrainsMono.variable} ${hebrewFont.variable}`}
+      className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${hebrewFont.variable}`}
     >
       <body className="grain" style={{ height: '100%' }}>
         <MotionProvider>

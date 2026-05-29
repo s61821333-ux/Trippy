@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { blurUpVariants, staggerContainer } from '@/lib/motion';
 import Glass from '../ui/Glass';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
@@ -15,17 +16,8 @@ import { useI18n } from '@/lib/i18n';
 type Category = SupplyItem['category'];
 const CATS: Category[] = ['Water', 'Food', 'Gear', 'Medical', 'Documents', 'Other'];
 
-const listVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.04, delayChildren: 0.06 } },
-};
-const itemVariant = {
-  hidden: { opacity: 0, y: 10 },
-  visible: {
-    opacity: 1, y: 0,
-    transition: { type: 'spring' as const, stiffness: 380, damping: 32 }
-  },
-};
+const listVariants = staggerContainer;
+const itemVariant  = blurUpVariants;
 
 export default function SuppliesScreen() {
   const { supplies, toggleSupply, addSupplyItem, deleteSupplyItem, toggleSupplyCritical } = useAppStore();
@@ -69,9 +61,9 @@ export default function SuppliesScreen() {
 
       {/* ── Header ── */}
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 340, damping: 32, delay: 0.04 }}
+        initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+        animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+        transition={{ duration: 0.42, ease: [0.25, 0, 0, 1] }}
         className="shrink-0"
         style={{ paddingTop: 'var(--page-pt)', paddingBottom: 16, paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}
       >
@@ -84,9 +76,11 @@ export default function SuppliesScreen() {
           ADVENTURE PREP
         </p>
         <h1 style={{
-          fontSize: 'clamp(1.6rem, 5vw, 2.6rem)',
-          fontWeight: 800,
-          letterSpacing: '-0.03em',
+          fontFamily: 'var(--font-serif)',
+          fontSize: 'clamp(1.8rem, 5vw, 2.8rem)',
+          fontWeight: 400,
+          fontStyle: 'italic',
+          letterSpacing: '-0.02em',
           color: 'var(--text)',
           lineHeight: 1.05,
           marginBottom: 16,

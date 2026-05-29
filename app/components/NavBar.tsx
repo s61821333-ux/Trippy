@@ -51,17 +51,17 @@ export default function NavBar({ active, onChange, onSettings, isLoading }: NavB
         animate={{ y: 0,  opacity: 1, filter: 'blur(0px)' }}
         transition={{ duration: 0.45, ease: [0.25, 0, 0, 1], delay: 0.05 }}
         style={{
-          backdropFilter: scrolled ? 'blur(40px) saturate(1.8)' : 'blur(24px) saturate(1.5)',
-          WebkitBackdropFilter: scrolled ? 'blur(40px) saturate(1.8)' : 'blur(24px) saturate(1.5)',
+          backdropFilter: scrolled ? 'blur(48px) saturate(1.9)' : 'blur(28px) saturate(1.6)',
+          WebkitBackdropFilter: scrolled ? 'blur(48px) saturate(1.9)' : 'blur(28px) saturate(1.6)',
           background: scrolled
-            ? 'rgba(255, 255, 255, 0.78)'
-            : 'rgba(255, 255, 255, 0.55)',
+            ? 'oklch(99% 0.004 80 / 82%)'
+            : 'oklch(99% 0.004 80 / 58%)',
           boxShadow: scrolled
-            ? '0 12px 40px rgba(26,20,16,0.10), inset 0 -1px 0 rgba(255,255,255,0.60), inset 0 1px 0 rgba(255,255,255,0.80)'
-            : 'inset 0 -1px 0 rgba(255,255,255,0.40)',
-          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.50)' : 'none',
+            ? '0 12px 40px oklch(13% 0.012 55 / 10%), inset 0 1px 0 oklch(100% 0 0 / 80%), inset 0 -1px 0 oklch(100% 0 0 / 40%)'
+            : 'inset 0 1px 0 oklch(100% 0 0 / 50%)',
+          borderBottom: scrolled ? '1px solid oklch(100% 0 0 / 45%)' : 'none',
           height: 'var(--nav-h)',
-          transition: 'background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease',
+          transition: 'background 0.32s cubic-bezier(0.25,0,0,1), box-shadow 0.32s ease, backdrop-filter 0.32s ease',
         }}
       >
         <div style={{
@@ -137,10 +137,11 @@ export default function NavBar({ active, onChange, onSettings, isLoading }: NavB
               display: 'flex',
               alignItems: 'center',
               gap: 2,
-              background: 'rgba(26,20,16,0.04)',
+              background: 'oklch(13% 0.012 55 / 5%)',
               borderRadius: 9999,
               padding: '3px 4px',
-              border: '1px solid rgba(26,20,16,0.06)',
+              border: '1px solid oklch(13% 0.012 55 / 7%)',
+              boxShadow: 'inset 0 1px 0 oklch(100% 0 0 / 30%)',
             }}
           >
             {TABS.map(tab => {
@@ -190,7 +191,7 @@ export default function NavBar({ active, onChange, onSettings, isLoading }: NavB
                           inset: 0,
                           borderRadius: 9999,
                           background: 'var(--brand)',
-                          boxShadow: '0 8px 20px rgba(34,85,59,0.30), inset 0 1px 0 rgba(255,255,255,0.15)',
+                          boxShadow: '0 6px 18px oklch(42% 0.092 155 / 32%), inset 0 1px 0 oklch(100% 0 0 / 18%)',
                           zIndex: 0,
                         }}
                       />
@@ -254,20 +255,20 @@ export default function NavBar({ active, onChange, onSettings, isLoading }: NavB
           width: 'calc(100% - 36px)',
           maxWidth: 390,
           zIndex: 100,
-          background: 'rgba(255, 255, 255, 0.72)',
-          backdropFilter: 'blur(40px) saturate(1.9)',
-          WebkitBackdropFilter: 'blur(40px) saturate(1.9)',
+          background: 'oklch(99% 0.004 80 / 78%)',
+          backdropFilter: 'blur(48px) saturate(1.9)',
+          WebkitBackdropFilter: 'blur(48px) saturate(1.9)',
           borderRadius: 9999,
           padding: '5px 6px',
           display: 'flex',
           justifyContent: 'space-around',
           alignItems: 'center',
           boxShadow: [
-            'inset 0 1px 0 rgba(255,255,255,0.80)',
-            '0 24px 60px rgba(26,20,16,0.16)',
-            '0 4px 12px rgba(26,20,16,0.06)',
+            'inset 0 1px 0 oklch(100% 0 0 / 82%)',
+            '0 24px 60px oklch(13% 0.012 55 / 16%)',
+            '0 4px 12px oklch(13% 0.012 55 / 7%)',
           ].join(', '),
-          border: '1px solid rgba(255,255,255,0.72)',
+          border: '1px solid oklch(100% 0 0 / 70%)',
         }}
       >
         {TABS.map(tab => {
@@ -316,7 +317,7 @@ export default function NavBar({ active, onChange, onSettings, isLoading }: NavB
                       inset: 0,
                       borderRadius: 22,
                       background: 'var(--brand)',
-                      boxShadow: '0 8px 20px rgba(34,85,59,0.32), inset 0 1px 0 rgba(255,255,255,0.18)',
+                      boxShadow: '0 6px 20px oklch(42% 0.092 155 / 34%), inset 0 1px 0 oklch(100% 0 0 / 20%)',
                       zIndex: 0,
                     }}
                   />

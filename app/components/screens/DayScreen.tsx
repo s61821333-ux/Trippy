@@ -484,10 +484,10 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, x: 24, transition: { duration: 0.16 } }}
-      transition={{ type: 'spring', stiffness: 380, damping: 34 }}
+      initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
+      animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+      exit={{ opacity: 0, x: 24, filter: 'blur(4px)', transition: { duration: 0.16 } }}
+      transition={{ duration: 0.38, ease: [0.25, 0, 0, 1] }}
       style={{ display: 'flex', alignItems: 'flex-start', padding: '0 var(--page-px)' }}
     >
       {/* Timeline left column: dot + line */}
@@ -1324,11 +1324,13 @@ export default function DayScreen() {
 
         {/* Big heading: Day N: Region */}
         <h1 style={{
-          fontSize: 'clamp(1.6rem, 6vw, 2.4rem)',
-          fontWeight: 800,
+          fontFamily: 'var(--font-serif)',
+          fontSize: 'clamp(1.8rem, 6vw, 2.8rem)',
+          fontWeight: 400,
+          fontStyle: 'italic',
           color: 'var(--text)',
-          letterSpacing: '-0.03em',
-          lineHeight: 1.1,
+          letterSpacing: '-0.02em',
+          lineHeight: 1.05,
           marginBottom: 0,
         }}>
           {`${t('day')} ${activeDay}`}

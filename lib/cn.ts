@@ -1,6 +1,6 @@
-// Lightweight className merger — no clsx/tailwind-merge dependency needed
-// Filters falsy values, joins with space. Use for conditional class lists.
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
-export function cn(...classes: (string | undefined | null | false)[]): string {
-  return classes.filter(Boolean).join(' ');
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
 }

@@ -215,14 +215,15 @@ function AuthStep() {
           style={{ marginBottom: 14, position: 'relative', zIndex: 1 }}
         >
           <h1 dir="ltr" style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: 'clamp(2.8rem, 11vw, 4rem)',
-            fontWeight: 700,
-            letterSpacing: '-0.04em',
+            fontFamily: 'var(--font-serif)',
+            fontSize: 'clamp(3.2rem, 12vw, 4.8rem)',
+            fontWeight: 400,
+            fontStyle: 'italic',
+            letterSpacing: '-0.03em',
             color: 'var(--forest-dk)',
-            lineHeight: 1,
+            lineHeight: 0.95,
           }}>
-            Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+            Trippy<span style={{ color: 'var(--terra)', fontStyle: 'normal' }}>.</span>
           </h1>
         </motion.div>
 

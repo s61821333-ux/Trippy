@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { blurUpVariants, staggerContainer } from '@/lib/motion';
 import Glass from '../ui/Glass';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
@@ -11,15 +12,8 @@ import { fmtDate } from '@/lib/utils';
 import { useI18n, Locale } from '@/lib/i18n';
 import { CURRENCIES } from '@/lib/currency';
 
-const sectionVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.06, delayChildren: 0.04 } },
-};
-const sectionItem = {
-  hidden:  { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0,
-    transition: { type: 'spring' as const, stiffness: 340, damping: 32 } },
-};
+const sectionVariants = staggerContainer;
+const sectionItem     = blurUpVariants;
 
 type ConfirmState = { message: string; onConfirm: () => void; variant?: 'danger' } | null;
 
@@ -158,19 +152,21 @@ export default function SettingsScreen() {
 
       {/* ── Header ── */}
       <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: 'spring', stiffness: 340, damping: 32, delay: 0.04 }}
+        initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
+        animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
+        transition={{ duration: 0.42, ease: [0.25, 0, 0, 1] }}
         className="shrink-0"
         style={{ paddingTop: 'var(--page-pt)', paddingBottom: 20, paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}
       >
         <p className="eyebrow" style={{ marginBottom: 4 }}>{t('setupSub')}</p>
         <h1 style={{
-          fontSize: 'clamp(1.5rem, 4vw, 2.4rem)',
-          fontWeight: 800,
-          letterSpacing: '-0.025em',
+          fontFamily: 'var(--font-serif)',
+          fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+          fontWeight: 400,
+          fontStyle: 'italic',
+          letterSpacing: '-0.02em',
           color: 'var(--text)',
-          lineHeight: 1.1,
+          lineHeight: 1.05,
         }}>
           {t('setupTitle')}
         </h1>

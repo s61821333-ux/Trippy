@@ -385,16 +385,16 @@ export default function DashboardScreen() {
         <div style={{
           position: 'relative',
           overflow: 'hidden',
-          background: 'linear-gradient(158deg, #2A5040 0%, #1E1810 48%, #5C2918 100%)',
+          background: 'linear-gradient(158deg, oklch(35% 0.080 155) 0%, oklch(10% 0.012 55) 48%, oklch(32% 0.090 38) 100%)',
           borderRadius: '0 0 44px 44px',
           paddingTop: 'calc(var(--page-pt) + env(safe-area-inset-top, 0px))',
           paddingBottom: 32,
-          boxShadow: '0 24px 64px rgba(26,20,16,0.22)',
+          boxShadow: '0 24px 64px oklch(13% 0.012 55 / 22%)',
         }}>
-          {/* Ambient blobs */}
-          <div style={{ position: 'absolute', top: -100, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(200,148,74,0.32) 0%, transparent 65%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: -80, left: -60, width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,110,82,0.28) 0%, transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', top: '35%', left: '45%', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(196,113,74,0.18) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
+          {/* Ambient blobs (oklch) */}
+          <div style={{ position: 'absolute', top: -100, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, oklch(68% 0.108 75 / 32%) 0%, transparent 65%)', filter: 'blur(50px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: -80, left: -60, width: 260, height: 260, borderRadius: '50%', background: 'radial-gradient(circle, oklch(50% 0.100 155 / 28%) 0%, transparent 65%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: '35%', left: '45%', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, oklch(62% 0.115 40 / 18%) 0%, transparent 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
 
           <div style={{ padding: '0 var(--page-px)', position: 'relative', zIndex: 1 }}>
             {/* Eyebrow + avatars + share */}
@@ -663,14 +663,15 @@ export default function DashboardScreen() {
         </div>
 
         {/* ═══ Body ═══ */}
-        <div style={{ padding: '16px var(--page-px) 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <motion.div
+          variants={stagger}
+          initial="hidden"
+          animate="visible"
+          style={{ padding: '16px var(--page-px) 0', display: 'flex', flexDirection: 'column', gap: 10 }}
+        >
 
           {/* Next Event */}
-          <motion.div
-            initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
-            animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-            transition={{ delay: 0.16, duration: 0.45, ease: [0.25, 0, 0, 1] }}
-          >
+          <motion.div variants={item}>
             <SectionLabel>{t('nextEvent')}</SectionLabel>
             {nextEventData ? (() => {
               const nextWeather = weather[nextEventData.dayNum - 1] ?? null;
@@ -806,11 +807,7 @@ export default function DashboardScreen() {
 
           {/* Weather Forecast Strip */}
           {(weatherLoading || weatherError || weather.length > 0) && (
-            <motion.div
-              initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-              transition={{ delay: 0.20, duration: 0.45, ease: [0.25, 0, 0, 1] }}
-            >
+            <motion.div variants={item}>
               <SectionLabel>{t('forecast') || 'Forecast'}</SectionLabel>
               {weatherLoading ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px 0' }}>
@@ -875,12 +872,7 @@ export default function DashboardScreen() {
 
           {/* Budget + Carbon */}
           {((tripBudget > 0 && !hideBudget) || (showCarbonBudget && carbonKg > 0)) && (
-            <motion.div
-              initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-              transition={{ delay: 0.16, duration: 0.42, ease: [0.25, 0, 0, 1] }}
-              style={{ display: 'flex', gap: 8 }}
-            >
+            <motion.div variants={item} style={{ display: 'flex', gap: 8 }}>
               {tripBudget > 0 && !hideBudget && (
                 <div className="jelly-glow" style={{
                   flex: 1,
@@ -929,11 +921,7 @@ export default function DashboardScreen() {
           )}
 
           {/* Expenses */}
-          <motion.div
-            initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
-            animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-            transition={{ delay: 0.18, duration: 0.42, ease: [0.25, 0, 0, 1] }}
-          >
+          <motion.div variants={item}>
             <motion.div
               onClick={() => setShowExpenses(v => !v)}
               className="jelly-glow liquid-hover"
@@ -1244,12 +1232,7 @@ export default function DashboardScreen() {
           })()}
 
           {/* Trip DNA + Map */}
-          <motion.div
-            initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
-            animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-            transition={{ delay: 0.26, duration: 0.45, ease: [0.25, 0, 0, 1] }}
-            style={{ display: 'flex', gap: 8 }}
-          >
+          <motion.div variants={item} style={{ display: 'flex', gap: 8 }}>
             <motion.button
               onClick={async () => {
                 setDnaLoading(true);
@@ -1306,11 +1289,7 @@ export default function DashboardScreen() {
 
           {/* Insights */}
           {insights.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
-              animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-              transition={{ delay: 0.25, duration: 0.45, ease: [0.25, 0, 0, 1] }}
-            >
+            <motion.div variants={item}>
               <SectionLabel>{t('tripInsights')}</SectionLabel>
               <div style={{
                 display: 'flex', gap: 8,
@@ -1365,7 +1344,7 @@ export default function DashboardScreen() {
           )}
 
           {/* Days */}
-          <div style={{ marginTop: 6 }}>
+          <motion.div variants={item} style={{ marginTop: 6 }}>
             <SectionLabel style={{ marginBottom: 14 }}>{t('days')}</SectionLabel>
 
             <motion.div
@@ -1529,9 +1508,9 @@ export default function DashboardScreen() {
                 );
               })}
             </motion.div>
-          </div>
+          </motion.div>
 
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* Share Sheet */}
