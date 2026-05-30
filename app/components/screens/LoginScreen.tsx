@@ -220,7 +220,7 @@ function AuthStep() {
             fontWeight: 400,
             fontStyle: 'italic',
             letterSpacing: '-0.03em',
-            color: 'var(--forest-dk)',
+            color: 'var(--lg-forest)',
             lineHeight: 0.95,
           }}>
             Trippy<span style={{ color: 'var(--terra)', fontStyle: 'normal' }}>.</span>
@@ -635,6 +635,7 @@ function TripStep() {
                   return (
                     <motion.button
                       key={trip.id}
+                      className="lg"
                       initial={{ opacity: 0, y: 14, filter: 'blur(5px)' }}
                       animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
                       transition={{ delay: 0.22 + i * 0.06, duration: 0.42, ease: [0.25, 0, 0, 1] }}
@@ -648,12 +649,7 @@ function TripStep() {
                       disabled={loadingTripId !== null}
                       style={{
                         display: 'flex', alignItems: 'center', gap: 14,
-                        padding: '14px 16px', borderRadius: 24,
-                        background: 'rgba(255,255,255,0.82)',
-                        backdropFilter: 'blur(40px) saturate(1.8)',
-                        WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-                        border: '1px solid rgba(255,255,255,0.92)',
-                        boxShadow: '0 4px 16px rgba(26,20,16,0.07)',
+                        padding: '14px 16px',
                         cursor: loadingTripId && !isLoading ? 'default' : 'pointer',
                         width: '100%', textAlign: locale === 'he' ? 'right' : 'left',
                         opacity: loadingTripId && !isLoading ? 0.48 : 1,

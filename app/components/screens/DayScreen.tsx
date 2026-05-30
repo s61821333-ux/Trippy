@@ -7,12 +7,12 @@ import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
 import { EventIcon } from '../ui/EventIcon';
 import { StampIcon } from '../ui/StampIcon';
+import { catStamp } from '@/lib/categoryStamp';
 import Field from '../ui/Field';
 import Sheet from '../ui/Sheet';
 import PlacesInput from '../ui/PlacesInput';
 import { useAppStore } from '@/lib/store';
-import { CAT_META, fmtDate, fmtDuration, toMins, toTime, getConflicts, getGoldenHourType, getDayBudget } from '@/lib/utils';
-import { CAT_GRADIENTS, CAT_GLOW } from '@/lib/categoryTokens';
+import { CAT_META, CAT_FALLBACK, fmtDate, fmtDuration, toMins, toTime, getConflicts, getGoldenHourType, getDayBudget } from '@/lib/utils';
 import { getCapitalCoords } from '@/lib/capitals';
 import { getCurrencySymbol } from '@/lib/currency';
 import { Category, HotelStay, TripEvent } from '@/lib/types';
@@ -40,36 +40,15 @@ function getMapsUrl(location: string, lat?: number, lng?: number): string {
 const DAY_ABBREVS_EN = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const DAY_ABBREVS_HE = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
-/* ── Category thumbnail ────────────────────────────────────────── */
+/* ── Category stamp thumbnail — uses illustrated seal from atlas ── */
 function EventThumbnail({ category }: { category: Category }) {
+  const { key } = catStamp(category);
   return (
-    <div style={{
-      width: 68, height: 68,
-      borderRadius: 22,
-      background: CAT_GRADIENTS[category],
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      flexShrink: 0,
-      position: 'relative',
-      overflow: 'hidden',
-      boxShadow: `${CAT_GLOW[category]}, inset 0 1px 0 rgba(255,255,255,0.30)`,
-    }}>
-      {/* Glossy top highlight */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, height: 34,
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.24) 0%, transparent 100%)',
-        pointerEvents: 'none',
-      }} />
-      <EventIcon
-        category={category as any}
-        size={29}
-        style={{
-          color: 'rgba(255,255,255,0.95)',
-          filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.28))',
-          position: 'relative',
-          zIndex: 1,
-        }}
-      />
-    </div>
+    <StampIcon
+      iconKey={key}
+      size={52}
+      style={{ flexShrink: 0, filter: 'drop-shadow(0 3px 8px oklch(20% 0.03 60 / 22%))' }}
+    />
   );
 }
 
@@ -88,9 +67,9 @@ function TravelBadges({ modes, fetching }: { modes: TravelModes | null; fetching
   }
   if (!modes) return null;
   const modeItems: { icon: string; m: TravelMode }[] = [];
-  if (modes.driving)  modeItems.push({ icon: '🚗', m: modes.driving });
-  if (modes.walking)  modeItems.push({ icon: '🚶', m: modes.walking });
-  if (modes.transit)  modeItems.push({ icon: '🚌', m: modes.transit });
+  if (modes.driving)  modeItems.push({ icon: 'car', m: modes.driving });
+  if (modes.walking)  modeItems.push({ icon: 'walk', m: modes.walking });
+  if (modes.transit)  modeItems.push({ icon: 'train', m: modes.transit });
   if (!modeItems.length) return null;
   return (
     <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -103,7 +82,7 @@ function TravelBadges({ modes, fetching }: { modes: TravelModes | null; fetching
           borderRadius: 100, padding: '4px 10px',
           display: 'inline-flex', alignItems: 'center', gap: 4,
         }}>
-          {icon} {fmtDuration(m.durationMins)}
+          <Icon name={icon as any} size={11} /> {fmtDuration(m.durationMins)}
           <span style={{ opacity: 0.5, fontWeight: 400 }}>· {m.distanceKm} km</span>
         </span>
       ))}
@@ -145,7 +124,7 @@ function HotelTravelRow({ hotelLat, hotelLng, eventLat, eventLng, eventName }: H
       display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
     }}>
       <span dir="ltr" style={{ fontSize: 11, color: 'var(--text-3)', fontWeight: 600, flexShrink: 0 }}>
-        🏨 → {eventName}
+        <Icon name="pin" size={11} style={{ display: 'inline-flex' }} /> {eventName}
       </span>
       <TravelBadges modes={modes} fetching={fetching} />
     </div>
@@ -275,7 +254,7 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, tripStartD
             </>
           ) : (
             <span style={{ fontSize: 10, color: 'var(--text-3)', opacity: 0.65, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-              📍 {locale === 'he' ? 'הוסף מיקום לחישוב זמן נסיעה' : 'Add locations for travel time'}
+              <Icon name="pin" size={10} style={{ display: 'inline-flex' }} /> {locale === 'he' ? 'הוסף מיקום לחישוב זמן נסיעה' : 'Add locations for travel time'}
             </span>
           )}
         </div>
@@ -366,12 +345,12 @@ function RouteConnector({ gapMins, gapStart: _gapStart, fromEv, toEv, tripStartD
             whileTap={{ scale: 0.90 }}
             onClick={onSuggest}
             style={{
-              background: 'var(--brand)',
+              background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
               border: 'none',
               borderRadius: 9999, padding: '6px 14px',
               fontSize: 11, fontWeight: 700, color: '#fff',
               cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5,
-              flexShrink: 0,
+              flexShrink: 0, boxShadow: 'var(--lg-glow-terra)',
             }}
           >
             <Icon name="sparkle" size={10} /> {t('suggestBtn')}
@@ -428,7 +407,7 @@ function TimezoneBadge({ timezone }: { timezone: string }) {
         display: 'flex', alignItems: 'center', gap: 6,
       }}
     >
-      <span style={{ fontSize: 14 }}>📍</span>
+      <Icon name="pin" size={14} color="var(--brand)" />
       <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--brand)' }}>
         {t('timezoneBadge.change')}: {t('timezoneBadge.nowIn')} {tzShort}
         {offsetLabel ? <span style={{ fontWeight: 400, marginLeft: 4, opacity: 0.75 }}>({offsetLabel})</span> : null}
@@ -512,7 +491,6 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
           color: 'var(--terra)', letterSpacing: '0.04em',
           marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6,
         }}>
-          {goldenHour === 'sunrise' ? '☀️ ' : goldenHour === 'sunset' ? '🌅 ' : ''}
           {event.time} {Number(event.time.split(':')[0]) < 12 ? 'AM' : 'PM'}
         </p>
 
@@ -531,7 +509,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
         style={{
           flex: 1, width: '100%',
           borderRadius: 'var(--lg-r-card)',
-          borderInlineStart: isConflict ? '3px solid var(--danger)' : `3px solid ${meta.bg || 'var(--lg-terra)'}`,
+          borderInlineStart: isConflict ? '3px solid var(--danger)' : `3px solid ${catStamp(event.category).color}`,
           background: rescheduling ? 'oklch(99% 0.004 80 / 72%)' : undefined,
           overflow: 'hidden',
           transition: 'border 0.18s',
@@ -545,7 +523,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
           style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', cursor: 'pointer' }}
           onClick={() => { setExpanded(e => !e); onFocus(event); }}
         >
-          <EventThumbnail category={event.category} />
+          <StampIcon iconKey={CAT_FALLBACK[event.category]} size={48} />
 
           <div style={{ flex: 1, minWidth: 0 }}>
             {(isConflict || goldenHour) && (
@@ -601,10 +579,10 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
 
             {event.cost != null && event.cost > 0 && (
               <span style={{
-                display: 'inline-flex', marginLeft: 6,
+                display: 'inline-flex', alignItems: 'center', gap: 3, marginLeft: 6,
                 fontSize: 11, color: 'var(--success)', fontWeight: 700,
               }}>
-                💰 {currSym}{event.cost}
+                {currSym}{event.cost}
               </span>
             )}
 
@@ -625,7 +603,7 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
                     borderRadius: 100, padding: '2px 9px',
                   }}
                 >
-                  📍 {event.location}
+                  <Icon name="pin" size={11} color="var(--lg-terra)" />{event.location}
                 </a>
               </div>
             )}
@@ -651,11 +629,13 @@ function EventCard({ event, onEdit, onDelete, onReschedule, onMove, onFocus, isC
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: 4,
-                background: meta.bg, color: meta.color,
+                background: `${catStamp(event.category).color}1f`,
+                color: catStamp(event.category).color,
                 borderRadius: 100, padding: '3px 9px',
-                fontSize: 10, fontWeight: 800, letterSpacing: '0.02em',
+                fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
+                fontFamily: 'var(--font-mono)',
               }}>
-                <EventIcon category={event.category as any} size={10} /> {meta.label}
+                {meta.label}
               </span>
               <motion.button whileTap={{ scale: 0.85 }} onClick={e => { e.stopPropagation(); voteEvent(dayNumber, event.id, nickname, 'up'); }}
                 style={{
@@ -1109,12 +1089,12 @@ export default function DayScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fName]);
 
-  const QUICK_PRESETS: { icon: string; label: string; name: string; cat: Category; dur: number }[] = [
-    { icon: '🚗', label: t('quickDriveLabel'), name: t('quickDriveName'), cat: 'transport', dur: 30 },
-    { icon: '🍽️', label: t('quickMealLabel'), name: t('quickMealName'), cat: 'food', dur: 60 },
-    { icon: '☕', label: t('quickCoffeeLabel'), name: t('quickCoffeeName'), cat: 'cafe', dur: 30 },
-    { icon: '⛺', label: t('quickRestLabel'), name: t('quickRestName'), cat: 'rest', dur: 20 },
-    { icon: '⛽', label: t('quickGasLabel'), name: t('quickGasName'), cat: 'transport', dur: 15 },
+  const QUICK_PRESETS: { cat: Category; label: string; name: string; dur: number }[] = [
+    { label: t('quickDriveLabel'), name: t('quickDriveName'), cat: 'transport', dur: 30 },
+    { label: t('quickMealLabel'), name: t('quickMealName'), cat: 'food', dur: 60 },
+    { label: t('quickCoffeeLabel'), name: t('quickCoffeeName'), cat: 'cafe', dur: 30 },
+    { label: t('quickRestLabel'), name: t('quickRestName'), cat: 'rest', dur: 20 },
+    { label: t('quickGasLabel'), name: t('quickGasName'), cat: 'transport', dur: 15 },
   ];
 
   if (!trip) return null;
@@ -1150,14 +1130,14 @@ export default function DayScreen() {
   };
 
   const weatherEmoji = (code: number) => {
-    if (code === 0) return '☀️';
-    if (code <= 3) return '⛅';
-    if (code <= 48) return '🌫️';
-    if (code <= 67) return '🌧️';
-    if (code <= 77) return '🌨️';
-    if (code <= 82) return '🌦️';
-    if (code <= 86) return '🌨️';
-    return '⛈️';
+    if (code === 0) return 'sun';
+    if (code <= 3) return 'sun';
+    if (code <= 48) return 'sun';
+    if (code <= 67) return 'sun';
+    if (code <= 77) return 'sun';
+    if (code <= 82) return 'sun';
+    if (code <= 86) return 'sun';
+    return 'sun';
   };
 
   // Build interleaved list: event → connector → event → …
@@ -1386,20 +1366,15 @@ export default function DayScreen() {
         </p>
 
         {/* Big heading: Day N · Region */}
-        <h1 style={{
-          fontFamily: 'var(--font-serif)',
+        <h1 className="display-xl" style={{
           fontSize: 'clamp(1.9rem, 6vw, 2.8rem)',
-          fontWeight: 400,
-          fontStyle: 'italic',
-          color: 'var(--text)',
-          letterSpacing: '-0.02em',
-          lineHeight: 1.05,
+          color: 'var(--lg-ink)',
           marginBottom: 0,
         }}>
           {`${t('day')} ${activeDay}`}
           {meta?.region && (
-            <span style={{ color: 'var(--text-2)' }}>
-              {'·'}<span style={{ fontWeight: 700, color: 'var(--text)', marginLeft: 4 }}>{meta.region}</span>
+            <span style={{ color: 'var(--text-2)', fontStyle: 'normal', fontSize: '0.55em', fontWeight: 600 }}>
+              {' · '}<span style={{ color: 'var(--text)' }}>{meta.region}</span>
             </span>
           )}
         </h1>
@@ -1517,7 +1492,7 @@ export default function DayScreen() {
           )}
           {weather && (() => {
             const loc = evs.find(e => e.location)?.location ?? meta?.region ?? trip?.name ?? '';
-            const icon = weather.icon ?? weatherEmoji(weather.code);
+            const icon = 'sun';
             return (
               <a
                 href={`https://www.google.com/search?q=${encodeURIComponent(loc + ' weather')}`}
@@ -1534,7 +1509,7 @@ export default function DayScreen() {
                 }}
                 title={weather.label}
               >
-                {icon} {weather.temp}°C
+                <Icon name="sun" size={11} color="var(--lg-sand)" /> {weather.temp}°C
               </a>
             );
           })()}
@@ -1609,7 +1584,7 @@ export default function DayScreen() {
                 boxShadow: hotel ? 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 60%)' : 'none',
               }}
             >
-              <span style={{ fontSize: 22, flexShrink: 0 }}>🏨</span>
+              <StampIcon iconKey="hotel" size={34} style={{ flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5, marginBottom: 1, display: 'block' }}>
                   {pos === 'bottom' && hotel ? (locale === 'he' ? 'צ\'ק-אאוט' : 'Checkout') : (locale === 'he' ? 'לינה' : 'Stay')}
@@ -1649,7 +1624,7 @@ export default function DayScreen() {
           <div style={{ display: 'flex', gap: 10, margin: '0 var(--page-px) 8px' }}>
             {weather && (
               <div className="lg" style={{ flex: 1, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 22 }}>{weather.icon ?? weatherEmoji(weather.code)}</span>
+                <Icon name="sun" size={22} color="var(--lg-sand)" />
                 <div>
                   <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5, marginBottom: 1 }}>{locale === 'he' ? 'מזג אוויר' : 'Weather'}</span>
                   <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{weather.temp}° · {weather.label ?? ''}</div>
@@ -1740,9 +1715,9 @@ export default function DayScreen() {
                 <motion.div
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                  style={{ width: 72, height: 72, borderRadius: 24, background: 'var(--terra-muted)', border: '1.5px solid rgba(196,113,74,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                 >
-                  <EventIcon category="attraction" size={36} style={{ color: 'var(--terra)' }} />
+                  <StampIcon iconKey="compass" size={72} style={{ filter: 'drop-shadow(0 4px 12px oklch(20% 0.03 60 / 20%))' }} />
                 </motion.div>
                 <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', textAlign: 'center', margin: 0 }}>
                   Nothing planned for this day yet
@@ -1753,13 +1728,10 @@ export default function DayScreen() {
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={() => openAdd()}
-                  style={{
-                    background: 'var(--terra)', color: 'white', border: 'none',
-                    borderRadius: 'var(--radius-lg)', padding: '12px 28px',
-                    fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                    boxShadow: '0 4px 14px rgba(196,113,74,0.28)',
-                  }}
+                  className="lg-btn lg-btn-terra"
+                  style={{ height: 52, padding: '0 28px', fontSize: 14 }}
                 >
+                  <Icon name="plus" size={16} color="#fff" />
                   Add first event
                 </motion.button>
               </motion.div>
@@ -1870,7 +1842,7 @@ export default function DayScreen() {
                     width: 'fit-content',
                   }}
                 >
-                  📍 {ev.location}
+                  <Icon name="pin" size={14} style={{ display: 'inline-flex', verticalAlign: 'middle' }} /> {ev.location}
                 </a>
               )}
 
@@ -1973,7 +1945,7 @@ export default function DayScreen() {
                         cursor: 'pointer', transition: 'all 0.15s',
                       }}
                     >
-                      <span>{p.icon}</span> {p.label}
+                      <StampIcon iconKey={CAT_FALLBACK[p.cat]} size={16} /> {p.label}
                     </motion.button>
                   ))}
                 </div>
@@ -2388,13 +2360,11 @@ export default function DayScreen() {
                     border: '1px solid var(--border)',
                     borderRadius: 12,
                   }}>
-                    <div style={{
-                      width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-                      background: CAT_GRADIENTS[ev.category],
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <EventIcon category={ev.category as any} size={16} style={{ color: 'rgba(255,255,255,0.95)' }} />
-                    </div>
+                    <StampIcon
+                      iconKey={catStamp(ev.category).key}
+                      size={34}
+                      style={{ flexShrink: 0 }}
+                    />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {ev.name}

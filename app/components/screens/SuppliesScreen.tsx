@@ -2,12 +2,10 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { blurUpVariants, staggerContainer } from '@/lib/motion';
-import Glass from '../ui/Glass';
-import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
-import { SupplyIcon } from '../ui/EventIcon';
-import Field from '../ui/Field';
+import Ring from '../ui/Ring';
+import { StampIcon } from '../ui/StampIcon';
+import { supplyStamp } from '@/lib/categoryStamp';
 import { useAppStore } from '@/lib/store';
 import { SupplyItem } from '@/lib/types';
 import { useToast } from '../ui/Toast';
@@ -15,9 +13,6 @@ import { useI18n } from '@/lib/i18n';
 
 type Category = SupplyItem['category'];
 const CATS: Category[] = ['Water', 'Food', 'Gear', 'Medical', 'Documents', 'Other'];
-
-const listVariants = staggerContainer;
-const itemVariant  = blurUpVariants;
 
 export default function SuppliesScreen() {
   const { supplies, toggleSupply, addSupplyItem, deleteSupplyItem, toggleSupplyCritical } = useAppStore();
@@ -29,12 +24,11 @@ export default function SuppliesScreen() {
   const [newCat, setNewCat] = useState<Category>('Gear');
   const [newAssignee, setNewAssignee] = useState('');
   const [newCritical, setNewCritical] = useState(false);
-  const [nudgeId, setNudgeId] = useState<string | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
 
   const filtered = (filter === 'All' ? supplies : supplies.filter(s => s.category === filter))
     .slice()
     .sort((a, b) => {
-      // Critical unchecked → first; checked → last
       if (a.critical && !a.checked && !(b.critical && !b.checked)) return -1;
       if (b.critical && !b.checked && !(a.critical && !a.checked)) return 1;
       return Number(a.checked) - Number(b.checked);
@@ -42,356 +36,235 @@ export default function SuppliesScreen() {
 
   const packed = supplies.filter(s => s.checked).length;
   const total = supplies.length;
-  // Progress turns success green only when all critical items are also checked
   const allCriticalDone = supplies.filter(s => s.critical).every(s => s.checked);
   const pct = total > 0 ? Math.round((packed / total) * 100) : 0;
-  const progressColor = pct === 100 && allCriticalDone ? 'var(--success)' : pct > 0 && !allCriticalDone ? 'var(--warning)' : 'var(--terra)';
+  const ringColor = pct === 100 && allCriticalDone ? 'var(--success)' : pct > 0 && !allCriticalDone ? 'var(--warning)' : 'var(--lg-terra)';
 
   const handleAdd = () => {
     if (!newName.trim()) { show(t('enterItemName')); return; }
     addSupplyItem(newName.trim(), newCat, newAssignee.trim() || undefined, newCritical);
-    setNewName('');
-    setNewAssignee('');
-    setNewCritical(false);
+    setNewName(''); setNewAssignee(''); setNewCritical(false);
     show(t('itemAdded'));
   };
 
   return (
-    <div className="flex flex-col h-full w-full max-w-[1200px] mx-auto overflow-hidden" style={{ position: 'relative' }}>
+    <div className="lg-scroll" style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', padding: '6px 20px 130px' }}>
+      {/* Header */}
+      <p className="eyebrow-lg a-rise" style={{ color: 'var(--lg-terra)', marginBottom: 2 }}>
+        {t('adventurePrep') as string || 'Adventure prep'}
+      </p>
+      <h1 className="display-xl a-rise d1" style={{ fontSize: 38, color: 'var(--lg-ink)', margin: '0 0 16px' }}>
+        {t('suppliesLabel') as string || 'Packing'}
+      </h1>
 
-      {/* ── Header ── */}
-      <motion.div
-        initial={{ opacity: 0, y: -6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.38, ease: [0.25, 0, 0, 1] }}
-        className="shrink-0"
-        style={{
-          paddingTop: 'calc(var(--page-pt) + 8px)',
-          paddingBottom: 16,
-          paddingLeft: 'var(--page-px)',
-          paddingRight: 'var(--page-px)',
-        }}
-      >
-        {/* Eyebrow */}
-        <p style={{
-          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-          letterSpacing: '0.20em', textTransform: 'uppercase',
-          color: 'var(--terra)', margin: '0 0 6px',
-        }}>
-          DON&apos;T FORGET
-        </p>
-        {/* Title */}
-        <h1 style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: 'clamp(2rem, 6vw, 3rem)',
-          fontWeight: 400, fontStyle: 'italic',
-          letterSpacing: '-0.02em',
-          color: 'var(--text)', lineHeight: 1.05, margin: '0 0 4px',
-        }}>
-          {t('suppliesLabel')}
-        </h1>
-        {/* Subtitle */}
-        <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 14px', fontWeight: 500 }}>
-          {packed} of {total} sorted · shared with the crew
-        </p>
-
-        {/* Linear progress bar */}
-        <div style={{ height: 6, background: 'var(--border)', borderRadius: 3, overflow: 'hidden', marginBottom: 16 }}>
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${pct}%` }}
-            transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            style={{
-              height: '100%', borderRadius: 3,
-              background: pct === 100 ? 'var(--success)' : 'linear-gradient(90deg, var(--brand), oklch(55% 0.12 155))',
-            }}
-          />
-        </div>
-
-        {/* Category filter pills */}
-        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4, scrollbarWidth: 'none' }}>
-          {(['All', ...CATS] as const).map(c => (
-            <motion.button
-              key={c}
-              whileTap={{ scale: 0.92 }}
-              onClick={() => setFilter(c)}
-              style={{
-                flexShrink: 0, padding: '6px 14px', borderRadius: 9999,
-                fontSize: 12, fontWeight: 700,
-                background: filter === c ? 'var(--terra)' : 'white',
-                color: filter === c ? 'white' : 'var(--text-2)',
-                border: filter === c ? 'none' : '1px solid rgba(26,20,16,0.10)',
-                boxShadow: filter === c ? '0 4px 12px rgba(196,113,74,0.28)' : '0 1px 3px rgba(26,20,16,0.04)',
-                cursor: 'pointer',
-                transition: 'all 0.18s ease',
-              }}
-            >
-              {c === 'All' ? 'All' : c}
-            </motion.button>
-          ))}
-        </div>
-      </motion.div>
-
-      {/* ── List ── */}
-      <div className="flex-1 overflow-y-auto pb-8 w-full" style={{ paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}>
-        <div className="w-full flex flex-col">
-          {/* Group by category when showing All; flat list otherwise */}
-          {filtered.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{ padding: '40px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}
-            >
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                style={{ width: 72, height: 72, borderRadius: 24, background: 'var(--terra-muted)', border: '1.5px solid rgba(196,113,74,0.22)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-              >
-                <SupplyIcon category="Gear" size={36} style={{ color: 'var(--terra)' }} />
-              </motion.div>
-              <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', margin: 0 }}>Your bag is empty</p>
-              <p style={{ fontSize: 13, color: 'var(--text-3)', margin: 0, lineHeight: 1.5 }}>
-                {filter === 'All' ? 'Add your first item below' : `No ${filter.toLowerCase()} items yet`}
-              </p>
-            </motion.div>
-          ) : (
-            // Group items by category
-            (filter === 'All' ? CATS : [filter as Category]).map(cat => {
-              const catItems = filtered.filter(i => i.category === cat);
-              if (catItems.length === 0) return null;
-              const catLabels: Record<Category, string> = {
-                Water: 'Water & Hydration', Food: 'Food & Provisions',
-                Gear: 'Essential Gear', Medical: 'Medical & Safety',
-                Documents: 'Documents & IDs', Other: 'Other Items',
-              };
-              return (
-                <div key={cat} style={{ marginBottom: 20 }}>
-                  {/* Category section header */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <SupplyIcon category={cat} size={16} style={{ color: 'var(--text-2)' }} />
-                    <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.01em' }}>
-                      {catLabels[cat] || cat}
-                    </span>
-                  </div>
-
-                  {/* Items */}
-                  <motion.div variants={listVariants} initial="hidden" animate="visible" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <AnimatePresence>
-                      {catItems.map(item => (
-                        <motion.div
-                          key={item.id}
-                          variants={itemVariant}
-                          exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.18 } }}
-                          layout
-                        >
-                          <motion.div
-                            animate={nudgeId === item.id ? { x: [0, 4, 0] } : { x: 0 }}
-                            transition={{ type: 'spring', stiffness: 500, damping: 28 }}
-                            onAnimationComplete={() => { if (nudgeId === item.id) setNudgeId(null); }}
-                            style={{
-                              background: 'rgba(255,255,255,0.88)',
-                              border: item.critical && !item.checked
-                                ? '1.5px solid rgba(192,57,43,0.40)'
-                                : '1px solid rgba(255,255,255,0.95)',
-                              borderRadius: 18,
-                              padding: '14px 14px',
-                              opacity: item.checked ? 0.60 : 1,
-                              transition: 'opacity 0.25s, border 0.2s',
-                              display: 'flex', alignItems: 'center', gap: 12,
-                              boxShadow: '0 2px 8px rgba(26,20,16,0.05)',
-                            }}
-                          >
-                            {/* Circle checkbox — demo style */}
-                            <motion.button
-                              whileTap={{ scale: 0.85 }}
-                              onClick={() => { toggleSupply(item.id); setNudgeId(item.id); }}
-                              style={{
-                                width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-                                border: item.checked
-                                  ? 'none'
-                                  : item.critical ? '1.5px solid var(--danger)' : '1.5px solid var(--border-strong)',
-                                background: item.checked ? 'var(--brand)' : 'transparent',
-                                cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                transition: 'background 0.2s, border 0.2s',
-                              }}
-                            >
-                              <AnimatePresence>
-                                {item.checked && (
-                                  <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} transition={{ type: 'spring' as const, stiffness: 500, damping: 22 }}>
-                                    <Icon name="check" size={12} style={{ color: 'white' }} />
-                                  </motion.span>
-                                )}
-                              </AnimatePresence>
-                            </motion.button>
-
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <p style={{
-                                fontSize: 14, fontWeight: 700, color: 'var(--text)',
-                                textDecoration: item.checked ? 'line-through' : 'none',
-                                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                letterSpacing: '-0.01em',
-                              }}>
-                                {item.name}
-                              </p>
-                              {item.assignee && (
-                                <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1, fontWeight: 500 }}>
-                                  {item.assignee}
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Assignee avatar if provided */}
-                            {item.assignee && (
-                              <div style={{
-                                width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                                background: 'var(--brand)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: 11, fontWeight: 700, color: 'white',
-                              }}>
-                                {item.assignee[0]?.toUpperCase()}
-                              </div>
-                            )}
-
-                            {/* Critical toggle */}
-                            <motion.button
-                              whileTap={{ scale: 0.85 }}
-                              title={item.critical ? 'Unmark critical' : 'Mark critical'}
-                              onClick={() => toggleSupplyCritical(item.id)}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, flexShrink: 0 }}
-                            >
-                              <Icon name="pin" size={14} style={{ color: item.critical ? 'var(--danger)' : 'var(--border-strong)' }} />
-                            </motion.button>
-
-                            <motion.button
-                              whileTap={{ scale: 0.85 }}
-                              onClick={() => { deleteSupplyItem(item.id); show(t('itemRemoved')); }}
-                              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, flexShrink: 0 }}
-                            >
-                              <Icon name="x" size={14} style={{ color: 'var(--text-3)' }} />
-                            </motion.button>
-                          </motion.div>
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </motion.div>
-                </div>
-              );
-            })
-          )}
-
-          {/* Add item */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.22, type: 'spring' as const, stiffness: 340, damping: 32 }}
-          >
-            <Glass level={2} style={{ borderRadius: 'var(--radius-lg)', padding: '16px' }}>
-              <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-2)', letterSpacing: '0.04em', marginBottom: 12, textTransform: 'uppercase' }}>
-                {t('addItem')}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <Field
-                  placeholder={t('itemNamePlaceholder')}
-                  value={newName}
-                  onChange={setNewName}
-                  onKeyDown={e => e.key === 'Enter' && handleAdd()}
-                />
-
-                {/* Assignee input */}
-                <input
-                  value={newAssignee}
-                  onChange={e => setNewAssignee(e.target.value)}
-                  placeholder={t('assigneePlaceholder')}
-                  style={{
-                    width: '100%', padding: '10px 12px', borderRadius: 'var(--radius-md)',
-                    fontSize: 13, fontWeight: 500,
-                    background: 'var(--bg)', color: 'var(--text)',
-                    border: '1px solid var(--border)', outline: 'none',
-                    boxSizing: 'border-box' as const,
-                  }}
-                />
-
-                {/* Category buttons */}
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  {CATS.map(c => (
-                    <motion.button
-                      key={c}
-                      whileTap={{ scale: 0.90 }}
-                      onClick={() => setNewCat(c)}
-                      style={{
-                        padding: '5px 12px', borderRadius: 'var(--radius-sm)', fontSize: 11, fontWeight: 600,
-                        background: newCat === c ? 'var(--terra)' : 'var(--bg)',
-                        color: newCat === c ? 'white' : 'var(--text-2)',
-                        border: newCat === c ? 'none' : '1px solid var(--border)',
-                        boxShadow: newCat === c ? 'var(--shadow-sm)' : 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      <SupplyIcon category={c} size={13} /> {c}
-                    </motion.button>
-                  ))}
-                </div>
-
-                {/* Critical toggle */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <motion.button
-                    whileTap={{ scale: 0.92 }}
-                    onClick={() => setNewCritical(v => !v)}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: 7,
-                      padding: '6px 12px', borderRadius: 'var(--radius-sm)',
-                      fontSize: 12, fontWeight: 600,
-                      background: newCritical ? 'var(--danger-bg)' : 'var(--bg)',
-                      color: newCritical ? 'var(--danger)' : 'var(--text-2)',
-                      border: newCritical ? '1.5px solid var(--danger)' : '1px solid var(--border)',
-                      cursor: 'pointer', transition: 'all 0.15s',
-                    }}
-                  >
-                    <Icon name="pin" size={13} /> {newCritical ? t('unmarkCritical') : t('markCritical')}
-                  </motion.button>
-                  {newCritical && (
-                    <span style={{ fontSize: 11, color: 'var(--text-3)' }}>
-                      {t('criticalBlocksBar')}
-                    </span>
-                  )}
-                </div>
-
-                <GlassBtn variant="accent" onClick={handleAdd} style={{ width: '100%' }}>
-                  <Icon name="plus" size={14} /> {t('addItem')}
-                </GlassBtn>
-              </div>
-            </Glass>
-          </motion.div>
+      {/* Progress card */}
+      <div className="lg a-rise d2" style={{ padding: 18, display: 'flex', alignItems: 'center', gap: 18, marginBottom: 16 }}>
+        <Ring pct={pct} size={76} stroke={6} color={ringColor}>{pct}%</Ring>
+        <div>
+          <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)', lineHeight: 1.1 }}>
+            {pct === 100 ? 'All packed!' : 'Almost there'}
+          </div>
+          <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 3 }}>
+            {packed}/{total} {t('packedShared') as string || 'packed · shared with crew'}
+          </div>
         </div>
       </div>
 
-      {/* Floating FAB: add item — matches demo's orange + button */}
-      <motion.button
-        whileTap={{ scale: 0.88 }}
-        whileHover={{ scale: 1.05 }}
-        onClick={() => {
-          const el = document.querySelector('input[placeholder]') as HTMLInputElement | null;
-          el?.focus();
-          el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }}
-        style={{
-          position: 'absolute',
-          bottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
-          right: 'var(--page-px)',
-          width: 52, height: 52,
-          borderRadius: '50%',
-          background: 'var(--terra)',
-          border: 'none',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          cursor: 'pointer',
-          boxShadow: '0 8px 24px rgba(196,113,74,0.45)',
-          zIndex: 20,
-          color: '#fff',
-        }}
+      {/* Category filter chips */}
+      <div className="lg-scroll" style={{ display: 'flex', gap: 7, overflowX: 'auto', marginBottom: 16 }}>
+        {(['All', ...CATS] as const).map(c => (
+          <button
+            key={c}
+            onClick={() => setFilter(c)}
+            style={{
+              flexShrink: 0, border: 0, cursor: 'pointer', borderRadius: 9999, padding: '8px 15px',
+              fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap',
+              background: filter === c ? 'var(--lg-forest)' : 'var(--lg-panel)',
+              backdropFilter: 'var(--lg-blur)',
+              color: filter === c ? '#fff' : 'var(--text-2)',
+              boxShadow: filter === c ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+              transition: 'all .3s',
+            }}
+          >
+            {c === 'All' ? 'All' : c}
+          </button>
+        ))}
+      </div>
+
+      {/* Items list */}
+      {filtered.length === 0 ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '40px 20px', textAlign: 'center' }}>
+          <Icon name="checklist" size={40} color="var(--text-3)" />
+          <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--lg-ink)', margin: 0 }}>Your bag is empty</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', margin: 0 }}>
+            {filter === 'All' ? 'Add your first item below' : `No ${String(filter).toLowerCase()} items yet`}
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+          <AnimatePresence>
+            {filtered.map((item, i) => (
+              <motion.button
+                key={item.id}
+                layout
+                className="lg"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0, transition: { duration: 0.16 } }}
+                transition={{ delay: i * 0.04 }}
+                onClick={() => toggleSupply(item.id)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 13, padding: 13,
+                  border: 0, cursor: 'pointer', textAlign: 'start',
+                  opacity: item.checked ? 0.6 : 1,
+                  transition: 'opacity .2s',
+                  borderInlineStart: item.critical && !item.checked ? '3px solid var(--danger)' : 'none',
+                }}
+              >
+                <StampIcon
+                  iconKey={supplyStamp(item.category)}
+                  size={38}
+                  style={{ flexShrink: 0, filter: 'drop-shadow(0 2px 6px oklch(20% 0.03 60 / 18%))' }}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)',
+                    textDecoration: item.checked ? 'line-through' : 'none',
+                    textDecorationColor: 'var(--text-3)',
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {item.name}
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginTop: 2 }}>
+                    {item.category}{item.assignee ? ` · ${item.assignee}` : ''}
+                  </div>
+                </div>
+                {/* Critical flag */}
+                <button
+                  onClick={e => { e.stopPropagation(); toggleSupplyCritical(item.id); }}
+                  aria-label={item.critical ? 'Unmark critical' : 'Mark critical'}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Icon name="pin" size={14} color={item.critical ? 'var(--danger)' : 'var(--text-3)'} />
+                </button>
+                {/* Delete */}
+                <button
+                  onClick={e => { e.stopPropagation(); deleteSupplyItem(item.id); show(t('itemRemoved')); }}
+                  aria-label="Remove item"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  <Icon name="x" size={14} color="var(--text-3)" />
+                </button>
+                {/* Check indicator */}
+                <span style={{
+                  width: 28, height: 28, borderRadius: '50%', flexShrink: 0, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                  background: item.checked ? 'var(--lg-forest)' : 'transparent',
+                  boxShadow: item.checked ? 'var(--lg-glow-forest)' : 'inset 0 0 0 2px oklch(50% 0.02 60 / 22%)',
+                }}>
+                  {item.checked && <Icon name="check" size={16} color="#fff" />}
+                </span>
+              </motion.button>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* Add item panel */}
+      <button
+        onClick={() => setShowAdd(v => !v)}
+        className="lg-btn lg-btn-glass"
+        style={{ width: '100%', height: 48, gap: 8, marginBottom: 12 }}
       >
-        <Icon name="plus" size={22} />
-      </motion.button>
+        <Icon name="plus" size={17} color="var(--lg-forest)" />
+        {t('addItem') as string || 'Add an item'}
+      </button>
+
+      <AnimatePresence>
+        {showAdd && (
+          <motion.div
+            className="lg"
+            initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            style={{ overflow: 'hidden', padding: 16 }}
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <input
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                placeholder={t('itemNamePlaceholder') as string || 'Item name'}
+                onKeyDown={e => e.key === 'Enter' && handleAdd()}
+                style={{
+                  width: '100%', boxSizing: 'border-box', height: 48, border: 0, borderRadius: 14,
+                  padding: '0 16px', fontFamily: 'var(--font-sans)', fontSize: 15,
+                  color: 'var(--lg-ink)', outline: 'none',
+                  background: 'var(--lg-panel-strong)',
+                  boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                }}
+              />
+              <input
+                value={newAssignee}
+                onChange={e => setNewAssignee(e.target.value)}
+                placeholder={t('assigneePlaceholder') as string || 'Assignee (optional)'}
+                style={{
+                  width: '100%', boxSizing: 'border-box', height: 44, border: 0, borderRadius: 14,
+                  padding: '0 16px', fontFamily: 'var(--font-sans)', fontSize: 14,
+                  color: 'var(--lg-ink)', outline: 'none',
+                  background: 'var(--lg-panel-strong)',
+                  boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                }}
+              />
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                {CATS.map(c => (
+                  <button
+                    key={c}
+                    onClick={() => setNewCat(c)}
+                    style={{
+                      border: 0, cursor: 'pointer', borderRadius: 9999, padding: '7px 13px',
+                      fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12.5,
+                      background: newCat === c ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                      color: newCat === c ? '#fff' : 'var(--text-2)',
+                      boxShadow: newCat === c ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                      transition: 'all .25s',
+                    }}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setNewCritical(v => !v)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 7, padding: '7px 13px', border: 0,
+                  borderRadius: 9999, cursor: 'pointer', alignSelf: 'flex-start',
+                  background: newCritical ? 'oklch(48% 0.130 25 / 12%)' : 'var(--lg-panel)',
+                  color: newCritical ? 'var(--danger)' : 'var(--text-2)',
+                  boxShadow: newCritical ? 'inset 0 0 0 1.5px var(--danger)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
+                }}
+              >
+                <Icon name="pin" size={14} color={newCritical ? 'var(--danger)' : 'var(--text-3)'} />
+                {newCritical ? (t('unmarkCritical') as string || 'Critical') : (t('markCritical') as string || 'Mark critical')}
+              </button>
+              <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                <button
+                  onClick={handleAdd}
+                  className="lg-btn lg-btn-forest"
+                  style={{ height: 48, flex: 1, fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'var(--font-mono)' }}
+                >
+                  {t('addItem') as string || 'Add item'}
+                </button>
+                <button
+                  onClick={() => setShowAdd(false)}
+                  className="lg-btn lg-btn-glass"
+                  style={{ height: 48, padding: '0 20px' }}
+                >
+                  {t('cancel') as string || 'Cancel'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

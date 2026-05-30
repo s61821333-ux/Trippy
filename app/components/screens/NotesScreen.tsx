@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import GlassBtn from '../ui/GlassBtn';
+import { AnimatePresence, motion } from 'framer-motion';
 import Icon from '../ui/Icon';
 import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
@@ -24,127 +23,91 @@ export default function NotesScreen() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="lg-scroll" style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', padding: '6px 20px 130px' }}>
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 12, filter: 'blur(6px)' }}
-        animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
-        transition={{ duration: 0.42, ease: [0.25, 0, 0, 1] }}
-        className="shrink-0"
-        style={{ paddingTop: 'var(--page-pt)', paddingBottom: 20, paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}
-      >
-        <p className="eyebrow" style={{ marginBottom: 4 }}>🔐 {t('navNotes')}</p>
-        <h1 style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
-          fontWeight: 400,
-          fontStyle: 'italic',
-          letterSpacing: '-0.02em',
-          color: 'var(--text)', lineHeight: 1.05,
-        }}>
-          {t('travelNotes')}
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 6 }}>
-          {t('travelNotesSub')}
-        </p>
-      </motion.div>
+      <p className="eyebrow-lg a-rise" style={{ color: 'var(--lg-terra)', marginBottom: 2 }}>
+        {trip.name}
+      </p>
+      <h1 className="display-xl a-rise d1" style={{ fontSize: 38, color: 'var(--lg-ink)', margin: '0 0 18px' }}>
+        {t('travelNotes') as string || 'Notes'}
+      </h1>
 
-      {/* Add note */}
-      <motion.div
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="shrink-0"
-        style={{ marginBottom: 16, paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}
-      >
-        <div style={{ display: 'flex', gap: 8 }}>
+      {/* Add note field */}
+      <div className="lg a-rise d2" style={{ padding: 16, marginBottom: 18 }}>
+        <div style={{ position: 'relative', marginBottom: 10 }}>
           <textarea
             value={newNote}
             onChange={e => setNewNote(e.target.value)}
-            placeholder={t('notePlaceholder')}
-            rows={2}
+            placeholder={t('notePlaceholder') as string || 'Write a note…'}
+            rows={3}
             onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleAdd(); }}
-            className="input-premium"
             style={{
-              flex: 1, padding: '10px 14px', borderRadius: 'var(--radius-md)',
-              fontSize: 13, background: 'var(--surface)',
-              border: '1px solid var(--border)', outline: 'none',
-              color: 'var(--text)', fontFamily: 'var(--font-sans)',
-              resize: 'none', lineHeight: 1.5,
+              width: '100%', boxSizing: 'border-box', padding: '12px 16px',
+              borderRadius: 14, border: 0, resize: 'none',
+              fontFamily: 'var(--font-sans)', fontSize: 14,
+              color: 'var(--lg-ink)', lineHeight: 1.6, outline: 'none',
+              background: 'var(--lg-panel-strong)',
+              boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+              transition: 'box-shadow .2s',
             }}
           />
-          <GlassBtn variant="accent" onClick={handleAdd} style={{ alignSelf: 'stretch', minWidth: 44, padding: '0 14px' }}>
-            <Icon name="plus" size={16} />
-          </GlassBtn>
         </div>
-      </motion.div>
+        <button
+          onClick={handleAdd}
+          className="lg-btn lg-btn-forest"
+          style={{ height: 48, width: '100%', fontSize: 14, textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: 'var(--font-mono)' }}
+        >
+          <Icon name="plus" size={16} color="#fff" />
+          {t('addNote') as string || 'Add note'}
+        </button>
+      </div>
 
       {/* Notes list */}
-      <div className="flex-1 overflow-y-auto pb-8" style={{ paddingLeft: 'var(--page-px)', paddingRight: 'var(--page-px)' }}>
-        {(!trip.tripNotes || trip.tripNotes.length === 0) ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-              padding: '48px 20px', gap: 10,
-            }}
-          >
-            <motion.span
-              animate={{ rotate: [0, -5, 5, -5, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2 }}
-              style={{ fontSize: 56, lineHeight: 1, display: 'block' }}
-            >
-              ✏️
-            </motion.span>
-            <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', textAlign: 'center', margin: 0 }}>
-              No notes yet
-            </p>
-            <p style={{ fontSize: 13, color: 'var(--text-3)', textAlign: 'center', lineHeight: 1.5, maxWidth: 260, margin: 0 }}>
-              Use notes for passwords, addresses, emergency contacts, or anything you want to keep handy
-            </p>
-          </motion.div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <AnimatePresence>
-              {trip.tripNotes.map((note, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, x: 40, transition: { duration: 0.16 } }}
-                  transition={{ delay: i * 0.04 }}
+      {(!trip.tripNotes || trip.tripNotes.length === 0) ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '48px 20px', gap: 12, textAlign: 'center' }}>
+          <Icon name="edit" size={40} color="var(--text-3)" />
+          <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--lg-ink)', margin: 0 }}>No notes yet</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', lineHeight: 1.5, maxWidth: 260, margin: 0 }}>
+            Keep passwords, addresses, and reminders here.
+          </p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <AnimatePresence>
+            {trip.tripNotes.map((note, i) => (
+              <motion.div
+                key={i}
+                className="lg"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, x: 40, transition: { duration: 0.16 } }}
+                transition={{ delay: i * 0.04 }}
+                style={{ padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}
+              >
+                <Icon name="edit" size={18} color="var(--lg-terra)" style={{ flexShrink: 0, marginTop: 2 }} />
+                <span style={{ flex: 1, fontSize: 14, color: 'var(--lg-ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  {note}
+                </span>
+                <motion.button
+                  whileTap={{ scale: 0.88 }}
+                  onClick={() => { deleteTripNote(i); show(t('itemRemoved')); }}
+                  aria-label="Delete note"
                   style={{
-                    display: 'flex', alignItems: 'flex-start', gap: 12,
-                    background: 'var(--surface)', borderRadius: 'var(--radius-lg)',
-                    border: '1px solid var(--border)',
-                    padding: '14px 16px',
-                    boxShadow: 'var(--shadow-xs)',
+                    background: 'var(--danger-bg)', border: '1px solid oklch(48% 0.130 25 / 18%)',
+                    borderRadius: 10, cursor: 'pointer', color: 'var(--danger)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 36, height: 36, flexShrink: 0,
+                    minWidth: 44, minHeight: 44,
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 >
-                  <span style={{ fontSize: 18, marginTop: 1, flexShrink: 0 }}>📝</span>
-                  <span style={{ flex: 1, fontSize: 14, color: 'var(--text)', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                    {note}
-                  </span>
-                  <motion.button
-                    whileTap={{ scale: 0.88 }}
-                    onClick={() => { deleteTripNote(i); show(t('itemRemoved')); }}
-                    style={{
-                      background: 'var(--danger-bg)', border: '1px solid rgba(192,57,43,0.15)',
-                      borderRadius: 8, cursor: 'pointer', color: 'var(--danger)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      width: 30, height: 30, flexShrink: 0,
-                    }}
-                  >
-                    <Icon name="trash" size={13} />
-                  </motion.button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
-      </div>
+                  <Icon name="trash" size={15} />
+                </motion.button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }

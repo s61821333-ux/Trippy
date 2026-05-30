@@ -17,6 +17,8 @@ import { m, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { spring } from '@/lib/motion';
 import { useAppStore } from '@/lib/store';
+import { StampIcon } from '../ui/StampIcon';
+import { catStamp } from '@/lib/categoryStamp';
 import { useI18n } from '@/lib/i18n';
 import { AiSuggestion, TripEvent } from '@/lib/types';
 import Icon from '../ui/Icon';
@@ -58,14 +60,6 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 function pinColor(cat: string) { return CATEGORY_COLORS[cat] ?? B.terra; }
 
-function categoryEmoji(cat: string): string {
-  const map: Record<string, string> = {
-    food: '🍽️', cafe: '☕', attraction: '🏛️', hotel: '🏨',
-    transport: '🚌', flight: '✈️', concert: '🎵', theme_park: '🎢',
-    sport: '⚽', beach: '🏖️', rest: '😴', other: '📍',
-  };
-  return map[cat] ?? '📍';
-}
 
 const CATEGORY_LABELS: Record<string, string> = {
   food: 'Food', cafe: 'Café', attraction: 'Sight', hotel: 'Stay',
@@ -232,17 +226,18 @@ function ModeToggle({ mode, onChange }: { mode: MapMode; onChange: (m: MapMode) 
           key={m}
           onClick={() => onChange(m)}
           style={{
-            padding: '5px 14px',
+            padding: '8px 15px',
             borderRadius: 'var(--radius-full)',
             border: 'none',
-            background: mode === m ? 'var(--brand)' : 'transparent',
-            color: mode === m ? '#fff' : 'var(--text-2)',
+            background: mode === m ? 'var(--lg-forest)' : 'transparent',
+            color: mode === m ? '#fff' : 'var(--text-3)',
+            boxShadow: mode === m ? 'var(--lg-glow-forest)' : 'none',
             fontFamily: 'var(--font-mono)',
-            fontSize: 11, fontWeight: 600,
+            fontSize: 10, fontWeight: 600,
             letterSpacing: '0.1em',
             textTransform: 'uppercase',
             cursor: 'pointer',
-            transition: 'all 0.2s',
+            transition: 'all 0.3s',
             WebkitTapHighlightColor: 'transparent',
           }}
         >
@@ -411,17 +406,12 @@ function EventPanel({ pin, onClose }: { pin: MapPin; onClose: () => void }) {
       }} />
 
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-        {/* Category icon */}
-        <div style={{
-          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-          background: col + '20',
-          border: `1.5px solid ${col}40`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 22,
-          backdropFilter: 'blur(10px)',
-        }}>
-          {categoryEmoji(e.category)}
-        </div>
+        {/* Category stamp seal */}
+        <StampIcon
+          iconKey={catStamp(e.category).key}
+          size={52}
+          style={{ flexShrink: 0, filter: 'drop-shadow(0 3px 8px oklch(20% 0.03 60 / 22%))' }}
+        />
 
         <div style={{ flex: 1, minWidth: 0 }}>
           {/* Category label */}
@@ -521,13 +511,11 @@ function SuggestionPanel({ s, onClose, onAdd }: {
       <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(26,20,16,0.12)', margin: '0 auto 16px' }} />
 
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 16 }}>
-        <div style={{
-          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-          background: col + '20', border: `1.5px solid ${col}40`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22,
-        }}>
-          {categoryEmoji(s.category)}
-        </div>
+        <StampIcon
+          iconKey={catStamp(s.category).key}
+          size={52}
+          style={{ flexShrink: 0, filter: 'drop-shadow(0 3px 8px oklch(20% 0.03 60 / 22%))' }}
+        />
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
@@ -625,15 +613,13 @@ function SuggestionPanel({ s, onClose, onAdd }: {
         onClick={() => onAdd(s)}
         whileTap={{ scale: 0.96 }}
         transition={spring.snap}
+        className="lg-btn lg-btn-terra"
         style={{
-          width: '100%', padding: '13px 20px',
-          background: 'var(--brand)', color: '#fff',
-          border: 'none', borderRadius: 'var(--radius-full)',
+          width: '100%', padding: '13px 20px', height: 52,
           fontFamily: 'var(--font-mono)', fontSize: 12,
           fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase',
           cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          boxShadow: '0 4px 20px rgba(34,85,59,0.35)',
           WebkitTapHighlightColor: 'transparent',
         }}
       >
@@ -878,15 +864,10 @@ export default function MapScreen() {
         display: 'flex', flexDirection: 'column', gap: 8,
       }}>
         {/* Search pill */}
-        <div style={{
+        <div className="lg lg-strong" style={{
           display: 'flex', alignItems: 'center', gap: 8,
-          background: 'rgba(255,255,255,0.65)',
-          backdropFilter: 'blur(40px) saturate(1.8)',
-          border: '1px solid rgba(255,255,255,0.55)',
           borderRadius: 'var(--radius-full)',
           padding: '10px 16px',
-          boxShadow: '0 8px 32px rgba(26,20,16,0.10)',
-          position: 'relative', overflow: 'hidden',
         }}>
           {/* Glass rim */}
           <div style={{

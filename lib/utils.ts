@@ -140,7 +140,7 @@ const KEYWORD_ICONS: [RegExp, string][] = [
   [/farm|ranch|vineyard/i,                                                'leaf'],
 ];
 
-const CAT_FALLBACK: Record<Category, string> = {
+export const CAT_FALLBACK: Record<Category, string> = {
   food: 'noodles', cafe: 'coffee', attraction: 'museum', hotel: 'hotel', rest: 'tent', transport: 'car', flight: 'plane',
   concert: 'music', theme_park: 'ferris_wheel', sport: 'stadium', beach: 'beach', other: 'globe',
 };
