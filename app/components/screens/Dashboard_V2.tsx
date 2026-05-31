@@ -26,12 +26,13 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
   onClose: () => void;
   onSave: (v: number) => void;
 }) {
+  const { t } = useI18n();
   const [val, setVal] = useState(current != null ? String(current) : '');
   return (
-    <Sheet title="Set budget limit" onClose={onClose}>
+    <Sheet title={t('setBudget')} onClose={onClose}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
         <Field
-          label={`Maximum budget (${currSym})`}
+          label={`${t('budgetLabel')} (${currSym})`}
           placeholder="0"
           value={val}
           onChange={setVal}
@@ -53,7 +54,7 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
               boxShadow: 'var(--lg-glow-forest)',
             }}
           >
-            Save
+            {t('saveBtn')}
           </button>
           <button
             onClick={onClose}
@@ -64,7 +65,7 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
               boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
             }}
           >
-            Cancel
+            {t('cancel')}
           </button>
         </div>
       </div>
@@ -91,7 +92,8 @@ function weatherIcon(label?: string): string {
 
 // ── AI analysis helper ───────────────────────────────────────────────────────
 
-function buildAiSummary(trip: any, supplies: any[], totalSpent: number): string {
+function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: string): string {
+  const isHe = locale === 'he';
   const totalEvents = Object.values(trip.events as Record<number, any[]>).reduce((s, e) => s + e.length, 0);
   const emptyDays = Array.from({ length: trip.days }, (_, i) => i + 1)
     .filter(d => !(trip.events[d]?.length));
@@ -101,29 +103,57 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number): string 
   const budgetPct = trip.budget ? Math.round((totalSpent / trip.budget) * 100) : null;
 
   const lines: string[] = [];
-  lines.push(`${trip.days} days · ${totalEvents} events planned.`);
 
-  if (emptyDays.length > 0 && emptyDays.length <= 3) {
-    const labels = emptyDays.map(d => {
-      if (!trip.startDate) return `Day ${d}`;
-      const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000);
-      return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
-    lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'has' : 'have'} no events yet — consider filling them in.`);
-  } else if (emptyDays.length > 3) {
-    lines.push(`${emptyDays.length} days still have no events — there's room to add more activities.`);
-  }
+  if (isHe) {
+    lines.push(`${trip.days} ימים · ${totalEvents} פעילויות מתוכננות.`);
 
-  if (budgetPct !== null) {
-    if (budgetPct > 90) lines.push('Budget is nearly full — review upcoming costs.');
-    else if (budgetPct > 70) lines.push(`${budgetPct}% of budget used — on track.`);
-    else lines.push(`Plenty of budget headroom remaining.`);
-  }
+    if (emptyDays.length > 0 && emptyDays.length <= 3) {
+      const labels = emptyDays.map(d => {
+        if (!trip.startDate) return `יום ${d}`;
+        const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000);
+        return dt.toLocaleDateString('he-IL', { month: 'short', day: 'numeric' });
+      });
+      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'עדיין ריק' : 'עדיין ריקים'} — כדאי להוסיף פעילויות.`);
+    } else if (emptyDays.length > 3) {
+      lines.push(`${emptyDays.length} ימים עדיין ריקים — יש מקום להרבה הרפתקאות!`);
+    }
 
-  if (packedPct < 50 && supplies.length > 0) {
-    lines.push(`Packing is ${packedPct}% done — make sure to check off essentials before departure.`);
-  } else if (packedPct === 100) {
-    lines.push('All items packed. Ready to go.');
+    if (budgetPct !== null) {
+      if (budgetPct > 90) lines.push('התקציב כמעט מלא — כדאי לבדוק עלויות קרובות.');
+      else if (budgetPct > 70) lines.push(`${budgetPct}% מהתקציב נוצל — במסלול הנכון.`);
+      else lines.push('הרבה מקום בתקציב — תיהנו!');
+    }
+
+    if (packedPct < 50 && supplies.length > 0) {
+      lines.push(`הציוד ${packedPct}% ארוז — אל תשכחו את העיקריים לפני היציאה.`);
+    } else if (packedPct === 100) {
+      lines.push('כל הציוד ארוז. מוכנים לדרך!');
+    }
+  } else {
+    lines.push(`${trip.days} days · ${totalEvents} activities planned.`);
+
+    if (emptyDays.length > 0 && emptyDays.length <= 3) {
+      const labels = emptyDays.map(d => {
+        if (!trip.startDate) return `Day ${d}`;
+        const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000);
+        return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      });
+      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'has' : 'have'} no activities yet — consider filling them in.`);
+    } else if (emptyDays.length > 3) {
+      lines.push(`${emptyDays.length} days still empty — plenty of room for more adventures!`);
+    }
+
+    if (budgetPct !== null) {
+      if (budgetPct > 90) lines.push('Budget nearly full — review upcoming costs.');
+      else if (budgetPct > 70) lines.push(`${budgetPct}% of budget used — on track.`);
+      else lines.push('Plenty of budget headroom remaining.');
+    }
+
+    if (packedPct < 50 && supplies.length > 0) {
+      lines.push(`Packing is ${packedPct}% done — check off essentials before departure.`);
+    } else if (packedPct === 100) {
+      lines.push('All packed. Ready to go!');
+    }
   }
 
   return lines.join(' ');
@@ -132,6 +162,7 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number): string 
 // ── Calendar heatmap ─────────────────────────────────────────────────────────
 
 function CalendarHeatmap({ trip }: { trip: any }) {
+  const { t, locale } = useI18n();
   if (!trip?.startDate) return null;
   const today = new Date(); today.setHours(0,0,0,0);
   const cells = Array.from({ length: trip.days }, (_, i) => {
@@ -142,10 +173,12 @@ function CalendarHeatmap({ trip }: { trip: any }) {
     return { dt, count, isPast, isToday };
   });
 
+  const calLocale = locale === 'he' ? 'he-IL' : 'en-US';
+
   // Group by month
   const months: Record<string, typeof cells> = {};
   cells.forEach(c => {
-    const key = c.dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const key = c.dt.toLocaleDateString(calLocale, { month: 'short', year: 'numeric' });
     if (!months[key]) months[key] = [];
     months[key].push(c);
   });
@@ -160,7 +193,7 @@ function CalendarHeatmap({ trip }: { trip: any }) {
 
   return (
     <div>
-      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>Trip calendar</p>
+      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>{t('tripCalendarLabel')}</p>
       {Object.entries(months).map(([month, mCells]) => (
         <div key={month} className="lg a-rise" style={{ padding: '12px 14px', marginBottom: 10 }}>
           <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 8, fontSize: 8.5 }}>{month}</p>
@@ -200,6 +233,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
   trip: any; currSym: string; currCode: string; onClose: () => void; onAddBudget: (v: number) => void;
 }) {
   const { addExpense, deleteExpense } = useAppStore();
+  const { t } = useI18n();
   const { show } = useToast();
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
@@ -211,31 +245,31 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
 
   const handleAdd = () => {
     const n = parseFloat(amount);
-    if (!desc.trim() || isNaN(n) || n <= 0) { show('Enter a valid description and amount'); return; }
-    addExpense({ description: desc.trim(), amount: n, paidBy: paidBy.trim() || 'You', splitCount: 1 });
+    if (!desc.trim() || isNaN(n) || n <= 0) { show(t('validExpenseError')); return; }
+    addExpense({ description: desc.trim(), amount: n, paidBy: paidBy.trim() || t('youLabel'), splitCount: 1 });
     setDesc(''); setAmount(''); setPaidBy('');
-    show('Expense added');
+    show(t('expenseAdded'));
   };
 
   return (
-    <Sheet title="Budget & expenses" onClose={onClose}>
+    <Sheet title={t('budgetSheetTitle')} onClose={onClose}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Budget limit */}
         <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
           <div style={{ flex: 1 }}>
-            <Field label={`Budget limit (${currSym})`} placeholder="0" value={budgetVal} onChange={setBudgetVal} type="number" />
+            <Field label={`${t('budgetLabel')} (${currSym})`} placeholder="0" value={budgetVal} onChange={setBudgetVal} type="number" />
           </div>
           <button
-            onClick={() => { const n = parseFloat(budgetVal); if (!isNaN(n) && n > 0) { onAddBudget(n); show('Budget saved'); } }}
+            onClick={() => { const n = parseFloat(budgetVal); if (!isNaN(n) && n > 0) { onAddBudget(n); show(t('budgetSavedToast')); } }}
             style={{ height: 48, padding: '0 16px', border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: '#fff', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: 'var(--lg-glow-forest)' }}
           >
-            Set
+            {t('setBudget')}
           </button>
         </div>
 
         {/* Summary */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 13, color: 'var(--text-2)' }}>Total spent</span>
+          <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{t('totalSpent')}</span>
           <span style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)' }}>
             <CurrencyAmount amount={total} base={currCode} />
           </span>
@@ -243,12 +277,12 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
 
         {/* Add expense */}
         <div style={{ padding: '12px 14px', background: 'var(--lg-panel)', borderRadius: 16 }}>
-          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10, fontSize: 9 }}>Add expense</p>
+          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10, fontSize: 9 }}>{t('addExpenseLabel')}</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Field label="Description" placeholder="Coffee, taxi…" value={desc} onChange={setDesc} />
+            <Field label={t('descriptionLabel')} placeholder="Coffee, taxi…" value={desc} onChange={setDesc} />
             <div style={{ display: 'flex', gap: 10 }}>
-              <Field label={`Amount (${currSym})`} placeholder="0" value={amount} onChange={setAmount} type="number" />
-              <Field label="Paid by" placeholder="You" value={paidBy} onChange={setPaidBy} />
+              <Field label={`${t('amountLabel')} (${currSym})`} placeholder="0" value={amount} onChange={setAmount} type="number" />
+              <Field label={t('paidByLabel')} placeholder={t('youLabel')} value={paidBy} onChange={setPaidBy} />
             </div>
             <button
               onClick={handleAdd}
@@ -256,7 +290,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
               style={{ height: 44, gap: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             >
               <Icon name="plus" size={15} color="#fff" />
-              Add
+              {t('addBtn')}
             </button>
           </div>
         </div>
@@ -264,7 +298,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
         {/* Expense list */}
         {expenses.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>History</p>
+            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>{t('expenseHistoryLabel')}</p>
             {expenses.map((exp: any) => (
               <div key={exp.id} className="lg" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -275,9 +309,9 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
                   <CurrencyAmount amount={exp.amount} base={currCode} />
                 </span>
                 <button
-                  onClick={() => { deleteExpense(exp.id); show('Expense removed'); }}
+                  onClick={() => { deleteExpense(exp.id); show(t('expenseRemovedToast')); }}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
-                  aria-label="Delete expense"
+                  aria-label={t('deleteExpenseLabel')}
                 >
                   <Icon name="trash" size={15} color="var(--danger)" />
                 </button>
@@ -413,7 +447,7 @@ export default function DashboardScreenV2() {
   const todayWeather: WeatherDay | null = weather[currentDisplayDay - 1] ?? weather[0] ?? null;
   const isRTL = locale === 'he';
 
-  const aiSummary = buildAiSummary(trip, supplies, totalSpent);
+  const aiSummary = buildAiSummary(trip, supplies, totalSpent, locale);
 
   return (
     <div
@@ -448,8 +482,8 @@ export default function DashboardScreenV2() {
             {currentTripDay !== null
               ? `${t('day').toUpperCase()} ${currentTripDay}`
               : daysUntil !== null && daysUntil > 0
-                ? `IN ${daysUntil} DAYS`
-                : 'TRIP'}
+                ? (isRTL ? `בעוד ${daysUntil} ${t('days')}` : `IN ${daysUntil} ${t('days').toUpperCase()}`)
+                : t('activeTrip').toUpperCase()}
           </span>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -469,8 +503,8 @@ export default function DashboardScreenV2() {
                 try {
                   const link = await createInviteLink();
                   await navigator.clipboard?.writeText(link).catch(() => {});
-                  show('Invite link copied to clipboard');
-                } catch { show('Could not create invite link'); }
+                  show(t('inviteLinkCopied'));
+                } catch { show(t('couldNotCreateInvite')); }
                 finally { setSharingLink(false); }
               }}
               style={{ width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent', opacity: sharingLink ? 0.6 : 1 }}
@@ -526,7 +560,7 @@ export default function DashboardScreenV2() {
             {currentTripDay !== null && (
               <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
                 <span aria-hidden style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }} />
-                {t('day')} {currentTripDay} {'of ' + trip.days}
+                {t('day')} {currentTripDay} {t('ofDays')} {trip.days}
               </span>
             )}
             {todayWeather && (
@@ -613,13 +647,13 @@ export default function DashboardScreenV2() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
             <Icon name="ai" size={16} color="var(--lg-sand)" />
-            <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)' }}>AI analysis</span>
+            <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)' }}>{t('aiAnalysisLabel')}</span>
           </div>
           <p style={{ fontSize: 14, lineHeight: 1.6, color: '#fff', fontWeight: 500, margin: 0 }}>
             {aiSummary}
           </p>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 12, color: '#fff', fontWeight: 600, fontSize: 13 }}>
-            View suggestions
+            {t('viewSuggestions')}
             <Icon name="arrow" size={15} color="#fff" style={{ transform: isRTL ? 'scaleX(-1)' : 'none' }} />
           </div>
         </button>
@@ -628,7 +662,7 @@ export default function DashboardScreenV2() {
         {nextEvent && (
           <div>
             <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
-              {t('nextEvent') as string || 'Next up'}
+              {t('nextEvent')}
             </p>
             <button
               className="lg a-rise d1"
@@ -667,11 +701,11 @@ export default function DashboardScreenV2() {
             className="lg a-rise d2"
             onClick={() => setScreen('supplies')}
             style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', border: 0 }}
-            aria-label={`Packed: ${packedPct}%`}
+            aria-label={`${t('suppliesLabel')}: ${packedPct}%`}
           >
             <Ring pct={packedPct} size={58} color="var(--lg-terra)">{packedPct}%</Ring>
             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--lg-ink)' }}>
-              {t('suppliesLabel') as string || 'Packed'}
+              {t('suppliesLabel')}
             </span>
           </button>
 
@@ -680,11 +714,11 @@ export default function DashboardScreenV2() {
             className="lg a-rise d3"
             onClick={() => setShowBudgetEdit(true)}
             style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, cursor: 'pointer', border: 0, textAlign: 'start' }}
-            aria-label="Edit budget"
+            aria-label={t('budgetLabel')}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>
-                {t('budgetLabel') as string || 'Budget'}
+                {t('budgetLabel')}
               </span>
               <Icon name="edit" size={12} color="var(--text-3)" />
             </div>
@@ -704,12 +738,12 @@ export default function DashboardScreenV2() {
                   />
                 </div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)' }}>
-                  {t('of') as string || 'of'} <CurrencyAmount amount={trip.budget} base={currency} style={{ fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 400 }} />
+                  {t('of')} <CurrencyAmount amount={trip.budget} base={currency} style={{ fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 400 }} />
                 </span>
               </>
             ) : (
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)' }}>
-                Tap to set limit
+                {t('tapToSetLimit')}
               </span>
             )}
           </button>
@@ -720,13 +754,15 @@ export default function DashboardScreenV2() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: 0 }}>
-                {'Today · ' + t('day').toUpperCase() + ' ' + currentTripDay}
+                {isRTL
+                  ? `${t('todayLabel')} · ${t('day')} ${currentTripDay}`
+                  : `${t('todayLabel').toUpperCase()} · ${t('day').toUpperCase()} ${currentTripDay}`}
               </p>
               <button
                 onClick={() => handleDayClick(currentTripDay)}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}
               >
-                See all
+                {t('seeAll')}
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -774,15 +810,15 @@ export default function DashboardScreenV2() {
                 {trip.startDate
                   ? (() => {
                       const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (currentDisplayDay - 1) * 86_400_000);
-                      return dt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                      return dt.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', { weekday: 'long', month: 'long', day: 'numeric' });
                     })()
-                  : `Day ${currentDisplayDay}`}
+                  : `${t('day')} ${currentDisplayDay}`}
               </p>
               <button
                 onClick={() => handleDayClick(currentDisplayDay)}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--brand)', padding: 0 }}
               >
-                See all
+                {t('seeAll')}
               </button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -825,10 +861,10 @@ export default function DashboardScreenV2() {
           >
             <Icon name="compass" size={40} color="var(--text-3)" />
             <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', margin: '12px 0 6px' }}>
-              No events yet.
+              {t('noActivitiesYet')}
             </p>
             <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 18px' }}>
-              Start planning Day 1 — add flights, restaurants, activities, anything.
+              {t('startPlanningCta')}
             </p>
             <button
               onClick={() => { setActiveDay(1); setScreen('day'); }}
@@ -836,7 +872,7 @@ export default function DashboardScreenV2() {
               style={{ height: 44, padding: '0 22px', display: 'inline-flex', alignItems: 'center', gap: 8 }}
             >
               <Icon name="plus" size={16} color="#fff" />
-              Plan Day 1
+              {t('planDay1')}
             </button>
           </div>
         )}
@@ -851,7 +887,7 @@ export default function DashboardScreenV2() {
             }}
           >
             <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: 0 }}>
-              Trip calendar
+              {t('tripCalendarLabel')}
             </p>
             <Icon name={showCalendar ? 'chevL' : 'chevR'} size={14} color="var(--text-3)" style={{ transform: showCalendar ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform .3s' }} />
           </button>

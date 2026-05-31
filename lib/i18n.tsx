@@ -471,6 +471,14 @@ const en = {
   validExpenseError: 'Enter a description and valid amount',
   ofDays: 'of',
   deleteExpenseLabel: 'Delete expense',
+  aiAnalysisLabel: 'AI Analysis',
+  viewSuggestions: 'View Ideas',
+  seeAll: 'See all',
+  todayLabel: 'Today',
+  tapToSetLimit: 'Tap to set a limit',
+  noActivitiesYet: 'No activities planned yet.',
+  startPlanningCta: 'Start with Day 1 — add flights, restaurants, or anything you have in mind.',
+  planDay1: 'Plan Day 1',
 };
 
 const he: typeof en = {
@@ -941,6 +949,14 @@ const he: typeof en = {
   validExpenseError: 'הכנס תיאור וסכום תקינים',
   ofDays: 'מתוך',
   deleteExpenseLabel: 'מחק הוצאה',
+  aiAnalysisLabel: 'ניתוח AI',
+  viewSuggestions: 'ראה רעיונות',
+  seeAll: 'ראה הכל',
+  todayLabel: 'היום',
+  tapToSetLimit: 'לחץ לקביעת מגבלת תקציב',
+  noActivitiesYet: 'עדיין לא תוכננו פעילויות.',
+  startPlanningCta: 'התחל ביום 1 — הוסף טיסות, מסעדות, או כל דבר שיש לך בראש.',
+  planDay1: 'תכנן יום 1',
 };
 
 const translations = { en, he } as const;
