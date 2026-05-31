@@ -470,7 +470,7 @@ export default function DashboardScreenV2() {
           aria-hidden
           style={{
             position: 'absolute', top: -40, insetInlineEnd: -30,
-            width: 220, height: 220, borderRadius: '50%',
+            width: 'clamp(140px, 35vw, 220px)', height: 'clamp(140px, 35vw, 220px)', borderRadius: '50%',
             background: 'radial-gradient(circle, oklch(62% 0.17 40 / 45%), transparent 70%)',
             pointerEvents: 'none',
           }}

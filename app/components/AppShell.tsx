@@ -350,7 +350,7 @@ function Shell() {
                 className={`screen-inset${showNav ? ' screen-inset-nav' : ''} flex flex-col overflow-hidden`}
               >
                 <div className="w-full h-full flex justify-center">
-                  <div className="w-full max-w-[1200px] h-full">
+                  <div className="w-full max-w-[560px] md:shadow-[0_0_0_1px_var(--border)] h-full">
                     {screen === 'splash' ? (
                       <Splash_V2 />
                     ) : screen === 'welcome' ? (

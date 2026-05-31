@@ -158,7 +158,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           style={{
             position: 'absolute', top: -120, right: -80,
-            width: 340, height: 340, borderRadius: '50%',
+            width: 'clamp(200px, 50vw, 340px)', height: 'clamp(200px, 50vw, 340px)', borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(59,110,82,0.16) 0%, transparent 70%)',
             filter: 'blur(40px)',
           }}
@@ -168,7 +168,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
           style={{
             position: 'absolute', bottom: -100, left: -80,
-            width: 300, height: 300, borderRadius: '50%',
+            width: 'clamp(180px, 45vw, 300px)', height: 'clamp(180px, 45vw, 300px)', borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(196,113,74,0.14) 0%, transparent 70%)',
             filter: 'blur(40px)',
           }}
@@ -178,7 +178,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
           style={{
             position: 'absolute', top: '40%', left: '50%', transform: 'translate(-50%,-50%)',
-            width: 260, height: 260, borderRadius: '50%',
+            width: 'clamp(160px, 40vw, 260px)', height: 'clamp(160px, 40vw, 260px)', borderRadius: '50%',
             background: 'radial-gradient(circle, rgba(200,148,74,0.08) 0%, transparent 70%)',
             filter: 'blur(40px)',
           }}

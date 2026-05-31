@@ -151,10 +151,10 @@ function AuthStep() {
       }} />
 
       {/* Warm ambient orbs */}
-      <div style={{ position: 'absolute', top: '-8%', right: '-12%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,210,150,0.55) 0%, transparent 70%)', filter: 'blur(48px)', zIndex: 1, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '-12%', left: '-16%', width: 440, height: 440, borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,100,60,0.48) 0%, transparent 70%)', filter: 'blur(64px)', zIndex: 1, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: '28%', left: '8%', width: 220, height: 220, borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,235,190,0.28) 0%, transparent 70%)', filter: 'blur(32px)', zIndex: 1, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '20%', right: '10%', width: 160, height: 160, borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,110,82,0.22) 0%, transparent 70%)', filter: 'blur(40px)', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '-8%', right: '-12%', width: 'clamp(200px, 55vw, 400px)', height: 'clamp(200px, 55vw, 400px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,210,150,0.55) 0%, transparent 70%)', filter: 'blur(48px)', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '-12%', left: '-16%', width: 'clamp(220px, 60vw, 440px)', height: 'clamp(220px, 60vw, 440px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,100,60,0.48) 0%, transparent 70%)', filter: 'blur(64px)', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '28%', left: '8%', width: 'clamp(120px, 30vw, 220px)', height: 'clamp(120px, 30vw, 220px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,235,190,0.28) 0%, transparent 70%)', filter: 'blur(32px)', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '20%', right: '10%', width: 'clamp(100px, 22vw, 160px)', height: 'clamp(100px, 22vw, 160px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,110,82,0.22) 0%, transparent 70%)', filter: 'blur(40px)', zIndex: 1, pointerEvents: 'none' }} />
 
       {/* Sparkle particles */}
       <AtmosphereCanvas />
@@ -172,8 +172,8 @@ function AuthStep() {
           background: 'rgba(255, 255, 255, 0.84)',
           backdropFilter: 'blur(48px) saturate(2.0)',
           WebkitBackdropFilter: 'blur(48px) saturate(2.0)',
-          borderRadius: 48,
-          padding: '52px 40px 48px',
+          borderRadius: 'clamp(28px, 8vw, 48px)',
+          padding: 'clamp(32px, 8vw, 52px) clamp(20px, 6vw, 40px) clamp(32px, 8vw, 48px)',
           boxShadow: [
             '0 48px 96px rgba(26,20,16,0.26)',
             '0 12px 40px rgba(26,20,16,0.14)',
