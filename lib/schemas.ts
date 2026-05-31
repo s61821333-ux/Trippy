@@ -2,7 +2,17 @@ import { z } from 'zod'
 
 const TimeString = z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:MM')
 
-const Category = z.enum(['food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other'])
+const Category = z.enum([
+  // Core
+  'food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'concert',
+  'theme_park', 'sport', 'beach', 'other',
+  // Extended
+  'museum', 'hiking', 'nightlife', 'shopping', 'spa', 'nature_walk', 'cycling',
+  'boat', 'cooking', 'theater', 'photography', 'winery', 'safari', 'festival',
+  'water_sports', 'golf', 'guided_tour', 'national_park', 'ski', 'wellness',
+  'cultural', 'religious', 'market', 'picnic', 'hot_springs', 'aerial', 'cruise',
+  'farm', 'art', 'cinema',
+])
 
 export const AiSuggestionsBody = z.object({
   dayNumber: z.number().int().min(1).max(366),
@@ -119,7 +129,7 @@ export const PatchEventBody = z.object({
   notes: z.string().max(2000).optional(),
   cost: z.number().min(0).max(1_000_000).optional(),
   tags: z.array(z.string().max(50)).max(20).optional(),
-  votes: z.record(z.string(), z.number().int()).optional(),
+  votes: z.record(z.string(), z.enum(['up', 'down'])).optional(),
   day_index: z.number().int().min(0).max(364).optional(),
 })
 
@@ -142,7 +152,7 @@ export const AddEmergencyContactBody = z.object({
   id: z.string().max(100).optional(),
   name: z.string().min(1).max(200),
   phone: z.string().min(1).max(50),
-  type: z.enum(['personal', 'medical', 'embassy', 'hotel', 'other']).optional(),
+  type: z.enum(['personal', 'medical', 'embassy', 'insurance']).optional(),
 })
 
 export const PatchDayMetaBody = z.object({

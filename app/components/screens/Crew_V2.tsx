@@ -40,12 +40,16 @@ export default function Crew_V2() {
   const { t, locale } = useI18n();
   const { show } = useToast();
 
-  const { trip, nickname, inviteToTrip, createInviteLink } = useAppStore(
+  const { trip, nickname, inviteToTrip, createInviteLink, pendingInvitations, loadInvitations, acceptInvitation, rejectInvitation } = useAppStore(
     useShallow(s => ({
-      trip:             s.trip,
-      nickname:         s.nickname,
-      inviteToTrip:     s.inviteToTrip,
-      createInviteLink: s.createInviteLink,
+      trip:               s.trip,
+      nickname:           s.nickname,
+      inviteToTrip:       s.inviteToTrip,
+      createInviteLink:   s.createInviteLink,
+      pendingInvitations: s.pendingInvitations,
+      loadInvitations:    s.loadInvitations,
+      acceptInvitation:   s.acceptInvitation,
+      rejectInvitation:   s.rejectInvitation,
     }))
   );
 
@@ -53,6 +57,8 @@ export default function Crew_V2() {
   const [sending,     setSending]     = useState(false);
   const [inviteLink,  setInviteLink]  = useState('');
   const [copying,     setCopying]     = useState(false);
+
+  React.useEffect(() => { loadInvitations().catch(() => {}); }, []);
 
   if (!trip) return null;
 
@@ -102,7 +108,7 @@ export default function Crew_V2() {
       <div
         className="hero-mesh"
         style={{
-          padding: '54px 22px 40px',
+          padding: 'calc(env(safe-area-inset-top, 0px) + 54px) 22px 40px',
           borderRadius: '0 0 32px 32px',
           position: 'relative',
           overflow: 'hidden',
@@ -146,7 +152,7 @@ export default function Crew_V2() {
         </m.p>
       </div>
 
-      <div style={{ padding: '0 20px', marginTop: -22 }}>
+      <div style={{ padding: '0 clamp(16px, 5vw, 28px)', marginTop: -22, maxWidth: 600, margin: '-22px auto 0', width: '100%', boxSizing: 'border-box' }}>
 
         {/* ── Invite card ── */}
         <m.div
@@ -217,7 +223,7 @@ export default function Crew_V2() {
         <div
           role="list"
           aria-label={t('Current crew') || 'Current crew'}
-          style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
+          style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}
         >
           {participants.map((p: Participant, i: number) => {
             const isMe = p.name === nickname;
@@ -268,6 +274,50 @@ export default function Crew_V2() {
             );
           })}
         </div>
+
+        {/* ── Pending invitations I received ── */}
+        {pendingInvitations.length > 0 && (
+          <>
+            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: '22px 0 12px' }}>
+              {locale === 'he' ? 'הזמנות ממתינות' : 'Pending invitations'} · {pendingInvitations.length}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%' }}>
+              {pendingInvitations.map((inv, i) => (
+                <m.div
+                  key={inv.id}
+                  className="lg"
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 + i * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 13, padding: 13 }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {inv.tripName}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: 'var(--text-3)', marginTop: 1 }}>
+                      {locale === 'he' ? 'הזמנה להצטרף' : 'Invitation to join'}
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
+                    <button
+                      onClick={() => acceptInvitation(inv.id).then(() => show(locale === 'he' ? 'הצטרפת לטיול' : 'Joined trip')).catch(() => show('Could not accept'))}
+                      style={{ height: 34, padding: '0 12px', border: 0, borderRadius: 9999, background: 'var(--lg-forest)', color: '#fff', fontWeight: 600, fontSize: 12, cursor: 'pointer', boxShadow: 'var(--lg-glow-forest)' }}
+                    >
+                      {locale === 'he' ? 'הצטרף' : 'Join'}
+                    </button>
+                    <button
+                      onClick={() => rejectInvitation(inv.id).catch(() => {})}
+                      style={{ height: 34, padding: '0 12px', border: 0, borderRadius: 9999, background: 'var(--lg-panel)', color: 'var(--text-3)', fontWeight: 600, fontSize: 12, cursor: 'pointer', boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)' }}
+                    >
+                      {locale === 'he' ? 'דחה' : 'Decline'}
+                    </button>
+                  </div>
+                </m.div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

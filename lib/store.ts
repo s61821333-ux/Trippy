@@ -77,7 +77,7 @@ interface AppState {
   deleteTrip: () => Promise<void>;
   setActiveDay: (day: number) => void;
   setNickname: (n: string) => void;
-  updateTripInfo: (updates: { name?: string; days?: number; startDate?: string }) => void;
+  updateTripInfo: (updates: { name?: string; days?: number; startDate?: string; countries?: string[] }) => void;
   updateTheme: (theme: TripTheme) => void;
   updateDayMeta: (dayIndex: number, meta: Partial<DayMeta>) => void;
   setThemeMode: (mode: 'light' | 'dark' | 'system') => void;
@@ -461,11 +461,12 @@ export const useAppStore = create<AppState>()(
       setActiveDay: (day) => set({ activeDay: day }),
       setNickname: (n) => set({ nickname: n }),
 
-      updateTripInfo: ({ name, days, startDate }) => set((s) => {
+      updateTripInfo: ({ name, days, startDate, countries }) => set((s) => {
         if (!s.trip) return {};
         const trip = { ...s.trip };
         if (name !== undefined)      trip.name      = name;
         if (startDate !== undefined) trip.startDate = startDate;
+        if (countries !== undefined) trip.countries = countries;
         if (days !== undefined && days >= 1 && days <= 90) {
           const old = trip.days;
           trip.days = days;
@@ -486,7 +487,7 @@ export const useAppStore = create<AppState>()(
           }
         }
         const { tripDbId } = s;
-        if (tripDbId) dbSyncTripInfo(tripDbId, { name, days, startDate }).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        if (tripDbId) dbSyncTripInfo(tripDbId, { name, days, startDate, countries }).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
         const newState: Partial<AppState> = { trip };
         if (days !== undefined && s.activeDay > trip.days) newState.activeDay = trip.days;
         return newState;

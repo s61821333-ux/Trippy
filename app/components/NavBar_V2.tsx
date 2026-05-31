@@ -12,17 +12,18 @@ interface NavBarV2Props {
   onSettings?: () => void;
   onSwitch?: () => void;
   onAdd?: () => void;
+  onLogout?: () => void;
+  onNotes?: () => void;
 }
 
 const TABS: {
   id: Screen;
-  icon: 'grid' | 'compass' | 'map' | 'checklist' | 'users';
-  labelKey: 'navCamp' | 'navExplore' | 'navMap' | 'navPack' | 'navCrew';
+  icon: 'grid' | 'compass' | 'checklist' | 'users';
+  labelKey: 'navCamp' | 'navExplore' | 'navPack' | 'navCrew';
   ariaLabel: string;
 }[] = [
   { id: 'dashboard', icon: 'grid',      labelKey: 'navCamp',    ariaLabel: 'Overview' },
   { id: 'day',       icon: 'compass',   labelKey: 'navExplore', ariaLabel: 'Day planner' },
-  { id: 'map',       icon: 'map',       labelKey: 'navMap',     ariaLabel: 'Map' },
   { id: 'supplies',  icon: 'checklist', labelKey: 'navPack',    ariaLabel: 'Packing list' },
   { id: 'crew',      icon: 'users',     labelKey: 'navCrew',    ariaLabel: 'Crew' },
 ];
@@ -32,17 +33,21 @@ const ICON_SPRING = { type: 'spring', stiffness: 380, damping: 28 } as const;
 const HANDLE_SPRING = { type: 'spring', stiffness: 320, damping: 26 } as const;
 const PANEL_SPRING = { type: 'spring', stiffness: 400, damping: 28 } as const;
 
-export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAdd }: NavBarV2Props) {
+export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes }: NavBarV2Props) {
   const { t, isRTL } = useI18n();
   const [expandOpen, setExpandOpen] = useState(false);
 
-  const activeIdx = Math.max(0, TABS.findIndex(tb => tb.id === active));
-  const blobX = (isRTL ? -1 : 1) * activeIdx * 58;
+  // -1 when on a non-tab screen (settings, notes, etc.) — blob should hide
+  const activeTabIdx = TABS.findIndex(tb => tb.id === active);
+  const blobX = (isRTL ? -1 : 1) * Math.max(0, activeTabIdx) * 58;
 
   const handleChange = (id: Screen) => {
     onChange(id);
     setExpandOpen(false);
   };
+
+  // rename for clarity in JSX
+  const activeIdx = activeTabIdx;
 
   return (
     <div
@@ -81,20 +86,21 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             <button
               onClick={() => { setExpandOpen(false); onSwitch?.(); }}
               className="lg-btn"
-              style={{
-                height: 42,
-                padding: '0 16px',
-                gap: 7,
-                background: 'transparent',
-                color: 'var(--lg-ink)',
-                fontSize: 13,
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-              }}
+              style={{ height: 42, padding: '0 16px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center' }}
             >
               <Icon name="swap" size={17} style={{ color: 'var(--lg-terra)' }} />
               <span>{(t('switchTrip') as string) || 'Switch trip'}</span>
+            </button>
+
+            <div style={{ width: 1, background: 'oklch(50% 0.02 60 / 22%)', margin: '6px 0' }} />
+
+            <button
+              onClick={() => { setExpandOpen(false); onNotes?.(); }}
+              className="lg-btn"
+              style={{ height: 42, padding: '0 16px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center' }}
+            >
+              <Icon name="edit" size={17} style={{ color: 'var(--lg-forest)' }} />
+              <span>Notes</span>
             </button>
 
             <div style={{ width: 1, background: 'oklch(50% 0.02 60 / 22%)', margin: '6px 0' }} />
@@ -116,6 +122,27 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             >
               <Icon name="settings" size={17} style={{ color: 'var(--lg-forest)' }} />
               <span>{(t('settings') as string) || 'Settings'}</span>
+            </button>
+
+            <div style={{ width: 1, background: 'oklch(50% 0.02 60 / 22%)', margin: '6px 0' }} />
+
+            <button
+              onClick={() => { setExpandOpen(false); onLogout?.(); }}
+              className="lg-btn"
+              style={{
+                height: 42,
+                padding: '0 16px',
+                gap: 7,
+                background: 'transparent',
+                color: 'oklch(52% 0.14 25)',
+                fontSize: 13,
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+              }}
+            >
+              <Icon name="x" size={17} style={{ color: 'oklch(52% 0.14 25)' }} />
+              <span>Log out</span>
             </button>
           </m.div>
         )}
@@ -141,10 +168,10 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             height: 64,
           }}
         >
-          {/* Liquid blob */}
+          {/* Liquid blob — hidden when on a non-tab screen like Settings */}
           <m.div
             aria-hidden="true"
-            animate={{ x: blobX }}
+            animate={{ x: blobX, opacity: activeIdx >= 0 ? 1 : 0 }}
             transition={BLOB_SPRING}
             style={{
               position: 'absolute',
@@ -228,16 +255,6 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                 >
                   <Icon name={tab.icon} size={20} color={isActive ? '#fff' : 'var(--text-3)'} />
                 </m.span>
-                <span style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: 8.5,
-                  fontWeight: 600,
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase' as const,
-                  lineHeight: 1,
-                }}>
-                  {t(tab.labelKey)}
-                </span>
               </m.button>
             );
           })}

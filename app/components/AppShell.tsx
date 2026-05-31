@@ -10,7 +10,7 @@ import { createClient } from '@/utils/supabase/client';
 import dynamic from 'next/dynamic';
 import NavBar_V2 from './NavBar_V2';
 import LoginScreen from './screens/LoginScreen';
-import CompassLoader from './ui/CompassLoader';
+import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { ToastProvider, useToast } from './ui/Toast';
 
 const Splash_V2         = dynamic(() => import('./screens/Splash_V2'));
@@ -106,7 +106,7 @@ function Shell() {
   const themeMode       = useAppStore(s => s.themeMode);
 
   const { setScreen, setThemeMode, checkAuth, loadTripById, subscribeToTrip,
-          recordDemoClick, clearTripEntry } = useAppStore(
+          recordDemoClick, clearTripEntry, logout } = useAppStore(
     useShallow(s => ({
       setScreen:       s.setScreen,
       setThemeMode:    s.setThemeMode,
@@ -115,6 +115,7 @@ function Shell() {
       subscribeToTrip: s.subscribeToTrip,
       recordDemoClick: s.recordDemoClick,
       clearTripEntry:  s.clearTripEntry,
+      logout:          s.logout,
     }))
   );
 
@@ -267,7 +268,8 @@ function Shell() {
         gap: 28,
         background: 'var(--bg)',
       }}>
-        <CompassLoader size={160} />
+        <LoaderStyles />
+        <CompassLoader theme={BRAND_THEME} size={160} />
         <span style={{
           fontFamily: 'var(--font-sans)',
           fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em', color: 'var(--text)',
@@ -331,6 +333,8 @@ function Shell() {
               onChange={s => setScreen(s)}
               onSettings={() => setScreen('settings')}
               onSwitch={() => setScreen('home')}
+              onLogout={() => logout()}
+              onNotes={() => setScreen('notes')}
             />
           )}
 
@@ -360,7 +364,8 @@ function Shell() {
                     ) : screen === 'day' ? (
                       <DayScreen />
                     ) : screen === 'map' ? (
-                      <MapScreen />
+                      // Map tab removed — silently redirect to dashboard
+                      (() => { setScreen('dashboard'); return null; })()
                     ) : screen === 'crew' ? (
                       <CrewScreen />
                     ) : screen === 'supplies' ? (
@@ -413,7 +418,8 @@ function Shell() {
                   gap: 28,
                 }}
               >
-                <CompassLoader size={200} />
+                <LoaderStyles />
+                <CompassLoader theme={BRAND_THEME} size={200} />
                 <span style={{
                   fontFamily: 'var(--font-sans)',
                   fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em',

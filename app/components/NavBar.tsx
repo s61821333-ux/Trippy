@@ -429,16 +429,6 @@ export default function NavBar({ active, onChange, onSettings, onSwitchTrip, onA
                   >
                     <Icon name={tab.icon} size={20} color={isActive ? '#fff' : 'var(--text-3)'} />
                   </m.span>
-                  <span style={{
-                    fontFamily: 'var(--font-mono)',
-                    fontSize: 8.5,
-                    fontWeight: 600,
-                    letterSpacing: '0.08em',
-                    textTransform: 'uppercase' as const,
-                    lineHeight: 1,
-                  }}>
-                    {t(tab.labelKey)}
-                  </span>
                 </m.button>
               );
             })}

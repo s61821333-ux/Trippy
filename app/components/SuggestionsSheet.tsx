@@ -8,6 +8,7 @@ import GlassBtn from './ui/GlassBtn';
 import Chip from './ui/Chip';
 import Icon from './ui/Icon';
 import AsyncError from './ui/AsyncError';
+import { SparkleLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { useAppStore } from '@/lib/store';
 import { CAT_META } from '@/lib/utils';
 import { AiSuggestion } from '@/lib/types';
@@ -219,14 +220,9 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
             padding: '14px 16px',
             display: 'flex', flexDirection: 'column', gap: 8,
           }}>
+            <LoaderStyles />
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <motion.span
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                style={{ display: 'inline-block', fontSize: 18, lineHeight: 1 }}
-              >
-                ✨
-              </motion.span>
+              <SparkleLoader theme={BRAND_THEME} size={36} speed={1.2} />
               <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
                 {locale === 'he' ? 'מחפש פעילויות מומלצות...' : 'Finding great activities for you…'}
               </span>

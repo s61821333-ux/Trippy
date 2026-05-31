@@ -24,19 +24,28 @@ async function enrichWithPlaces(
           headers: {
             'Content-Type': 'application/json',
             'X-Goog-Api-Key': key,
-            'X-Goog-FieldMask': 'places.rating,places.userRatingCount,places.googleMapsUri',
+            'X-Goog-FieldMask': 'places.rating,places.userRatingCount,places.googleMapsUri,places.priceLevel,places.currentOpeningHours.openNow',
           },
           body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
         });
         if (!res.ok) return s;
-        const data = await res.json() as { places?: Array<{ rating?: number; userRatingCount?: number; googleMapsUri?: string }> };
+        const data = await res.json() as { places?: Array<{ rating?: number; userRatingCount?: number; googleMapsUri?: string; priceLevel?: string; currentOpeningHours?: { openNow?: boolean } }> };
         const place = data.places?.[0];
         if (!place) return s;
+        const priceLevelMap: Record<string, number> = {
+          PRICE_LEVEL_FREE: 0,
+          PRICE_LEVEL_INEXPENSIVE: 1,
+          PRICE_LEVEL_MODERATE: 2,
+          PRICE_LEVEL_EXPENSIVE: 3,
+          PRICE_LEVEL_VERY_EXPENSIVE: 4,
+        };
         return {
           ...s,
           rating: place.rating,
           ratingCount: place.userRatingCount,
           mapsUrl: place.googleMapsUri,
+          priceLevel: place.priceLevel ? (priceLevelMap[place.priceLevel] ?? undefined) : undefined,
+          open: place.currentOpeningHours?.openNow ?? s.open,
         };
       } catch {
         return s;

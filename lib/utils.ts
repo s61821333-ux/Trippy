@@ -86,18 +86,50 @@ export const getGaps = (evs: TripEvent[], dayEndMins = 23 * 60): Gap[] => {
 };
 
 export const CAT_META: Record<Category, { icon: string; label: string; color: string; bg: string }> = {
-  food:       { icon: '🍽️', label: 'Food',      color: 'oklch(58% 0.16 55)',  bg: 'rgba(200,120,30,0.12)' },
-  cafe:       { icon: '☕',  label: 'Café',      color: 'oklch(52% 0.14 65)',  bg: 'rgba(160,100,30,0.12)' },
-  attraction: { icon: '📍', label: 'Sight',     color: 'oklch(52% 0.16 195)', bg: 'rgba(30,145,175,0.12)'  },
-  hotel:      { icon: '🏨', label: 'Hotel',     color: 'oklch(52% 0.14 310)', bg: 'rgba(160,60,180,0.11)'  },
-  rest:       { icon: '⛺', label: 'Rest',      color: 'oklch(52% 0.15 148)', bg: 'rgba(40,160,90,0.11)'   },
-  transport:  { icon: '🚗', label: 'Drive',      color: 'oklch(50% 0.13 255)', bg: 'rgba(60,100,200,0.11)'  },
-  flight:     { icon: '✈️', label: 'Flight',    color: 'oklch(46% 0.15 230)', bg: 'rgba(20,70,180,0.12)'   },
-  concert:    { icon: '🎤', label: 'Concert',   color: 'oklch(48% 0.20 330)', bg: 'rgba(192,38,211,0.12)'  },
-  theme_park: { icon: '🎡', label: 'Theme Park',color: 'oklch(56% 0.18 38)',  bg: 'rgba(220,90,30,0.12)'   },
-  sport:      { icon: '🏟️', label: 'Sport',     color: 'oklch(46% 0.16 148)', bg: 'rgba(22,120,60,0.12)'   },
-  beach:      { icon: '🏖️', label: 'Beach',     color: 'oklch(58% 0.15 80)',  bg: 'rgba(200,155,30,0.12)'  },
-  other:      { icon: '✦',  label: 'Other',     color: 'oklch(52% 0.10 30)',  bg: 'rgba(180,90,50,0.10)'   },
+  // Core
+  food:        { icon: '🍽️', label: 'Food',        color: 'oklch(58% 0.16 55)',  bg: 'rgba(200,120,30,0.12)' },
+  cafe:        { icon: '☕',  label: 'Café',        color: 'oklch(52% 0.14 65)',  bg: 'rgba(160,100,30,0.12)' },
+  attraction:  { icon: '📍', label: 'Sight',       color: 'oklch(52% 0.16 195)', bg: 'rgba(30,145,175,0.12)' },
+  hotel:       { icon: '🏨', label: 'Hotel',       color: 'oklch(52% 0.14 310)', bg: 'rgba(160,60,180,0.11)' },
+  rest:        { icon: '⛺', label: 'Rest',        color: 'oklch(52% 0.15 148)', bg: 'rgba(40,160,90,0.11)'  },
+  transport:   { icon: '🚗', label: 'Drive',       color: 'oklch(50% 0.13 255)', bg: 'rgba(60,100,200,0.11)' },
+  flight:      { icon: '✈️', label: 'Flight',      color: 'oklch(46% 0.15 230)', bg: 'rgba(20,70,180,0.12)'  },
+  concert:     { icon: '🎤', label: 'Concert',     color: 'oklch(48% 0.20 330)', bg: 'rgba(192,38,211,0.12)' },
+  theme_park:  { icon: '🎡', label: 'Theme Park',  color: 'oklch(56% 0.18 38)',  bg: 'rgba(220,90,30,0.12)'  },
+  sport:       { icon: '🏟️', label: 'Sport',       color: 'oklch(46% 0.16 148)', bg: 'rgba(22,120,60,0.12)'  },
+  beach:       { icon: '🏖️', label: 'Beach',       color: 'oklch(58% 0.15 80)',  bg: 'rgba(200,155,30,0.12)' },
+  other:       { icon: '✦',  label: 'Other',       color: 'oklch(52% 0.10 30)',  bg: 'rgba(180,90,50,0.10)'  },
+  // Extended
+  museum:      { icon: '🏛️', label: 'Museum',      color: 'oklch(50% 0.14 215)', bg: 'rgba(25,110,170,0.12)' },
+  hiking:      { icon: '🥾', label: 'Hiking',      color: 'oklch(46% 0.14 135)', bg: 'rgba(30,120,55,0.12)'  },
+  nightlife:   { icon: '🍸', label: 'Nightlife',   color: 'oklch(46% 0.18 310)', bg: 'rgba(150,25,190,0.12)' },
+  shopping:    { icon: '🛍️', label: 'Shopping',    color: 'oklch(54% 0.16 350)', bg: 'rgba(200,30,70,0.10)'  },
+  spa:         { icon: '💆', label: 'Spa',         color: 'oklch(52% 0.12 180)', bg: 'rgba(30,160,130,0.11)' },
+  nature_walk: { icon: '🌿', label: 'Nature',      color: 'oklch(50% 0.15 145)', bg: 'rgba(35,140,60,0.11)'  },
+  cycling:     { icon: '🚴', label: 'Cycling',     color: 'oklch(52% 0.14 165)', bg: 'rgba(20,130,80,0.11)'  },
+  boat:        { icon: '⛵', label: 'Boat',        color: 'oklch(50% 0.15 220)', bg: 'rgba(20,100,180,0.12)' },
+  cooking:     { icon: '👨‍🍳', label: 'Cooking',    color: 'oklch(56% 0.16 50)',  bg: 'rgba(190,110,25,0.12)' },
+  theater:     { icon: '🎭', label: 'Theater',     color: 'oklch(48% 0.19 320)', bg: 'rgba(180,30,200,0.11)' },
+  photography: { icon: '📸', label: 'Photography', color: 'oklch(50% 0.12 210)', bg: 'rgba(40,95,160,0.12)'  },
+  winery:      { icon: '🍷', label: 'Winery',      color: 'oklch(48% 0.18 5)',   bg: 'rgba(170,25,50,0.12)'  },
+  safari:      { icon: '🦁', label: 'Safari',      color: 'oklch(54% 0.16 65)',  bg: 'rgba(190,130,20,0.12)' },
+  festival:    { icon: '🎪', label: 'Festival',    color: 'oklch(54% 0.18 40)',  bg: 'rgba(210,80,25,0.12)'  },
+  water_sports:{ icon: '🏄', label: 'Water Sports',color: 'oklch(50% 0.15 215)', bg: 'rgba(25,115,175,0.12)' },
+  golf:        { icon: '⛳', label: 'Golf',        color: 'oklch(50% 0.14 140)', bg: 'rgba(30,130,55,0.11)'  },
+  guided_tour: { icon: '🚶', label: 'Guided Tour', color: 'oklch(52% 0.12 200)', bg: 'rgba(30,110,160,0.11)' },
+  national_park:{ icon: '🌲',label: 'National Park',color:'oklch(48% 0.15 148)', bg: 'rgba(25,115,60,0.12)'  },
+  ski:         { icon: '⛷️', label: 'Ski',         color: 'oklch(50% 0.14 225)', bg: 'rgba(25,95,180,0.12)'  },
+  wellness:    { icon: '🧘', label: 'Wellness',    color: 'oklch(52% 0.13 175)', bg: 'rgba(30,155,120,0.11)' },
+  cultural:    { icon: '🏺', label: 'Cultural',    color: 'oklch(52% 0.15 55)',  bg: 'rgba(185,120,25,0.12)' },
+  religious:   { icon: '⛪', label: 'Religious',   color: 'oklch(50% 0.10 75)',  bg: 'rgba(165,135,30,0.11)' },
+  market:      { icon: '🛒', label: 'Market',      color: 'oklch(54% 0.15 50)',  bg: 'rgba(195,115,25,0.12)' },
+  picnic:      { icon: '🧺', label: 'Picnic',      color: 'oklch(54% 0.16 95)',  bg: 'rgba(165,160,20,0.12)' },
+  hot_springs: { icon: '♨️', label: 'Hot Springs', color: 'oklch(52% 0.16 20)',  bg: 'rgba(200,70,30,0.11)'  },
+  aerial:      { icon: '🎈', label: 'Aerial',      color: 'oklch(54% 0.15 40)',  bg: 'rgba(205,100,20,0.12)' },
+  cruise:      { icon: '🛳️', label: 'Cruise',      color: 'oklch(50% 0.14 210)', bg: 'rgba(25,100,170,0.12)' },
+  farm:        { icon: '🌾', label: 'Farm',        color: 'oklch(54% 0.14 90)',  bg: 'rgba(160,145,25,0.11)' },
+  art:         { icon: '🎨', label: 'Art',         color: 'oklch(52% 0.16 305)', bg: 'rgba(145,45,195,0.11)' },
+  cinema:      { icon: '🎬', label: 'Cinema',      color: 'oklch(46% 0.14 260)', bg: 'rgba(65,60,190,0.12)'  },
 };
 
 export const fmtDuration = (mins: number): string => {
@@ -141,8 +173,19 @@ const KEYWORD_ICONS: [RegExp, string][] = [
 ];
 
 export const CAT_FALLBACK: Record<Category, string> = {
-  food: 'noodles', cafe: 'coffee', attraction: 'museum', hotel: 'hotel', rest: 'tent', transport: 'car', flight: 'plane',
-  concert: 'music', theme_park: 'ferris_wheel', sport: 'stadium', beach: 'beach', other: 'globe',
+  // Core
+  food: 'noodles', cafe: 'coffee', attraction: 'museum', hotel: 'hotel', rest: 'tent',
+  transport: 'car', flight: 'plane', concert: 'concert', theme_park: 'ferris_wheel',
+  sport: 'stadium', beach: 'beach', other: 'globe',
+  // Extended
+  museum: 'museum', hiking: 'hiking', nightlife: 'nightlife', shopping: 'shopping',
+  spa: 'spa', nature_walk: 'pine_tree', cycling: 'bike', boat: 'kayak',
+  cooking: 'noodles', theater: 'concert', photography: 'camera', winery: 'wine',
+  safari: 'binoculars', festival: 'concert', water_sports: 'kayak', golf: 'stadium',
+  guided_tour: 'compass', national_park: 'pine_tree', ski: 'skiing',
+  wellness: 'spa', cultural: 'museum', religious: 'church', market: 'shopping',
+  picnic: 'picnic', hot_springs: 'hot_spring', aerial: 'hot_air_balloon',
+  cruise: 'ship', farm: 'leaf', art: 'museum', cinema: 'camera',
 };
 
 export function getDayIcon(events: TripEvent[], fallback = 'mountain'): string {

@@ -4,22 +4,315 @@ import { useState, useEffect } from 'react';
 import Icon from '../ui/Icon';
 import { StampIcon } from '../ui/StampIcon';
 import Ring from '../ui/Ring';
+import Sheet from '../ui/Sheet';
+import Field from '../ui/Field';
 import { useAppStore } from '@/lib/store';
+import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
 import { fmtDate, getNextEvent, CAT_FALLBACK, fmtDuration, toMins } from '@/lib/utils';
 import { fetchWeatherForTrip, WeatherDay } from '@/lib/weather';
 import { getCapitalCoords } from '@/lib/capitals';
 import { getTimezoneForCountry } from '@/lib/countryTimezones';
 import { getCurrencySymbol } from '@/lib/currency';
+import CurrencyAmount from '../ui/CurrencyAmount';
 
 const STRIPE_COLORS = ['#C4714A', '#C8944A', '#3B6E52', '#6B5CE7', '#E05A3A', '#2B8A6E', '#B45309'];
 
+// ── Budget edit sheet ─────────────────────────────────────────────────────────
+
+function BudgetEditSheet({ current, currSym, onClose, onSave }: {
+  current: number | undefined;
+  currSym: string;
+  onClose: () => void;
+  onSave: (v: number) => void;
+}) {
+  const [val, setVal] = useState(current != null ? String(current) : '');
+  return (
+    <Sheet title="Set budget limit" onClose={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <Field
+          label={`Maximum budget (${currSym})`}
+          placeholder="0"
+          value={val}
+          onChange={setVal}
+          type="number"
+          autoFocus
+        />
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button
+            onClick={() => {
+              const n = parseFloat(val);
+              if (isNaN(n) || n <= 0) { return; } // silently block — Field is visually focused
+              onSave(n);
+              onClose();
+            }}
+            style={{
+              flex: 2, height: 52, border: 0, borderRadius: 'var(--lg-r-btn)',
+              background: 'var(--lg-forest)', color: '#fff',
+              fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, cursor: 'pointer',
+              boxShadow: 'var(--lg-glow-forest)',
+            }}
+          >
+            Save
+          </button>
+          <button
+            onClick={onClose}
+            style={{
+              flex: 1, height: 52, border: 0, borderRadius: 'var(--lg-r-btn)',
+              background: 'var(--lg-panel)', color: 'var(--text-2)',
+              fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 15, cursor: 'pointer',
+              boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+            }}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </Sheet>
+  );
+}
+
+// ── Weather icon ─────────────────────────────────────────────────────────────
+
+const WEATHER_ICONS: [RegExp, string][] = [
+  [/clear|sunny/i,  '☀'],
+  [/partly|cloud/i, '⛅'],
+  [/rain|shower/i,  '🌧'],
+  [/thunder|storm/i,'⛈'],
+  [/snow/i,         '🌨'],
+  [/fog|mist/i,     '🌫'],
+  [/wind/i,         '💨'],
+];
+function weatherIcon(label?: string): string {
+  if (!label) return '🌡';
+  for (const [re, ic] of WEATHER_ICONS) if (re.test(label)) return ic;
+  return '🌡';
+}
+
+// ── AI analysis helper ───────────────────────────────────────────────────────
+
+function buildAiSummary(trip: any, supplies: any[], totalSpent: number): string {
+  const totalEvents = Object.values(trip.events as Record<number, any[]>).reduce((s, e) => s + e.length, 0);
+  const emptyDays = Array.from({ length: trip.days }, (_, i) => i + 1)
+    .filter(d => !(trip.events[d]?.length));
+  const packedPct = supplies.length > 0
+    ? Math.round((supplies.filter((s: any) => s.checked).length / supplies.length) * 100)
+    : 0;
+  const budgetPct = trip.budget ? Math.round((totalSpent / trip.budget) * 100) : null;
+
+  const lines: string[] = [];
+  lines.push(`${trip.days} days · ${totalEvents} events planned.`);
+
+  if (emptyDays.length > 0 && emptyDays.length <= 3) {
+    const labels = emptyDays.map(d => {
+      if (!trip.startDate) return `Day ${d}`;
+      const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000);
+      return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'has' : 'have'} no events yet — consider filling them in.`);
+  } else if (emptyDays.length > 3) {
+    lines.push(`${emptyDays.length} days still have no events — there's room to add more activities.`);
+  }
+
+  if (budgetPct !== null) {
+    if (budgetPct > 90) lines.push('Budget is nearly full — review upcoming costs.');
+    else if (budgetPct > 70) lines.push(`${budgetPct}% of budget used — on track.`);
+    else lines.push(`Plenty of budget headroom remaining.`);
+  }
+
+  if (packedPct < 50 && supplies.length > 0) {
+    lines.push(`Packing is ${packedPct}% done — make sure to check off essentials before departure.`);
+  } else if (packedPct === 100) {
+    lines.push('All items packed. Ready to go.');
+  }
+
+  return lines.join(' ');
+}
+
+// ── Calendar heatmap ─────────────────────────────────────────────────────────
+
+function CalendarHeatmap({ trip }: { trip: any }) {
+  if (!trip?.startDate) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const cells = Array.from({ length: trip.days }, (_, i) => {
+    const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + i * 86_400_000);
+    const count = (trip.events[i + 1] ?? []).length;
+    const isPast = dt < today;
+    const isToday = dt.getTime() === today.getTime();
+    return { dt, count, isPast, isToday };
+  });
+
+  // Group by month
+  const months: Record<string, typeof cells> = {};
+  cells.forEach(c => {
+    const key = c.dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    if (!months[key]) months[key] = [];
+    months[key].push(c);
+  });
+
+  const heatColor = (count: number, isPast: boolean) => {
+    if (isPast) return 'oklch(50% 0.02 60 / 20%)';
+    if (count === 0) return 'oklch(50% 0.02 60 / 12%)';
+    if (count <= 2)  return 'oklch(58% 0.12 148 / 55%)';
+    if (count <= 4)  return 'oklch(52% 0.15 148 / 75%)';
+    return 'var(--lg-forest)';
+  };
+
+  return (
+    <div>
+      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>Trip calendar</p>
+      {Object.entries(months).map(([month, mCells]) => (
+        <div key={month} className="lg a-rise" style={{ padding: '12px 14px', marginBottom: 10 }}>
+          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 8, fontSize: 8.5 }}>{month}</p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {mCells.map(({ dt, count, isPast, isToday }) => (
+              <div
+                key={dt.toISOString()}
+                title={`${dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} · ${count} event${count !== 1 ? 's' : ''}`}
+                style={{
+                  width: 32, height: 32, borderRadius: 8,
+                  background: heatColor(count, isPast),
+                  border: isToday ? '2px solid var(--lg-terra)' : '1px solid transparent',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexDirection: 'column',
+                }}
+              >
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700, color: count > 0 && !isPast ? '#fff' : 'var(--text-3)', lineHeight: 1 }}>
+                  {dt.getDate()}
+                </span>
+                {count > 0 && (
+                  <span style={{ fontSize: 8, color: count > 0 && !isPast ? 'rgba(255,255,255,0.75)' : 'var(--text-3)', lineHeight: 1 }}>
+                    {count}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Expense manager ───────────────────────────────────────────────────────────
+
+function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
+  trip: any; currSym: string; currCode: string; onClose: () => void; onAddBudget: (v: number) => void;
+}) {
+  const { addExpense, deleteExpense } = useAppStore();
+  const { show } = useToast();
+  const [desc, setDesc] = useState('');
+  const [amount, setAmount] = useState('');
+  const [paidBy, setPaidBy] = useState('');
+  const [budgetVal, setBudgetVal] = useState(trip?.budget ? String(trip.budget) : '');
+
+  const expenses = trip?.expenses ?? [];
+  const total = expenses.reduce((s: number, e: any) => s + e.amount, 0);
+
+  const handleAdd = () => {
+    const n = parseFloat(amount);
+    if (!desc.trim() || isNaN(n) || n <= 0) { show('Enter a valid description and amount'); return; }
+    addExpense({ description: desc.trim(), amount: n, paidBy: paidBy.trim() || 'You', splitCount: 1 });
+    setDesc(''); setAmount(''); setPaidBy('');
+    show('Expense added');
+  };
+
+  return (
+    <Sheet title="Budget & expenses" onClose={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {/* Budget limit */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
+          <div style={{ flex: 1 }}>
+            <Field label={`Budget limit (${currSym})`} placeholder="0" value={budgetVal} onChange={setBudgetVal} type="number" />
+          </div>
+          <button
+            onClick={() => { const n = parseFloat(budgetVal); if (!isNaN(n) && n > 0) { onAddBudget(n); show('Budget saved'); } }}
+            style={{ height: 48, padding: '0 16px', border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: '#fff', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: 'var(--lg-glow-forest)' }}
+          >
+            Set
+          </button>
+        </div>
+
+        {/* Summary */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ fontSize: 13, color: 'var(--text-2)' }}>Total spent</span>
+          <span style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)' }}>
+            <CurrencyAmount amount={total} base={currCode} />
+          </span>
+        </div>
+
+        {/* Add expense */}
+        <div style={{ padding: '12px 14px', background: 'var(--lg-panel)', borderRadius: 16 }}>
+          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10, fontSize: 9 }}>Add expense</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Field label="Description" placeholder="Coffee, taxi…" value={desc} onChange={setDesc} />
+            <div style={{ display: 'flex', gap: 10 }}>
+              <Field label={`Amount (${currSym})`} placeholder="0" value={amount} onChange={setAmount} type="number" />
+              <Field label="Paid by" placeholder="You" value={paidBy} onChange={setPaidBy} />
+            </div>
+            <button
+              onClick={handleAdd}
+              className="lg-btn lg-btn-forest"
+              style={{ height: 44, gap: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <Icon name="plus" size={15} color="#fff" />
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* Expense list */}
+        {expenses.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>History</p>
+            {expenses.map((exp: any) => (
+              <div key={exp.id} className="lg" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.description}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{exp.paidBy}</div>
+                </div>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--lg-ink)', flexShrink: 0 }}>
+                  <CurrencyAmount amount={exp.amount} base={currCode} />
+                </span>
+                <button
+                  onClick={() => { deleteExpense(exp.id); show('Expense removed'); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+                  aria-label="Delete expense"
+                >
+                  <Icon name="trash" size={15} color="var(--danger)" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </Sheet>
+  );
+}
+
+// ── Day date label ────────────────────────────────────────────────────────────
+
+function dayDateLabel(startDate: string | undefined, dayNum: number): { top: string; bottom: string } {
+  if (!startDate) return { top: 'DAY', bottom: String(dayNum) };
+  const dt = new Date(new Date(startDate + 'T00:00:00').getTime() + (dayNum - 1) * 86_400_000);
+  return {
+    top: dt.toLocaleDateString('en-US', { month: 'short' }).toUpperCase(),
+    bottom: String(dt.getDate()),
+  };
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
+
 export default function DashboardScreenV2() {
-  const { trip, setScreen, setActiveDay, supplies, tripDbId, currencyByTrip } = useAppStore();
+  const { trip, setScreen, setActiveDay, supplies, tripDbId, currencyByTrip, setTripBudget, createInviteLink } = useAppStore();
   const { t, locale } = useI18n();
+  const { show } = useToast();
 
   const [weather, setWeather] = useState<WeatherDay[]>([]);
   const [localTime, setLocalTime] = useState('');
+  const [showBudgetEdit, setShowBudgetEdit] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [sharingLink, setSharingLink] = useState(false);
 
   // ── Derived date values ──────────────────────────────────────────────
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -46,8 +339,7 @@ export default function DashboardScreenV2() {
       })()
     : null;
 
-  const destCity =
-    trip?.dayMeta?.[0]?.region || trip?.countries?.[0] || trip?.name || '';
+  const destCity = trip?.dayMeta?.[0]?.region || trip?.countries?.[0] || trip?.name || '';
 
   // ── Weather fetch ────────────────────────────────────────────────────
   useEffect(() => {
@@ -62,7 +354,6 @@ export default function DashboardScreenV2() {
         lat = meta.lat; lng = meta.lng; break;
       }
     }
-
     if (!lat) {
       outer: for (let d = 1; d <= trip.days; d++) {
         for (const ev of trip.events[d] ?? []) {
@@ -72,12 +363,10 @@ export default function DashboardScreenV2() {
         }
       }
     }
-
     if (!lat && trip.countries?.length) {
       const capital = getCapitalCoords(trip.countries[0]);
       if (capital) { lat = capital.lat; lng = capital.lng; }
     }
-
     if (!lat || !lng) return;
     fetchWeatherForTrip(lat, lng, trip.startDate, trip.days)
       .then(setWeather)
@@ -122,9 +411,9 @@ export default function DashboardScreenV2() {
   );
 
   const todayWeather: WeatherDay | null = weather[currentDisplayDay - 1] ?? weather[0] ?? null;
-  const totalEvents = Object.values(trip.events).reduce((s, evs) => s + evs.length, 0);
-
   const isRTL = locale === 'he';
+
+  const aiSummary = buildAiSummary(trip, supplies, totalSpent);
 
   return (
     <div
@@ -142,7 +431,7 @@ export default function DashboardScreenV2() {
           marginBottom: 18,
         }}
       >
-        {/* Soft terra radial glow — top-trailing corner */}
+        {/* Soft terra radial glow */}
         <div
           aria-hidden
           style={{
@@ -158,36 +447,37 @@ export default function DashboardScreenV2() {
           <span className="eyebrow-lg" style={{ color: 'oklch(98% 0.005 80 / 72%)' }}>
             {currentTripDay !== null
               ? `${t('day').toUpperCase()} ${currentTripDay}`
-              : 'Active trip'}
+              : daysUntil !== null && daysUntil > 0
+                ? `IN ${daysUntil} DAYS`
+                : 'TRIP'}
           </span>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button
               onClick={() => setScreen('settings')}
               className="lg-dark"
-              style={{
-                width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                WebkitTapHighlightColor: 'transparent',
-              }}
+              style={{ width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent' }}
               aria-label="Settings"
             >
               <Icon name="settings" size={16} color="#fff" />
             </button>
-
             <button
               className="lg-dark"
-              style={{
-                width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                WebkitTapHighlightColor: 'transparent',
+              disabled={sharingLink}
+              onClick={async () => {
+                setSharingLink(true);
+                try {
+                  const link = await createInviteLink();
+                  await navigator.clipboard?.writeText(link).catch(() => {});
+                  show('Invite link copied to clipboard');
+                } catch { show('Could not create invite link'); }
+                finally { setSharingLink(false); }
               }}
+              style={{ width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent', opacity: sharingLink ? 0.6 : 1 }}
               aria-label="Share trip"
             >
               <Icon name="share" size={16} color="#fff" />
             </button>
-
-            {/* Crew avatars — overlapping, dark ring */}
             <div role="list" aria-label="Crew" style={{ display: 'flex', alignItems: 'center' }}>
               {trip.participants.slice(0, 4).map((p, i) => (
                 <div
@@ -201,9 +491,7 @@ export default function DashboardScreenV2() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     border: '2px solid oklch(20% 0.03 60)',
                     marginInlineStart: i > 0 ? -8 : 0,
-                    boxShadow: 'var(--lg-shadow)',
-                    letterSpacing: '-0.02em',
-                    flexShrink: 0,
+                    boxShadow: 'var(--lg-shadow)', letterSpacing: '-0.02em', flexShrink: 0,
                   }}
                 >
                   {p.initials}
@@ -213,13 +501,10 @@ export default function DashboardScreenV2() {
           </div>
         </div>
 
-        {/* Destination eyebrow → trip name */}
+        {/* Trip name */}
         <div style={{ marginTop: 24, position: 'relative' }}>
           {(trip.countries?.length ?? 0) > 0 && (
-            <p
-              className="eyebrow-lg a-rise"
-              style={{ color: 'var(--lg-sand)', margin: '0 0 4px' }}
-            >
+            <p className="eyebrow-lg a-rise" style={{ color: 'var(--lg-sand)', margin: '0 0 4px' }}>
               {(trip.countries ?? []).join(' · ')}
             </p>
           )}
@@ -230,54 +515,28 @@ export default function DashboardScreenV2() {
             {trip.name}
           </h1>
 
-          {/* Status chip row: countdown · weather · local time */}
-          <div
-            className="a-rise d2"
-            style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}
-          >
-            {/* Countdown */}
+          {/* Status chips */}
+          <div className="a-rise d2" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
             {daysUntil !== null && daysUntil > 0 && (
-              <span
-                className="lg-dark"
-                style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}
-              >
-                <span
-                  aria-hidden
-                  style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }}
-                />
+              <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
+                <span aria-hidden style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }} />
                 {daysUntil} {t('days')}
               </span>
             )}
             {currentTripDay !== null && (
-              <span
-                className="lg-dark"
-                style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}
-              >
-                <span
-                  aria-hidden
-                  style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }}
-                />
+              <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
+                <span aria-hidden style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }} />
                 {t('day')} {currentTripDay} {'of ' + trip.days}
               </span>
             )}
-
-            {/* Weather chip */}
             {todayWeather && (
-              <span
-                className="lg-dark"
-                style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}
-              >
+              <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
                 <Icon name="sun" size={14} color="var(--lg-sand)" />
                 {todayWeather.tempMax}° · {destCity}
               </span>
             )}
-
-            {/* Local time chip */}
             {localTime && (
-              <span
-                className="lg-dark"
-                style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontWeight: 500, fontSize: 12 }}
-              >
+              <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontWeight: 500, fontSize: 12 }}>
                 <Icon name="clock" size={12} color="oklch(98% 0.005 80 / 72%)" />
                 {localTime}
               </span>
@@ -285,7 +544,7 @@ export default function DashboardScreenV2() {
           </div>
         </div>
 
-        {/* Day-journey scroller: 50×62 chips, Day 1 active terra gradient */}
+        {/* Day journey scroller — shows real dates (Aug 23, Aug 24…) */}
         <div
           className="lg-scroll a-rise d3"
           role="list"
@@ -295,33 +554,39 @@ export default function DashboardScreenV2() {
           {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
             const dayNum  = i + 1;
             const isActive = dayNum === currentDisplayDay;
+            const { top, bottom } = dayDateLabel(trip.startDate, dayNum);
+            const dayWeather = weather[i];
             return (
               <button
                 key={dayNum}
                 role="listitem"
                 onClick={() => handleDayClick(dayNum)}
-                aria-label={`${t('day')} ${dayNum}`}
+                aria-label={`${top} ${bottom}`}
                 aria-pressed={isActive}
                 style={{
-                  flexShrink: 0, width: 50, height: 62, borderRadius: 16, border: 0, cursor: 'pointer',
+                  flexShrink: 0, width: 54, height: dayWeather ? 74 : 62, borderRadius: 16, border: 0, cursor: 'pointer',
                   background: isActive
                     ? 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))'
                     : 'oklch(100% 0 0 / 12%)',
-                  boxShadow: isActive
-                    ? 'var(--lg-glow-terra)'
-                    : 'inset 0 0 0 1px oklch(100% 0 0 / 14%)',
+                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'inset 0 0 0 1px oklch(100% 0 0 / 14%)',
                   color: '#fff',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: 1, backdropFilter: 'blur(10px)',
                   WebkitTapHighlightColor: 'transparent',
+                  padding: '4px 0',
                 }}
               >
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, opacity: 0.8, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-                  {t('day')}
+                  {top}
                 </span>
                 <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, lineHeight: 1 }}>
-                  {dayNum}
+                  {bottom}
                 </span>
+                {dayWeather && (
+                  <span style={{ fontSize: 9, opacity: 0.85, marginTop: 1 }}>
+                    {weatherIcon(dayWeather.label)} {dayWeather.tempMax}°
+                  </span>
+                )}
               </button>
             );
           })}
@@ -331,7 +596,7 @@ export default function DashboardScreenV2() {
       {/* ══ Main content ════════════════════════════════════════════════ */}
       <div style={{ padding: '0 20px', paddingBottom: 110, display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-        {/* ── AI summary card ── */}
+        {/* ── AI analysis card ── */}
         <button
           className="a-rise"
           onClick={() => setScreen('day')}
@@ -346,21 +611,15 @@ export default function DashboardScreenV2() {
           <div aria-hidden style={{ position: 'absolute', top: -20, insetInlineEnd: -10, opacity: 0.16, pointerEvents: 'none' }}>
             <Icon name="sparkle" size={90} color="#fff" />
           </div>
-
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
-            <Icon name="sparkle" size={16} color="var(--lg-sand)" />
-            <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)' }}>
-              Trip summary
-            </span>
+            <Icon name="ai" size={16} color="var(--lg-sand)" />
+            <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)' }}>AI analysis</span>
           </div>
-
-          <p style={{ fontSize: 14, lineHeight: 1.55, color: '#fff', fontWeight: 500, margin: 0 }}>
-            {trip.days} {t('days')} · {totalEvents} events planned
-            {trip.countries?.length ? ` · ${trip.countries.join(', ')}` : ''}.
+          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#fff', fontWeight: 500, margin: 0 }}>
+            {aiSummary}
           </p>
-
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 12, color: '#fff', fontWeight: 600, fontSize: 13 }}>
-            See suggestions
+            View suggestions
             <Icon name="arrow" size={15} color="#fff" style={{ transform: isRTL ? 'scaleX(-1)' : 'none' }} />
           </div>
         </button>
@@ -374,13 +633,9 @@ export default function DashboardScreenV2() {
             <button
               className="lg a-rise d1"
               onClick={() => { setActiveDay(nextEvent.dayNum); setScreen('day'); }}
-              style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 15, padding: 16,
-                cursor: 'pointer', border: 0, textAlign: 'start',
-              }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 15, padding: 16, cursor: 'pointer', border: 0, textAlign: 'start' }}
             >
               <StampIcon iconKey={CAT_FALLBACK[nextEvent.event.category]} size={56} />
-
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div className="eyebrow-lg" style={{ color: 'var(--lg-sky)', fontSize: 9 }}>
                   {t('day')} {nextEvent.dayNum}
@@ -390,11 +645,7 @@ export default function DashboardScreenV2() {
                     ? ` → ${Math.floor((toMins(nextEvent.event.time) + nextEvent.event.duration) / 60).toString().padStart(2, '0')}:${String((toMins(nextEvent.event.time) + nextEvent.event.duration) % 60).padStart(2, '0')}`
                     : ''}
                 </div>
-                <div style={{
-                  fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)',
-                  lineHeight: 1.05, marginTop: 2,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)', lineHeight: 1.05, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {t(nextEvent.event.name as any)}
                 </div>
                 {nextEvent.event.location && (
@@ -404,13 +655,7 @@ export default function DashboardScreenV2() {
                   </div>
                 )}
               </div>
-
-              <Icon
-                name="chevR"
-                size={20}
-                color="var(--text-3)"
-                style={{ flexShrink: 0, transform: isRTL ? 'scaleX(-1)' : 'none' }}
-              />
+              <Icon name="chevR" size={20} color="var(--text-3)" style={{ flexShrink: 0, transform: isRTL ? 'scaleX(-1)' : 'none' }} />
             </button>
           </div>
         )}
@@ -421,11 +666,7 @@ export default function DashboardScreenV2() {
           <button
             className="lg a-rise d2"
             onClick={() => setScreen('supplies')}
-            style={{
-              flex: 1, padding: 16,
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-              cursor: 'pointer', border: 0,
-            }}
+            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', border: 0 }}
             aria-label={`Packed: ${packedPct}%`}
           >
             <Ring pct={packedPct} size={58} color="var(--lg-terra)">{packedPct}%</Ring>
@@ -434,16 +675,21 @@ export default function DashboardScreenV2() {
             </span>
           </button>
 
-          {/* Budget */}
-          <div
+          {/* Budget — tap to open full expense manager */}
+          <button
             className="lg a-rise d3"
-            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4 }}
+            onClick={() => setShowBudgetEdit(true)}
+            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, cursor: 'pointer', border: 0, textAlign: 'start' }}
+            aria-label="Edit budget"
           >
-            <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>
-              {t('budgetLabel') as string || 'Budget'}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>
+                {t('budgetLabel') as string || 'Budget'}
+              </span>
+              <Icon name="edit" size={12} color="var(--text-3)" />
+            </div>
             <span style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--lg-ink)', lineHeight: 1 }}>
-              {currSym}{totalSpent.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              <CurrencyAmount amount={totalSpent} base={currency} />
             </span>
             {trip.budget ? (
               <>
@@ -451,37 +697,38 @@ export default function DashboardScreenV2() {
                   <div
                     style={{
                       width: `${Math.min(100, Math.round((totalSpent / trip.budget) * 100))}%`,
-                      height: '100%', background: 'var(--lg-terra)', borderRadius: 3,
+                      height: '100%',
+                      background: totalSpent / trip.budget > 0.9 ? 'var(--danger)' : 'var(--lg-terra)',
+                      borderRadius: 3,
                     }}
                   />
                 </div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)' }}>
-                  {t('of') as string || 'of'} {currSym}{trip.budget.toLocaleString()}
+                  {t('of') as string || 'of'} <CurrencyAmount amount={trip.budget} base={currency} style={{ fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 400 }} />
                 </span>
               </>
-            ) : null}
-          </div>
+            ) : (
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)' }}>
+                Tap to set limit
+              </span>
+            )}
+          </button>
         </div>
 
-        {/* ── Today preview ── */}
-        {todayEvs.length > 0 && (
+        {/* ── Today's schedule (only shown when trip is active) ── */}
+        {todayEvs.length > 0 && currentTripDay !== null && (
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: 0 }}>
-                {'Today · ' + t('day').toUpperCase() + ' ' + currentDisplayDay}
+                {'Today · ' + t('day').toUpperCase() + ' ' + currentTripDay}
               </p>
               <button
-                onClick={() => handleDayClick(currentDisplayDay)}
-                style={{
-                  background: 'none', border: 'none', cursor: 'pointer',
-                  fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600,
-                  color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: 4, padding: 0,
-                }}
+                onClick={() => handleDayClick(currentTripDay)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--brand)', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}
               >
-                {trip.days} {t('days')}
+                See all
               </button>
             </div>
-
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {todayEvs.slice(0, 4).map(ev => (
                 <div
@@ -489,26 +736,16 @@ export default function DashboardScreenV2() {
                   className="lg a-rise"
                   role="button"
                   tabIndex={0}
-                  onClick={() => handleDayClick(currentDisplayDay)}
-                  onKeyDown={e => e.key === 'Enter' && handleDayClick(currentDisplayDay)}
+                  onClick={() => handleDayClick(currentTripDay)}
+                  onKeyDown={e => e.key === 'Enter' && handleDayClick(currentTripDay)}
                   style={{ display: 'flex', alignItems: 'center', gap: 13, padding: 13, cursor: 'pointer' }}
                 >
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600,
-                      color: 'var(--lg-ink)', width: 40, flexShrink: 0,
-                    }}
-                  >
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: 'var(--lg-ink)', width: 40, flexShrink: 0 }}>
                     {ev.time}
                   </span>
-
                   <StampIcon iconKey={CAT_FALLBACK[ev.category]} size={38} />
-
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                      fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)',
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                    }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {t(ev.name as any)}
                     </div>
                     {ev.location && (
@@ -518,7 +755,6 @@ export default function DashboardScreenV2() {
                       </div>
                     )}
                   </div>
-
                   {ev.duration > 0 && (
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', flexShrink: 0 }}>
                       {fmtDuration(ev.duration)}
@@ -530,7 +766,110 @@ export default function DashboardScreenV2() {
           </div>
         )}
 
+        {/* Upcoming day preview when trip hasn't started */}
+        {todayEvs.length > 0 && currentTripDay === null && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: 0 }}>
+                {trip.startDate
+                  ? (() => {
+                      const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (currentDisplayDay - 1) * 86_400_000);
+                      return dt.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+                    })()
+                  : `Day ${currentDisplayDay}`}
+              </p>
+              <button
+                onClick={() => handleDayClick(currentDisplayDay)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600, color: 'var(--brand)', padding: 0 }}
+              >
+                See all
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {todayEvs.slice(0, 3).map(ev => (
+                <div
+                  key={ev.id}
+                  className="lg a-rise"
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleDayClick(currentDisplayDay)}
+                  onKeyDown={e => e.key === 'Enter' && handleDayClick(currentDisplayDay)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 13, padding: 13, cursor: 'pointer' }}
+                >
+                  <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: 'var(--lg-ink)', width: 40, flexShrink: 0 }}>
+                    {ev.time}
+                  </span>
+                  <StampIcon iconKey={CAT_FALLBACK[ev.category]} size={38} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {t(ev.name as any)}
+                    </div>
+                    {ev.location && (
+                      <div style={{ fontSize: 12, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+                        <Icon name="pin" size={12} color="var(--text-3)" />
+                        {ev.location}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Empty trip CTA — no events at all ── */}
+        {Object.values(trip.events).every((evArr: any) => evArr.length === 0) && (
+          <div
+            className="lg a-rise"
+            style={{ padding: '28px 20px', textAlign: 'center', borderRadius: 'var(--lg-r-card)' }}
+          >
+            <Icon name="compass" size={40} color="var(--text-3)" />
+            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', margin: '12px 0 6px' }}>
+              No events yet.
+            </p>
+            <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 18px' }}>
+              Start planning Day 1 — add flights, restaurants, activities, anything.
+            </p>
+            <button
+              onClick={() => { setActiveDay(1); setScreen('day'); }}
+              className="lg-btn lg-btn-forest"
+              style={{ height: 44, padding: '0 22px', display: 'inline-flex', alignItems: 'center', gap: 8 }}
+            >
+              <Icon name="plus" size={16} color="#fff" />
+              Plan Day 1
+            </button>
+          </div>
+        )}
+
+        {/* ── Calendar heatmap toggle ── */}
+        <div>
+          <button
+            onClick={() => setShowCalendar(c => !c)}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
+              background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', marginBottom: 8,
+            }}
+          >
+            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: 0 }}>
+              Trip calendar
+            </p>
+            <Icon name={showCalendar ? 'chevL' : 'chevR'} size={14} color="var(--text-3)" style={{ transform: showCalendar ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform .3s' }} />
+          </button>
+          {showCalendar && <CalendarHeatmap trip={trip} />}
+        </div>
+
       </div>
+
+      {/* Budget / expense sheet */}
+      {showBudgetEdit && (
+        <ExpenseSheet
+          trip={trip}
+          currSym={currSym}
+          currCode={currency}
+          onClose={() => setShowBudgetEdit(false)}
+          onAddBudget={v => setTripBudget(v)}
+        />
+      )}
     </div>
   );
 }

@@ -62,6 +62,7 @@ export async function PATCH(
   if (d.startDate  !== undefined) patch.start_date = d.startDate
   if (d.theme      !== undefined) patch.theme      = d.theme
   if (d.trip_notes !== undefined) patch.trip_notes = d.trip_notes
+  if (d.countries  !== undefined) patch.countries  = d.countries
 
   const client = admin ?? supabase
   const { error } = await client.from('trips').update(patch).eq('id', tripId)

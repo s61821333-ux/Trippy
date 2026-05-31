@@ -339,7 +339,7 @@ export async function dbDeleteEmergencyContact(contactId: string, tripId?: strin
   if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
-export async function dbUpdateTripInfo(tripId: string, updates: { name?: string; days?: number; startDate?: string }) {
+export async function dbUpdateTripInfo(tripId: string, updates: { name?: string; days?: number; startDate?: string; countries?: string[] }) {
   const r = await fetch(`/api/trips/${tripId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -387,7 +387,7 @@ export async function dbUpdateTripNotes(tripId: string, notes: string[]) {
   const r = await fetch(`/api/trips/${tripId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tripNotes: notes }),
+    body: JSON.stringify({ trip_notes: notes }),
   })
   if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }

@@ -10,7 +10,7 @@ import Icon from '../ui/Icon';
 import Btn from '../ui/Btn';
 import Sheet from '../ui/Sheet';
 import { StampIcon } from '../ui/StampIcon';
-import CompassLoader from '../ui/CompassLoader';
+import { CompassLoader, LoaderStyles, BRAND_THEME } from '../ui/TripLoaders';
 import Field from '../ui/Field';
 import CountriesInput from '../ui/CountriesInput';
 import { TripTheme } from '@/lib/types';
@@ -24,14 +24,21 @@ const THEME_STAMP: Record<string, string> = {
   city:     'museum',
   beach:    'beach',
   mountain: 'mountain',
+  lake:     'kayak',
   snow:     'snowflake',
+  sunset:   'sunrise',
+  space:    'compass',
 };
 
 const THEMES: { id: TripTheme; label: string; labelHe: string; bg: string; accent: string }[] = [
-  { id: 'desert', label: 'Desert', labelHe: 'מדבר', bg: '#FFF4EC', accent: '#C4714A' },
-  { id: 'nature', label: 'Nature', labelHe: 'טבע',  bg: '#EDF5EF', accent: '#3B6E52' },
-  { id: 'city',   label: 'City',   labelHe: 'עיר',  bg: '#F0F0F4', accent: '#3A2E26' },
-  { id: 'beach',  label: 'Beach',  labelHe: 'חוף',  bg: '#E8F7F9', accent: '#2B7A8E' },
+  { id: 'desert',   label: 'Desert',   labelHe: 'מדבר',  bg: '#FFF4EC', accent: '#C4714A' },
+  { id: 'nature',   label: 'Nature',   labelHe: 'טבע',   bg: '#EDF5EF', accent: '#3B6E52' },
+  { id: 'city',     label: 'City',     labelHe: 'עיר',   bg: '#F0F0F4', accent: '#3A2E26' },
+  { id: 'beach',    label: 'Beach',    labelHe: 'חוף',   bg: '#E8F7F9', accent: '#2B7A8E' },
+  { id: 'mountain', label: 'Mountain', labelHe: 'הרים',  bg: '#EEF0F5', accent: '#4B5E7A' },
+  { id: 'lake',     label: 'Lake',     labelHe: 'אגם',   bg: '#E5F0F5', accent: '#1B6A8A' },
+  { id: 'snow',     label: 'Winter',   labelHe: 'חורף',  bg: '#F0F4F8', accent: '#3A6598' },
+  { id: 'sunset',   label: 'Sunset',   labelHe: 'שקיעה', bg: '#FFF0E5', accent: '#D4531A' },
 ];
 
 const AVC = ['#C4714A', '#C8944A', '#3B6E52', '#2B7A8E', '#A03CB4', '#1E91AF'];
@@ -267,7 +274,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
           style={{ marginTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
         >
           {loading
-            ? <CompassLoader size={22} />
+            ? <CompassLoader theme={BRAND_THEME} size={22} />
             : <><Icon name="check" size={15} />{t('createBtn')}</>
           }
         </Btn>
@@ -279,7 +286,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
 // ── Home_V2 ───────────────────────────────────────────────────────────────────
 
 export default function Home_V2() {
-  const { authUser, loadTripById } = useAppStore();
+  const { authUser, loadTripById, logout } = useAppStore();
   const { t, locale } = useI18n();
   const { show } = useToast();
 
@@ -313,6 +320,7 @@ export default function Home_V2() {
       className="lg-scroll"
       style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}
     >
+      <LoaderStyles />
       {/* ── Dark hero header ── */}
       <div
         className="hero-mesh"
@@ -323,25 +331,36 @@ export default function Home_V2() {
           overflow: 'hidden',
         }}
       >
-        {/* Wordmark + avatar row */}
+        {/* Wordmark + avatar + logout row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
-          <span style={{
-            fontFamily: 'var(--font-sans)', fontSize: 19, fontWeight: 700,
-            letterSpacing: '-0.04em', color: '#fff',
-          }}>
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 19, fontWeight: 700, letterSpacing: '-0.04em', color: '#fff' }}>
             Trippy<span style={{ color: 'var(--lg-sand)' }}>.</span>
           </span>
-          <div
-            aria-label={authUser?.username}
-            style={{
-              width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-              background: 'oklch(100% 0 0 / 16%)',
-              border: '2px solid oklch(100% 0 0 / 30%)',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13, color: '#fff',
-            }}
-          >
-            {initials}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div
+              aria-label={authUser?.username}
+              style={{
+                width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+                background: 'oklch(100% 0 0 / 16%)',
+                border: '2px solid oklch(100% 0 0 / 30%)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13, color: '#fff',
+              }}
+            >
+              {initials}
+            </div>
+            <button
+              onClick={() => logout()}
+              aria-label="Sign out"
+              style={{
+                width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer',
+                background: 'oklch(100% 0 0 / 14%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <Icon name="x" size={15} color="oklch(98% 0.005 80 / 80%)" />
+            </button>
           </div>
         </div>
 
@@ -394,7 +413,7 @@ export default function Home_V2() {
           style={{
             width: '100%', height: 60,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 24px', marginBottom: 12,
+            padding: '0 24px', marginBottom: 26,
             fontSize: 16, fontFamily: 'var(--font-sans)',
           }}
         >
@@ -405,25 +424,7 @@ export default function Home_V2() {
           <Icon name="arrow" size={18} color="#fff" />
         </m.button>
 
-        <m.button
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.28, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setShowCreate(true)}
-          className="lg-btn lg-btn-glass"
-          aria-label="Plan one with AI"
-          style={{
-            width: '100%', height: 52,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 8, marginBottom: 26,
-          }}
-        >
-          <Icon name="sparkle" size={18} color="var(--lg-terra)" />
-          <span style={{ color: 'var(--lg-terra)', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>
-            Plan one with AI
-          </span>
-        </m.button>
+        {/* "Plan one with AI" removed per design update */}
 
         {/* ── Trips list ── */}
         {(tripsLoading || trips.length > 0) && (
@@ -434,7 +435,7 @@ export default function Home_V2() {
 
             {tripsLoading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
-                <CompassLoader size={56} />
+                <CompassLoader theme={BRAND_THEME} size={56} />
               </div>
             ) : (
               <div
@@ -513,7 +514,7 @@ export default function Home_V2() {
                         }}
                       >
                         {isLoading
-                          ? <CompassLoader size={22} />
+                          ? <CompassLoader theme={BRAND_THEME} size={22} />
                           : <Icon name="arrow" size={17} color="#fff" />
                         }
                       </span>

@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getCountryColors } from '@/lib/countryColors';
-import CompassLoader from './ui/CompassLoader';
+import { deriveTheme } from '@/lib/deriveTheme';
+import WelcomeAnimation from './WelcomeAnimation';
 
 interface Props {
   countries: string[];
@@ -12,100 +13,24 @@ interface Props {
 
 export default function TripEntryAnimation({ countries, onDone }: Props) {
   const { colors } = getCountryColors(countries);
-
-  useEffect(() => {
-    const t = setTimeout(onDone, 1800);
-    return () => clearTimeout(t);
-  }, [onDone]);
-
-  // Build a beautiful conic/radial gradient from country colors
-  const palette = colors.length >= 3 ? colors : [...colors, ...colors, ...colors];
-  const gradientStops = palette.slice(0, 6).map((c, i, arr) => `${c} ${Math.round((i / arr.length) * 100)}%`).join(', ');
-  const gradient = `conic-gradient(from 0deg, ${gradientStops})`;
+  const theme = deriveTheme(colors);
 
   return (
-    <motion.div
-      initial={{ opacity: 1 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.55, ease: 'easeInOut' }}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        overflow: 'hidden',
-        pointerEvents: 'all',
-        background: '#0a0a0a',
-      }}
-    >
-      {/* Rotating conic gradient backdrop */}
+    <AnimatePresence>
       <motion.div
-        initial={{ scale: 0, opacity: 0, rotate: -30 }}
-        animate={{ scale: 3.5, opacity: 0.85, rotate: 30 }}
-        transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-        style={{
-          position: 'absolute',
-          width: '100vmax', height: '100vmax',
-          borderRadius: '50%',
-          background: gradient,
-          filter: 'blur(60px)',
-        }}
-      />
-
-      {/* Ripple rings expanding outward */}
-      {palette.slice(0, 4).map((color, i) => (
-        <motion.div
-          key={i}
-          initial={{ scale: 0, opacity: 0.7 }}
-          animate={{ scale: [0, 2.8], opacity: [0.6, 0] }}
-          transition={{
-            duration: 1.1,
-            delay: 0.08 + i * 0.12,
-            ease: 'easeOut',
-          }}
-          style={{
-            position: 'absolute',
-            width: '80vmax', height: '80vmax',
-            borderRadius: '50%',
-            border: `3px solid ${color}`,
-            boxShadow: `0 0 32px 8px ${color}55`,
-          }}
-        />
-      ))}
-
-      {/* Loader card — springs in, fades out */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.6, y: 12 }}
-        animate={{ opacity: [0, 1, 1, 0], scale: [0.6, 1.05, 1, 0.92], y: [12, 0, 0, 0] }}
-        transition={{ duration: 1.8, times: [0.10, 0.26, 0.72, 0.96], ease: 'easeOut' }}
-        style={{
-          position: 'relative', zIndex: 2,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', gap: 20,
-        }}
+        key="trip-entry"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
       >
-        {/* Frosted glass disc */}
-        <div style={{
-          width: 188, height: 188,
-          borderRadius: '50%',
-          background: 'rgba(244,239,232,0.13)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          border: '1.5px solid rgba(244,239,232,0.38)',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.35)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <CompassLoader size={140} />
-        </div>
-        {/* Brand label */}
-        <span style={{
-          fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
-          fontSize: 22, fontWeight: 700, color: '#F4EFE8',
-          letterSpacing: '-0.04em', lineHeight: 1,
-          textShadow: '0 2px 12px rgba(0,0,0,0.6)',
-        }}>
-          Trippy<span style={{ color: '#E0916B' }}>.</span>
-        </span>
+        <WelcomeAnimation
+          theme={theme}
+          duration={3.6}
+          onDone={onDone}
+        />
       </motion.div>
-    </motion.div>
+    </AnimatePresence>
   );
 }

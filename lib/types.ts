@@ -1,4 +1,13 @@
-export type Category = 'food' | 'cafe' | 'attraction' | 'hotel' | 'rest' | 'transport' | 'flight' | 'concert' | 'theme_park' | 'sport' | 'beach' | 'other';
+export type Category =
+  // Core
+  | 'food' | 'cafe' | 'attraction' | 'hotel' | 'rest' | 'transport' | 'flight' | 'concert'
+  | 'theme_park' | 'sport' | 'beach' | 'other'
+  // Extended
+  | 'museum' | 'hiking' | 'nightlife' | 'shopping' | 'spa' | 'nature_walk' | 'cycling'
+  | 'boat' | 'cooking' | 'theater' | 'photography' | 'winery' | 'safari' | 'festival'
+  | 'water_sports' | 'golf' | 'guided_tour' | 'national_park' | 'ski' | 'wellness'
+  | 'cultural' | 'religious' | 'market' | 'picnic' | 'hot_springs' | 'aerial' | 'cruise'
+  | 'farm' | 'art' | 'cinema';
 
 export interface Participant {
   id: number;
@@ -51,6 +60,7 @@ export interface AiSuggestion {
   location?: string;
   rating?: number;
   ratingCount?: number;
+  priceLevel?: number;  // 1–4 from Google Places (1=$, 4=$$$$)
   mapsUrl?: string;
 }
 
