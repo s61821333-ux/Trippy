@@ -110,12 +110,12 @@ export const AddEventBody = z.object({
   duration: z.number().int().min(1).max(1440),
   name: z.string().min(1).max(200),
   category: Category,
-  location: z.string().max(300).optional(),
-  lat: z.number().optional(),
-  lng: z.number().optional(),
-  notes: z.string().max(2000).optional(),
-  cost: z.number().min(0).max(1_000_000).optional(),
-  tags: z.array(z.string().max(50)).max(20).optional(),
+  location: z.string().max(300).nullable().optional(),
+  lat: z.number().nullable().optional(),
+  lng: z.number().nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+  cost: z.number().min(0).max(1_000_000).nullable().optional(),
+  tags: z.array(z.string().max(50)).max(20).nullable().optional(),
 })
 
 export const PatchEventBody = z.object({
@@ -123,12 +123,12 @@ export const PatchEventBody = z.object({
   duration: z.number().int().min(1).max(1440).optional(),
   name: z.string().min(1).max(200).optional(),
   category: Category.optional(),
-  location: z.string().max(300).optional(),
-  lat: z.number().optional(),
-  lng: z.number().optional(),
-  notes: z.string().max(2000).optional(),
-  cost: z.number().min(0).max(1_000_000).optional(),
-  tags: z.array(z.string().max(50)).max(20).optional(),
+  location: z.string().max(300).nullable().optional(),
+  lat: z.number().nullable().optional(),
+  lng: z.number().nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+  cost: z.number().min(0).max(1_000_000).nullable().optional(),
+  tags: z.array(z.string().max(50)).max(20).nullable().optional(),
   votes: z.record(z.string(), z.enum(['up', 'down'])).optional(),
   day_index: z.number().int().min(0).max(364).optional(),
 })
@@ -136,30 +136,30 @@ export const PatchEventBody = z.object({
 export const AddSupplyBody = z.object({
   id: z.string().max(100).optional(),
   name: z.string().min(1).max(200),
-  category: z.string().max(50).optional(),
+  category: z.string().max(50).nullable().optional(),
   checked: z.boolean().optional(),
   critical: z.boolean().optional(),
-  assignee: z.string().max(100).optional(),
+  assignee: z.string().max(100).nullable().optional(),
 })
 
 export const PatchSupplyBody = z.object({
   checked: z.boolean().optional(),
   critical: z.boolean().optional(),
-  assignee: z.string().max(100).optional(),
+  assignee: z.string().max(100).nullable().optional(),
 })
 
 export const AddEmergencyContactBody = z.object({
   id: z.string().max(100).optional(),
   name: z.string().min(1).max(200),
   phone: z.string().min(1).max(50),
-  type: z.enum(['personal', 'medical', 'embassy', 'insurance']).optional(),
+  type: z.enum(['personal', 'medical', 'embassy', 'insurance']).nullable().optional(),
 })
 
 export const PatchDayMetaBody = z.object({
   dayIndex: z.number().int().min(0).max(364),
-  region: z.string().max(200).optional(),
-  emoji: z.string().max(10).optional(),
-  lat: z.number().optional(),
-  lng: z.number().optional(),
-  desc: z.string().max(500).optional(),
+  region: z.string().max(200).nullable().optional(),
+  emoji: z.string().max(10).nullable().optional(),
+  lat: z.number().nullable().optional(),
+  lng: z.number().nullable().optional(),
+  desc: z.string().max(500).nullable().optional(),
 })
