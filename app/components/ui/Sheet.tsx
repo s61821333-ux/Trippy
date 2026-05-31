@@ -11,9 +11,11 @@ interface SheetProps {
   title?: string;
   subtitle?: string;
   isDismissable?: boolean;
+  // When `full` is true the sheet becomes a full-screen slider (slides in from the right)
+  full?: boolean;
 }
 
-export default function Sheet({ children, onClose, title, subtitle, isDismissable = true }: SheetProps) {
+export default function Sheet({ children, onClose, title, subtitle, isDismissable = true, full = false }: SheetProps) {
   const startY = useRef(0);
   const panelRef = useRef<HTMLDivElement>(null);
   const scrollAtStart = useRef(0);
@@ -93,7 +95,8 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           position: 'fixed', inset: 0, zIndex: 200,
           background: 'rgba(26, 20, 16, 0.55)',
           display: 'flex',
-          alignItems: 'flex-end',
+          alignItems: full ? 'stretch' : 'flex-end',
+          justifyContent: full ? 'flex-end' : undefined,
           paddingBottom: kbH > 0 ? kbH : undefined,
           transition: 'padding-bottom 0.2s ease',
         }}
@@ -104,32 +107,34 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           role="dialog"
           aria-modal="true"
           aria-labelledby={title ? titleId : undefined}
-          initial={{ y: '100%' }}
-          animate={{ y: 0 }}
-          exit={{ y: '100%' }}
+          initial={full ? { x: '100%' } : { y: '100%' }}
+          animate={full ? { x: 0 } : { y: 0 }}
+          exit={full ? { x: '100%' } : { y: '100%' }}
           transition={spring.gentle}
           onClick={e => e.stopPropagation()}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onFocusCapture={handleFocusCapture}
           style={{
-            width: '100%',
+            width: full ? '100%' : '100%',
+            height: full ? '100%' : undefined,
             background: 'var(--lg-panel-strong)',
             backdropFilter: 'var(--lg-blur-strong)',
             WebkitBackdropFilter: 'var(--lg-blur-strong)',
             color: 'var(--text)',
-            borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0',
+            borderRadius: full ? 0 : 'var(--lg-r-lg) var(--lg-r-lg) 0 0',
             border: '1px solid oklch(100% 0 0 / 22%)',
-            borderBottom: 'none',
-            padding: 'var(--space-2) var(--space-5)',
+            borderBottom: full ? 'none' : 'none',
+            padding: full ? 'var(--space-6) var(--space-6)' : 'var(--space-2) var(--space-5)',
             paddingBottom: kbH > 0
               ? 'max(20px, env(safe-area-inset-bottom, 20px))'
-              : 'max(40px, env(safe-area-inset-bottom, 40px))',
-            maxHeight: '92dvh',
+              : full ? 'env(safe-area-inset-bottom, 20px)' : 'max(40px, env(safe-area-inset-bottom, 40px))',
+            maxHeight: full ? '100vh' : '92dvh',
             overflowY: 'auto',
-            boxShadow: 'var(--lg-shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 70%)',
+            boxShadow: full ? 'none' : 'var(--lg-shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 70%)',
             touchAction: 'pan-y',
             overscrollBehavior: 'contain',
+            position: full ? 'relative' : undefined,
           }}
         >
           {/* Drag handle + close button */}

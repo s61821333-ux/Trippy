@@ -476,34 +476,7 @@ function BeachBg() {
     );
   }
 
-  /* ── Snow ────────────────────────────────────────────────────── */
-  function SnowBg() {
-    const flakesRef = useRef<SVGGElement>(null);
-    useEffect(()=>{
-      let t=false; const mv=(e:MouseEvent|TouchEvent)=>{ if(t) return; t=true; requestAnimationFrame(()=>{ const cx = e instanceof TouchEvent ? (e.touches[0]?.clientX ?? window.innerWidth/2) : e.clientX; const cy = e instanceof TouchEvent ? (e.touches[0]?.clientY ?? window.innerHeight/2) : e.clientY; const dx=cx/window.innerWidth-0.5, dy=cy/window.innerHeight-0.5; if(flakesRef.current) flakesRef.current.style.transform = `translate(${dx*8}px,${dy*4}px)`; t=false; }); };
-      window.addEventListener('mousemove', mv); window.addEventListener('touchmove', mv, { passive:true });
-      return ()=>{ window.removeEventListener('mousemove', mv); window.removeEventListener('touchmove', mv); };
-    }, []);
-
-    return (
-      <svg width="100%" height="100%" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="sSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#cfe6ff"/><stop offset="100%" stopColor="#f8fbff"/></linearGradient>
-        </defs>
-        <rect width="800" height="600" fill="url(#sSky)"/>
-        <g ref={flakesRef} opacity="0.9">
-          {Array.from({length:60}).map((_,i)=>{
-            const x = Math.floor(Math.random()*820)-10, y = Math.floor(Math.random()*620)-20, r = 1+Math.random()*2.5;
-            return <circle key={i} cx={x} cy={y} r={r} fill="white" opacity={0.8}/>;
-          })}
-        </g>
-        <g>
-          <polygon points="0,480 140,260 300,420 450,240 600,420 740,280 800,480" fill="#e6eef6"/>
-          <ellipse cx="400" cy="620" rx="520" ry="110" fill="#ffffff"/>
-        </g>
-      </svg>
-    );
-  }
+  /* Snow background removed (option no longer available) */
 
   /* ── Space ───────────────────────────────────────────────────── */
   function SpaceBg() {
@@ -562,7 +535,6 @@ export default function BackgroundScene({ theme = 'desert' }: Props) {
       {theme === 'beach'  && <BeachBg />}
       {theme === 'mountain' && <MountainBg />}
       {theme === 'lake' && <LakeBg />}
-      {theme === 'snow' && <SnowBg />}
       {theme === 'space' && <SpaceBg />}
       {theme === 'sunset' && <SunsetBg />}
     </div>

@@ -25,7 +25,6 @@ const THEME_STAMP: Record<string, string> = {
   beach:    'beach',
   mountain: 'mountain',
   lake:     'kayak',
-  snow:     'snowflake',
   sunset:   'sunrise',
   space:    'compass',
 };
@@ -37,7 +36,6 @@ const THEMES: { id: TripTheme; label: string; labelHe: string; bg: string; accen
   { id: 'beach',    label: 'Beach',    labelHe: 'חוף',   bg: '#E8F7F9', accent: '#2B7A8E' },
   { id: 'mountain', label: 'Mountain', labelHe: 'הרים',  bg: '#EEF0F5', accent: '#4B5E7A' },
   { id: 'lake',     label: 'Lake',     labelHe: 'אגם',   bg: '#E5F0F5', accent: '#1B6A8A' },
-  { id: 'snow',     label: 'Winter',   labelHe: 'חורף',  bg: '#F0F4F8', accent: '#3A6598' },
   { id: 'sunset',   label: 'Sunset',   labelHe: 'שקיעה', bg: '#FFF0E5', accent: '#D4531A' },
 ];
 
@@ -132,6 +130,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
       onClose={onClose}
       title={t('createNewTrip')}
       subtitle={locale === 'he' ? selectedTheme.labelHe : selectedTheme.label}
+      full
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
