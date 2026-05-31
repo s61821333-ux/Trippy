@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CompassMark from './ui/CompassMark';
-import CompassLoader from './ui/CompassLoader';
+import { CompassLoader, BRAND_THEME } from './ui/TripLoaders';
 
 interface OnboardingScreenProps {
   onDone: () => void;
@@ -237,7 +237,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
                   boxShadow: '0 12px 40px rgba(26,20,16,0.10)',
                 }}
               >
-                <CompassLoader size={100} />
+                <CompassLoader theme={BRAND_THEME} size={100} />
                 <div style={{
                   fontFamily: 'var(--font-sans)', fontSize: 22, fontWeight: 700,
                   letterSpacing: '-0.04em', color: 'var(--text)',

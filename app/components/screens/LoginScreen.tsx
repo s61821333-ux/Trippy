@@ -8,7 +8,7 @@ import Field from '../ui/Field';
 import Sheet from '../ui/Sheet';
 import Icon from '../ui/Icon';
 import CompassMark from '../ui/CompassMark';
-import CompassLoader from '../ui/CompassLoader';
+import { CompassLoader, BRAND_THEME } from '../ui/TripLoaders';
 import CountriesInput from '../ui/CountriesInput';
 import { StampIcon } from '../ui/StampIcon';
 import { useAppStore } from '@/lib/store';
@@ -198,7 +198,7 @@ function AuthStep() {
           style={{ display: 'flex', justifyContent: 'center', marginBottom: 28, position: 'relative', zIndex: 1 }}
         >
           {googleLoading
-            ? <CompassLoader size={88} />
+            ? <CompassLoader theme={BRAND_THEME} size={88} />
             : (
               <div style={{ animation: 'float 6s ease-in-out infinite' }}>
                 <CompassMark size={88} />
@@ -625,7 +625,7 @@ function TripStep() {
 
             {tripsLoading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
-                <CompassLoader size={56} />
+                <CompassLoader theme={BRAND_THEME} size={56} />
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -691,7 +691,7 @@ function TripStep() {
                         boxShadow: isLoading ? 'none' : `0 4px 12px ${meta.stripe}40`,
                       }}>
                         {isLoading
-                          ? <CompassLoader size={28} />
+                          ? <CompassLoader theme={BRAND_THEME} size={28} />
                           : <span style={{ color: '#fff', fontSize: 15, fontWeight: 700 }}>→</span>
                         }
                       </div>
@@ -804,7 +804,7 @@ function TripStep() {
                 WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
               }}
             >
-              {loading ? <CompassLoader size={22} /> : <Icon name="check" size={15} />}
+              {loading ? <CompassLoader theme={BRAND_THEME} size={22} /> : <Icon name="check" size={15} />}
               {loading ? '' : t('createBtn')}
             </button>
           </div>
