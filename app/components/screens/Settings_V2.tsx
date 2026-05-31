@@ -1,0 +1,366 @@
+'use client';
+
+import React, { useState } from 'react';
+import { m, AnimatePresence } from 'framer-motion';
+import { useShallow } from 'zustand/react/shallow';
+import { spring } from '@/lib/motion';
+import { useAppStore } from '@/lib/store';
+import { useI18n, Locale } from '@/lib/i18n';
+import { CURRENCIES } from '@/lib/currency';
+import Icon from '../ui/Icon';
+
+// ── Toggle ────────────────────────────────────────────────────────────────────
+
+function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
+  const { isRTL } = useI18n();
+  return (
+    <button
+      onClick={onClick}
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      style={{
+        width: 50, height: 30, borderRadius: 9999,
+        border: 0, cursor: 'pointer', padding: 3, flexShrink: 0,
+        background: on ? 'var(--lg-forest)' : 'oklch(50% 0.02 60 / 24%)',
+        boxShadow: on ? 'var(--lg-glow-forest)' : 'none',
+        transition: 'background .3s',
+        WebkitTapHighlightColor: 'transparent',
+      }}
+    >
+      <m.span
+        animate={{ x: on ? (isRTL ? -20 : 20) : 0 }}
+        transition={{ type: 'spring', stiffness: 500, damping: 36 }}
+        style={{
+          display: 'block', width: 24, height: 24, borderRadius: '50%',
+          background: '#fff', boxShadow: 'var(--lg-shadow)',
+        }}
+      />
+    </button>
+  );
+}
+
+// ── Row ───────────────────────────────────────────────────────────────────────
+
+function Row({
+  icon, title, sub, right, onClick,
+}: {
+  icon?: string;
+  title: string;
+  sub?: string;
+  right?: React.ReactNode;
+  onClick?: () => void;
+}) {
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 13, padding: '13px 0',
+        cursor: onClick ? 'pointer' : 'default',
+      }}
+    >
+      {icon && (
+        <span
+          className="lg-btn lg-btn-glass"
+          style={{ width: 38, height: 38, padding: 0, flexShrink: 0 }}
+          aria-hidden="true"
+        >
+          <Icon name={icon as 'settings'} size={17} color="var(--lg-forest)" />
+        </span>
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)' }}>{title}</div>
+        {sub && <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 1 }}>{sub}</div>}
+      </div>
+      {right}
+    </div>
+  );
+}
+
+function Divider() {
+  return <div aria-hidden="true" style={{ height: 1, background: 'oklch(50% 0.02 60 / 10%)' }} />;
+}
+
+// ── Main Settings_V2 ─────────────────────────────────────────────────────────
+
+export default function Settings_V2() {
+  const { t, locale, setLocale, isRTL } = useI18n();
+
+  const {
+    trip, themeMode, setThemeMode,
+    highContrast, toggleHighContrast,
+    reducedMotion, toggleReducedMotion,
+    currencyByTrip, tripDbId,
+    deleteTrip,
+  } = useAppStore(useShallow(s => ({
+    trip:                s.trip,
+    themeMode:           s.themeMode,
+    setThemeMode:        s.setThemeMode,
+    highContrast:        s.highContrast,
+    toggleHighContrast:  s.toggleHighContrast,
+    reducedMotion:       s.reducedMotion,
+    toggleReducedMotion: s.toggleReducedMotion,
+    currencyByTrip:      s.currencyByTrip,
+    tripDbId:            s.tripDbId,
+    deleteTrip:          s.deleteTrip,
+  })));
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const currency = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
+  const currencyLabel = CURRENCIES.find(c => c.code === currency)
+    ? `${currency} — ${CURRENCIES.find(c => c.code === currency)!.label}`
+    : currency;
+
+  const chev = (
+    <Icon
+      name={isRTL ? 'chevL' : 'chevR'}
+      size={16}
+      style={{ color: 'var(--text-3)', flexShrink: 0 }}
+    />
+  );
+
+  if (!trip) return null;
+
+  const themeOptions = [
+    { id: 'light'  as const, icon: 'sun'  as const, label: t('Light')  || 'Light'  },
+    { id: 'dark'   as const, icon: 'lock' as const, label: t('Dark')   || 'Dark'   },
+    { id: 'system' as const, icon: 'grid' as const, label: t('System') || 'System' },
+  ];
+
+  return (
+    <div
+      className="lg-scroll"
+      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', padding: '6px 20px 130px' }}
+    >
+      {/* ── Header ── */}
+      <m.p
+        className="eyebrow-lg"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+        style={{ color: 'var(--lg-terra)', marginBottom: 2 }}
+      >
+        {t('setupSub') || 'Trip & preferences'}
+      </m.p>
+
+      <m.h1
+        className="display-xl"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.09, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        style={{ fontSize: 38, color: 'var(--lg-ink)', margin: '0 0 18px' }}
+      >
+        {t('setupTitle') || 'Settings'}
+      </m.h1>
+
+      {/* ── Appearance ── */}
+      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
+        {t('Appearance') || 'Appearance'}
+      </p>
+
+      <m.div
+        className="lg"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.13, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        style={{ padding: 16, marginBottom: 16 }}
+      >
+        {/* Light / Dark / System three-up */}
+        <div style={{ display: 'flex', gap: 8 }} role="group" aria-label="Theme">
+          {themeOptions.map(opt => (
+            <button
+              key={opt.id}
+              onClick={() => setThemeMode(opt.id)}
+              aria-pressed={themeMode === opt.id}
+              style={{
+                flex: 1, border: 0, cursor: 'pointer',
+                borderRadius: 14, padding: '14px 0',
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                background: themeMode === opt.id ? 'var(--lg-forest)' : 'var(--lg-panel-strong)',
+                color:      themeMode === opt.id ? '#fff' : 'var(--text-2)',
+                boxShadow:  themeMode === opt.id
+                  ? 'var(--lg-glow-forest)'
+                  : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                transition: 'all .25s',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <Icon name={opt.icon} size={20} color={themeMode === opt.id ? '#fff' : 'var(--text-3)'} />
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{opt.label}</span>
+            </button>
+          ))}
+        </div>
+      </m.div>
+
+      {/* ── A11y ── */}
+      <m.div
+        className="lg"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.18, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        style={{ padding: '4px 16px', marginBottom: 16 }}
+      >
+        <Row
+          icon="sparkle"
+          title={t('highContrast') || 'High contrast'}
+          sub={t('highContrastSub') || 'WCAG AA boosted'}
+          right={<Toggle on={highContrast} onClick={toggleHighContrast} label="High contrast" />}
+        />
+        <Divider />
+        <Row
+          icon="wind"
+          title={t('reduceMotion') || 'Reduce motion'}
+          sub={t('reduceMotionSub') || 'Calm transitions'}
+          right={<Toggle on={reducedMotion} onClick={toggleReducedMotion} label="Reduce motion" />}
+        />
+      </m.div>
+
+      {/* ── Trip ── */}
+      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
+        {t('tripLabel') || 'Trip'}
+      </p>
+
+      <m.div
+        className="lg"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.23, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        style={{ padding: '4px 16px', marginBottom: 16 }}
+      >
+        <Row
+          icon="download"
+          title={t('currencyLabel') || 'Currency'}
+          sub={currencyLabel}
+          right={chev}
+        />
+        <Divider />
+        <Row
+          icon="share"
+          title={t('languageLabel') || 'Language'}
+          right={
+            <div
+              className="lg"
+              role="group"
+              aria-label="Language"
+              style={{
+                display: 'flex', padding: 3, borderRadius: 9999, gap: 2,
+                boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+              }}
+            >
+              {(['en', 'he'] as Locale[]).map(l => (
+                <button
+                  key={l}
+                  onClick={() => setLocale(l)}
+                  aria-pressed={locale === l}
+                  style={{
+                    borderRadius: 9999, padding: '5px 11px', border: 0, cursor: 'pointer',
+                    fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 12,
+                    background: locale === l ? 'var(--lg-forest)' : 'transparent',
+                    color:      locale === l ? '#fff' : 'var(--text-3)',
+                    transition: 'all .25s',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  {l === 'en' ? 'EN' : 'עב'}
+                </button>
+              ))}
+            </div>
+          }
+        />
+        <Divider />
+        <Row
+          icon="calExport"
+          title={t('exportPDF') || 'Export as PDF'}
+          sub={t('exportPDFSub') || 'Printable itinerary'}
+          right={chev}
+        />
+      </m.div>
+
+      {/* ── Delete trip ── */}
+      <m.button
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.28, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+        whileTap={{ scale: 0.97 }}
+        onClick={() => setShowDeleteConfirm(true)}
+        className="lg-btn"
+        style={{
+          width: '100%', height: 50,
+          background: 'var(--danger-bg)', color: 'var(--danger)',
+          boxShadow: 'inset 0 0 0 1px oklch(48% 0.130 25 / 18%)',
+          marginBottom: 20,
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        {locale === 'he' ? 'מחק טיול' : 'Delete trip'}
+      </m.button>
+
+      {/* ── Version footer ── */}
+      <p style={{
+        textAlign: 'center',
+        fontFamily: 'var(--font-mono)', fontSize: 10,
+        color: 'var(--text-3)', letterSpacing: '0.06em',
+      }}>
+        Trippy · v2.0 · Liquid Glass
+      </p>
+
+      {/* ── Delete confirm overlay ── */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <>
+            <m.div
+              key="backdrop"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.18 }}
+              onClick={() => setShowDeleteConfirm(false)}
+              style={{
+                position: 'fixed', inset: 0, zIndex: 80,
+                background: 'oklch(16% 0.018 60 / 42%)',
+                backdropFilter: 'blur(3px)',
+              }}
+            />
+            <m.div
+              key="sheet"
+              className="lg lg-strong"
+              initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+              transition={spring.gentle}
+              style={{
+                position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81,
+                padding: '24px 24px 40px',
+                borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0',
+              }}
+            >
+              <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 20px' }} />
+              <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--lg-ink)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
+                {locale === 'he'
+                  ? 'מחיקה היא בלתי הפיכה. להמשיך?'
+                  : 'Deleting is permanent and cannot be undone. Continue?'}
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="lg-btn lg-btn-glass"
+                  style={{ flex: 1, height: 52 }}
+                >
+                  {locale === 'he' ? 'ביטול' : 'Cancel'}
+                </button>
+                <button
+                  onClick={() => { setShowDeleteConfirm(false); deleteTrip().catch(() => {}); }}
+                  className="lg-btn"
+                  style={{
+                    flex: 1, height: 52,
+                    background: 'var(--danger-bg)', color: 'var(--danger)',
+                    boxShadow: 'none',
+                  }}
+                >
+                  {locale === 'he' ? 'מחק' : 'Delete'}
+                </button>
+              </div>
+            </m.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

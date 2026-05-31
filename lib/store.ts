@@ -191,7 +191,7 @@ function mergeLocalIntoDbTrip(
 export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
-      screen: 'login',
+      screen: 'splash',
       trip: null,
       nickname: '',
       activeDay: 1,
@@ -351,7 +351,7 @@ export const useAppStore = create<AppState>()(
             trip = { ...trip, events: filteredEvents };
           }
           const { screen: currentScreen } = get();
-          const navUpdate = isSameTrip && currentScreen !== 'login'
+          const navUpdate = isSameTrip && currentScreen !== 'login' && currentScreen !== 'home'
             ? {}  // preserve current screen/activeDay when refreshing an already-open trip
             : { screen: 'dashboard' as const, activeDay: 1 };
           set({
@@ -419,7 +419,7 @@ export const useAppStore = create<AppState>()(
             }
           });
         }
-        set({ screen: 'login', trip: null, tripDbId: null, activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false });
+        set({ screen: 'welcome', trip: null, tripDbId: null, activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false });
       },
 
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later
@@ -436,26 +436,26 @@ export const useAppStore = create<AppState>()(
             }
           });
         }
-        set({ screen: 'login', activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false });
+        set({ screen: 'welcome', activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false });
       },
 
       // Keep the Supabase session but go back to the trip picker
       switchTrip: () => {
-        set({ trip: null, tripDbId: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [] });
+        set({ trip: null, tripDbId: null, nickname: '', screen: 'home', activeDay: 1, aiSuggestions: [] });
       },
 
       // Permanently remove the user from this trip's participant list
       leaveTrip: async () => {
         const { tripDbId, userId } = get();
         if (tripDbId && userId) await dbLeaveTrip(tripDbId, userId);
-        set({ trip: null, tripDbId: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [] });
+        set({ trip: null, tripDbId: null, nickname: '', screen: 'home', activeDay: 1, aiSuggestions: [] });
       },
 
       // Permanently delete the entire trip (owner only)
       deleteTrip: async () => {
         const { tripDbId } = get();
         if (tripDbId) await dbDeleteTrip(tripDbId);
-        set({ trip: null, tripDbId: null, nickname: '', screen: 'login', activeDay: 1, aiSuggestions: [] });
+        set({ trip: null, tripDbId: null, nickname: '', screen: 'home', activeDay: 1, aiSuggestions: [] });
       },
 
       setActiveDay: (day) => set({ activeDay: day }),

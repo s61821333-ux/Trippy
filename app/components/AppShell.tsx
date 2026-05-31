@@ -8,18 +8,21 @@ import { useAppStore } from '@/lib/store';
 import { I18nProvider, useI18n } from '@/lib/i18n';
 import { createClient } from '@/utils/supabase/client';
 import dynamic from 'next/dynamic';
-import NavBar from './NavBar';
+import NavBar_V2 from './NavBar_V2';
 import LoginScreen from './screens/LoginScreen';
 import CompassLoader from './ui/CompassLoader';
 import { ToastProvider, useToast } from './ui/Toast';
 
-const DashboardScreen   = dynamic(() => import('./screens/DashboardScreen'));
-const DayScreen         = dynamic(() => import('./screens/DayScreen'));
-const SuppliesScreen    = dynamic(() => import('./screens/SuppliesScreen'));
-const SettingsScreen    = dynamic(() => import('./screens/SettingsScreen'));
+const Splash_V2         = dynamic(() => import('./screens/Splash_V2'));
+const Welcome_V2        = dynamic(() => import('./screens/Welcome_V2'));
+const Home_V2           = dynamic(() => import('./screens/Home_V2'));
+const DashboardScreen   = dynamic(() => import('./screens/Dashboard_V2'));
+const DayScreen         = dynamic(() => import('./screens/DayDetail_V2'));
+const SuppliesScreen    = dynamic(() => import('./screens/Packing_V2'));
+const SettingsScreen    = dynamic(() => import('./screens/Settings_V2'));
 const NotesScreen       = dynamic(() => import('./screens/NotesScreen'));
-const MapScreen         = dynamic(() => import('./screens/MapScreen'));
-const CrewScreen        = dynamic(() => import('./screens/CrewScreen'));
+const MapScreen         = dynamic(() => import('./screens/Map_V2'));
+const CrewScreen        = dynamic(() => import('./screens/Crew_V2'));
 const TourOverlay        = dynamic(() => import('./TourOverlay'));
 const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
 const TermsModal         = dynamic(() => import('./TermsModal'));
@@ -167,9 +170,16 @@ function Shell() {
       if (session?.user) {
         const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
         useAppStore.setState({ authUser: { id: session.user.id, username }, userId: session.user.id });
+        // After sign-in: move to home if still on an unauthenticated screen
+        const cur = useAppStore.getState().screen;
+        if (cur === 'login' || cur === 'welcome' || cur === 'splash') {
+          setScreen('home');
+        }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });
-        setScreen('login');
+        // After splash auto-advance, land on welcome (not legacy login)
+        const cur = useAppStore.getState().screen;
+        if (cur !== 'splash') setScreen('welcome');
       }
     });
 
@@ -271,7 +281,7 @@ function Shell() {
     );
   }
 
-  const showNav = trip && screen !== 'login';
+  const showNav = trip && screen !== 'login' && screen !== 'home' && screen !== 'splash' && screen !== 'welcome';
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
@@ -316,10 +326,11 @@ function Shell() {
           )}
 
           {showNav && (
-            <NavBar
+            <NavBar_V2
               active={screen}
               onChange={s => setScreen(s)}
               onSettings={() => setScreen('settings')}
+              onSwitch={() => setScreen('home')}
             />
           )}
 
@@ -336,8 +347,14 @@ function Shell() {
               >
                 <div className="w-full h-full flex justify-center">
                   <div className="w-full max-w-[1200px] h-full">
-                    {!trip || screen === 'login' ? (
+                    {screen === 'splash' ? (
+                      <Splash_V2 />
+                    ) : screen === 'welcome' ? (
+                      <Welcome_V2 />
+                    ) : screen === 'login' ? (
                       <LoginScreen />
+                    ) : !trip || screen === 'home' ? (
+                      <Home_V2 />
                     ) : screen === 'dashboard' ? (
                       <DashboardScreen />
                     ) : screen === 'day' ? (

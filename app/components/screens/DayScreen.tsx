@@ -17,7 +17,7 @@ import { getCapitalCoords } from '@/lib/capitals';
 import { getCurrencySymbol } from '@/lib/currency';
 import { Category, HotelStay, TripEvent } from '@/lib/types';
 import { useToast } from '../ui/Toast';
-import SuggestionsSheet from '../SuggestionsSheet';
+import { AISheet } from '../Sheets_V2';
 import DayTimelineView from '../DayTimelineView';
 import { useI18n, TranslationKey } from '@/lib/i18n';
 import { slideVariants, spring } from '@/lib/motion';
@@ -2470,7 +2470,7 @@ export default function DayScreen() {
       </motion.button>
 
 
-      {showSuggestions && <SuggestionsSheet dayNumber={activeDay} />}
+      {showSuggestions && <AISheet dayNumber={activeDay} />}
     </div>
   );
 }
