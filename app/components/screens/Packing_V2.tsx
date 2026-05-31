@@ -139,9 +139,9 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
                 style={{
                   border: 0, cursor: 'pointer', borderRadius: 9999, padding: '8px 13px',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12.5,
-                  background: category === c ? 'var(--lg-forest)' : 'var(--lg-panel)',
-                  color: category === c ? '#fff' : 'var(--text-2)',
-                  boxShadow: category === c ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                  background: category === c ? 'var(--lg-forest)' : 'var(--field-bg)',
+                  color: category === c ? '#fff' : 'var(--field-label)',
+                  boxShadow: category === c ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px var(--field-border)',
                   transition: 'all .25s',
                 }}
               >
@@ -163,9 +163,9 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
                   style={{
                     border: 0, cursor: 'pointer', borderRadius: 9999, padding: '7px 13px',
                     fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12.5,
-                    background: (assignee === '' && name === 'Anyone') || assignee === name ? 'var(--lg-forest)' : 'var(--lg-panel)',
-                    color: (assignee === '' && name === 'Anyone') || assignee === name ? '#fff' : 'var(--text-2)',
-                    boxShadow: (assignee === '' && name === 'Anyone') || assignee === name ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                    background: (assignee === '' && name === 'Anyone') || assignee === name ? 'var(--lg-forest)' : 'var(--field-bg)',
+                    color: (assignee === '' && name === 'Anyone') || assignee === name ? '#fff' : 'var(--field-label)',
+                    boxShadow: (assignee === '' && name === 'Anyone') || assignee === name ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px var(--field-border)',
                     transition: 'all .25s',
                   }}
                 >
