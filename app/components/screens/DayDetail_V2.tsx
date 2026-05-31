@@ -330,7 +330,7 @@ function EventAccordion({ event, index, currCode, onEdit, onSuggest, onDelete }:
 // ── TimelineView ──────────────────────────────────────────────────────────────
 
 function TimelineView({ events }: { events: TripEvent[] }) {
-  const TICK_H = 52;
+  const TICK_H = 40;
   const TICKS = 13;
   return (
     <div style={{ position: 'relative', paddingInlineStart: 66, paddingInlineEnd: 20, paddingBottom: 130 }}>
@@ -344,13 +344,13 @@ function TimelineView({ events }: { events: TripEvent[] }) {
       {events.map((ev, i) => {
         const { color } = catStamp(ev.category);
         const top    = (toMins(ev.time) / 60 / 2) * TICK_H;
-        const height = Math.max((ev.duration / 60 / 2) * TICK_H, 40);
+        const height = Math.max((ev.duration / 60 / 2) * TICK_H, 32);
         return (
           <motion.div key={ev.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 32, delay: i * 0.07 }}
-            style={{ position: 'absolute', insetInlineStart: 46, insetInlineEnd: 20, top, height, borderRadius: 14, padding: '8px 12px', background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff', boxShadow: `0 6px 18px ${color}55`, overflow: 'hidden' }}
+            style={{ position: 'absolute', insetInlineStart: 46, insetInlineEnd: 20, top, height, borderRadius: 14, padding: '6px 10px', background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff', boxShadow: `0 6px 18px ${color}55`, overflow: 'hidden' }}
           >
-            <div style={{ fontSize: 13, fontWeight: 700 }}>{ev.name}</div>
-            <div style={{ fontSize: 10, opacity: 0.85, fontFamily: 'var(--font-mono)' }}>{ev.time}–{toTime(toMins(ev.time) + ev.duration)}</div>
+            <div style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.name}</div>
+            <div style={{ fontSize: 9, opacity: 0.85, fontFamily: 'var(--font-mono)', lineHeight: 1.1 }}>{ev.time}–{toTime(toMins(ev.time) + ev.duration)}</div>
           </motion.div>
         );
       })}
