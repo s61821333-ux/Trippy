@@ -409,29 +409,6 @@ export function AISheet({ dayNumber }: AISheetProps) {
               </div>
             )}
 
-            {/* Streaming typewriter preview */}
-            {streamingText && (
-              <m.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="lg"
-                style={{
-                  padding: '12px 14px',
-                  fontFamily: 'var(--font-mono)', fontSize: 11,
-                  color: 'var(--text-3)', lineHeight: 1.6,
-                  maxHeight: 140, overflow: 'hidden',
-                  whiteSpace: 'pre-wrap', wordBreak: 'break-all',
-                }}
-              >
-                {streamingText}
-                <m.span
-                  animate={{ opacity: [1, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
-                  style={{ display: 'inline-block', width: 6, height: 12, background: 'var(--lg-terra)', marginLeft: 2, verticalAlign: 'middle', borderRadius: 2 }}
-                />
-              </m.div>
-            )}
-
             {/* Progress bar */}
             <div className="lg" style={{ padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
