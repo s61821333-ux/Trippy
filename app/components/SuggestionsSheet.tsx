@@ -8,7 +8,6 @@ import GlassBtn from './ui/GlassBtn';
 import Chip from './ui/Chip';
 import Icon from './ui/Icon';
 import AsyncError from './ui/AsyncError';
-import { SparkleLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { useAppStore } from '@/lib/store';
 import { CAT_META } from '@/lib/utils';
 import { AiSuggestion } from '@/lib/types';
@@ -175,44 +174,6 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
     >
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* Streaming typewriter preview */}
-          {streamingText ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              style={{
-                background: 'rgba(0,0,0,0.04)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
-                border: '1px solid var(--border)',
-                borderRadius: 14,
-                padding: '12px 14px',
-                fontFamily: 'var(--font-mono)',
-                fontSize: 11,
-                color: 'var(--text-3)',
-                lineHeight: 1.6,
-                maxHeight: 140,
-                overflow: 'hidden',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-all',
-              }}
-            >
-              {streamingText}
-              <motion.span
-                animate={{ opacity: [1, 0] }}
-                transition={{ duration: 0.5, repeat: Infinity, repeatType: 'reverse' }}
-                style={{ display: 'inline-block', width: 6, height: 12, background: 'var(--brand)', marginLeft: 2, verticalAlign: 'middle' }}
-              />
-            </motion.div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[1, 2, 3].map(i => (
-                <div key={i} className="skeleton" style={{ height: 82, borderRadius: 16 }} />
-              ))}
-            </div>
-          )}
-
-          {/* Progress bar + status */}
           <div style={{
             background: 'var(--surface)',
             border: '1px solid var(--border)',
@@ -220,12 +181,7 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
             padding: '14px 16px',
             display: 'flex', flexDirection: 'column', gap: 8,
           }}>
-            <LoaderStyles />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <SparkleLoader theme={BRAND_THEME} size={36} speed={1.2} />
-              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
-                {locale === 'he' ? 'מחפש פעילויות מומלצות...' : 'Finding great activities for you…'}
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
               <span style={{
                 marginLeft: 'auto', fontSize: 11, fontWeight: 700,
                 color: elapsed >= 8 ? 'var(--warning)' : 'var(--text-3)',
@@ -233,18 +189,6 @@ export default function SuggestionsSheet({ dayNumber }: Props) {
                 {elapsed}s
               </span>
             </div>
-            <div style={{ height: 4, background: 'var(--border)', borderRadius: 2, overflow: 'hidden' }}>
-              <motion.div
-                animate={{ width: `${Math.min(95, elapsed * 10)}%` }}
-                transition={{ duration: 0.9, ease: 'easeOut' }}
-                style={{ height: '100%', background: 'linear-gradient(90deg, var(--brand), #5B4FCF)', borderRadius: 2 }}
-              />
-            </div>
-            <p style={{ fontSize: 11, color: 'var(--text-3)', margin: 0 }}>
-              {locale === 'he'
-                ? '⚡ מופעל על ידי Claude Haiku · בדרך כלל 3–8 שניות'
-                : '⚡ Powered by Claude Haiku · Usually ready in 3–8 sec'}
-            </p>
           </div>
         </div>
       ) : error ? (
