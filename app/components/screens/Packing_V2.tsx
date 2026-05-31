@@ -214,8 +214,9 @@ export default function Packing_V2() {
   return (
     <div
       className="lg-scroll"
-      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', padding: '6px 20px 130px' }}
+      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}
     >
+      <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
       {/* ── Header ── */}
       <m.p
         className="eyebrow-lg"
@@ -380,6 +381,7 @@ export default function Packing_V2() {
       )}
 
       {showAdd && <AddItemSheet onClose={() => setShowAdd(false)} />}
+      </div>{/* /resp-container */}
     </div>
   );
 }

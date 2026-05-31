@@ -476,6 +476,8 @@ export default function DashboardScreenV2() {
           }}
         />
 
+        {/* Inner centering wrapper */}
+        <div className="resp-container">
         {/* Top row: eyebrow · settings · share · crew avatars */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
           <span className="eyebrow-lg" style={{ color: 'oklch(98% 0.005 80 / 72%)' }}>
@@ -625,10 +627,12 @@ export default function DashboardScreenV2() {
             );
           })}
         </div>
+        </div>{/* /resp-container */}
       </div>
 
       {/* ══ Main content ════════════════════════════════════════════════ */}
-      <div style={{ padding: '0 20px', paddingBottom: 110, display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="resp-container" style={{ padding: '0 20px', paddingBottom: 110 }}>
+        <div className="resp-dash-grid">
 
         {/* ── AI analysis card ── */}
         <button
@@ -894,6 +898,7 @@ export default function DashboardScreenV2() {
           {showCalendar && <CalendarHeatmap trip={trip} />}
         </div>
 
+        </div>{/* /resp-dash-grid */}
       </div>
 
       {/* Budget / expense sheet */}

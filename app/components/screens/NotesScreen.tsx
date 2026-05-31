@@ -23,7 +23,8 @@ export default function NotesScreen() {
   };
 
   return (
-    <div className="lg-scroll" style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', padding: '6px 20px 130px' }}>
+    <div className="lg-scroll" style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}>
+      <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
       {/* Header */}
       <p className="eyebrow-lg a-rise" style={{ color: 'var(--lg-terra)', marginBottom: 2 }}>
         {trip.name}
@@ -108,6 +109,7 @@ export default function NotesScreen() {
           </AnimatePresence>
         </div>
       )}
+      </div>{/* /resp-container */}
     </div>
   );
 }

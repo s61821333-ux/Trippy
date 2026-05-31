@@ -115,6 +115,7 @@ export default function Crew_V2() {
           textAlign: 'center',
         }}
       >
+        <div className="resp-container">
         {/* Floating compass disc */}
         <m.div
           animate={{ y: [0, -5, 0, 5, 0] }}
@@ -318,6 +319,7 @@ export default function Crew_V2() {
             </div>
           </>
         )}
+        </div>{/* /resp-container */}
       </div>
     </div>
   );

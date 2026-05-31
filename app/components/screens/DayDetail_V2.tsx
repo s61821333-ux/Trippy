@@ -639,7 +639,7 @@ export default function DayDetail_V2() {
     <div className="flex flex-col h-full w-full" style={{ background: 'var(--bg)' }}>
 
       {/* ── Sticky header ── */}
-      <div style={{ padding: '6px 20px 12px', flexShrink: 0 }}>
+      <div className="resp-container" style={{ padding: '6px 20px 12px', flexShrink: 0 }}>
         {/* Back to dashboard */}
         <button
           onClick={() => setScreen('dashboard')}
@@ -733,6 +733,7 @@ export default function DayDetail_V2() {
 
       {/* ── Body ── */}
       <div className="lg-scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 130 }}>
+        <div className="resp-container">
 
         {/* Context bar: Weather + Day budget */}
         {(weather || dayBudget > 0) && (
@@ -864,6 +865,7 @@ export default function DayDetail_V2() {
         ) : (
           <TimelineView events={evs} />
         )}
+        </div>{/* /resp-container */}
       </div>
 
       {showAdd && (

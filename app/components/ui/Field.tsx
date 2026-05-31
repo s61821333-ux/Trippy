@@ -26,9 +26,7 @@ export default function Field({
 
   const baseStyle: CSSProperties = {
     // 2027 glass input surface
-    background: focused
-      ? 'oklch(99% 0.004 80 / 72%)'
-      : 'oklch(97% 0.008 80 / 58%)',
+    background: focused ? 'var(--field-bg-focused)' : 'var(--field-bg)',
     backdropFilter: 'blur(20px) saturate(1.8)',
     WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
     border: 'none',
@@ -46,8 +44,9 @@ export default function Field({
     boxShadow: error
       ? 'inset 0 0 0 1.5px var(--danger), inset 0 1px 0 oklch(100% 0 0 / 40%)'
       : focused
-        ? `inset 0 0 0 1.5px var(--brand), inset 0 1px 0 oklch(100% 0 0 / 50%), 0 0 0 3px var(--brand-muted)`
-        : 'inset 0 0 0 1px oklch(13% 0.012 55 / 8%), inset 0 1px 0 oklch(100% 0 0 / 50%)',
+        ? `inset 0 0 0 1.5px var(--field-border-focused), inset 0 1px 0 oklch(100% 0 0 / 40%), 0 0 0 3px var(--brand-muted)`
+        : 'inset 0 0 0 1px var(--field-border), inset 0 1px 0 oklch(100% 0 0 / 44%)',
+    caretColor: 'var(--brand)',
     ...style,
   };
 
@@ -68,7 +67,7 @@ export default function Field({
           fontWeight: 600,
           letterSpacing: '0.10em',
           textTransform: 'uppercase' as const,
-          color: focused ? 'var(--brand)' : 'var(--text-3)',
+          color: focused ? 'var(--brand)' : 'var(--field-label)',
           transition: 'color 0.2s ease',
         }}>
           {label}
@@ -82,7 +81,7 @@ export default function Field({
             insetInlineStart: 16,
             top: '50%',
             transform: 'translateY(-50%)',
-            color: focused ? 'var(--brand)' : 'var(--text-3)',
+            color: focused ? 'var(--brand)' : 'var(--field-icon)',
             display: 'flex',
             pointerEvents: 'none',
             transition: 'color 0.2s ease',

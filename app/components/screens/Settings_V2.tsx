@@ -138,8 +138,9 @@ export default function Settings_V2() {
   return (
     <div
       className="lg-scroll"
-      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', padding: '6px 20px 130px' }}
+      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}
     >
+      <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
       {/* ── Header ── */}
       <m.p
         className="eyebrow-lg"
@@ -481,6 +482,7 @@ export default function Settings_V2() {
           </>
         )}
       </AnimatePresence>
+      </div>{/* /resp-container */}
     </div>
   );
 }

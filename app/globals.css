@@ -51,6 +51,14 @@
   --text-inv:      oklch(98% 0.002 80);
   --text-inverse:  oklch(98% 0.002 80);
 
+  /* Form fields */
+  --field-bg:             oklch(97% 0.008 80 / 58%);
+  --field-bg-focused:     oklch(99% 0.004 80 / 78%);
+  --field-border:         oklch(13% 0.012 55 / 8%);
+  --field-border-focused:  oklch(42% 0.092 155 / 30%);
+  --field-label:          var(--text-3);
+  --field-icon:           var(--text-3);
+
   /* Semantic */
   --success:       oklch(50% 0.090 155);
   --success-bg:    oklch(94% 0.030 155);
@@ -256,6 +264,14 @@
   --text-3:        oklch(56% 0.014 55);
   --text-inv:      oklch(8% 0.008 55);
 
+  /* Form fields */
+  --field-bg:             oklch(16% 0.018 55 / 82%);
+  --field-bg-focused:     oklch(21% 0.020 55 / 92%);
+  --field-border:         oklch(100% 0 0 / 8%);
+  --field-border-focused:  oklch(62% 0.100 155 / 42%);
+  --field-label:          var(--text-3);
+  --field-icon:           var(--text-3);
+
   --success:       oklch(62% 0.090 155);
   --success-bg:    oklch(62% 0.090 155 / 12%);
   --warning:       oklch(66% 0.110 68);
@@ -308,6 +324,12 @@
   --text:      oklch(95% 0.01 80);
   --text-2:    oklch(78% 0.018 75);
   --text-3:    oklch(60% 0.016 75);
+  --field-bg:             oklch(16% 0.018 55 / 82%);
+  --field-bg-focused:     oklch(21% 0.020 55 / 92%);
+  --field-border:         oklch(100% 0 0 / 8%);
+  --field-border-focused:  oklch(62% 0.100 155 / 42%);
+  --field-label:          var(--text-3);
+  --field-icon:           var(--text-3);
   --lg-ink:    oklch(95% 0.01 80);
   --lg-forest:       oklch(62% 0.14 158);
   --lg-forest-deep:  oklch(44% 0.11 158);
@@ -758,6 +780,38 @@ select {
 /* ─── DayScreen itinerary bottom padding — clears 2 mobile FABs ── */
 .day-list-pb { padding-bottom: 136px; }
 @media (min-width: 768px) { .day-list-pb { padding-bottom: 24px; } }
+
+/* ─── Responsive layout helpers ─────────────────────────────── */
+
+/* Centered content column — max 1200px, auto horizontal margin */
+.resp-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 2-column card grid on desktop, single column on mobile */
+.resp-dash-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+@media (min-width: 1024px) {
+  .resp-dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+}
+
+/* NavBar is bottom-fixed on mobile; on desktop keep bottom offset */
+@media (min-width: 1024px) {
+  .screen-inset-nav {
+    bottom: var(--nav-total-h);
+  }
+}
 
 /* ─── Screen inset — fixes content hidden under mobile nav ───── */
 /* The motion.div uses absolute positioning; on mobile we must pull */

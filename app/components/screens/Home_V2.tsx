@@ -331,6 +331,8 @@ export default function Home_V2() {
           overflow: 'hidden',
         }}
       >
+        {/* Inner centering wrapper */}
+        <div style={{ maxWidth: 960, margin: '0 auto' }}>
         {/* Wordmark + avatar + logout row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
           <span style={{ fontFamily: 'var(--font-sans)', fontSize: 19, fontWeight: 700, letterSpacing: '-0.04em', color: '#fff' }}>
@@ -397,9 +399,10 @@ export default function Home_V2() {
         >
           Your adventures are waiting.
         </m.p>
+        </div>{/* /inner centering wrapper */}
       </div>
 
-      <div style={{ padding: '20px 20px 30px', marginTop: -16, position: 'relative' }}>
+      <div style={{ padding: '20px 20px 30px', marginTop: -16, position: 'relative', maxWidth: 960, marginLeft: 'auto', marginRight: 'auto' }}>
 
         {/* ── Action stack ── */}
         <m.button
@@ -441,7 +444,8 @@ export default function Home_V2() {
               <div
                 role="list"
                 aria-label={t('myTrips')}
-                style={{ display: 'flex', flexDirection: 'column', gap: 13 }}
+                className="trips-grid"
+                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 13 }}
               >
                 {trips.map((trip, i) => {
                   const stampKey = THEME_STAMP[trip.theme ?? ''] ?? 'cactus';
