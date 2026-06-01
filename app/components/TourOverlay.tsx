@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { Screen } from '@/lib/types';
@@ -224,7 +224,7 @@ export default function TourOverlay() {
 
       {/* Tooltip card */}
       <AnimatePresence mode="wait">
-        <motion.div
+        <m.div
           key={`step-${stepIdx}`}
           initial={{ opacity: 0, y: 12, scale: 0.94 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -285,7 +285,7 @@ export default function TourOverlay() {
           {/* Progress dots */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginBottom: 16 }}>
             {STEPS.map((_, i) => (
-              <motion.div
+              <m.div
                 key={i}
                 animate={{
                   width: i === stepIdx ? 20 : 6,
@@ -305,7 +305,7 @@ export default function TourOverlay() {
           {/* Buttons */}
           <div style={{ display: 'flex', gap: 8 }}>
             {!isLast && (
-              <motion.button
+              <m.button
                 whileTap={{ scale: 0.95 }}
                 onClick={skip}
                 style={{
@@ -316,9 +316,9 @@ export default function TourOverlay() {
                 }}
               >
                 {isHe ? 'דלג' : 'Skip'}
-              </motion.button>
+              </m.button>
             )}
-            <motion.button
+            <m.button
               whileTap={{ scale: 0.97 }}
               onClick={advance}
               style={{
@@ -331,9 +331,9 @@ export default function TourOverlay() {
               {isLast
                 ? (isHe ? 'יאללה! 🚀' : "Let's go! 🚀")
                 : (isHe ? 'הבא →' : 'Next →')}
-            </motion.button>
+            </m.button>
           </div>
-        </motion.div>
+        </m.div>
       </AnimatePresence>
     </div>
   );

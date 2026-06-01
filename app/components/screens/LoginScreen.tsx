@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { blurUpVariants, staggerContainer } from '@/lib/motion';
 import GlassBtn from '../ui/GlassBtn';
 import Field from '../ui/Field';
@@ -160,7 +160,7 @@ function AuthStep() {
       <AtmosphereCanvas />
 
       {/* ── Main glass card ── */}
-      <motion.div
+      <m.div
         ref={cardRef}
         initial={{ opacity: 0, y: 48, scale: 0.93, filter: 'blur(12px)' }}
         animate={{ opacity: 1, y: 0,  scale: 1,    filter: 'blur(0px)' }}
@@ -191,7 +191,7 @@ function AuthStep() {
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(255,255,255,0.48) 0%, transparent 55%, rgba(255,255,255,0.08) 100%)', pointerEvents: 'none', borderRadius: 'inherit', zIndex: 0 }} />
 
         {/* Globe Loader / Compass hero */}
-        <motion.div
+        <m.div
           initial={{ scale: 0.55, opacity: 0, filter: 'blur(8px)' }}
           animate={{ scale: 1,    opacity: 1, filter: 'blur(0px)' }}
           transition={{ duration: 0.55, ease: [0.34, 1.56, 0.64, 1], delay: 0.20 }}
@@ -205,10 +205,10 @@ function AuthStep() {
               </div>
             )
           }
-        </motion.div>
+        </m.div>
 
         {/* Wordmark */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
           animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
           transition={{ delay: 0.30, duration: 0.45, ease: [0.25, 0, 0, 1] }}
@@ -225,10 +225,10 @@ function AuthStep() {
           }}>
             Trippy<span style={{ color: 'var(--terra)', fontStyle: 'normal' }}>.</span>
           </h1>
-        </motion.div>
+        </m.div>
 
         {/* Editorial tagline */}
-        <motion.p
+        <m.p
           initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
           animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
           transition={{ delay: 0.38, duration: 0.45, ease: [0.25, 0, 0, 1] }}
@@ -245,10 +245,10 @@ function AuthStep() {
           }}
         >
           {t('appTagline')}
-        </motion.p>
+        </m.p>
 
         {/* Body copy */}
-        <motion.p
+        <m.p
           initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
           animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
           transition={{ delay: 0.44, duration: 0.42, ease: [0.25, 0, 0, 1] }}
@@ -265,10 +265,10 @@ function AuthStep() {
           }}
         >
           Experience the new standard in collaborative travel. From desert dunes to city lights, your journey begins here.
-        </motion.p>
+        </m.p>
 
         {webView && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.50 }}
             style={{
               marginBottom: 16, padding: '12px 14px',
@@ -278,11 +278,11 @@ function AuthStep() {
             }}
           >
             <span style={{ fontWeight: 700 }}>⚠️ </span>{t('webViewWarning')}
-          </motion.div>
+          </m.div>
         )}
 
         {/* CTA — morphic primary pill */}
-        <motion.button
+        <m.button
           initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
           animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
           transition={{ delay: 0.50, duration: 0.45, ease: [0.25, 0, 0, 1] }}
@@ -324,11 +324,11 @@ function AuthStep() {
           {!googleLoading && (
             <span style={{ fontSize: 20, lineHeight: 1, position: 'relative' }}>→</span>
           )}
-        </motion.button>
-      </motion.div>
+        </m.button>
+      </m.div>
 
       {/* ── Footer tagline ── */}
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 10, filter: 'blur(6px)' }}
         animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
         transition={{ delay: 0.68, duration: 0.45, ease: [0.25, 0, 0, 1] }}
@@ -347,7 +347,7 @@ function AuthStep() {
         <span>Discover</span>
         <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.38)', flexShrink: 0 }} />
         <span>Document</span>
-      </motion.div>
+      </m.div>
     </div>
   );
 }
@@ -505,13 +505,13 @@ function TripStep() {
       <div style={{ padding: '0 20px', maxWidth: 500, margin: '0 auto' }}>
 
         {/* ── Primary CTA ── */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 16, filter: 'blur(6px)' }}
           animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
           transition={{ delay: 0.08, duration: 0.42, ease: [0.25, 0, 0, 1] }}
           style={{ marginTop: 20, marginBottom: 12 }}
         >
-          <motion.button
+          <m.button
             onClick={() => setShowCreate(true)}
             whileHover={{ scale: 1.012, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
             whileTap={{ scale: 0.97, transition: { type: 'spring', stiffness: 500, damping: 22 } }}
@@ -530,17 +530,17 @@ function TripStep() {
               <span>{t('createNewTrip')}</span>
             </div>
             <span style={{ fontSize: 18, lineHeight: 1, opacity: 0.85 }}>→</span>
-          </motion.button>
-        </motion.div>
+          </m.button>
+        </m.div>
 
         {/* Demo */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 12, filter: 'blur(5px)' }}
           animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
           transition={{ delay: 0.14, duration: 0.40, ease: [0.25, 0, 0, 1] }}
           style={{ marginBottom: 28 }}
         >
-          <motion.button
+          <m.button
             onClick={loadDemoTrip}
             whileTap={{ scale: 0.97, transition: { type: 'spring', stiffness: 500, damping: 22 } }}
             style={{
@@ -557,13 +557,13 @@ function TripStep() {
             }}
           >
             <Icon name="sparkle" size={13} style={{ opacity: 0.8 }} /> {t('tryDemo')}
-          </motion.button>
-        </motion.div>
+          </m.button>
+        </m.div>
 
         {/* ── Pending invitations ── */}
         <AnimatePresence>
           {pendingInvitations.length > 0 && (
-            <motion.div
+            <m.div
               key="invites"
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
               transition={{ type: 'spring', stiffness: 320, damping: 28 }}
@@ -607,13 +607,13 @@ function TripStep() {
                   );
                 })}
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>
 
         {/* ── My Trips ── */}
         {(tripsLoading || userTrips.length > 0) && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 16, filter: 'blur(6px)' }}
             animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
             transition={{ delay: 0.20, duration: 0.45, ease: [0.25, 0, 0, 1] }}
@@ -633,7 +633,7 @@ function TripStep() {
                   const meta = getTripMeta(trip.theme);
                   const isLoading = loadingTripId === trip.id;
                   return (
-                    <motion.button
+                    <m.button
                       key={trip.id}
                       className="lg"
                       initial={{ opacity: 0, y: 14, filter: 'blur(5px)' }}
@@ -695,12 +695,12 @@ function TripStep() {
                           : <span style={{ color: '#fff', fontSize: 15, fontWeight: 700 }}>→</span>
                         }
                       </div>
-                    </motion.button>
+                    </m.button>
                   );
                 })}
               </div>
             )}
-          </motion.div>
+          </m.div>
         )}
 
         {/* Spacer for safe area */}
@@ -723,7 +723,7 @@ function TripStep() {
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {THEMES.map(th => (
-                  <motion.button
+                  <m.button
                     key={th.id}
                     whileTap={{ scale: 0.94, transition: { type: 'spring', stiffness: 500, damping: 22 } }}
                     onClick={() => setCTheme(th.id)}
@@ -751,7 +751,7 @@ function TripStep() {
                         <Icon name="check" size={11} style={{ color: '#fff' }} />
                       </div>
                     )}
-                  </motion.button>
+                  </m.button>
                 ))}
               </div>
             </div>
@@ -821,17 +821,17 @@ export default function LoginScreen() {
   return (
     <AnimatePresence mode="wait">
       {authUser ? (
-        <motion.div key="trip" style={{ height: '100%' }}
+        <m.div key="trip" style={{ height: '100%' }}
           initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }}
           transition={{ type: 'spring', stiffness: 320, damping: 30 }}>
           <TripStep />
-        </motion.div>
+        </m.div>
       ) : (
-        <motion.div key="auth" style={{ height: '100%' }}
+        <m.div key="auth" style={{ height: '100%' }}
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           transition={{ duration: 0.28 }}>
           <AuthStep />
-        </motion.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

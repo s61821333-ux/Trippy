@@ -285,7 +285,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
 // ── Home_V2 ───────────────────────────────────────────────────────────────────
 
 export default function Home_V2() {
-  const { authUser, loadTripById, logout } = useAppStore();
+  const { authUser, tripDbId, loadTripById, logout } = useAppStore();
   const { t, locale } = useI18n();
   const { show } = useToast();
 
@@ -427,6 +427,78 @@ export default function Home_V2() {
         </m.button>
 
         {/* "Plan one with AI" removed per design update */}
+
+        {/* ── Resume banner — shown when a previous trip session is remembered ── */}
+        {(() => {
+          const lastTrip = tripDbId ? trips.find(tr => tr.id === tripDbId) : null;
+          if (!lastTrip) return null;
+          const isLoading = loadingTripId === lastTrip.id;
+          const stampKey = THEME_STAMP[lastTrip.theme ?? ''] ?? 'cactus';
+          return (
+            <m.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.20, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              style={{ marginBottom: 22 }}
+            >
+              <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
+                {locale === 'he' ? 'המשך מאיפה שעצרת' : 'Continue where you left off'}
+              </p>
+              <button
+                onClick={() => handleOpen(lastTrip.id)}
+                disabled={loadingTripId !== null}
+                aria-label={`Resume ${lastTrip.name}`}
+                aria-busy={isLoading}
+                className="lg"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 15,
+                  padding: 18, textAlign: locale === 'he' ? 'right' : 'left',
+                  border: '2px solid var(--lg-terra)', width: '100%',
+                  cursor: loadingTripId && !isLoading ? 'default' : 'pointer',
+                  opacity: loadingTripId && !isLoading ? 0.48 : 1,
+                  transition: 'opacity 0.18s',
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation',
+                  boxShadow: '0 4px 18px oklch(62% 0.12 50 / 12%)',
+                }}
+              >
+                <StampIcon iconKey={stampKey} size={52} aria-hidden="true" />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="eyebrow-lg" style={{ color: 'var(--lg-terra)', fontSize: 9, marginBottom: 2 }}>
+                    {formatDateRange(lastTrip.start_date, lastTrip.days)} · {lastTrip.days} {locale === 'he' ? 'ימים' : 'days'}
+                  </div>
+                  <div style={{
+                    fontFamily: 'var(--font-serif)', fontStyle: 'italic',
+                    fontSize: 23, color: 'var(--lg-ink)', lineHeight: 1.05,
+                    marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {lastTrip.name}
+                  </div>
+                  <div style={{
+                    marginTop: 6, fontSize: 12, fontFamily: 'var(--font-sans)',
+                    fontWeight: 600, color: 'var(--lg-terra)',
+                  }}>
+                    {locale === 'he' ? 'המשך' : 'Resume trip'} →
+                  </div>
+                </div>
+                <span
+                  className="lg-btn lg-btn-forest"
+                  aria-hidden="true"
+                  style={{
+                    width: 40, height: 40, padding: 0, flexShrink: 0,
+                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: 9999,
+                  }}
+                >
+                  {isLoading
+                    ? <CompassLoader theme={BRAND_THEME} size={22} />
+                    : <Icon name="arrow" size={17} color="#fff" />
+                  }
+                </span>
+              </button>
+            </m.div>
+          );
+        })()}
 
         {/* ── Trips list ── */}
         {(tripsLoading || trips.length > 0) && (

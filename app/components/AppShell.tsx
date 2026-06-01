@@ -9,7 +9,8 @@ import { I18nProvider, useI18n } from '@/lib/i18n';
 import { createClient } from '@/utils/supabase/client';
 import dynamic from 'next/dynamic';
 import NavBar_V2 from './NavBar_V2';
-import LoginScreen from './screens/LoginScreen';
+
+const LoginScreen        = dynamic(() => import('./screens/LoginScreen'));
 import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { ToastProvider, useToast } from './ui/Toast';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { TERMS_VERSION } from '@/lib/db';
@@ -195,7 +195,7 @@ export default function TermsModal() {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -211,7 +211,7 @@ export default function TermsModal() {
           padding: '0 0 env(safe-area-inset-bottom, 0px)',
         }}
       >
-        <motion.div
+        <m.div
           initial={{ y: '100%', opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
@@ -343,7 +343,7 @@ export default function TermsModal() {
                 {isHe ? 'יש לגלול עד הסוף לפני האישור' : 'Read to the end before accepting'}
               </p>
             )}
-            <motion.button
+            <m.button
               whileTap={{ scale: 0.97 }}
               disabled={!scrolledToBottom || submitting}
               onClick={handleAccept}
@@ -366,15 +366,15 @@ export default function TermsModal() {
               {submitting
                 ? (isHe ? '…שומר' : 'Saving…')
                 : (isHe ? '✓ אני מסכים לתנאים ולמדיניות הפרטיות' : '✓ I agree to the Terms & Privacy Policy')}
-            </motion.button>
+            </m.button>
             <p style={{ fontSize: 10, color: 'var(--text-3)', textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
               {isHe
                 ? 'האפליקציה מסופקת "כמות שהיא". אין להסתמך עליה למידע בטיחות קריטי.'
                 : 'The app is provided "as-is". Do not rely on it for critical safety decisions during travel.'}
             </p>
           </div>
-        </motion.div>
-      </motion.div>
+        </m.div>
+      </m.div>
     </AnimatePresence>
   );
 }

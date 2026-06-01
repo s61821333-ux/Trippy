@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { CURRENCIES, convertCurrency, getCurrencySymbol } from '@/lib/currency';
 
 interface Props {
@@ -122,26 +122,26 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
       >
         <AnimatePresence mode="wait" initial={false}>
           {loading ? (
-            <motion.span key="loading"
+            <m.span key="loading"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               style={{ opacity: 0.45 }}
-            >…</motion.span>
+            >…</m.span>
           ) : isPeeking ? (
-            <motion.span key="peek"
+            <m.span key="peek"
               initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }}
               transition={{ type: 'spring', stiffness: 420, damping: 28 }}
               style={{ display: 'inline-flex', alignItems: 'baseline', gap: 1 }}
             >
               <span style={{ fontSize: '0.6em', opacity: 0.5 }}>≈</span>
               {peekSym}{peekValue != null ? fmt(peekValue) : '…'}
-            </motion.span>
+            </m.span>
           ) : (
-            <motion.span key="base"
+            <m.span key="base"
               initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }}
               transition={{ type: 'spring', stiffness: 420, damping: 28 }}
             >
               {baseSym}{fmt(amount)}
-            </motion.span>
+            </m.span>
           )}
         </AnimatePresence>
       </button>
@@ -150,7 +150,7 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {open && (
-            <motion.div
+            <m.div
               ref={popRef}
               initial={{ opacity: 0, scale: 0.92, y: arrowAbove ? 6 : -6 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -201,7 +201,7 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
                   </button>
                 ))}
               </div>
-            </motion.div>
+            </m.div>
           )}
         </AnimatePresence>,
         document.body,

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { getCountryColors } from '@/lib/countryColors';
 import { deriveTheme } from '@/lib/deriveTheme';
 import WelcomeAnimation from './WelcomeAnimation';
@@ -17,7 +17,7 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
 
   return (
     <AnimatePresence>
-      <motion.div
+      <m.div
         key="trip-entry"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -30,7 +30,7 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
           duration={3.6}
           onDone={onDone}
         />
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

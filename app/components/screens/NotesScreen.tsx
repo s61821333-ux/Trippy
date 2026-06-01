@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import Icon from '../ui/Icon';
 import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
@@ -76,7 +76,7 @@ export default function NotesScreen() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <AnimatePresence>
             {trip.tripNotes.map((note, i) => (
-              <motion.div
+              <m.div
                 key={i}
                 className="lg"
                 initial={{ opacity: 0, y: 8 }}
@@ -89,7 +89,7 @@ export default function NotesScreen() {
                 <span style={{ flex: 1, fontSize: 14, color: 'var(--lg-ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                   {note}
                 </span>
-                <motion.button
+                <m.button
                   whileTap={{ scale: 0.88 }}
                   onClick={() => { deleteTripNote(i); show(t('itemRemoved')); }}
                   aria-label="Delete note"
@@ -103,8 +103,8 @@ export default function NotesScreen() {
                   }}
                 >
                   <Icon name="trash" size={15} />
-                </motion.button>
-              </motion.div>
+                </m.button>
+              </m.div>
             ))}
           </AnimatePresence>
         </div>

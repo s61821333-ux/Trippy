@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import Icon from '../../ui/Icon';
 import { StampIcon } from '../../ui/StampIcon';
 import { CAT_META, CAT_FALLBACK, fmtDuration, toMins, toTime } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { useI18n } from '@/lib/i18n';
 
 function QuickAction({ icon, label, onClick, color }: { icon: string; label: string; onClick: () => void; color: string }) {
   return (
-    <motion.button
+    <m.button
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       style={{
@@ -25,7 +25,7 @@ function QuickAction({ icon, label, onClick, color }: { icon: string; label: str
     >
       <Icon name={icon as any} size={15} color={color} />
       <span style={{ fontSize: 12, fontWeight: 600 }}>{label}</span>
-    </motion.button>
+    </m.button>
   );
 }
 
@@ -70,9 +70,9 @@ export default function EventAccordion({ event, index, onEdit, onSuggest }: Even
             {meta?.label ?? event.category}
           </span>
         </div>
-        <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ type: 'spring', stiffness: 320, damping: 26 }} style={{ alignSelf: 'center', display: 'flex', flexShrink: 0 }}>
+        <m.span animate={{ rotate: open ? 90 : 0 }} transition={{ type: 'spring', stiffness: 320, damping: 26 }} style={{ alignSelf: 'center', display: 'flex', flexShrink: 0 }}>
           <Icon name="chevR" size={18} color="var(--text-3)" />
-        </motion.span>
+        </m.span>
       </button>
 
       <div style={{ maxHeight: open ? 320 : 0, overflow: 'hidden', transition: 'max-height .4s var(--snap)' }}>

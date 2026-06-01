@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import CompassMark from './ui/CompassMark';
 import { CompassLoader, BRAND_THEME } from './ui/TripLoaders';
 
@@ -24,7 +24,7 @@ const SLIDES = [
           { time: '11:00', name: 'Louvre Museum',       emoji: '🏛️', color: '#3B6E52' },
           { time: '14:00', name: 'Lunch at Le Marais',  emoji: '🍽️', color: '#C4714A' },
         ].map((item, i) => (
-          <motion.div
+          <m.div
             key={i}
             initial={{ opacity: 0, x: -20, scale: 0.95 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -61,7 +61,7 @@ const SLIDES = [
             <div style={{ marginInlineStart: 'auto', flexShrink: 0 }}>
               <div style={{ width: 8, height: 8, borderRadius: 4, background: item.color, opacity: 0.7 }} />
             </div>
-          </motion.div>
+          </m.div>
         ))}
       </div>
     ),
@@ -81,7 +81,7 @@ const SLIDES = [
           { icon: '📝', label: 'Notes',     color: 'rgba(196,113,74,0.14)', border: 'rgba(196,113,74,0.28)' },
           { icon: '✈️', label: 'Flights',   color: 'rgba(18,82,194,0.14)',  border: 'rgba(18,82,194,0.28)'  },
         ].map((item, i) => (
-          <motion.div
+          <m.div
             key={i}
             initial={{ opacity: 0, scale: 0.75 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -98,7 +98,7 @@ const SLIDES = [
           >
             <span style={{ fontSize: 26 }}>{item.icon}</span>
             <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-2)', fontFamily: 'var(--font-sans)' }}>{item.label}</span>
-          </motion.div>
+          </m.div>
         ))}
       </div>
     ),
@@ -153,7 +153,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
     >
       {/* Ambient background orbs */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
-        <motion.div
+        <m.div
           animate={{ x: [0, 20, 0], y: [0, -15, 0] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
           style={{
@@ -163,7 +163,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
             filter: 'blur(40px)',
           }}
         />
-        <motion.div
+        <m.div
           animate={{ x: [0, -18, 0], y: [0, 20, 0] }}
           transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
           style={{
@@ -173,7 +173,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
             filter: 'blur(40px)',
           }}
         />
-        <motion.div
+        <m.div
           animate={{ scale: [1, 1.15, 1] }}
           transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
           style={{
@@ -187,7 +187,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
 
       {/* Skip */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 20px', flexShrink: 0, position: 'relative', zIndex: 1 }}>
-        <motion.button
+        <m.button
           whileTap={{ scale: 0.92 }}
           transition={spring}
           onClick={finish}
@@ -204,13 +204,13 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
           }}
         >
           Skip
-        </motion.button>
+        </m.button>
       </div>
 
       {/* Slide content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 28px', overflow: 'hidden', position: 'relative', zIndex: 1 }}>
         <AnimatePresence mode="wait" custom={dir}>
-          <motion.div
+          <m.div
             key={slide}
             custom={dir}
             initial={{ opacity: 0, x: dir * 48 }}
@@ -221,7 +221,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
           >
             {/* Preview or compass loader */}
             {slide === 2 ? (
-              <motion.div
+              <m.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ ...spring, delay: 0.1 }}
@@ -245,7 +245,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
                 }}>
                   Trippy<span style={{ color: 'var(--terra)' }}>.</span>
                 </div>
-              </motion.div>
+              </m.div>
             ) : (
               <div style={{ width: '100%' }}>{preview}</div>
             )}
@@ -275,7 +275,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
             }}>
               {sub}
             </p>
-          </motion.div>
+          </m.div>
         </AnimatePresence>
       </div>
 
@@ -284,7 +284,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
         {/* Dot indicators */}
         <div style={{ display: 'flex', gap: 7, alignItems: 'center' }}>
           {SLIDES.map((_, i) => (
-            <motion.button
+            <m.button
               key={i}
               onClick={() => { setDir(i > slide ? 1 : -1); setSlide(i); }}
               animate={{
@@ -301,7 +301,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
         {/* CTA */}
         {isLast ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 360 }}>
-            <motion.button
+            <m.button
               whileTap={{ scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -318,8 +318,8 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
               }}
             >
               Create trip
-            </motion.button>
-            <motion.button
+            </m.button>
+            <m.button
               whileTap={{ scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
@@ -340,10 +340,10 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
               }}
             >
               Join with invite
-            </motion.button>
+            </m.button>
           </div>
         ) : (
-          <motion.button
+          <m.button
             whileTap={{
               scale: 0.95,
               transition: { type: 'spring', stiffness: 500, damping: 20 },
@@ -360,7 +360,7 @@ export default function OnboardingScreen({ onDone }: OnboardingScreenProps) {
             }}
           >
             Next →
-          </motion.button>
+          </m.button>
         )}
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 import { TripEvent } from '@/lib/types';
 import { toMins } from '@/lib/utils';
 import { EventIcon } from './ui/EventIcon';
@@ -164,7 +164,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
           const height = Math.max(28, minutesToPx(gap.endMins, startHour) - minutesToPx(gap.startMins, startHour));
           const gapMins = gap.endMins - gap.startMins;
           return (
-            <motion.div
+            <m.div
               key={`gap-${i}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -186,7 +186,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
               <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 ⚡ {gapMins}min free
               </span>
-              <motion.button
+              <m.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => onSuggest(gap.startMins, gap.endMins)}
                 style={{
@@ -198,8 +198,8 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
                 }}
               >
                 <Icon name="sparkle" size={10} /> AI Suggest
-              </motion.button>
-              <motion.button
+              </m.button>
+              <m.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => onAdd(toTimeStr(gap.startMins))}
                 style={{
@@ -211,8 +211,8 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
                 }}
               >
                 <Icon name="plus" size={10} />
-              </motion.button>
-            </motion.div>
+              </m.button>
+            </m.div>
           );
         })}
 
@@ -236,7 +236,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
           const catColor = CAT_COLORS[ev.category] ?? '#ccc';
 
           return (
-            <motion.div
+            <m.div
               key={ev.id}
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -280,7 +280,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
                   {ev.time} · {ev.duration}min
                 </span>
               )}
-            </motion.div>
+            </m.div>
           );
         })}
       </div>

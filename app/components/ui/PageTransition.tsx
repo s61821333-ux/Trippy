@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, m } from 'framer-motion';
 import { pageVariants } from '@/lib/motion';
 
 interface PageTransitionProps {
@@ -16,7 +16,7 @@ interface PageTransitionProps {
 export function PageTransition({ children, pageKey }: PageTransitionProps) {
   return (
     <AnimatePresence mode="wait" initial={false}>
-      <motion.div
+      <m.div
         key={pageKey}
         variants={pageVariants}
         initial="initial"
@@ -25,7 +25,7 @@ export function PageTransition({ children, pageKey }: PageTransitionProps) {
         style={{ height: '100%', width: '100%' }}
       >
         {children}
-      </motion.div>
+      </m.div>
     </AnimatePresence>
   );
 }

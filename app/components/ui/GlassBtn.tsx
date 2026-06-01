@@ -3,7 +3,7 @@
 // Usage: accent/coral/danger for actions; ghost for secondary; flat for inline list controls; default for general buttons.
 // Never use on page-scroll content that is not floating (use a plain <button> or GlassBtn variant="flat" instead).
 import { CSSProperties, ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { m } from 'framer-motion';
 
 type Variant = 'default' | 'accent' | 'coral' | 'danger' | 'ghost' | 'flat';
 type Size = 'sm' | 'md' | 'lg';
@@ -83,7 +83,7 @@ export default function GlassBtn({
   const isDefault = variant === 'default' || variant === 'flat';
 
   return (
-    <motion.button
+    <m.button
       type={type}
       onClick={onClick}
       disabled={disabled}
@@ -118,6 +118,6 @@ export default function GlassBtn({
       }}
     >
       {children}
-    </motion.button>
+    </m.button>
   );
 }

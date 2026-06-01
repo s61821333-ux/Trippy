@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, Reorder } from 'framer-motion';
+import { m, Reorder } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
 import { StampIcon } from '../ui/StampIcon';
@@ -228,7 +228,7 @@ function HotelSheet({ dayNum, existing, onClose }: {
 
 function QuickAction({ icon, label, onClick, color }: { icon: string; label: string; onClick: () => void; color: string }) {
   return (
-    <motion.button
+    <m.button
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       style={{
@@ -242,7 +242,7 @@ function QuickAction({ icon, label, onClick, color }: { icon: string; label: str
     >
       <Icon name={icon as any} size={15} color={color} />
       <span style={{ fontSize: 12, fontWeight: 600 }}>{label}</span>
-    </motion.button>
+    </m.button>
   );
 }
 
@@ -292,9 +292,9 @@ function EventAccordion({ event, index, currCode, onEdit, onSuggest, onDelete }:
             {meta?.label ?? event.category}
           </span>
         </div>
-        <motion.span animate={{ rotate: open ? 90 : 0 }} transition={{ type: 'spring', stiffness: 320, damping: 26 }} style={{ alignSelf: 'center', display: 'flex', flexShrink: 0 }}>
+        <m.span animate={{ rotate: open ? 90 : 0 }} transition={{ type: 'spring', stiffness: 320, damping: 26 }} style={{ alignSelf: 'center', display: 'flex', flexShrink: 0 }}>
           <Icon name="chevR" size={18} color="var(--text-3)" />
-        </motion.span>
+        </m.span>
       </button>
 
       <div style={{ maxHeight: open ? 320 : 0, overflow: 'hidden', transition: 'max-height .4s var(--snap)' }}>
@@ -346,12 +346,12 @@ function TimelineView({ events }: { events: TripEvent[] }) {
         const top    = (toMins(ev.time) / 60 / 2) * TICK_H;
         const height = Math.max((ev.duration / 60 / 2) * TICK_H, 28);
         return (
-          <motion.div key={ev.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 32, delay: i * 0.07 }}
+          <m.div key={ev.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 32, delay: i * 0.07 }}
             style={{ position: 'absolute', insetInlineStart: 46, insetInlineEnd: 20, top, height, borderRadius: 12, padding: '4px 8px', background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff', boxShadow: `0 6px 18px ${color}55`, overflow: 'hidden' }}
           >
             <div style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.05, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.name}</div>
             <div style={{ fontSize: 8.5, opacity: 0.85, fontFamily: 'var(--font-mono)', lineHeight: 1.05 }}>{ev.time}–{toTime(toMins(ev.time) + ev.duration)}</div>
-          </motion.div>
+          </m.div>
         );
       })}
     </div>

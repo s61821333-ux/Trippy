@@ -49,6 +49,8 @@ interface AppState {
   lastSyncError: string | null;
   pendingInvitations: TripInvitation[];
   termsAccepted: boolean;
+  /** Unix ms of last login — used for 2-day session reminder window */
+  lastSessionAt: number | null;
 
   // Actions
   setScreen: (s: Screen) => void;
@@ -218,6 +220,7 @@ export const useAppStore = create<AppState>()(
       lastSyncError: null,
       pendingInvitations: [],
       termsAccepted: false,
+      lastSessionAt: null,
       isOffline: false,
       pendingChanges: [],
       isGlobalLoading: false,
@@ -246,19 +249,20 @@ export const useAppStore = create<AppState>()(
           }
         } catch {}
         // Set identity so auth-dependent effects (join-link, terms) can proceed immediately.
-        set({ authUser: user, userId: user.id, termsAccepted })
-        // If the user had a trip open before, auto-reload it from DB so data is always
-        // fresh on refresh. The join-link flow (/?join=id) will overwrite this if needed,
-        // since AppShell's authUser effect runs after checkAuth resolves.
-        const { tripDbId: persistedTripDbId } = get()
-        if (persistedTripDbId) {
-          get().loadTripById(persistedTripDbId).catch(() => {
-            // Trip gone or access revoked — fall back to trip picker
-            set({ trip: null, tripDbId: null, supplies: [] })
-          })
-        } else {
-          set({ trip: null, tripDbId: null, supplies: [] })
-        }
+        // Keep tripDbId as a session reminder (max 2 days) but don't auto-navigate into the trip.
+        const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+        const { tripDbId: persistedTripDbId, lastSessionAt } = get();
+        const sessionExpired = lastSessionAt !== null && Date.now() - lastSessionAt > TWO_DAYS_MS;
+        const reminderTripId = (!sessionExpired && persistedTripDbId) ? persistedTripDbId : null;
+        set({
+          authUser: user,
+          userId: user.id,
+          termsAccepted,
+          trip: null,
+          supplies: [],
+          tripDbId: reminderTripId,
+          lastSessionAt: Date.now(),
+        })
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
 
@@ -419,7 +423,7 @@ export const useAppStore = create<AppState>()(
             }
           });
         }
-        set({ screen: 'welcome', trip: null, tripDbId: null, activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false });
+        set({ screen: 'welcome', trip: null, tripDbId: null, supplies: [], activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false, lastSessionAt: null });
       },
 
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later
@@ -436,7 +440,7 @@ export const useAppStore = create<AppState>()(
             }
           });
         }
-        set({ screen: 'welcome', activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false });
+        set({ screen: 'welcome', trip: null, tripDbId: null, supplies: [], activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false, lastSessionAt: null });
       },
 
       // Keep the Supabase session but go back to the trip picker
@@ -859,6 +863,7 @@ export const useAppStore = create<AppState>()(
         authUser: s.authUser,
         termsAccepted: s.termsAccepted,
         pendingChanges: s.pendingChanges,
+        lastSessionAt: s.lastSessionAt,
       }),
     }
   )

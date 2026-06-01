@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 
 // Full list: [English name, Hebrew name, flag emoji]
 const ALL_COUNTRIES: [string, string, string][] = [
@@ -177,7 +177,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
         {value.map(name => {
           const entry = ALL_COUNTRIES.find(([en]) => en === name);
           return (
-            <motion.span
+            <m.span
               key={name}
               initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -207,7 +207,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
               >
                 ×
               </button>
-            </motion.span>
+            </m.span>
           );
         })}
 
@@ -229,7 +229,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
       {/* Dropdown */}
       <AnimatePresence>
         {open && filtered.length > 0 && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: -6, scaleY: 0.92 }}
             animate={{ opacity: 1, y: 0, scaleY: 1 }}
             exit={{ opacity: 0, y: -6, scaleY: 0.92 }}
@@ -262,7 +262,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
                 <span style={{ fontSize: 12, color: 'var(--text-2)', marginRight: 'auto' }}>{he}</span>
               </button>
             ))}
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
