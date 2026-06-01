@@ -101,7 +101,12 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
           )}
         </span>
         <input
-          type="text"
+          type="search"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="none"
+          spellCheck={false}
+          name="location-search"
           placeholder={placeholder}
           value={value}
           onChange={e => handleChange(e.target.value)}

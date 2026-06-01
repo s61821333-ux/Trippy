@@ -454,6 +454,21 @@ const en = {
   v2FeatDNA: 'Shareable DNA Card',
   v2FeatAlerts: 'Smart Budget Alerts',
 
+  // Packing screen
+  adventurePrep: 'Adventure prep',
+  almostThere: 'Almost there!',
+  allPacked: 'All packed! 🎉',
+  packedShared: 'packed · shared with crew',
+
+  // Crew screen
+  gatherTheTribe: 'Gather the tribe',
+  gatherSubtitle: 'Add friends to sync itineraries and share memories in real time.',
+  inviteByEmailLabel: 'Invite by email',
+  sendInvitesBtn: 'Send invites',
+  orMagicLink: 'or magic link',
+  currentCrew: 'Current crew',
+  generatingLink: 'Generating link…',
+
   // Dashboard hardcoded strings
   budgetSheetTitle: 'Budget & Expenses',
   totalSpent: 'Total spent',
@@ -931,6 +946,21 @@ const he: typeof en = {
   v2FeatSettle: 'סילוק הוצאות',
   v2FeatDNA: 'כרטיס DNA לשיתוף',
   v2FeatAlerts: 'התראות תקציב חכמות',
+
+  // Packing screen
+  adventurePrep: 'הכנה להרפתקה',
+  almostThere: 'כמעט שם!',
+  allPacked: 'הכל ארוז! 🎉',
+  packedShared: 'ארוזים · משותף עם הצוות',
+
+  // Crew screen
+  gatherTheTribe: 'קבץ את הצוות',
+  gatherSubtitle: 'הוסף חברים לסנכרון מסלולים ושיתוף זכרונות בזמן אמת.',
+  inviteByEmailLabel: 'הזמן באימייל',
+  sendInvitesBtn: 'שלח הזמנות',
+  orMagicLink: 'או קישור קסם',
+  currentCrew: 'הצוות הנוכחי',
+  generatingLink: 'מייצר קישור…',
 
   // Dashboard hardcoded strings
   budgetSheetTitle: 'תקציב והוצאות',

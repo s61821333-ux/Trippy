@@ -139,7 +139,7 @@ export default function Crew_V2() {
           transition={{ delay: 0.06, duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
           style={{ fontSize: 34, color: '#fff', margin: 0 }}
         >
-          {t('Gather the tribe') || 'Gather the tribe'}
+          {t('gatherTheTribe')}
         </m.h1>
 
         <m.p
@@ -148,8 +148,7 @@ export default function Crew_V2() {
           transition={{ delay: 0.12, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
           style={{ fontSize: 13.5, color: 'oklch(98% 0.005 80 / 78%)', margin: '8px 0 0' }}
         >
-          {t('Add friends to sync itineraries and share memories in real time.')
-            || 'Add friends to sync itineraries and share memories in real time.'}
+          {t('gatherSubtitle')}
         </m.p>
       </div>
 
@@ -164,7 +163,7 @@ export default function Crew_V2() {
           style={{ padding: 18 }}
         >
           <Field
-            label={t('Invite by email') || 'Invite by email'}
+            label={t('inviteByEmailLabel')}
             placeholder="friend@example.com"
             value={email}
             onChange={setEmail}
@@ -184,14 +183,14 @@ export default function Crew_V2() {
           >
             {sending
               ? (locale === 'he' ? 'שולח…' : 'Sending…')
-              : (t('Send invites') || 'Send invites')}
+              : t('sendInvitesBtn')}
           </Btn>
 
           {/* Divider */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '18px 0 8px' }}>
             <div style={{ flex: 1, height: 1, background: 'oklch(50% 0.02 60 / 14%)' }} />
             <span className="eyebrow-lg" style={{ color: 'var(--text-3)' }}>
-              {t('or magic link') || 'or magic link'}
+              {t('orMagicLink')}
             </span>
             <div style={{ flex: 1, height: 1, background: 'oklch(50% 0.02 60 / 14%)' }} />
           </div>
@@ -202,23 +201,40 @@ export default function Crew_V2() {
             disabled={copying}
             className="lg-btn lg-btn-glass"
             aria-label={locale === 'he' ? 'העתק קישור הצטרפות' : 'Copy join link'}
-            style={{ width: '100%', height: 48, justifyContent: 'space-between', padding: '0 18px', display: 'flex', alignItems: 'center' }}
+            style={{ width: '100%', height: 48, justifyContent: 'space-between', padding: '0 18px', display: 'flex', alignItems: 'center', gap: 10 }}
           >
-            <span style={{
-              fontFamily: 'var(--font-mono)', fontSize: 12,
-              color: 'var(--text-2)',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              flex: 1, textAlign: 'start',
-            }}>
-              {copying ? (locale === 'he' ? '…' : '…') : displayLink}
-            </span>
-            <Icon name="share" size={16} color="var(--lg-terra)" style={{ flexShrink: 0 }} />
+            {copying ? (
+              <>
+                <m.span
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
+                  style={{ display: 'flex', flexShrink: 0 }}
+                >
+                  <Icon name="compass" size={15} color="var(--lg-terra)" />
+                </m.span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, color: 'var(--text-3)', flex: 1, textAlign: 'start' }}>
+                  {t('generatingLink')}
+                </span>
+              </>
+            ) : (
+              <>
+                <span style={{
+                  fontFamily: 'var(--font-mono)', fontSize: 12,
+                  color: 'var(--text-2)',
+                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  flex: 1, textAlign: 'start',
+                }}>
+                  {displayLink}
+                </span>
+                <Icon name="share" size={16} color="var(--lg-terra)" style={{ flexShrink: 0 }} />
+              </>
+            )}
           </button>
         </m.div>
 
         {/* ── Crew list ── */}
         <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: '22px 0 12px' }}>
-          {t('Current crew') || 'Current crew'} · {participants.length}
+          {t('currentCrew')} · {participants.length}
         </p>
 
         <div

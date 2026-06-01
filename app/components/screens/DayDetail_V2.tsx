@@ -19,6 +19,23 @@ import { AISheet } from '../Sheets_V2';
 import { useI18n } from '@/lib/i18n';
 import { getCapitalCoords } from '@/lib/capitals';
 
+// ── Weather icon helper ───────────────────────────────────────────────────────
+
+const WEATHER_ICON_MAP: [RegExp, string][] = [
+  [/clear|sunny/i,    'sun'],
+  [/partly|cloud/i,   'wind'],
+  [/rain|shower|drizzle/i, 'water'],
+  [/thunder|storm/i,  'sparkle'],
+  [/snow/i,           'wind'],
+  [/fog|mist/i,       'wind'],
+  [/wind/i,           'wind'],
+];
+function getWeatherIcon(label?: string): string {
+  if (!label) return 'sun';
+  for (const [re, icon] of WEATHER_ICON_MAP) if (re.test(label)) return icon;
+  return 'sun';
+}
+
 // ── Category definitions ──────────────────────────────────────────────────────
 
 const CATS_CORE: [Category, string, string][] = [
@@ -27,45 +44,45 @@ const CATS_CORE: [Category, string, string][] = [
   ['food',        'wind',     'Food'],
   ['cafe',        'water',    'Café'],
   ['attraction',  'pin',      'Sight'],
-  ['museum',      'pin',      'Museum'],
+  ['museum',      'compass',  'Museum'],
   ['hotel',       'home',     'Hotel'],
   ['rest',        'tent',     'Rest'],
   ['beach',       'sun',      'Beach'],
   ['sport',       'users',    'Sport'],
-  ['concert',     'sparkle',  'Concert'],
-  ['theme_park',  'sparkle',  'Theme Park'],
-  ['other',       'sparkle',  'Other'],
+  ['concert',     'music',    'Concert'],
+  ['theme_park',  'star',     'Theme Park'],
+  ['other',       'grid',     'Other'],
 ];
 
 const CATS_EXTENDED: [Category, string, string][] = [
   ['hiking',      'compass',  'Hiking'],
   ['nature_walk', 'sun',      'Nature'],
-  ['cycling',     'arrow',    'Cycling'],
-  ['boat',        'swap',     'Boat'],
+  ['cycling',     'bike',     'Cycling'],
+  ['boat',        'ship',     'Boat'],
   ['water_sports','water',    'Water Sports'],
   ['ski',         'arrow',    'Ski'],
-  ['aerial',      'arrow',    'Aerial'],
+  ['aerial',      'plane',    'Aerial'],
   ['golf',        'sun',      'Golf'],
   ['safari',      'compass',  'Safari'],
-  ['nightlife',   'sparkle',  'Nightlife'],
+  ['nightlife',   'music',    'Nightlife'],
   ['winery',      'water',    'Winery'],
   ['cooking',     'wind',     'Cooking'],
-  ['theater',     'sparkle',  'Theater'],
-  ['cinema',      'sparkle',  'Cinema'],
-  ['art',         'pin',      'Art'],
-  ['festival',    'sparkle',  'Festival'],
-  ['shopping',    'wind',     'Shopping'],
+  ['theater',     'film',     'Theater'],
+  ['cinema',      'film',     'Cinema'],
+  ['art',         'camera',   'Art'],
+  ['festival',    'star',     'Festival'],
+  ['shopping',    'gift',     'Shopping'],
   ['market',      'wind',     'Market'],
-  ['spa',         'water',    'Spa'],
-  ['wellness',    'water',    'Wellness'],
-  ['hot_springs', 'water',    'Hot Springs'],
-  ['photography', 'pin',      'Photography'],
+  ['spa',         'hot',      'Spa'],
+  ['wellness',    'hot',      'Wellness'],
+  ['hot_springs', 'hot',      'Hot Springs'],
+  ['photography', 'camera',   'Photography'],
   ['guided_tour', 'users',    'Guided Tour'],
   ['national_park','sun',     'National Park'],
   ['cultural',    'pin',      'Cultural'],
   ['religious',   'tent',     'Religious'],
   ['picnic',      'sun',      'Picnic'],
-  ['cruise',      'swap',     'Cruise'],
+  ['cruise',      'ship',     'Cruise'],
   ['farm',        'tent',     'Farm'],
 ];
 
@@ -209,15 +226,15 @@ function HotelSheet({ dayNum, existing, onClose }: {
         </div>
 
         <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
-          <GlassBtn variant="accent" size="lg" onClick={handleSave} style={{ flex: 2 }}>
+          <GlassBtn variant="forest" size="lg" onClick={handleSave} style={{ flex: 2 }}>
             {existing ? 'Save changes' : 'Add hotel'}
           </GlassBtn>
           {existing && (
-            <GlassBtn size="lg" onClick={() => { deleteHotel(existing.id); show('Hotel removed'); onClose(); }} style={{ flex: 1 }}>
+            <GlassBtn variant="danger" size="lg" onClick={() => { deleteHotel(existing.id); show('Hotel removed'); onClose(); }} style={{ flex: 1 }}>
               Remove
             </GlassBtn>
           )}
-          <GlassBtn size="lg" onClick={onClose} style={{ flex: 1 }}>Cancel</GlassBtn>
+          <GlassBtn variant="ghost" size="lg" onClick={onClose} style={{ flex: 1, color: 'var(--text-2)' }}>Cancel</GlassBtn>
         </div>
       </div>
     </Sheet>
@@ -273,9 +290,10 @@ function EventAccordion({ event, index, currCode, onEdit, onSuggest, onDelete }:
         aria-expanded={open}
         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 13, padding: 14, border: 0, background: 'transparent', cursor: 'pointer', textAlign: 'start' }}
       >
-        <div style={{ flex: 'none', textAlign: 'center', width: 42 }}>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--lg-ink)' }}>{event.time}</div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)', marginTop: 2 }}>{endT}</div>
+        <div style={{ flex: 'none', textAlign: 'center', width: 46 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 11.5, fontWeight: 700, color: 'var(--lg-ink)', lineHeight: 1.1 }}>{event.time}</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--text-3)', marginTop: 1 }}>↓</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, color: 'var(--text-3)', marginTop: 1 }}>{endT}</div>
         </div>
         <StampIcon iconKey={stampKey} size={42} style={{ flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -530,17 +548,18 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
         <div>
           <label style={monoLabel}>{locale === 'he' ? 'עלות (אופציונלי)' : 'Cost (optional)'}</label>
           <input
-            type="number" min="0" inputMode="decimal" placeholder="$0"
+            type="number" min="0" inputMode="decimal"
+            placeholder={locale === 'he' ? 'לדוגמה: 25' : 'e.g. 25'}
             value={cost} onChange={e => setCost(e.target.value)}
-            style={{ width: '100%', boxSizing: 'border-box', height: 48, border: 0, borderRadius: 14, paddingInlineStart: 16, paddingInlineEnd: 16, fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--lg-ink)', outline: 'none', background: 'var(--lg-panel-strong)', boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)', transition: 'box-shadow .2s' }}
+            style={{ width: '100%', boxSizing: 'border-box', height: 48, border: 0, borderRadius: 14, paddingInlineStart: 16, paddingInlineEnd: 16, fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--lg-ink)', outline: 'none', background: 'var(--field-bg)', boxShadow: 'inset 0 0 0 1px var(--field-border)', transition: 'box-shadow .2s' }}
           />
         </div>
 
         <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
-          <GlassBtn variant="accent" size="lg" onClick={handleSave} style={{ flex: 2 }}>
+          <GlassBtn variant="forest" size="lg" onClick={handleSave} style={{ flex: 2 }}>
             {editing ? (locale === 'he' ? 'שמור שינויים' : 'Save changes') : (locale === 'he' ? 'הוסף אירוע' : 'Add event')}
           </GlassBtn>
-          <GlassBtn size="lg" onClick={onClose} style={{ flex: 1 }}>
+          <GlassBtn variant="ghost" size="lg" onClick={onClose} style={{ flex: 1, color: 'var(--text-2)' }}>
             {locale === 'he' ? 'ביטול' : 'Cancel'}
           </GlassBtn>
         </div>
@@ -651,7 +670,7 @@ export default function DayDetail_V2() {
             WebkitTapHighlightColor: 'transparent',
           }}
         >
-          <Icon name="chevL" size={12} color="var(--text-3)" />
+          <Icon name={locale === 'he' ? 'chevR' : 'chevL'} size={12} color="var(--text-3)" />
           {locale === 'he' ? 'לוח בקרה' : 'Dashboard'}
         </button>
         <p className="eyebrow-lg" style={{ color: 'var(--lg-terra)', marginBottom: 2 }}>{eyebrow}</p>
@@ -740,7 +759,7 @@ export default function DayDetail_V2() {
           <div style={{ display: 'flex', gap: 10, margin: '0 20px 14px' }}>
             {weather && (
               <div className="lg" style={{ flex: 1, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Icon name="sun" size={22} color="var(--lg-sand)" />
+                <Icon name={getWeatherIcon(weather.label) as any} size={22} color="var(--lg-sand)" />
                 <div>
                   <div className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5 }}>{locale === 'he' ? 'מזג אוויר' : 'Weather'}</div>
                   <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--lg-ink)' }}>{weather.temp}° · {weather.label ?? 'Clear'}</div>

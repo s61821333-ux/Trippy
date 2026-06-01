@@ -27,7 +27,7 @@ const STORE_CAT_LABELS: Record<SupplyItem['category'], string> = {
   Gear:      'Gear',
   Medical:   'Health',
   Food:      'Food',
-  Water:     'Water',
+  Water:     'Drinks & Water',
   Other:     'Other',
 };
 
@@ -120,13 +120,9 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
             placeholder="e.g. Sunscreen, Passport…"
             value={itemName}
             onChange={handleNameChange}
+            autoComplete="off"
             autoFocus
           />
-          {autoDetected && (
-            <p style={{ fontSize: 11, color: 'var(--lg-forest)', marginTop: 5, fontFamily: 'var(--font-sans)' }}>
-              Auto-categorized as {STORE_CAT_LABELS[category]}
-            </p>
-          )}
         </div>
 
         <div>
@@ -149,6 +145,11 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
               </button>
             ))}
           </div>
+          {autoDetected && (
+            <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 7, fontFamily: 'var(--font-sans)', paddingInlineStart: 2 }}>
+              {locale === 'he' ? `זוהה אוטומטית: ${STORE_CAT_LABELS[category]} — אפשר לשנות` : `Suggested: ${STORE_CAT_LABELS[category]} — tap to change`}
+            </p>
+          )}
         </div>
 
         {/* Assign to crew member */}
@@ -177,10 +178,10 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
         )}
 
         <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
-          <GlassBtn variant="accent" size="lg" onClick={handleSave} style={{ flex: 2 }}>
+          <GlassBtn variant="forest" size="lg" onClick={handleSave} style={{ flex: 2 }}>
             {locale === 'he' ? 'הוסף' : 'Add item'}
           </GlassBtn>
-          <GlassBtn size="lg" onClick={onClose} style={{ flex: 1 }}>
+          <GlassBtn variant="ghost" size="lg" onClick={onClose} style={{ flex: 1, color: 'var(--text-2)' }}>
             {locale === 'he' ? 'ביטול' : 'Cancel'}
           </GlassBtn>
         </div>
@@ -246,12 +247,16 @@ export default function Packing_V2() {
         <Ring pct={pct} size={76} stroke={6} color="var(--lg-terra)">{pct}%</Ring>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, color: 'var(--lg-ink)', lineHeight: 1.1 }}>
-            {pct === 100
-              ? (t('allPacked') || 'All packed!')
-              : (t('almostThere') || 'Almost there')}
+            {total === 0
+              ? (locale === 'he' ? 'מוכן להתחיל?' : 'Ready to pack?')
+              : pct === 100
+                ? t('allPacked')
+                : t('almostThere')}
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 3 }}>
-            {packed}/{total} {t('packedShared') || 'packed · shared with crew'}
+            {total === 0
+              ? (locale === 'he' ? 'הוסף פריטים לרשימה' : 'Start adding items below')
+              : `${packed}/${total} ${t('packedShared')}`}
           </div>
         </div>
 
@@ -292,7 +297,7 @@ export default function Packing_V2() {
               WebkitTapHighlightColor: 'transparent',
             }}
           >
-            {t(c) || c}
+            {c === 'Water' ? (locale === 'he' ? 'שתייה' : 'Drinks') : (t(c) || c)}
           </button>
         ))}
       </div>
@@ -339,22 +344,27 @@ export default function Packing_V2() {
         })}
 
         {total === 0 && (
-          <div style={{ textAlign: 'center', padding: '40px 20px', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-3)', lineHeight: 1.6 }}>
-            <div style={{ marginBottom: 14 }}>
-              <Icon name="checklist" size={40} color="var(--text-3)" />
-            </div>
-            <p style={{ margin: '0 0 16px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, color: 'var(--lg-ink)' }}>
-              Nothing packed yet.
+          <m.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
+            style={{ textAlign: 'center', padding: '48px 24px', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-3)', lineHeight: 1.6 }}
+          >
+            <div style={{ marginBottom: 18, fontSize: 56 }}>🧳</div>
+            <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', fontWeight: 400 }}>
+              {locale === 'he' ? 'הרשימה ריקה' : 'Your packing list is empty'}
+            </p>
+            <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--text-3)' }}>
+              {locale === 'he' ? 'הוסף פריטים שתצטרך לטיול' : 'Add items you\'ll need for this trip'}
             </p>
             <button
               onClick={() => setShowAdd(true)}
               className="lg-btn lg-btn-forest"
-              style={{ height: 44, padding: '0 20px', display: 'inline-flex', alignItems: 'center', gap: 7 }}
+              style={{ height: 46, padding: '0 22px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600 }}
             >
               <Icon name="plus" size={16} color="#fff" />
-              Add first item
+              {locale === 'he' ? 'הוסף את הפריט הראשון' : 'Add your first item'}
             </button>
-          </div>
+          </m.div>
         )}
         {total > 0 && filtered.length === 0 && (
           <div style={{ textAlign: 'center', padding: '32px 0', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-3)' }}>

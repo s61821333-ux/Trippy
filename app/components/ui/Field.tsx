@@ -13,6 +13,7 @@ interface FieldProps {
   onKeyDown?: (e: React.KeyboardEvent) => void;
   icon?: ReactNode;
   autoFocus?: boolean;
+  autoComplete?: string;
   rows?: number;
   style?: CSSProperties;
   disabled?: boolean;
@@ -20,7 +21,7 @@ interface FieldProps {
 
 export default function Field({
   label, hint, error, type = 'text', placeholder, value, onChange, onKeyDown,
-  icon, autoFocus, rows, style = {}, disabled,
+  icon, autoFocus, autoComplete, rows, style = {}, disabled,
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
 
@@ -107,6 +108,7 @@ export default function Field({
             onChange={e => onChange(e.target.value)}
             onKeyDown={onKeyDown}
             autoFocus={autoFocus}
+            autoComplete={autoComplete}
             inputMode={
               type === 'number' || type === 'tel' ? 'numeric'
               : type === 'email' ? 'email'

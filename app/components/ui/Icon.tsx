@@ -6,7 +6,8 @@ type IconName =
   | 'home' | 'calendar' | 'checklist' | 'settings' | 'plus' | 'chevR' | 'chevL'
   | 'share' | 'map' | 'sparkle' | 'trash' | 'edit' | 'x' | 'check' | 'sun'
   | 'wind' | 'lock' | 'pin' | 'download' | 'compass' | 'tent' | 'water'
-  | 'calExport' | 'user' | 'users' | 'search' | 'filter' | 'ai' | 'clock' | 'arrow' | 'menu' | 'grid' | 'swap';
+  | 'calExport' | 'user' | 'users' | 'search' | 'filter' | 'ai' | 'clock' | 'arrow' | 'menu' | 'grid' | 'swap'
+  | 'plane' | 'music' | 'film' | 'gift' | 'camera' | 'ship' | 'bike' | 'hot' | 'star';
 
 interface IconProps {
   name: IconName;
@@ -50,6 +51,15 @@ const PATHS: Partial<Record<IconName, string>> = {
   menu:      `<path d="M4 7h16M4 12h16M4 17h16"/>`,
   grid:      `<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>`,
   swap:      `<path d="M7 16V8M7 8L4 11M7 8l3 3M17 8v8M17 16l3-3M17 16l-3-3"/>`,
+  plane:     `<path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/>`,
+  music:     `<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>`,
+  film:      `<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 4v16M17 4v16M2 9h5M2 15h5M17 9h5M17 15h5"/>`,
+  gift:      `<path d="M20 12v10H4V12M22 7H2v5h20zM12 22V7M12 7a2 2 0 0 1-2-2c0-2 2-5 2-5s2 3 2 5a2 2 0 0 1-2 2z"/>`,
+  camera:    `<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>`,
+  ship:      `<path d="M2 21c.6.5 1.2 1 2.5 1C7 22 7 20 9.5 20s2.5 2 5 2 2.5-2 5-2c1.3 0 1.9.5 2.5 1M19.38 20A11.6 11.6 0 0 0 21 14l-9-4-9 4a11.6 11.6 0 0 0 1.62 6M10 3.5a2.5 2.5 0 0 1 5 0"/><path d="M12 3v4"/>`,
+  bike:      `<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 0 0-1-1h-1M9.5 14l5-8.5M12 17.5h3l3-8.5M6 10l1.5 7.5"/>`,
+  hot:       `<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/><path d="M12 22V12"/>`,
+  star:      `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>`,
 };
 
 export default function Icon({ name, size = 20, style = {}, color }: IconProps) {

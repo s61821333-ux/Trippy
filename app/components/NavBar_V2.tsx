@@ -165,7 +165,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             alignItems: 'center',
             padding: 7,
             borderRadius: 9999,
-            height: 64,
+            height: 68,
           }}
         >
           {/* Liquid blob — hidden when on a non-tab screen like Settings */}
@@ -178,7 +178,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
               top: 7,
               [isRTL ? 'right' : 'left']: 7 + 44,
               width: 58,
-              height: 50,
+              height: 54,
               borderRadius: 9999,
               background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
               boxShadow: 'var(--lg-glow-terra)',
@@ -232,7 +232,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                   position: 'relative',
                   zIndex: 1,
                   width: 58,
-                  height: 50,
+                  height: 54,
                   border: 0,
                   background: 'transparent',
                   cursor: 'pointer',
@@ -240,7 +240,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                   flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 2,
+                  gap: 3,
                   color: isActive ? '#fff' : 'var(--text-3)',
                   transition: 'color 0.3s',
                   flexShrink: 0,
@@ -249,12 +249,24 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                 }}
               >
                 <m.span
-                  animate={{ scale: isActive ? 1.08 : 1, y: isActive ? -1 : 0 }}
+                  animate={{ scale: isActive ? 1.05 : 1, y: isActive ? -1 : 0 }}
                   transition={ICON_SPRING}
                   style={{ display: 'flex' }}
                 >
-                  <Icon name={tab.icon} size={20} color={isActive ? '#fff' : 'var(--text-3)'} />
+                  <Icon name={tab.icon} size={19} color={isActive ? '#fff' : 'var(--text-3)'} />
                 </m.span>
+                <span style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 9,
+                  fontWeight: 600,
+                  letterSpacing: '0.04em',
+                  lineHeight: 1,
+                  color: isActive ? 'rgba(255,255,255,0.9)' : 'var(--text-3)',
+                  transition: 'color 0.3s',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {t(tab.labelKey) as string}
+                </span>
               </m.button>
             );
           })}

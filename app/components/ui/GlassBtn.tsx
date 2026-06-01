@@ -5,7 +5,7 @@
 import { CSSProperties, ReactNode } from 'react';
 import { m } from 'framer-motion';
 
-type Variant = 'default' | 'accent' | 'coral' | 'danger' | 'ghost' | 'flat';
+type Variant = 'default' | 'accent' | 'coral' | 'danger' | 'ghost' | 'flat' | 'forest';
 type Size = 'sm' | 'md' | 'lg';
 
 interface GlassBtnProps {
@@ -26,6 +26,13 @@ const SIZES: Record<Size, { h: number; px: number; fs: number }> = {
 
 function getVariantStyles(variant: Variant) {
   switch (variant) {
+    case 'forest':
+      return {
+        bg: 'linear-gradient(180deg, oklch(52% 0.14 158), var(--lg-forest))',
+        color: 'white',
+        border: 'none',
+        shadow: 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 25%)',
+      };
     case 'accent':
       return {
         bg: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
