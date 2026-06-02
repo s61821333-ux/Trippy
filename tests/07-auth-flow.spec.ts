@@ -125,6 +125,62 @@ test.describe('Auth — demo-user via __trippySetState__', () => {
   });
 });
 
+test.describe('Persistence — reload regression', () => {
+  test('mutated trip state survives a page reload', async ({ page }) => {
+    await setupPage(page, 'day');
+
+    const persistedEvent = {
+      id: 'evt-persisted-reload',
+      time: '18:45',
+      duration: 45,
+      name: 'Persisted Stop',
+      category: 'food',
+      addedBy: 'Tester',
+    };
+
+    await page.evaluate((event) => {
+      const raw = localStorage.getItem('trippy-storage');
+      if (!raw) throw new Error('missing persisted store');
+      const snapshot = JSON.parse(raw);
+      const trip = snapshot?.state?.trip;
+      if (!trip) throw new Error('missing trip state');
+
+      const updatedTrip = {
+        ...trip,
+        events: {
+          ...trip.events,
+          2: [...(trip.events?.[2] ?? []), event],
+        },
+      };
+      const updatedSupplies = [...(snapshot.state.supplies ?? [])];
+      if (updatedSupplies[0]) {
+        updatedSupplies[0] = { ...updatedSupplies[0], checked: !updatedSupplies[0].checked };
+      }
+
+      (window as unknown as Record<string, (patch: unknown) => void>).__trippySetState__({
+        trip: updatedTrip,
+        supplies: updatedSupplies,
+      });
+    }, persistedEvent);
+
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(1_000);
+
+    const snapshot = await page.evaluate(() => {
+      const raw = localStorage.getItem('trippy-storage');
+      return raw ? JSON.parse(raw) : null;
+    });
+
+    expect(snapshot?.state?.trip?.events?.['2'] ?? []).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'evt-persisted-reload', name: 'Persisted Stop' }),
+      ])
+    );
+    expect(snapshot?.state?.supplies?.[0]?.checked).toBe(true);
+  });
+});
+
 // ── Sign-out guard ────────────────────────────────────────────────────────────
 
 test.describe('Auth — sign-out guard', () => {

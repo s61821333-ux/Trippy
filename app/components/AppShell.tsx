@@ -105,6 +105,7 @@ function Shell() {
   // A fresh createClient() on the second run would fire INITIAL_SESSION before cookies are re-read,
   // causing a brief redirect to 'welcome' even for authenticated users.
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+  const lastLoadedTripRef = useRef<string | null>(null);
 
   // Granular selectors — each group only re-renders Shell when its slice changes (ME-5)
   const screen          = useAppStore(s => s.screen);
@@ -243,6 +244,22 @@ function Shell() {
       clearTripEntry();
     }
   }, [tripEntryCountries]);
+
+  // If auth has resolved and the persisted trip body is missing, restore it from the DB.
+  // This covers reloads where the Supabase session becomes available after the first bootstrap pass.
+  useEffect(() => {
+    if (!authUser || !tripDbId) return;
+    if (trip && lastLoadedTripRef.current === tripDbId) return;
+    if (trip) {
+      lastLoadedTripRef.current = tripDbId;
+      return;
+    }
+    if (lastLoadedTripRef.current === tripDbId) return;
+    lastLoadedTripRef.current = tripDbId;
+    loadTripById(tripDbId).catch(() => {
+      lastLoadedTripRef.current = null;
+    });
+  }, [authUser, tripDbId, trip, loadTripById]);
 
   // Track demo clicks (when in demo mode: tripDbId is null and trip exists)
   const isDemo = !!trip && !tripDbId;
