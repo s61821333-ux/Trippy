@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { m, Reorder } from 'framer-motion';
+import { m, Reorder, useDragControls } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
 import { StampIcon } from '../ui/StampIcon';
@@ -458,7 +458,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
       onClose={onClose}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <Field label={locale === 'he' ? 'שם האירוע' : 'Event name'} placeholder="—" value={name} onChange={setName} autoFocus />
+        <Field label={locale === 'he' ? 'שם האירוע' : 'Event name'} placeholder="—" value={name} onChange={setName} />
 
         {/* Start + End times */}
         <div style={{ display: 'flex', gap: 12 }}>
@@ -565,6 +565,49 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
         </div>
       </div>
     </Sheet>
+  );
+}
+
+// ── DraggableEvent — Reorder.Item with explicit drag handle ──────────────────
+
+function DraggableEvent({ event, index, currCode, onEdit, onSuggest, onDelete }: {
+  event: TripEvent;
+  index: number;
+  currCode: string;
+  onEdit: (e: TripEvent) => void;
+  onSuggest: () => void;
+  onDelete: (id: string) => void;
+}) {
+  const controls = useDragControls();
+  return (
+    <Reorder.Item
+      value={event}
+      dragListener={false}
+      dragControls={controls}
+      whileDrag={{ scale: 1.02, boxShadow: '0 8px 24px oklch(20% 0.03 60 / 22%)' }}
+      style={{ position: 'relative' }}
+    >
+      {/* Drag handle — only this element activates drag; rest of card is scrollable */}
+      <div
+        onPointerDown={e => { e.preventDefault(); controls.start(e); }}
+        style={{
+          position: 'absolute', insetInlineStart: 0, top: 0, bottom: 0,
+          width: 20, cursor: 'grab', touchAction: 'none', zIndex: 2,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}
+        aria-label="Drag to reorder"
+      >
+        <Icon name="menu" size={12} color="var(--text-3)" style={{ opacity: 0.4 }} />
+      </div>
+      <EventAccordion
+        event={event}
+        index={index}
+        currCode={currCode}
+        onEdit={onEdit}
+        onSuggest={onSuggest}
+        onDelete={onDelete}
+      />
+    </Reorder.Item>
   );
 }
 
@@ -825,21 +868,15 @@ export default function DayDetail_V2() {
                 style={{ display: 'flex', flexDirection: 'column', gap: 11, listStyle: 'none', padding: 0, margin: 0 }}
               >
                 {evs.map((ev, i) => (
-                  <Reorder.Item
+                  <DraggableEvent
                     key={ev.id}
-                    value={ev}
-                    style={{ cursor: 'grab' }}
-                    whileDrag={{ scale: 1.02, boxShadow: '0 8px 24px oklch(20% 0.03 60 / 22%)' }}
-                  >
-                    <EventAccordion
-                      event={ev}
-                      index={i}
-                      currCode={currCode}
-                      onEdit={e => { setEditTarget(e); setShowAdd(true); }}
-                      onSuggest={() => setShowSuggestions(true)}
-                      onDelete={id => deleteEvent(activeDay, id)}
-                    />
-                  </Reorder.Item>
+                    event={ev}
+                    index={i}
+                    currCode={currCode}
+                    onEdit={e => { setEditTarget(e); setShowAdd(true); }}
+                    onSuggest={() => setShowSuggestions(true)}
+                    onDelete={id => deleteEvent(activeDay, id)}
+                  />
                 ))}
               </Reorder.Group>
             ) : (

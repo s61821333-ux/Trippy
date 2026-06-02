@@ -73,7 +73,7 @@ export default function Settings_V2() {
     trip, themeMode, setThemeMode,
     highContrast, toggleHighContrast,
     currencyByTrip, tripDbId,
-    deleteTrip, setCurrency, updateTripInfo,
+    deleteTrip, setCurrency, updateTripInfo, setScreen,
   } = useAppStore(useShallow(s => ({
     trip:               s.trip,
     themeMode:          s.themeMode,
@@ -85,6 +85,7 @@ export default function Settings_V2() {
     deleteTrip:         s.deleteTrip,
     setCurrency:        s.setCurrency,
     updateTripInfo:     s.updateTripInfo,
+    setScreen:          s.setScreen,
   })));
 
   const [showDeleteConfirm,  setShowDeleteConfirm]  = useState(false);
@@ -141,6 +142,21 @@ export default function Settings_V2() {
       style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}
     >
       <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
+      {/* ── Back button ── */}
+      <button
+        onClick={() => setScreen('dashboard')}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 4, marginBottom: 6,
+          background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0',
+          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+          letterSpacing: '0.06em', textTransform: 'uppercase', color: 'var(--text-3)',
+          WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        <Icon name={isRTL ? 'chevR' : 'chevL'} size={12} color="var(--text-3)" />
+        {locale === 'he' ? 'לוח בקרה' : 'Dashboard'}
+      </button>
+
       {/* ── Header ── */}
       <m.p
         className="eyebrow-lg"

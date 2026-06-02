@@ -121,7 +121,6 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
             value={itemName}
             onChange={handleNameChange}
             autoComplete="off"
-            autoFocus
           />
         </div>
 

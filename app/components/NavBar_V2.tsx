@@ -1,7 +1,7 @@
 'use client';
 
 import { m, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Icon from './ui/Icon';
 import { Screen } from '@/lib/types';
 import { useI18n } from '@/lib/i18n';
@@ -36,6 +36,9 @@ const PANEL_SPRING = { type: 'spring', stiffness: 400, damping: 28 } as const;
 export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes }: NavBarV2Props) {
   const { t, isRTL } = useI18n();
   const [expandOpen, setExpandOpen] = useState(false);
+
+  // Close the expand panel whenever the active screen changes
+  React.useEffect(() => { setExpandOpen(false); }, [active]);
 
   // -1 when on a non-tab screen (settings, notes, etc.) — blob should hide
   const activeTabIdx = TABS.findIndex(tb => tb.id === active);

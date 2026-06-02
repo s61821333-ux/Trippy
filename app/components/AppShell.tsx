@@ -284,7 +284,7 @@ function Shell() {
     );
   }
 
-  const showNav = trip && screen !== 'login' && screen !== 'home' && screen !== 'splash' && screen !== 'welcome';
+  const showNav = trip && screen !== 'login' && screen !== 'home' && screen !== 'splash' && screen !== 'welcome' && screen !== 'settings' && screen !== 'notes';
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';

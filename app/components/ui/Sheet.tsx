@@ -58,12 +58,15 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
     return () => document.removeEventListener('keydown', handler);
   }, [onClose, isDismissable]);
 
-  // Auto-focus: move focus into sheet on open
+  // Auto-focus: after animation, focus the first INPUT (not a button which would fight with field autoFocus on mobile)
   useEffect(() => {
-    const firstFocusable = panelRef.current?.querySelector<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    firstFocusable?.focus();
+    const timer = setTimeout(() => {
+      const firstInput = panelRef.current?.querySelector<HTMLElement>('input, textarea');
+      if (firstInput) {
+        firstInput.focus({ preventScroll: true });
+      }
+    }, 350); // wait for sheet slide-in animation to finish
+    return () => clearTimeout(timer);
   }, []);
 
   const handleTouchStart = (e: React.TouchEvent) => {
