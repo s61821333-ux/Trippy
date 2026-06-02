@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, m, MotionConfig } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { screenVariants, spring } from '@/lib/motion';
@@ -101,6 +101,11 @@ function SyncErrorWatcher() {
 const screenTransition = spring.default;
 
 function Shell() {
+  // Single Supabase client instance — survives React 18 Strict Mode's double-invoke of effects.
+  // A fresh createClient() on the second run would fire INITIAL_SESSION before cookies are re-read,
+  // causing a brief redirect to 'welcome' even for authenticated users.
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+
   // Granular selectors — each group only re-renders Shell when its slice changes (ME-5)
   const screen          = useAppStore(s => s.screen);
   const isGlobalLoading = useAppStore(s => s.isGlobalLoading);
@@ -175,7 +180,10 @@ function Shell() {
     // onAuthStateChange fires immediately with INITIAL_SESSION on every page load.
     // If the session is valid → confirm/update authUser.
     // If no session (expired or logged out) → clear persisted authUser and go to login.
-    const supabase = createClient();
+    // Re-use the same Supabase client across Strict Mode re-runs so the second invocation
+    // sees the already-loaded session and never fires INITIAL_SESSION with a null session.
+    if (!supabaseRef.current) supabaseRef.current = createClient();
+    const supabase = supabaseRef.current;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
