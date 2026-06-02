@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Icon from '../ui/Icon';
 import { StampIcon } from '../ui/StampIcon';
 import Ring from '../ui/Ring';
@@ -347,6 +347,8 @@ export default function DashboardScreenV2() {
   const [showBudgetEdit, setShowBudgetEdit] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const [sharingLink, setSharingLink] = useState(false);
+  const [coachAdvice,  setCoachAdvice]  = useState<string | null>(null);
+  const [coachLoading, setCoachLoading] = useState(false);
 
   // ── Derived date values ──────────────────────────────────────────────
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -449,6 +451,67 @@ export default function DashboardScreenV2() {
   const isRTL = locale === 'he';
 
   const aiSummary = buildAiSummary(trip, supplies, totalSpent, locale);
+
+  // ── Per-category spend (from events with cost) ───────────────────────
+  const topCats = useMemo(() => {
+    const cats: Record<string, number> = {};
+    for (let d = 1; d <= trip.days; d++) {
+      for (const ev of trip.events[d] ?? []) {
+        if (ev.cost && ev.cost > 0) {
+          cats[ev.category] = (cats[ev.category] ?? 0) + ev.cost;
+        }
+      }
+    }
+    return Object.entries(cats)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3)
+      .map(([name, amount]) => ({ name, amount }));
+  }, [trip]);
+
+  // ── Upcoming event costs (today or future days) ──────────────────────
+  const upcomingCost = useMemo(() => {
+    const fromDay = currentTripDay ?? 1;
+    let total = 0;
+    for (let d = fromDay; d <= trip.days; d++) {
+      for (const ev of trip.events[d] ?? []) {
+        if (ev.cost && ev.cost > 0) total += ev.cost;
+      }
+    }
+    return total;
+  }, [trip, currentTripDay]);
+
+  const daysLeft = currentTripDay != null ? trip.days - currentTripDay : null;
+
+  // ── AI Budget Coach ──────────────────────────────────────────────────
+  const fetchCoachAdvice = useCallback(async () => {
+    setCoachLoading(true);
+    setCoachAdvice(null);
+    try {
+      const res = await fetch('/api/ai/budget-coach', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          tripName:     trip.name,
+          currency,
+          budget:       trip.budget ?? null,
+          spent:        totalSpent,
+          days:         trip.days,
+          currentDay:   currentTripDay,
+          daysLeft,
+          upcomingCost,
+          packedPct,
+          topCats,
+          locale,
+        }),
+      });
+      const data = await res.json() as { advice?: string; error?: string };
+      if (data.advice) setCoachAdvice(data.advice);
+    } catch {
+      // Silently fail — static summary is still shown
+    } finally {
+      setCoachLoading(false);
+    }
+  }, [trip, currency, totalSpent, currentTripDay, daysLeft, upcomingCost, packedPct, topCats, locale]);
 
   return (
     <div
@@ -635,33 +698,84 @@ export default function DashboardScreenV2() {
       <div className="resp-container" style={{ padding: '0 20px', paddingBottom: 110 }}>
         <div className="resp-dash-grid">
 
-        {/* ── AI analysis card ── */}
-        <button
+        {/* ── AI Budget Coach card ── */}
+        <div
           className="a-rise"
-          onClick={() => setScreen('day')}
           style={{
             borderRadius: 'var(--lg-r-card)', padding: 16,
             background: 'linear-gradient(135deg, var(--lg-forest), var(--lg-forest-deep))',
             boxShadow: 'var(--lg-glow-forest)',
-            cursor: 'pointer', position: 'relative', overflow: 'hidden',
-            border: 0, textAlign: 'start', width: '100%',
+            position: 'relative', overflow: 'hidden',
           }}
         >
-          <div aria-hidden style={{ position: 'absolute', top: -20, insetInlineEnd: -10, opacity: 0.16, pointerEvents: 'none' }}>
+          <div aria-hidden style={{ position: 'absolute', top: -20, insetInlineEnd: -10, opacity: 0.14, pointerEvents: 'none' }}>
             <Icon name="sparkle" size={90} color="#fff" />
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 8 }}>
-            <Icon name="ai" size={16} color="var(--lg-sand)" />
-            <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)' }}>{t('aiAnalysisLabel')}</span>
+
+          {/* Header row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <Icon name="ai" size={16} color="var(--lg-sand)" />
+              <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)' }}>
+                {coachAdvice ? (isRTL ? 'יועץ תקציב' : 'Budget Coach') : t('aiAnalysisLabel')}
+              </span>
+            </div>
+            {/* Refresh button — shown once advice is loaded */}
+            {coachAdvice && !coachLoading && (
+              <button
+                onClick={fetchCoachAdvice}
+                aria-label="Refresh advice"
+                style={{ background: 'rgba(255,255,255,.15)', border: 0, borderRadius: 9999, width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+              >
+                <Icon name="swap" size={13} color="#fff" />
+              </button>
+            )}
           </div>
-          <p style={{ fontSize: 14, lineHeight: 1.6, color: '#fff', fontWeight: 500, margin: 0 }}>
-            {aiSummary}
-          </p>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 12, color: '#fff', fontWeight: 600, fontSize: 13 }}>
-            {t('viewSuggestions')}
-            <Icon name="arrow" size={15} color="#fff" style={{ transform: isRTL ? 'scaleX(-1)' : 'none' }} />
+
+          {/* Body text */}
+          {coachLoading ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
+              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,.35)', borderTopColor: '#fff', animation: 'spin .8s linear infinite', flexShrink: 0 }} />
+              <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+              <span style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', fontStyle: 'italic' }}>
+                {isRTL ? 'מנתח את התקציב שלך…' : 'Analysing your trip…'}
+              </span>
+            </div>
+          ) : (
+            <p style={{ fontSize: 14, lineHeight: 1.65, color: '#fff', fontWeight: 500, margin: 0 }}>
+              {coachAdvice ?? aiSummary}
+            </p>
+          )}
+
+          {/* Footer actions */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
+            {/* Ask AI button — shown until advice is loaded */}
+            {!coachAdvice && !coachLoading ? (
+              <button
+                onClick={fetchCoachAdvice}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: 'rgba(255,255,255,.18)', border: 0, borderRadius: 9999,
+                  padding: '7px 14px', cursor: 'pointer', color: '#fff',
+                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                <Icon name="sparkle" size={13} color="var(--lg-sand)" />
+                {isRTL ? 'קבל ייעוץ AI' : 'Get AI coaching'}
+              </button>
+            ) : <span />}
+
+            {/* View day plan link */}
+            <button
+              onClick={() => setScreen('day')}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'none', border: 0, cursor: 'pointer', color: '#fff', fontWeight: 600, fontSize: 13 }}
+            >
+              {t('viewSuggestions')}
+              <Icon name="arrow" size={14} color="#fff" style={{ transform: isRTL ? 'scaleX(-1)' : 'none' }} />
+            </button>
           </div>
-        </button>
+        </div>
 
         {/* ── Next up ── */}
         {nextEvent && (
