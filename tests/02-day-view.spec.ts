@@ -6,7 +6,6 @@ import { setupPage, clickEl } from './helpers';
 test.describe('Day view — event cards', () => {
   test('event cards are rendered for day 1', async ({ page }) => {
     await setupPage(page, 'day');
-    // The BASE_TRIP has 2 events on day 1; each renders with class "lg a-rise"
     await page.locator('.lg.a-rise').first().waitFor({ state: 'visible', timeout: 12_000 });
     const cards = page.locator('.lg.a-rise');
     await expect(cards).toHaveCount(2, { timeout: 8_000 });
@@ -22,8 +21,9 @@ test.describe('Day view — event cards', () => {
     await setupPage(page, 'day');
     await page.locator('.lg.a-rise').first().waitFor({ state: 'visible', timeout: 12_000 });
     await clickEl(page, '.lg.a-rise');
-    await expect(page.getByText('Edit')).toBeVisible({ timeout: 5_000 });
-    await expect(page.getByText('Reschedule')).toBeVisible({ timeout: 5_000 });
+    // Use .first() — multiple cards may each have an Edit/Reschedule label
+    await expect(page.getByText('Edit').first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Reschedule').first()).toBeVisible({ timeout: 5_000 });
   });
 
   test('drag handles are present on each event card', async ({ page }) => {
@@ -49,7 +49,7 @@ test.describe('Day view — Reschedule sheet', () => {
     await setupPage(page, 'day');
     await page.locator('.lg.a-rise').first().waitFor({ state: 'visible', timeout: 12_000 });
     await clickEl(page, '.lg.a-rise');
-    await expect(page.getByText('Reschedule')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Reschedule').first()).toBeVisible({ timeout: 5_000 });
     await page.evaluate(() => {
       document.querySelectorAll('button').forEach(b => {
         if (b.textContent?.trim() === 'Reschedule') b.click();
@@ -62,7 +62,6 @@ test.describe('Day view — Reschedule sheet', () => {
     await expect(page.getByText('Start time')).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText('End time')).toBeVisible({ timeout: 5_000 });
     await expect(page.getByText('Duration shortcut')).toBeVisible({ timeout: 5_000 });
-    // Must NOT show the full edit form
     await expect(page.getByText('Event name')).not.toBeVisible();
   });
 
@@ -91,14 +90,13 @@ test.describe('Day view — Edit sheet', () => {
     await setupPage(page, 'day');
     await page.locator('.lg.a-rise').first().waitFor({ state: 'visible', timeout: 12_000 });
     await clickEl(page, '.lg.a-rise');
-    await expect(page.getByText('Edit')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Edit').first()).toBeVisible({ timeout: 5_000 });
     await page.evaluate(() => {
       document.querySelectorAll('button').forEach(b => {
         if (b.textContent?.trim() === 'Edit') b.click();
       });
     });
     await expect(page.getByText('Event name')).toBeVisible({ timeout: 5_000 });
-    // Full edit sheet must NOT show the reschedule-only title
     await expect(page.getByText('Update time')).not.toBeVisible();
   });
 });

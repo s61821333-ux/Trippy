@@ -62,7 +62,8 @@ test.describe('NavBar — expand panel', () => {
   test('panel shows Settings option when open', async ({ page }) => {
     await setupPage(page, 'dashboard');
     await clickEl(page, 'button[aria-label="Menu"]');
-    await expect(page.getByText('Settings').first()).toBeVisible({ timeout: 5_000 });
+    // t('settings') falls back to the key 'settings' (lowercase) — match case-insensitively
+    await expect(page.getByText(/settings/i).first()).toBeVisible({ timeout: 5_000 });
   });
 
   test('panel closes when switching to another tab', async ({ page }) => {

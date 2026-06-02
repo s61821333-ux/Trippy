@@ -37,10 +37,9 @@ test.describe('Auth — unauthenticated flow', () => {
     await page.waitForLoadState('domcontentloaded');
     // Wait well past the 1.9 s auto-advance
     await page.waitForTimeout(3_500);
-    // Welcome screen should show the Google sign-in button
-    const body = await page.textContent('body');
-    // Either "Google" text or the "Start an adventure" CTA is present
-    expect(body?.toLowerCase()).toMatch(/google|adventure|sign.?in/i);
+    // Use innerText (not textContent) to avoid matching raw RSC/script payloads
+    const body = await page.locator('body').innerText();
+    expect(body.toLowerCase()).toMatch(/google|adventure|sign.?in/i);
   });
 
   test('NavBar is NOT shown on the welcome screen', async ({ page }) => {
@@ -85,9 +84,9 @@ test.describe('Auth — demo-user via __trippySetState__', () => {
     await expect(page.getByText('Test Trip')).toBeVisible({ timeout: 10_000 });
   });
 
-  test('injected authUser nickname is reflected in the session', async ({ page }) => {
+  test('injected participant name is reflected in the crew list', async ({ page }) => {
     await setupPage(page, 'crew');
-    // The injected participant "Tester" should appear in the crew list
+    // BASE_TRIP has participant with name: 'Tester' (uses Participant.name field)
     await expect(page.getByText('Tester')).toBeVisible({ timeout: 10_000 });
   });
 

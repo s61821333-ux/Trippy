@@ -31,6 +31,8 @@ test.describe('Accessibility — ARIA', () => {
     await expect(btn).toHaveAttribute('aria-expanded', 'false');
     await clickEl(page, 'button[aria-label="Menu"]');
     await expect(btn).toHaveAttribute('aria-expanded', 'true', { timeout: 5_000 });
+    // Wait for the open animation to settle before clicking again
+    await page.waitForTimeout(600);
     await clickEl(page, 'button[aria-label="Menu"]');
     await expect(btn).toHaveAttribute('aria-expanded', 'false', { timeout: 5_000 });
   });

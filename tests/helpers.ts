@@ -7,7 +7,7 @@ export const BASE_TRIP = {
   days:         3,
   startDate:    '2027-06-01',
   countries:    ['US'],
-  participants: [{ id: 'u1', nickname: 'Tester', color: '#f97316' }],
+  participants: [{ id: 1, name: 'Tester', initials: 'TE', color: '#f97316' }],
   dayMeta:      [{ region: 'New York' }, { region: 'Boston' }, { region: 'Washington' }],
   events: {
     1: [
