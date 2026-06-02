@@ -15,6 +15,9 @@ import Field from '../ui/Field';
 import CountriesInput from '../ui/CountriesInput';
 import { TripTheme } from '@/lib/types';
 import { CURRENCIES } from '@/lib/currency';
+import dynamic from 'next/dynamic';
+
+const PlanWithAISheet = dynamic(() => import('./PlanWithAISheet'));
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -293,6 +296,7 @@ export default function Home_V2() {
   const [tripsLoading,  setTripsLoading]  = useState(false);
   const [loadingTripId, setLoadingTripId] = useState<string | null>(null);
   const [showCreate,    setShowCreate]    = useState(false);
+  const [showAIPlan,    setShowAIPlan]    = useState(false);
 
   const initials = (authUser?.username ?? '?')
     .split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
@@ -426,7 +430,32 @@ export default function Home_V2() {
           <Icon name="arrow" size={18} color="#fff" />
         </m.button>
 
-        {/* "Plan one with AI" removed per design update */}
+        {/* Plan with AI — full itinerary generator */}
+        <m.button
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.28, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => setShowAIPlan(true)}
+          className="lg"
+          aria-label={locale === 'he' ? 'תכנן עם AI' : 'Plan with AI'}
+          style={{
+            width: '100%', height: 60,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '0 24px', marginBottom: 26,
+            fontFamily: 'var(--font-sans)', fontSize: 16, border: 0, cursor: 'pointer',
+            background: 'linear-gradient(135deg, oklch(38% 0.10 148 / 90%), oklch(30% 0.08 148 / 95%))',
+            boxShadow: 'var(--lg-glow-forest)',
+          }}
+        >
+          <span style={{ display: 'flex', alignItems: 'center', gap: 11, color: '#fff', fontWeight: 700 }}>
+            <Icon name="sparkle" size={20} color="var(--lg-sand)" />
+            {locale === 'he' ? 'תכנן עם AI' : 'Plan with AI'}
+          </span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.65)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+            {locale === 'he' ? 'מסלול מלא תוך שניות' : 'Full itinerary in seconds'}
+          </span>
+        </m.button>
 
         {/* ── Resume banner — shown when a previous trip session is remembered ── */}
         {(() => {
@@ -604,8 +633,11 @@ export default function Home_V2() {
         <div style={{ height: 'max(32px, env(safe-area-inset-bottom, 32px))' }} aria-hidden="true" />
       </div>
 
-      {/* ── CreateSheet — shared for both CTAs ── */}
+      {/* ── CreateSheet — manual trip creation ── */}
       {showCreate && <CreateSheet onClose={() => setShowCreate(false)} />}
+
+      {/* ── AI Trip Planner sheet ── */}
+      {showAIPlan && <PlanWithAISheet onClose={() => setShowAIPlan(false)} />}
     </div>
   );
 }
