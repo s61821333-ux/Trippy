@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { m } from 'framer-motion';
+import React, { useState, useMemo } from 'react';
+import { m, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/lib/store';
 import { useShallow as useShallowPacking } from 'zustand/react/shallow';
@@ -189,6 +189,193 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
+// ── AI Packing Smart-Fill sheet ───────────────────────────────────────────────
+
+type AISuggestedItem = { name: string; category: SupplyItem['category']; selected: boolean };
+
+const CAT_EMOJI: Record<SupplyItem['category'], string> = {
+  Documents: '📄', Gear: '🎒', Medical: '💊', Food: '🥜', Water: '💧', Other: '🗂',
+};
+
+function AIPackingSheet({ trip, supplies, onClose }: {
+  trip: NonNullable<ReturnType<typeof useAppStore.getState>['trip']>;
+  supplies: SupplyItem[];
+  onClose: () => void;
+}) {
+  const { addSupplyItem } = useAppStore();
+  const { locale } = useI18n();
+  const { show } = useToast();
+  const isHe = locale === 'he';
+
+  const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState<AISuggestedItem[] | null>(null);
+  const [fetched, setFetched] = useState(false);
+
+  // Gather trip context
+  const eventCats = useMemo(() => {
+    const cats: string[] = [];
+    for (let d = 1; d <= trip.days; d++) {
+      for (const ev of trip.events[d] ?? []) cats.push(ev.category);
+    }
+    return [...new Set(cats)];
+  }, [trip]);
+
+  const existingNames = useMemo(() => supplies.map(s => s.name), [supplies]);
+
+  const fetchSuggestions = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/ai/packing', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          destination: trip.countries?.join(', ') || trip.name,
+          days:        trip.days,
+          startDate:   trip.startDate,
+          locale,
+          existing:    existingNames,
+          eventCats,
+        }),
+      });
+      const data = await res.json() as { items?: { name: string; category: SupplyItem['category'] }[] };
+      if (data.items) {
+        setSuggestions(data.items.map(i => ({ ...i, selected: true })));
+        setFetched(true);
+      }
+    } catch {
+      show(isHe ? 'שגיאה — נסה שוב' : 'Error fetching suggestions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Kick off on mount
+  React.useEffect(() => { fetchSuggestions(); }, []);
+
+  const toggle = (i: number) => setSuggestions(prev =>
+    prev ? prev.map((s, idx) => idx === i ? { ...s, selected: !s.selected } : s) : prev
+  );
+
+  const handleAdd = () => {
+    const toAdd = (suggestions ?? []).filter(s => s.selected);
+    toAdd.forEach(s => addSupplyItem(s.name, s.category));
+    show(isHe ? `${toAdd.length} פריטים נוספו` : `${toAdd.length} items added`);
+    onClose();
+  };
+
+  // Group by category
+  const grouped = useMemo(() => {
+    if (!suggestions) return {};
+    return suggestions.reduce<Record<string, { item: AISuggestedItem; idx: number }[]>>((acc, item, idx) => {
+      const k = item.category;
+      if (!acc[k]) acc[k] = [];
+      acc[k].push({ item, idx });
+      return acc;
+    }, {});
+  }, [suggestions]);
+
+  const selectedCount = (suggestions ?? []).filter(s => s.selected).length;
+
+  return (
+    <Sheet title={isHe ? 'הצעות AI לציוד' : 'AI Packing Suggestions'} onClose={onClose}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+        {/* Loading state */}
+        {loading && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '24px 0' }}>
+            <m.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}>
+              <Icon name="compass" size={48} color="var(--lg-terra)" />
+            </m.div>
+            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--lg-ink)', margin: 0 }}>
+              {isHe ? 'מכין רשימת ציוד…' : 'Building your packing list…'}
+            </p>
+          </div>
+        )}
+
+        {/* Suggestions list */}
+        {!loading && suggestions && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0 }}>
+                {isHe ? `${selectedCount} פריטים נבחרו` : `${selectedCount} items selected`}
+              </p>
+              <button
+                onClick={() => setSuggestions(s => s?.map(i => ({ ...i, selected: !s.every(x => x.selected) })) ?? s)}
+                style={{ fontSize: 12, fontWeight: 600, color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                {(suggestions.every(s => s.selected)) ? (isHe ? 'בטל הכל' : 'Deselect all') : (isHe ? 'בחר הכל' : 'Select all')}
+              </button>
+            </div>
+
+            {Object.entries(grouped).map(([cat, items]) => (
+              <div key={cat}>
+                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: '0 0 8px', fontWeight: 600 }}>
+                  {CAT_EMOJI[cat as SupplyItem['category']]} {cat}
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {items.map(({ item, idx }) => (
+                    <button
+                      key={idx}
+                      onClick={() => toggle(idx)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '10px 14px', border: 0, borderRadius: 14, cursor: 'pointer', textAlign: 'start',
+                        background: item.selected ? 'var(--lg-panel)' : 'transparent',
+                        boxShadow: item.selected ? 'inset 0 0 0 1.5px var(--lg-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                        transition: 'all .18s',
+                      }}
+                    >
+                      <span style={{
+                        width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+                        background: item.selected ? 'var(--lg-forest)' : 'transparent',
+                        boxShadow: item.selected ? 'var(--lg-glow-forest)' : 'inset 0 0 0 2px oklch(50% 0.02 60 / 25%)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'all .18s',
+                      }}>
+                        {item.selected && <Icon name="check" size={12} color="#fff" />}
+                      </span>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--lg-ink)' }}>{item.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+              <button
+                onClick={handleAdd}
+                disabled={selectedCount === 0}
+                style={{
+                  flex: 2, height: 50, border: 0, borderRadius: 'var(--lg-r-btn)', cursor: 'pointer',
+                  background: 'var(--lg-forest)', color: '#fff',
+                  fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15,
+                  boxShadow: 'var(--lg-glow-forest)',
+                  opacity: selectedCount === 0 ? 0.4 : 1,
+                }}
+              >
+                {isHe ? `הוסף ${selectedCount} פריטים` : `Add ${selectedCount} items`}
+              </button>
+              <button
+                onClick={() => { setSuggestions(null); fetchSuggestions(); }}
+                style={{
+                  flex: 0, width: 50, height: 50, border: 0, borderRadius: 'var(--lg-r-btn)', cursor: 'pointer',
+                  background: 'var(--lg-panel)', color: 'var(--text-2)',
+                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
+                  boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+                aria-label="Refresh"
+              >
+                <Icon name="swap" size={17} color="var(--text-2)" />
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </Sheet>
+  );
+}
+
 // ── Main Packing_V2 ───────────────────────────────────────────────────────────
 
 export default function Packing_V2() {
@@ -200,6 +387,7 @@ export default function Packing_V2() {
 
   const [activeCat, setActiveCat] = useState<FilterCat>('All');
   const [showAdd,   setShowAdd]   = useState(false);
+  const [showAI,    setShowAI]    = useState(false);
 
   const packed = supplies.filter(s => s.checked).length;
   const total  = supplies.length;
@@ -259,18 +447,34 @@ export default function Packing_V2() {
           </div>
         </div>
 
-        {/* Add item button */}
-        <button
-          onClick={() => setShowAdd(true)}
-          className="lg-btn lg-btn-forest"
-          aria-label="Add packing item"
-          style={{
-            width: 42, height: 42, padding: 0, flexShrink: 0, borderRadius: 9999,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
-        >
-          <Icon name="plus" size={20} color="#fff" />
-        </button>
+        {/* AI fill + add buttons */}
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          <button
+            onClick={() => setShowAI(true)}
+            className="lg-btn"
+            aria-label="Fill with AI"
+            title="AI packing suggestions"
+            style={{
+              width: 42, height: 42, padding: 0, borderRadius: 9999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'var(--lg-panel)',
+              boxShadow: 'inset 0 0 0 1.5px var(--lg-terra)',
+            }}
+          >
+            <Icon name="sparkle" size={17} color="var(--lg-terra)" />
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="lg-btn lg-btn-forest"
+            aria-label="Add packing item"
+            style={{
+              width: 42, height: 42, padding: 0, borderRadius: 9999,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Icon name="plus" size={20} color="#fff" />
+          </button>
+        </div>
       </m.div>
 
       {/* ── Category rail ── */}
@@ -390,6 +594,13 @@ export default function Packing_V2() {
       )}
 
       {showAdd && <AddItemSheet onClose={() => setShowAdd(false)} />}
+      {showAI && trip && (
+        <AIPackingSheet
+          trip={trip}
+          supplies={supplies}
+          onClose={() => setShowAI(false)}
+        />
+      )}
       </div>{/* /resp-container */}
     </div>
   );
