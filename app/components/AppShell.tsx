@@ -376,8 +376,7 @@ function Shell() {
                     ) : screen === 'day' ? (
                       <DayScreen />
                     ) : screen === 'map' ? (
-                      // Map tab removed — silently redirect to dashboard
-                      (() => { setScreen('dashboard'); return null; })()
+                      <MapScreen />
                     ) : screen === 'crew' ? (
                       <CrewScreen />
                     ) : screen === 'supplies' ? (

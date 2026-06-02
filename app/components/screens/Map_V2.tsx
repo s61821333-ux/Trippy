@@ -1,275 +1,301 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { m, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
-import { spring } from '@/lib/motion';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
-import { StampIcon } from '../ui/StampIcon';
-import { catStamp } from '@/lib/categoryStamp';
+import { getCurrencySymbol } from '@/lib/currency';
+import type { MapEvent } from '../ui/LeafletMap';
 import Icon from '../ui/Icon';
-import Btn from '../ui/Btn';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
+// ── Dynamically import Leaflet (client-only, no SSR) ─────────────────────────
 
-type MapMode = 'trip' | 'explore';
+const LeafletMap = dynamic(() => import('../ui/LeafletMap'), {
+  ssr: false,
+  loading: () => (
+    <div style={{
+      width: '100%', height: '100%',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      background: 'linear-gradient(165deg, #E3EBE4 0%, #DCE6DD 35%, #EBE2D2 70%, #E8DCC8 100%)',
+    }}>
+      <div style={{
+        width: 44, height: 44, borderRadius: '50%',
+        border: '3px solid transparent',
+        borderTopColor: '#C4714A',
+        animation: 'spin 0.9s linear infinite',
+      }} />
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  ),
+});
 
-interface Pin {
-  key: string;      // stamp icon key
-  x: number;        // absolute px from left
-  y: number;        // absolute px from top
-  label: string;    // event name
-  delay: number;    // a-pop stagger delay
-}
+// ── Day-label colours (matches LeafletMap palette) ───────────────────────────
 
-// ── Decorative pin layout — mirrors explore.jsx reference ─────────────────────
-// Falls back to these when the trip has no geocoded events.
-
-const DECORATIVE_PINS: Omit<Pin, 'label'>[] = [
-  { key: 'plane',  x: 60,  y: 130, delay: 0     },
-  { key: 'hotel',  x: 250, y: 200, delay: 0.08  },
-  { key: 'museum', x: 140, y: 300, delay: 0.16  },
-  { key: 'wine',   x: 270, y: 380, delay: 0.24  },
-  { key: 'coffee', x: 90,  y: 440, delay: 0.32  },
+const DAY_PALETTE = [
+  '#C4714A', '#3B6E52', '#6B5CE7', '#2B7A8E',
+  '#D4531A', '#C8944A', '#E05A3A', '#1B6A8A',
 ];
 
-// ── Route polyline points (matches DECORATIVE_PINS order) ─────────────────────
-const ROUTE_D = 'M80 150 L268 218 L160 318 L286 398 L110 458';
+// ── Event-detail card shown when a pin is tapped ─────────────────────────────
 
-// ── Derive pins from trip events that have lat/lng ────────────────────────────
-// Maps geocoded coords → viewport positions within a 402×640 canvas.
-// Falls back to DECORATIVE_PINS when fewer than 2 events have coords.
+function EventCard({
+  ev,
+  currSym,
+  onClose,
+  onGoToDay,
+}: {
+  ev: MapEvent;
+  currSym: string;
+  onClose: () => void;
+  onGoToDay: (day: number) => void;
+}) {
+  const dayColor = DAY_PALETTE[(ev.day - 1) % DAY_PALETTE.length];
 
-function deriveViewPins(
-  events: Record<number, import('@/lib/types').TripEvent[]>,
-  days: number,
-): Pin[] {
-  const geocoded: Array<{ lat: number; lng: number; cat: string; name: string }> = [];
-  for (let d = 1; d <= days; d++) {
-    for (const ev of events[d] ?? []) {
-      if (ev.lat != null && ev.lng != null) {
-        geocoded.push({ lat: ev.lat, lng: ev.lng, cat: ev.category, name: ev.name });
-      }
-    }
-  }
+  return (
+    <m.div
+      key={ev.id}
+      initial={{ opacity: 0, y: 22, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 16, scale: 0.96 }}
+      transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+      className="lg lg-strong"
+      style={{ padding: '14px 16px', borderRadius: 20 }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+        {/* Day badge */}
+        <div style={{
+          flexShrink: 0, width: 40, height: 40, borderRadius: 12,
+          background: dayColor,
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'rgba(255,255,255,.8)', lineHeight: 1, letterSpacing: '0.05em' }}>DAY</span>
+          <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, color: '#fff', lineHeight: 1 }}>{ev.day}</span>
+        </div>
 
-  if (geocoded.length < 2) {
-    return DECORATIVE_PINS.map((p, i) => ({ ...p, label: '' }));
-  }
+        {/* Details */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {ev.name}
+          </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4, flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--text-3)' }}>{ev.time}</span>
+            {ev.location && (
+              <span style={{ fontSize: 11, color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                <Icon name="pin" size={11} color="var(--text-3)" />
+                {ev.location}
+              </span>
+            )}
+            {ev.cost != null && (
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--lg-terra)' }}>
+                {currSym}{ev.cost}
+              </span>
+            )}
+          </div>
+        </div>
 
-  const lats = geocoded.map(e => e.lat);
-  const lngs = geocoded.map(e => e.lng);
-  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
-  const latRange = maxLat - minLat || 1;
-  const lngRange = maxLng - minLng || 1;
+        {/* Close */}
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, flexShrink: 0 }}
+        >
+          <Icon name="x" size={16} color="var(--text-3)" />
+        </button>
+      </div>
 
-  const W = 362, H = 560, PAD = 40;
-
-  return geocoded.slice(0, 8).map((e, i) => ({
-    key:   catStamp(e.cat).key,
-    x:     PAD + ((e.lng - minLng) / lngRange) * (W - PAD * 2),
-    y:     PAD + (1 - (e.lat - minLat) / latRange) * (H - PAD * 2),
-    label: e.name,
-    delay: i * 0.08,
-  }));
+      {/* Go-to-day button */}
+      <button
+        onClick={() => onGoToDay(ev.day)}
+        style={{
+          marginTop: 12, width: '100%', height: 40, border: 0, borderRadius: 12, cursor: 'pointer',
+          background: dayColor, color: '#fff',
+          fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+        }}
+      >
+        <Icon name="compass" size={14} color="#fff" />
+        Open Day {ev.day}
+      </button>
+    </m.div>
+  );
 }
 
-function buildRoutePath(pins: Pin[]): string {
-  if (pins.length < 2) return ROUTE_D;
-  return pins.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x + 23} ${p.y + 23}`).join(' ');
+// ── No-pins empty state ───────────────────────────────────────────────────────
+
+function EmptyMapState({ onGoToDay }: { onGoToDay: (d: number) => void }) {
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, duration: 0.45 }}
+      className="lg lg-strong"
+      style={{ padding: '18px 16px', borderRadius: 20, textAlign: 'center' }}
+    >
+      <Icon name="map" size={32} color="var(--text-3)" />
+      <p style={{ margin: '10px 0 4px', fontSize: 15, fontWeight: 700, color: 'var(--lg-ink)' }}>
+        No locations yet
+      </p>
+      <p style={{ margin: '0 0 14px', fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>
+        Add a location to events on your day plan and they'll appear here as pins.
+      </p>
+      <button
+        onClick={() => onGoToDay(1)}
+        style={{
+          height: 38, padding: '0 18px', border: 0, borderRadius: 10, cursor: 'pointer',
+          background: 'var(--lg-forest)', color: '#fff',
+          fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+        }}
+      >
+        <Icon name="compass" size={14} color="#fff" />
+        Add events
+      </button>
+    </m.div>
+  );
 }
 
-// ── Trip / Explore segmented toggle ──────────────────────────────────────────
+// ── Day legend pill ───────────────────────────────────────────────────────────
 
-function ModeToggle({ mode, onChange }: { mode: MapMode; onChange: (m: MapMode) => void }) {
+function DayLegend({ days, selectedDay, onSelect }: {
+  days: number;
+  selectedDay: number | null;
+  onSelect: (d: number | null) => void;
+}) {
   return (
     <div
-      className="lg lg-strong"
-      style={{ display: 'flex', padding: 4, borderRadius: 9999, flexShrink: 0 }}
-      role="group"
-      aria-label="Map mode"
+      className="lg-scroll"
+      style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}
     >
-      {(['trip', 'explore'] as MapMode[]).map(m => (
+      <button
+        onClick={() => onSelect(null)}
+        style={{
+          flexShrink: 0, height: 30, padding: '0 12px', borderRadius: 9999, border: 0, cursor: 'pointer',
+          background: selectedDay == null ? 'var(--lg-terra)' : 'var(--lg-panel)',
+          color: selectedDay == null ? '#fff' : 'var(--text-3)',
+          fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+          letterSpacing: '0.06em', boxShadow: selectedDay == null ? 'var(--lg-glow-terra)' : 'none',
+          transition: 'all .2s',
+        }}
+      >
+        ALL
+      </button>
+      {Array.from({ length: days }, (_, i) => i + 1).map(d => (
         <button
-          key={m}
-          onClick={() => onChange(m)}
-          aria-pressed={mode === m}
+          key={d}
+          onClick={() => onSelect(selectedDay === d ? null : d)}
           style={{
-            border: 0, cursor: 'pointer',
-            borderRadius: 9999,
-            padding: '8px 15px',
-            fontFamily: 'var(--font-mono)', fontSize: 10,
-            letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600,
-            background: mode === m ? 'var(--lg-forest)' : 'transparent',
-            color:      mode === m ? '#fff' : 'var(--text-3)',
-            boxShadow:  mode === m ? 'var(--lg-glow-forest)' : 'none',
-            transition: 'all .3s',
-            WebkitTapHighlightColor: 'transparent',
+            flexShrink: 0, height: 30, padding: '0 12px', borderRadius: 9999, border: 0, cursor: 'pointer',
+            background: selectedDay === d ? DAY_PALETTE[(d - 1) % DAY_PALETTE.length] : 'var(--lg-panel)',
+            color: selectedDay === d ? '#fff' : 'var(--text-3)',
+            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+            transition: 'all .2s',
           }}
         >
-          {m === 'trip' ? 'Trip' : 'Explore'}
+          D{d}
         </button>
       ))}
     </div>
   );
 }
 
-// ── Stamp pin ─────────────────────────────────────────────────────────────────
-
-function MapPin({ pin, onClick }: { pin: Pin; onClick: () => void }) {
-  return (
-    <m.button
-      onClick={onClick}
-      initial={{ scale: 0.6, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{
-        delay: pin.delay,
-        type: 'spring', stiffness: 380, damping: 22,
-      }}
-      whileTap={{ scale: 0.92 }}
-      aria-label={pin.label || pin.key}
-      style={{
-        position: 'absolute',
-        left: pin.x,
-        top:  pin.y,
-        border: 0,
-        background: 'transparent',
-        cursor: 'pointer',
-        padding: 0,
-        filter: 'drop-shadow(0 4px 10px oklch(20% 0.03 60 / 28%))',
-        WebkitTapHighlightColor: 'transparent',
-        touchAction: 'manipulation',
-      }}
-    >
-      <StampIcon iconKey={pin.key} size={46} />
-    </m.button>
-  );
-}
-
-// ── Nearby card ───────────────────────────────────────────────────────────────
-
-function NearbyCard({ t }: { t: (k: string) => string }) {
-  return (
-    <m.div
-      className="lg lg-strong"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      style={{ padding: 14, display: 'flex', alignItems: 'center', gap: 13 }}
-    >
-      <StampIcon iconKey="museum" size={48} aria-hidden="true" />
-
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div
-          className="eyebrow-lg"
-          style={{ color: 'var(--lg-sand)', fontSize: 9, marginBottom: 2 }}
-        >
-          {t('Sight')} · 4.8 ★ · 0.5km
-        </div>
-        <div style={{
-          fontSize: 15, fontWeight: 600,
-          color: 'var(--lg-ink)', lineHeight: 1.2, marginTop: 1,
-        }}>
-          MoMA
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
-          {t('Open')} · {t('8 min walk from hotel')}
-        </div>
-      </div>
-
-      <Btn
-        kind="terra"
-        aria-label={t('Route')}
-        style={{ height: 42, padding: '0 18px', fontSize: 13, flexShrink: 0 }}
-      >
-        {t('Route')}
-      </Btn>
-    </m.div>
-  );
-}
-
 // ── Main Map_V2 ───────────────────────────────────────────────────────────────
 
 export default function Map_V2() {
+  const { trip, setScreen, setActiveDay, tripDbId, currencyByTrip } = useAppStore(
+    useShallow(s => ({
+      trip:           s.trip,
+      setScreen:      s.setScreen,
+      setActiveDay:   s.setActiveDay,
+      tripDbId:       s.tripDbId,
+      currencyByTrip: s.currencyByTrip,
+    }))
+  );
   const { t } = useI18n();
 
-  const { trip } = useAppStore(useShallow(s => ({ trip: s.trip })));
-
-  const [mode,        setMode]        = useState<MapMode>('trip');
+  const [selectedId,  setSelectedId]  = useState<string | null>(null);
+  const [filterDay,   setFilterDay]   = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPin, setSelectedPin] = useState<Pin | null>(null);
 
-  const pins = useMemo(
-    () => trip ? deriveViewPins(trip.events, trip.days) : DECORATIVE_PINS.map(p => ({ ...p, label: '' })),
-    [trip],
-  );
+  const currency = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
+  const currSym  = getCurrencySymbol(currency);
 
-  const routeD = useMemo(() => buildRoutePath(pins), [pins]);
+  // Collect all geocoded events
+  const allMapEvents = useMemo<MapEvent[]>(() => {
+    if (!trip) return [];
+    const out: MapEvent[] = [];
+    for (let d = 1; d <= trip.days; d++) {
+      for (const ev of trip.events[d] ?? []) {
+        if (ev.lat != null && ev.lng != null) {
+          out.push({
+            id:       ev.id,
+            name:     ev.name,
+            category: ev.category,
+            lat:      ev.lat,
+            lng:      ev.lng,
+            day:      d,
+            time:     ev.time,
+            location: ev.location,
+            cost:     ev.cost,
+          });
+        }
+      }
+    }
+    return out;
+  }, [trip]);
+
+  // Apply day filter + search
+  const visibleEvents = useMemo(() => {
+    let evs = allMapEvents;
+    if (filterDay != null) evs = evs.filter(e => e.day === filterDay);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      evs = evs.filter(e =>
+        e.name.toLowerCase().includes(q) ||
+        (e.location ?? '').toLowerCase().includes(q)
+      );
+    }
+    return evs;
+  }, [allMapEvents, filterDay, searchQuery]);
+
+  const selectedEvent = visibleEvents.find(e => e.id === selectedId) ?? null;
+
+  const handleGoToDay = (day: number) => {
+    setActiveDay(day);
+    setScreen('day');
+  };
+
+  const tileApiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ?? '';
 
   if (!trip) return null;
 
   return (
-    <div
-      style={{ height: '100%', position: 'relative', overflow: 'hidden' }}
-      aria-label={t('mapTitle') || 'Trip map'}
-    >
-      {/* ── Terrain base ── */}
-      <div style={{
-        position: 'absolute', inset: 0,
-        background: 'linear-gradient(165deg, #E3EBE4 0%, #DCE6DD 35%, #EBE2D2 70%, #E8DCC8 100%)',
-      }} aria-hidden="true" />
-
-      {/* ── Road strokes ── */}
-      <svg
-        width="100%" height="100%"
-        style={{ position: 'absolute', inset: 0, opacity: 0.55, pointerEvents: 'none' }}
-        aria-hidden="true"
-      >
-        <path d="M-20 160 Q120 120 250 200 T520 180" stroke="#fff" strokeWidth="14" fill="none" opacity="0.6" />
-        <path d="M70 -20 Q120 220 90 460 T160 880" stroke="#fff" strokeWidth="16" fill="none" opacity="0.6" />
-        <path d="M-20 420 Q200 380 420 460"          stroke="#fff" strokeWidth="10" fill="none" opacity="0.6" />
-      </svg>
-
-      {/* ── Terra dashed route line ── */}
-      <svg
-        width="100%" height="100%"
-        style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
-        aria-hidden="true"
-      >
-        <path
-          d={routeD}
-          stroke="var(--lg-terra)"
-          strokeWidth="2.5"
-          fill="none"
-          strokeDasharray="2 9"
-          strokeLinecap="round"
-          opacity="0.7"
+    <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
+      {/* ── Real Leaflet map (full bleed) ── */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <LeafletMap
+          events={visibleEvents}
+          selectedId={selectedId}
+          onSelect={ev => setSelectedId(ev?.id ?? null)}
+          tileApiKey={tileApiKey}
         />
-      </svg>
+      </div>
 
-      {/* ── Stamp pins ── */}
-      {pins.map((pin, i) => (
-        <MapPin
-          key={`${pin.key}-${i}`}
-          pin={pin}
-          onClick={() => setSelectedPin(selectedPin?.key === pin.key && selectedPin?.x === pin.x ? null : pin)}
-        />
-      ))}
-
-      {/* ── Top controls: toggle + search ── */}
+      {/* ── Top controls overlay ── */}
       <div style={{
         position: 'absolute', top: 56, left: 16, right: 16,
-        display: 'flex', gap: 10, zIndex: 20,
+        display: 'flex', flexDirection: 'column', gap: 10, zIndex: 20,
+        pointerEvents: 'none',
       }}>
-        <ModeToggle mode={mode} onChange={m => { setMode(m); setSelectedPin(null); }} />
-
+        {/* Search bar */}
         <div
           className="lg lg-strong"
           style={{
-            flex: 1, display: 'flex', alignItems: 'center', gap: 8,
-            padding: '0 14px', borderRadius: 9999, height: 42, minWidth: 0,
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '0 14px', borderRadius: 9999, height: 44,
+            pointerEvents: 'auto',
           }}
         >
           <Icon name="search" size={16} style={{ color: 'var(--text-3)', flexShrink: 0 }} />
@@ -277,70 +303,57 @@ export default function Map_V2() {
             type="search"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder={t('Search your trip')}
-            aria-label={t('Search your trip')}
+            placeholder="Search events…"
+            aria-label="Search events"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
               fontFamily: 'var(--font-sans)', fontSize: 13,
-              color: 'var(--text)', caretColor: 'var(--lg-terra)',
-              minWidth: 0,
+              color: 'var(--text)', caretColor: 'var(--lg-terra)', minWidth: 0,
             }}
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               aria-label="Clear search"
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--text-3)', padding: '2px 4px', flexShrink: 0,
-                WebkitTapHighlightColor: 'transparent',
-              }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: '2px 4px', flexShrink: 0 }}
             >
               <Icon name="x" size={14} />
             </button>
           )}
+          {allMapEvents.length > 0 && (
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', flexShrink: 0 }}>
+              {visibleEvents.length}/{allMapEvents.length}
+            </span>
+          )}
         </div>
+
+        {/* Day filter strip */}
+        {trip.days > 1 && (
+          <div style={{ pointerEvents: 'auto' }}>
+            <DayLegend days={trip.days} selectedDay={filterDay} onSelect={setFilterDay} />
+          </div>
+        )}
       </div>
 
-      {/* ── Pin tooltip (tap label) ── */}
-      <AnimatePresence>
-        {selectedPin && selectedPin.label && (
-          <m.div
-            key="pin-tip"
-            initial={{ opacity: 0, y: 6, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.9 }}
-            transition={spring.snap}
-            style={{
-              position: 'absolute',
-              left: selectedPin.x + 46 + 6,
-              top:  selectedPin.y + 6,
-              zIndex: 30,
-              background: 'rgba(255,255,255,0.82)',
-              backdropFilter: 'blur(28px)',
-              border: '1px solid rgba(255,255,255,0.6)',
-              borderRadius: 12,
-              padding: '5px 12px',
-              fontFamily: 'var(--font-sans)',
-              fontSize: 13, fontWeight: 600,
-              color: 'var(--lg-ink)',
-              boxShadow: '0 4px 16px rgba(26,20,16,0.10)',
-              whiteSpace: 'nowrap',
-              pointerEvents: 'none',
-            }}
-          >
-            {selectedPin.label}
-          </m.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Nearby card (above nav) ── */}
+      {/* ── Bottom card: event detail OR empty state ── */}
       <div style={{
         position: 'absolute', left: 16, right: 16,
         bottom: 'calc(var(--nav-total-h, 92px) + 8px)',
         zIndex: 20,
       }}>
-        <NearbyCard t={t} />
+        <AnimatePresence mode="wait">
+          {selectedEvent ? (
+            <EventCard
+              key={selectedEvent.id}
+              ev={selectedEvent}
+              currSym={currSym}
+              onClose={() => setSelectedId(null)}
+              onGoToDay={handleGoToDay}
+            />
+          ) : allMapEvents.length === 0 ? (
+            <EmptyMapState key="empty" onGoToDay={handleGoToDay} />
+          ) : null}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -18,12 +18,13 @@ interface NavBarV2Props {
 
 const TABS: {
   id: Screen;
-  icon: 'grid' | 'compass' | 'checklist' | 'users';
-  labelKey: 'navCamp' | 'navExplore' | 'navPack' | 'navCrew';
+  icon: 'grid' | 'compass' | 'map' | 'checklist' | 'users';
+  labelKey: 'navCamp' | 'navExplore' | 'navMap' | 'navPack' | 'navCrew';
   ariaLabel: string;
 }[] = [
   { id: 'dashboard', icon: 'grid',      labelKey: 'navCamp',    ariaLabel: 'Overview' },
   { id: 'day',       icon: 'compass',   labelKey: 'navExplore', ariaLabel: 'Day planner' },
+  { id: 'map',       icon: 'map',       labelKey: 'navMap',     ariaLabel: 'Map' },
   { id: 'supplies',  icon: 'checklist', labelKey: 'navPack',    ariaLabel: 'Packing list' },
   { id: 'crew',      icon: 'users',     labelKey: 'navCrew',    ariaLabel: 'Crew' },
 ];
@@ -42,7 +43,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
 
   // -1 when on a non-tab screen (settings, notes, etc.) — blob should hide
   const activeTabIdx = TABS.findIndex(tb => tb.id === active);
-  const blobX = (isRTL ? -1 : 1) * Math.max(0, activeTabIdx) * 58;
+  const blobX = (isRTL ? -1 : 1) * Math.max(0, activeTabIdx) * 52;
 
   const handleChange = (id: Screen) => {
     onChange(id);
@@ -190,7 +191,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
               position: 'absolute',
               top: 7,
               [isRTL ? 'right' : 'left']: 7 + 44,
-              width: 58,
+              width: 52,
               height: 54,
               borderRadius: 9999,
               background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
@@ -244,7 +245,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                 style={{
                   position: 'relative',
                   zIndex: 1,
-                  width: 58,
+                  width: 52,
                   height: 54,
                   border: 0,
                   background: 'transparent',
