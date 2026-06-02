@@ -249,21 +249,20 @@ export const useAppStore = create<AppState>()(
           }
         } catch {}
         // Set identity so auth-dependent effects (join-link, terms) can proceed immediately.
-        // Keep tripDbId as a session reminder (max 2 days) but don't auto-navigate into the trip.
+        // Restore the previously-open trip on reload so DB-backed state survives refreshes.
         const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
         const { tripDbId: persistedTripDbId, lastSessionAt } = get();
         const sessionExpired = lastSessionAt !== null && Date.now() - lastSessionAt > TWO_DAYS_MS;
-        const reminderTripId = (!sessionExpired && persistedTripDbId) ? persistedTripDbId : null;
         set({
           authUser: user,
           userId: user.id,
           termsAccepted,
-          // Only clear the trip if there is a DB trip to reload. Preserve local-only trips.
-          trip: reminderTripId ? null : get().trip,
-          supplies: reminderTripId ? [] : get().supplies,
-          tripDbId: reminderTripId,
           lastSessionAt: Date.now(),
         })
+
+        if (!sessionExpired && persistedTripDbId) {
+          await get().loadTripById(persistedTripDbId)
+        }
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
 
