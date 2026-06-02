@@ -46,7 +46,13 @@ export const metadata: Metadata = {
   title: 'Trippy - Friendly Trip Planner',
   description: 'AI-powered collaborative trip planner with hour-by-hour itinerary planning.',
   manifest: '/manifest.json',
-  icons: { icon: '/icon.svg', apple: '/apple-icon.png' },
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [{ url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
