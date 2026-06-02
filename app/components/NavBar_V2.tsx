@@ -84,6 +84,10 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
               padding: 8,
               borderRadius: 9999,
               pointerEvents: 'auto',
+              maxWidth: 'calc(100vw - 32px)',
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none' as React.CSSProperties['msOverflowStyle'],
             }}
           >
             <button

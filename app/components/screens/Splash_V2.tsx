@@ -11,6 +11,8 @@ export default function Splash_V2() {
   const setScreen = useAppStore(s => s.setScreen);
 
   useEffect(() => {
+    // Skip auto-advance in Playwright test mode to prevent resetting injected state
+    if ((window as unknown as Record<string, unknown>).__trippyTestMode__) return;
     const id = setTimeout(() => setScreen('welcome'), ADVANCE_MS);
     return () => clearTimeout(id);
   }, [setScreen]);

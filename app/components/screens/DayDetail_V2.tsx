@@ -265,11 +265,12 @@ function QuickAction({ icon, label, onClick, color }: { icon: string; label: str
 
 // ── EventAccordion ────────────────────────────────────────────────────────────
 
-function EventAccordion({ event, index, currCode, onEdit, onSuggest, onDelete }: {
+function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSuggest, onDelete }: {
   event: TripEvent;
   index: number;
   currCode: string;
   onEdit: (e: TripEvent) => void;
+  onReschedule: (e: TripEvent) => void;
   onSuggest: () => void;
   onDelete: (id: string) => void;
 }) {
@@ -335,7 +336,7 @@ function EventAccordion({ event, index, currCode, onEdit, onSuggest, onDelete }:
           {event.notes && <p style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--text-2)', margin: '0 0 14px' }}>{event.notes}</p>}
           <div className="lg-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
             <QuickAction icon="edit"    label={locale === 'he' ? 'עריכה'    : 'Edit'}       color="var(--lg-forest)" onClick={() => { setOpen(false); onEdit(event); }} />
-            <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onEdit(event); }} />
+            <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onReschedule(event); }} />
             <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'AI suggest'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
             <QuickAction icon="trash"   label={locale === 'he' ? 'מחק'      : 'Delete'}     color="var(--danger)"    onClick={() => { setOpen(false); onDelete(event.id); }} />
           </div>
@@ -373,6 +374,113 @@ function TimelineView({ events }: { events: TripEvent[] }) {
         );
       })}
     </div>
+  );
+}
+
+// ── RescheduleSheet ───────────────────────────────────────────────────────────
+
+function RescheduleSheet({ event, onClose, dayLabel }: {
+  event: TripEvent;
+  onClose: () => void;
+  dayLabel: string;
+}) {
+  const { editEvent, activeDay } = useAppStore();
+  const { show } = useToast();
+  const { locale } = useI18n();
+
+  const [startTime, setStartTime] = useState(event.time);
+  const [endTime,   setEndTime]   = useState(() => toTime(toMins(event.time) + event.duration));
+  const [durPreset, setDurPreset] = useState(() => minsToPreset(event.duration));
+
+  const syncEndFromPreset = (preset: string, start: string) => {
+    if (preset === 'Custom') return;
+    const dur = DUR_MINS[preset] ?? 60;
+    setEndTime(toTime(toMins(start) + dur));
+  };
+
+  const syncDurationFromEndTime = (et: string) => {
+    const diff = toMins(et) - toMins(startTime);
+    const dur = diff > 0 ? diff : diff + 24 * 60;
+    setDurPreset(minsToPreset(dur));
+    setEndTime(et);
+  };
+
+  const derivedDuration = (() => {
+    const diff = toMins(endTime) - toMins(startTime);
+    return diff > 0 ? diff : diff + 24 * 60;
+  })();
+
+  const monoLabel: React.CSSProperties = {
+    display: 'block', fontFamily: 'var(--font-mono)', fontSize: 10,
+    letterSpacing: '0.1em', textTransform: 'uppercase',
+    color: 'var(--text-3)', marginBottom: 8, fontWeight: 600,
+  };
+
+  const handleSave = () => {
+    editEvent(activeDay, event.id, { time: startTime, duration: derivedDuration });
+    show(locale === 'he' ? 'זמן עודכן' : 'Time updated');
+    onClose();
+  };
+
+  return (
+    <Sheet
+      title={locale === 'he' ? 'שנה זמן' : 'Reschedule'}
+      subtitle={event.name}
+      onClose={onClose}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <Field
+            label={locale === 'he' ? 'שעת התחלה' : 'Start time'}
+            type="time"
+            value={startTime}
+            onChange={v => { setStartTime(v); syncEndFromPreset(durPreset, v); }}
+          />
+          <Field
+            label={locale === 'he' ? 'שעת סיום' : 'End time'}
+            type="time"
+            value={endTime}
+            onChange={syncDurationFromEndTime}
+          />
+        </div>
+
+        <div>
+          <label style={monoLabel}>{locale === 'he' ? 'משך (קיצור דרך)' : 'Duration shortcut'}</label>
+          <div className="lg-scroll" style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
+            {DUR_LABELS.map(d => (
+              <button
+                key={d}
+                onClick={() => { setDurPreset(d); if (d !== 'Custom') syncEndFromPreset(d, startTime); }}
+                style={{
+                  flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px',
+                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
+                  background: durPreset === d ? 'var(--lg-terra)' : 'var(--lg-panel)',
+                  color: durPreset === d ? '#fff' : 'var(--text-2)',
+                  boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                  transition: 'all .25s', whiteSpace: 'nowrap',
+                }}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+          {derivedDuration > 0 && (
+            <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5 }}>
+              {fmtDuration(derivedDuration)} {locale === 'he' ? 'סה"כ' : 'total'}
+            </p>
+          )}
+        </div>
+
+        <div style={{ display: 'flex', gap: 12, marginTop: 4 }}>
+          <GlassBtn variant="forest" size="lg" onClick={handleSave} style={{ flex: 2 }}>
+            {locale === 'he' ? 'שמור זמן' : 'Update time'}
+          </GlassBtn>
+          <GlassBtn variant="ghost" size="lg" onClick={onClose} style={{ flex: 1, color: 'var(--text-2)' }}>
+            {locale === 'he' ? 'ביטול' : 'Cancel'}
+          </GlassBtn>
+        </div>
+      </div>
+    </Sheet>
   );
 }
 
@@ -570,11 +678,12 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
 
 // ── DraggableEvent — Reorder.Item with explicit drag handle ──────────────────
 
-function DraggableEvent({ event, index, currCode, onEdit, onSuggest, onDelete }: {
+function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSuggest, onDelete }: {
   event: TripEvent;
   index: number;
   currCode: string;
   onEdit: (e: TripEvent) => void;
+  onReschedule: (e: TripEvent) => void;
   onSuggest: () => void;
   onDelete: (id: string) => void;
 }) {
@@ -604,6 +713,7 @@ function DraggableEvent({ event, index, currCode, onEdit, onSuggest, onDelete }:
         index={index}
         currCode={currCode}
         onEdit={onEdit}
+        onReschedule={onReschedule}
         onSuggest={onSuggest}
         onDelete={onDelete}
       />
@@ -622,13 +732,15 @@ export default function DayDetail_V2() {
   } = useAppStore();
   const { locale } = useI18n();
 
-  const [viewMode,        setViewMode]        = useState<'list' | 'timeline'>('list');
-  const [showAdd,         setShowAdd]         = useState(false);
-  const [editTarget,      setEditTarget]      = useState<TripEvent | null>(null);
-  const [defaultAddTime,  setDefaultAddTime]  = useState('09:00');
-  const [weather,         setWeather]         = useState<{ temp: number; label?: string } | null>(null);
-  const [showHotelSheet,  setShowHotelSheet]  = useState(false);
-  const [hotelEditTarget, setHotelEditTarget] = useState<HotelStay | null>(null);
+  const [viewMode,           setViewMode]           = useState<'list' | 'timeline'>('list');
+  const [showAdd,            setShowAdd]            = useState(false);
+  const [editTarget,         setEditTarget]         = useState<TripEvent | null>(null);
+  const [showReschedule,     setShowReschedule]     = useState(false);
+  const [rescheduleTarget,   setRescheduleTarget]   = useState<TripEvent | null>(null);
+  const [defaultAddTime,     setDefaultAddTime]     = useState('09:00');
+  const [weather,            setWeather]            = useState<{ temp: number; label?: string } | null>(null);
+  const [showHotelSheet,     setShowHotelSheet]     = useState(false);
+  const [hotelEditTarget,    setHotelEditTarget]    = useState<HotelStay | null>(null);
 
   const evs = trip
     ? [...(trip.events[activeDay] ?? [])].sort((a, b) => toMins(a.time) - toMins(b.time))
@@ -874,6 +986,7 @@ export default function DayDetail_V2() {
                     index={i}
                     currCode={currCode}
                     onEdit={e => { setEditTarget(e); setShowAdd(true); }}
+                    onReschedule={e => { setRescheduleTarget(e); setShowReschedule(true); }}
                     onSuggest={() => setShowSuggestions(true)}
                     onDelete={id => deleteEvent(activeDay, id)}
                   />
@@ -929,6 +1042,14 @@ export default function DayDetail_V2() {
           onClose={() => { setShowAdd(false); setEditTarget(null); }}
           editing={editTarget}
           defaultTime={defaultAddTime}
+          dayLabel={dayLabel}
+        />
+      )}
+
+      {showReschedule && rescheduleTarget && (
+        <RescheduleSheet
+          event={rescheduleTarget}
+          onClose={() => { setShowReschedule(false); setRescheduleTarget(null); }}
           dayLabel={dayLabel}
         />
       )}

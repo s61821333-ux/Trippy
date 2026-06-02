@@ -258,8 +258,9 @@ export const useAppStore = create<AppState>()(
           authUser: user,
           userId: user.id,
           termsAccepted,
-          trip: null,
-          supplies: [],
+          // Only clear the trip if there is a DB trip to reload. Preserve local-only trips.
+          trip: reminderTripId ? null : get().trip,
+          supplies: reminderTripId ? [] : get().supplies,
           tripDbId: reminderTripId,
           lastSessionAt: Date.now(),
         })

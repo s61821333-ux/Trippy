@@ -156,6 +156,14 @@ function Shell() {
   useEffect(() => {
     setMounted(true);
 
+    // Dev-only test hooks: lets Playwright inject/read store state
+    if (process.env.NODE_ENV !== 'production') {
+      (window as unknown as Record<string, unknown>).__trippySetState__ =
+        (patch: Record<string, unknown>) => useAppStore.setState(patch as unknown as Parameters<typeof useAppStore.setState>[0]);
+      (window as unknown as Record<string, unknown>).__trippyGetScreen__ =
+        () => useAppStore.getState().screen;
+    }
+
     // Stash any pending join trip ID from invite link redirect
     const params = new URLSearchParams(window.location.search);
     const joinId = params.get('join');
@@ -179,9 +187,12 @@ function Shell() {
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });
-        // After splash auto-advance, land on welcome (not legacy login)
+        // After splash auto-advance, land on welcome (not legacy login).
+        // Skip in test mode — __trippySetState__ presence means a test is injecting state.
         const cur = useAppStore.getState().screen;
-        if (cur !== 'splash') setScreen('welcome');
+        const isTestMode = process.env.NODE_ENV !== 'production' &&
+          !!(window as unknown as Record<string, unknown>).__trippySetState__;
+        if (!isTestMode && cur !== 'splash') setScreen('welcome');
       }
     });
 
@@ -284,7 +295,7 @@ function Shell() {
     );
   }
 
-  const showNav = trip && screen !== 'login' && screen !== 'home' && screen !== 'splash' && screen !== 'welcome' && screen !== 'settings' && screen !== 'notes';
+  const showNav = trip && screen !== 'login' && screen !== 'home' && screen !== 'splash' && screen !== 'welcome';
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
