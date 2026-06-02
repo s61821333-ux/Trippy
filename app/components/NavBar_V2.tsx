@@ -168,9 +168,9 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
         <m.nav
           role="navigation"
           aria-label="Main navigation"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.4, ease: [0.25, 0, 0, 1], delay: 0.08 }}
+          initial={{ y: 12 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.06 }}
           className="lg lg-strong"
           style={{
             position: 'relative',
@@ -289,9 +289,9 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
         {onAdd && (
           <m.button
             onClick={onAdd}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.4, ease: [0.25, 0, 0, 1], delay: 0.12 }}
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
             whileTap={{ scale: 0.92 }}
             className="lg-btn lg-btn-forest a-float"
             aria-label="Add"

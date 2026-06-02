@@ -806,22 +806,25 @@ select {
   }
 }
 
-/* NavBar is bottom-fixed on mobile; on desktop keep bottom offset */
-@media (min-width: 1024px) {
-  .screen-inset-nav {
-    bottom: var(--nav-total-h);
-  }
-}
-
-/* ─── Screen inset — fixes content hidden under mobile nav ───── */
-/* The motion.div uses absolute positioning; on mobile we must pull */
-/* its bottom edge up by exactly the nav height + device safe area. */
+/* ─── Screen inset ────────────────────────────────────────────── */
+/* Content extends full height (bottom: 0) so it goes *behind* the  */
+/* floating NavBar pill, letting the glass backdrop-filter show real */
+/* content. padding-bottom reserves space so the last item is never  */
+/* hidden under the pill.                                            */
 .screen-inset {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
 }
 .screen-inset-nav {
-  bottom: var(--nav-total-h);
+  bottom: 0;
+  padding-bottom: var(--nav-total-h);
+}
+/* On desktop keep the old behaviour — content above the nav */
+@media (min-width: 1024px) {
+  .screen-inset-nav {
+    bottom: var(--nav-total-h);
+    padding-bottom: 0;
+  }
 }
 
 /* ─── Progress ───────────────────────────────────────────────── */
