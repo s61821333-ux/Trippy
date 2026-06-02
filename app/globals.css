@@ -142,7 +142,7 @@
   --safe-right:  env(safe-area-inset-right, 0px);
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --nav-total-h: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px));
+  --nav-total-h: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 12px);
 
   /* ── Type scale ── */
   --t-display: clamp(1.9rem, 5vw, 2.8rem);

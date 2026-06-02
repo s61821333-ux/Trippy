@@ -58,14 +58,20 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
         position: 'fixed',
         left: 0,
         right: 0,
-        bottom: 0,
-        paddingBottom: 'env(safe-area-inset-bottom, 14px)',
+        // Sit above the safe-area inset so the pill truly floats — the safe area
+        // below is transparent and shows page content rather than a solid bar.
+        bottom: 'env(safe-area-inset-bottom, 0px)',
+        paddingBottom: 12,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: 10,
         zIndex: 40,
         pointerEvents: 'none',
+        // GPU composite layer — required for backdrop-filter to render on iOS
+        // WebKit without waiting for a touch interaction.
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
       }}
     >
       {/* Expanded focus panel */}
