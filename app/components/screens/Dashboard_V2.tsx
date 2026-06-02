@@ -9,7 +9,7 @@ import Field from '../ui/Field';
 import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
-import { fmtDate, getNextEvent, CAT_FALLBACK, fmtDuration, toMins } from '@/lib/utils';
+import { fmtDate, getNextEvent, CAT_FALLBACK, fmtDuration, toMins, getDayBudget } from '@/lib/utils';
 import { fetchWeatherForTrip, WeatherDay } from '@/lib/weather';
 import { getCapitalCoords } from '@/lib/capitals';
 import { getTimezoneForCountry } from '@/lib/countryTimezones';
@@ -433,7 +433,8 @@ export default function DashboardScreenV2() {
   const currency  = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
   const currSym   = getCurrencySymbol(currency);
   const expenses  = trip.expenses ?? [];
-  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0);
+  const eventsCost = Object.values(trip.events).reduce((sum, evs) => sum + getDayBudget(evs), 0);
+  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0) + eventsCost;
 
   const packedCount = supplies.filter(s => s.checked).length;
   const totalCount  = supplies.length;
