@@ -126,7 +126,6 @@ function ChipGroup<T extends string>({
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
-              <span style={{ fontSize: 16, lineHeight: 1 }}>{opt.emoji}</span>
               {isHe ? opt.he : opt.en}
             </button>
           );
@@ -529,17 +528,17 @@ export default function PlanWithAISheet({ onClose }: { onClose: () => void }) {
                 autoFocus
               />
 
-              <div style={{ display: 'flex', gap: 10 }}>
-                <div style={{ flex: '0 0 90px' }}>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <div style={{ flex: '1 1 80px', minWidth: 72 }}>
                   <label style={sectionLabel}>{isHe ? 'ימים' : 'Days'}</label>
                   <input type="number" min="1" max="21" inputMode="numeric" value={days}
                     onChange={e => setDays(e.target.value)} style={fieldStyle} placeholder="7" />
                 </div>
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: '3 1 140px', minWidth: 120 }}>
                   <label style={sectionLabel}>{isHe ? 'תאריך התחלה' : 'Start date'}</label>
                   <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={fieldStyle} />
                 </div>
-                <div style={{ flex: '0 0 100px' }}>
+                <div style={{ flex: '1 1 90px', minWidth: 80 }}>
                   <label style={sectionLabel}>{isHe ? 'מטבע' : 'Currency'}</label>
                   <select value={currency} onChange={e => setCurrency(e.target.value)} style={fieldStyle}>
                     {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code}</option>)}

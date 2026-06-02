@@ -200,7 +200,7 @@ export const useTripStore = create<TripState>()(
         const dayEvs = (trip.events[dayNumber] ?? []).map((e) => e.id === eventId ? { ...e, ...updates } : e);
         const events = { ...trip.events, [dayNumber]: dayEvs };
         set({ trip: { ...trip, events } });
-        if (tripDbId) dbEditEvent(eventId, updates).catch(() => {});
+        if (tripDbId) dbEditEvent(eventId, { ...updates, tripId: tripDbId }).catch(() => {});
       },
 
       deleteEvent: (dayNumber, eventId) => {
@@ -208,7 +208,7 @@ export const useTripStore = create<TripState>()(
         if (!trip) return;
         const events = { ...trip.events, [dayNumber]: (trip.events[dayNumber] ?? []).filter((e) => e.id !== eventId) };
         set({ trip: { ...trip, events } });
-        if (tripDbId) dbDeleteEvent(eventId).catch(() => {});
+        if (tripDbId) dbDeleteEvent(eventId, tripDbId).catch(() => {});
       },
 
       moveEvent: (fromDay, toDay, eventId) => {
@@ -222,7 +222,7 @@ export const useTripStore = create<TripState>()(
           [toDay]: [...(trip.events[toDay] ?? []), ev],
         };
         set({ trip: { ...trip, events } });
-        if (tripDbId) dbMoveEvent(eventId, toDay).catch(() => {});
+        if (tripDbId) dbMoveEvent(eventId, toDay, tripDbId).catch(() => {});
       },
 
       voteEvent: (dayNumber, eventId, nickname, vote) => {
@@ -268,7 +268,7 @@ export const useTripStore = create<TripState>()(
         const item = supplies.find(i => i.id === id);
         const newChecked = item ? !item.checked : false;
         set((s) => ({ supplies: s.supplies.map((i) => i.id === id ? { ...i, checked: !i.checked } : i) }));
-        if (tripDbId) dbToggleSupply(id, newChecked).catch(() => {});
+        if (tripDbId) dbToggleSupply(id, newChecked, tripDbId).catch(() => {});
       },
 
       addSupplyItem: (name, category, assignee, critical) => {
@@ -281,7 +281,7 @@ export const useTripStore = create<TripState>()(
       deleteSupplyItem: (id) => {
         const { tripDbId } = get();
         set((s) => ({ supplies: s.supplies.filter((i) => i.id !== id) }));
-        if (tripDbId) dbDeleteSupply(id).catch(() => {});
+        if (tripDbId) dbDeleteSupply(id, tripDbId).catch(() => {});
       },
 
       toggleSupplyCritical: (id) => {
@@ -289,7 +289,7 @@ export const useTripStore = create<TripState>()(
         const item = supplies.find(i => i.id === id);
         const newCritical = item ? !item.critical : true;
         set((s) => ({ supplies: s.supplies.map((i) => i.id === id ? { ...i, critical: !i.critical } : i) }));
-        if (tripDbId) dbUpdateSupplyCritical(id, newCritical).catch(() => {});
+        if (tripDbId) dbUpdateSupplyCritical(id, newCritical, tripDbId).catch(() => {});
       },
 
       addExpense: (exp) => {

@@ -193,9 +193,6 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
 
 type AISuggestedItem = { name: string; category: SupplyItem['category']; selected: boolean };
 
-const CAT_EMOJI: Record<SupplyItem['category'], string> = {
-  Documents: '📄', Gear: '🎒', Medical: '💊', Food: '🥜', Water: '💧', Other: '🗂',
-};
 
 function AIPackingSheet({ trip, supplies, onClose }: {
   trip: NonNullable<ReturnType<typeof useAppStore.getState>['trip']>;
@@ -309,9 +306,12 @@ function AIPackingSheet({ trip, supplies, onClose }: {
 
             {Object.entries(grouped).map(([cat, items]) => (
               <div key={cat}>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: '0 0 8px', fontWeight: 600 }}>
-                  {CAT_EMOJI[cat as SupplyItem['category']]} {cat}
-                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 0 8px' }}>
+                  <StampIcon iconKey={supplyStamp(cat)} size={22} aria-hidden="true" />
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: 0, fontWeight: 600 }}>
+                    {STORE_CAT_LABELS[cat as SupplyItem['category']] ?? cat}
+                  </p>
+                </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {items.map(({ item, idx }) => (
                     <button
@@ -552,7 +552,9 @@ export default function Packing_V2() {
             transition={{ delay: 0.18, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
             style={{ textAlign: 'center', padding: '48px 24px', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-3)', lineHeight: 1.6 }}
           >
-            <div style={{ marginBottom: 18, fontSize: 56 }}>🧳</div>
+            <div style={{ marginBottom: 18, display: 'flex', justifyContent: 'center' }}>
+              <StampIcon iconKey="backpack" size={80} aria-hidden="true" />
+            </div>
             <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', fontWeight: 400 }}>
               {locale === 'he' ? 'הרשימה ריקה' : 'Your packing list is empty'}
             </p>
