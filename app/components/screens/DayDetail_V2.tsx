@@ -1,9 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { m, Reorder, useDragControls } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
+import type { MapEvent } from '../ui/LeafletMap';
+
+// ── Lazy-load Leaflet (client-only, avoids SSR penalty) ───────────────────────
+const LeafletMap = dynamic(() => import('../ui/LeafletMap'), { ssr: false, loading: () => (
+  <div style={{ width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',
+    background:'linear-gradient(165deg,#E3EBE4 0%,#DCE6DD 35%,#EBE2D2 70%,#E8DCC8 100%)' }}>
+    <div style={{ width:40,height:40,borderRadius:'50%',border:'3px solid transparent',
+      borderTopColor:'#C4714A',animation:'spin .9s linear infinite' }} />
+    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+  </div>
+) });
 import { StampIcon } from '../ui/StampIcon';
 import Sheet from '../ui/Sheet';
 import Field from '../ui/Field';
@@ -721,6 +733,141 @@ function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSugges
   );
 }
 
+// ── Google Maps route URL ─────────────────────────────────────────────────────
+// Builds a Google Maps Directions URL with up to 8 intermediate waypoints.
+// Falls back to a plain Search URL for single-point or name-only events.
+
+function buildGoogleMapsUrl(evs: TripEvent[]): string {
+  const sorted = [...evs].sort((a, b) => toMins(a.time) - toMins(b.time));
+
+  // Prefer geocoded events; fall back to location-name events
+  const geo   = sorted.filter(e => e.lat != null && e.lng != null);
+  const named = sorted.filter(e => e.location);
+
+  if (geo.length === 0 && named.length === 0) return '';
+
+  // Single geocoded point → Search
+  if (geo.length === 1 && named.length <= 1) {
+    return `https://www.google.com/maps/search/?api=1&query=${geo[0].lat},${geo[0].lng}`;
+  }
+
+  // Single named location → Search
+  if (geo.length === 0 && named.length === 1) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(named[0].location!)}`;
+  }
+
+  // Multiple geocoded points → Directions with waypoints
+  if (geo.length >= 2) {
+    const pts = geo.map(e => `${e.lat},${e.lng}`);
+    const origin = pts[0];
+    const dest   = pts[pts.length - 1];
+    const mid    = pts.slice(1, -1).slice(0, 8); // Google Maps max 8 waypoints
+    let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=walking`;
+    if (mid.length) url += `&waypoints=${mid.join('|')}`;
+    return url;
+  }
+
+  // Mix of named + geocoded — build path-style URL (no JS API key needed)
+  const parts = (geo.length > 0 ? geo : named)
+    .map(e => e.lat != null ? `${e.lat},${e.lng}` : encodeURIComponent(e.location!))
+    .slice(0, 10)
+    .join('/');
+  return `https://maps.google.com/maps/dir/${parts}/`;
+}
+
+// ── Day map view ──────────────────────────────────────────────────────────────
+
+function DayMapView({ evs, activeDay, mapsUrl }: {
+  evs: TripEvent[];
+  activeDay: number;
+  mapsUrl: string;
+}) {
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const tileApiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ?? '';
+
+  const mapEvents = useMemo<MapEvent[]>(() =>
+    evs
+      .filter(e => e.lat != null && e.lng != null)
+      .map(e => ({
+        id: e.id, name: e.name, category: e.category,
+        lat: e.lat!, lng: e.lng!,
+        day: activeDay, time: e.time,
+        location: e.location, cost: e.cost,
+      })),
+    [evs, activeDay]
+  );
+
+  const selected = mapEvents.find(e => e.id === selectedId) ?? null;
+
+  return (
+    <div style={{ position: 'relative', height: 420, margin: '0 20px', borderRadius: 20, overflow: 'hidden', boxShadow: 'var(--lg-shadow)' }}>
+      {/* Real map */}
+      <LeafletMap
+        events={mapEvents}
+        selectedId={selectedId}
+        onSelect={e => setSelectedId(e?.id ?? null)}
+        tileApiKey={tileApiKey}
+      />
+
+      {/* Selected event card overlay */}
+      {selected && (
+        <div style={{
+          position: 'absolute', bottom: 12, left: 12, right: 12, zIndex: 20,
+          background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(18px)',
+          borderRadius: 16, padding: '12px 14px',
+          boxShadow: '0 4px 20px rgba(0,0,0,.18)',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1410', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selected.name}</div>
+              <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+                {selected.time}
+                {selected.location ? ` · ${selected.location}` : ''}
+              </div>
+            </div>
+            <button onClick={() => setSelectedId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#888' }}>
+              <Icon name="x" size={15} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* No pins state */}
+      {mapEvents.length === 0 && (
+        <div style={{
+          position: 'absolute', inset: 0, zIndex: 10,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(227,235,228,.85)', backdropFilter: 'blur(6px)',
+        }}>
+          <Icon name="pin" size={32} color="#888" />
+          <p style={{ margin: '8px 0 4px', fontSize: 14, fontWeight: 700, color: '#444' }}>No pinned locations</p>
+          <p style={{ margin: 0, fontSize: 12, color: '#888', textAlign: 'center', maxWidth: 220 }}>Add a location to your events to see them here.</p>
+        </div>
+      )}
+
+      {/* Open in Google Maps — always visible */}
+      {mapsUrl && (
+        <a
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            position: 'absolute', top: 12, right: 12, zIndex: 20,
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            height: 36, padding: '0 14px', borderRadius: 9999,
+            background: '#fff', boxShadow: '0 2px 10px rgba(0,0,0,.18)',
+            fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 700,
+            color: '#1a73e8', textDecoration: 'none',
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a73e8"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          Google Maps
+        </a>
+      )}
+    </div>
+  );
+}
+
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function DayDetail_V2() {
@@ -732,7 +879,7 @@ export default function DayDetail_V2() {
   } = useAppStore();
   const { locale } = useI18n();
 
-  const [viewMode,           setViewMode]           = useState<'list' | 'timeline'>('list');
+  const [viewMode,           setViewMode]           = useState<'list' | 'map'>('list');
   const [showAdd,            setShowAdd]            = useState(false);
   const [editTarget,         setEditTarget]         = useState<TripEvent | null>(null);
   const [showReschedule,     setShowReschedule]     = useState(false);
@@ -848,11 +995,36 @@ export default function DayDetail_V2() {
               }}
             >
               <Icon name="sparkle" size={14} color="var(--lg-terra)" />
-              AI suggestions
+              AI
             </button>
-            {/* List / Timeline toggle */}
+            {/* Google Maps route link */}
+            {(() => {
+              const url = buildGoogleMapsUrl(evs);
+              if (!url) return null;
+              return (
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="lg-btn"
+                  style={{
+                    height: 38, padding: '0 14px', gap: 6, display: 'flex', alignItems: 'center',
+                    background: 'var(--lg-panel)', border: 0, cursor: 'pointer',
+                    fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
+                    color: '#1a73e8', textDecoration: 'none',
+                    boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a73e8" style={{ flexShrink: 0 }}>
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  Maps
+                </a>
+              );
+            })()}
+            {/* List / Map toggle */}
             <div className="lg" style={{ display: 'flex', padding: 4, borderRadius: 9999, gap: 2 }}>
-              {(['list', 'timeline'] as const).map(m => (
+              {(['list', 'map'] as const).map(m => (
                 <button
                   key={m}
                   onClick={() => setViewMode(m)}
@@ -864,7 +1036,7 @@ export default function DayDetail_V2() {
                     transition: 'all .3s',
                   }}
                 >
-                  {m === 'list' ? (locale === 'he' ? 'רשימה' : 'List') : (locale === 'he' ? 'ציר' : 'Time')}
+                  {m === 'list' ? (locale === 'he' ? 'רשימה' : 'List') : (locale === 'he' ? 'מפה' : 'Map')}
                 </button>
               ))}
             </div>
@@ -1032,7 +1204,11 @@ export default function DayDetail_V2() {
             )}
           </div>
         ) : (
-          <TimelineView events={evs} />
+          <DayMapView
+            evs={evs}
+            activeDay={activeDay}
+            mapsUrl={buildGoogleMapsUrl(evs)}
+          />
         )}
         </div>{/* /resp-container */}
       </div>
