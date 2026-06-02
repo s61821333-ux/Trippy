@@ -715,10 +715,14 @@ export default function DashboardScreenV2() {
           </button>
 
           {/* Budget — tap to open full expense manager */}
-          <button
+          {/* div+role instead of button because CurrencyAmount renders its own <button> inside */}
+          <div
+            role="button"
+            tabIndex={0}
             className="lg a-rise d3"
             onClick={() => setShowBudgetEdit(true)}
-            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, cursor: 'pointer', border: 0, textAlign: 'start' }}
+            onKeyDown={e => e.key === 'Enter' && setShowBudgetEdit(true)}
+            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, cursor: 'pointer', textAlign: 'start' }}
             aria-label={t('budgetLabel')}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -751,7 +755,7 @@ export default function DashboardScreenV2() {
                 {t('tapToSetLimit')}
               </span>
             )}
-          </button>
+          </div>
         </div>
 
         {/* ── Today's schedule (only shown when trip is active) ── */}
