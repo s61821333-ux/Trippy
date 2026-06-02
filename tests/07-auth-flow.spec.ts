@@ -37,9 +37,11 @@ test.describe('Auth — unauthenticated flow', () => {
     await page.waitForLoadState('domcontentloaded');
     // Wait well past the 1.9 s auto-advance
     await page.waitForTimeout(3_500);
-    // Use innerText (not textContent) to avoid matching raw RSC/script payloads
-    const body = await page.locator('body').innerText();
-    expect(body.toLowerCase()).toMatch(/google|adventure|sign.?in/i);
+    // Look for a visible element that belongs to the welcome/auth screen
+    await expect(
+      page.getByText(/adventure|sign in|google|continue/i).first()
+        .or(page.locator('button').filter({ hasText: /adventure|sign|google/i }).first())
+    ).toBeVisible({ timeout: 5_000 });
   });
 
   test('NavBar is NOT shown on the welcome screen', async ({ page }) => {
