@@ -1602,3 +1602,61 @@ body::after {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MOBILE THERMAL FIX — pointer:coarse = touch-first device.
+   Eliminates the GPU workloads responsible for sustained heat:
+     1. body pseudo-element orbs with blur(72–88px) + infinite animation
+     2. Film grain: SVG feTurbulence animated every 0.5 s at z-index 9000
+     3. backdrop-filter: 28–44 px on every card/button → reduced to 8–14 px
+     4. Infinite idle animations: float, pulse, breathe, spin, cloudDrift
+   ═══════════════════════════════════════════════════════════════════════ */
+@media (pointer: coarse) {
+  /* 1 — Kill animated background orbs (was blur 72 px + 88 px, always compositing) */
+  body::before,
+  body::after {
+    animation: none !important;
+    filter: none !important;
+  }
+
+  /* 2 — Kill film grain (SVG filter + 0.5 s step loop covering the whole screen) */
+  .grain::before { animation: none !important; }
+
+  /* 3 — Reduce backdrop-filter design tokens */
+  :root {
+    --lg-blur:        blur(10px) saturate(1.4);
+    --lg-blur-strong: blur(18px) saturate(1.6);
+  }
+
+  /* Reduce explicit backdrop-filter on legacy glass classes */
+  .glass {
+    backdrop-filter: blur(10px) saturate(1.4) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(1.4) !important;
+  }
+  .glass-panel, .glass-float {
+    backdrop-filter: blur(14px) saturate(1.5) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(1.5) !important;
+  }
+  .v2-card {
+    backdrop-filter: blur(10px) saturate(1.4) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(1.4) !important;
+  }
+  .day-card-v3 {
+    backdrop-filter: blur(10px) saturate(1.4) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(1.4) !important;
+  }
+  .lg-btn-glass {
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+  }
+
+  /* 4 — Kill all infinite idle animations */
+  .an-float,
+  .an-pulse,
+  .an-breathe,
+  .a-float {
+    animation: none !important;
+  }
+  /* Keep spin but slow it down so loaders still work */
+  .an-spin { animation-duration: 1.5s !important; }
+}

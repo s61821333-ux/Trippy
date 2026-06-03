@@ -17,6 +17,7 @@ function DesertBg() {
   const sunRef    = useRef<SVGCircleElement>(null);
 
   useEffect(() => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     let ticking = false;
     const move = (e: MouseEvent | TouchEvent) => {
       if (ticking) return;
@@ -102,6 +103,7 @@ function NatureBg() {
   const cloudRef = useRef<SVGGElement>(null);
 
   useEffect(() => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     let ticking = false;
     const move = (e: MouseEvent | TouchEvent) => {
       if (ticking) return; ticking = true;
@@ -183,6 +185,7 @@ function CityBg() {
   const fgRef   = useRef<SVGGElement>(null);
 
   useEffect(() => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     let ticking = false;
     const move = (e: MouseEvent | TouchEvent) => {
       if (ticking) return; ticking = true;
@@ -299,6 +302,7 @@ function BeachBg() {
   const palmRef  = useRef<SVGGElement>(null);
 
   useEffect(() => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     let ticking = false;
     const move = (e: MouseEvent | TouchEvent) => {
       if (ticking) return; ticking = true;
@@ -405,6 +409,7 @@ function BeachBg() {
     const midRef = useRef<SVGGElement>(null);
     const foreRef = useRef<SVGGElement>(null);
     useEffect(() => {
+      if (window.matchMedia('(pointer: coarse)').matches) return;
       let t = false;
       const mv = (e: MouseEvent | TouchEvent) => { if (t) return; t = true; requestAnimationFrame(() => {
         const cx = e instanceof TouchEvent ? (e.touches[0]?.clientX ?? window.innerWidth/2) : e.clientX;
@@ -448,6 +453,7 @@ function BeachBg() {
     const waterRef = useRef<SVGGElement>(null);
     const cloudRef = useRef<SVGGElement>(null);
     useEffect(() => {
+      if (window.matchMedia('(pointer: coarse)').matches) return;
       let t=false; const mv=(e:MouseEvent|TouchEvent)=>{ if(t) return; t=true; requestAnimationFrame(()=>{ const cx = e instanceof TouchEvent ? (e.touches[0]?.clientX ?? window.innerWidth/2) : e.clientX; const cy = e instanceof TouchEvent ? (e.touches[0]?.clientY ?? window.innerHeight/2) : e.clientY; const dx=cx/window.innerWidth-0.5, dy=cy/window.innerHeight-0.5; if(waterRef.current) waterRef.current.style.transform = `translate(${dx*10}px,${dy*6}px)`; if(cloudRef.current) cloudRef.current.style.transform = `translate(${dx*6}px,${dy*3}px)`; t=false; }); };
       window.addEventListener('mousemove', mv); window.addEventListener('touchmove', mv, { passive:true });
       return ()=>{ window.removeEventListener('mousemove', mv); window.removeEventListener('touchmove', mv); };
@@ -482,6 +488,7 @@ function BeachBg() {
   function SpaceBg() {
     const starsRef = useRef<SVGGElement>(null);
     useEffect(()=>{
+      if (window.matchMedia('(pointer: coarse)').matches) return;
       let t=false; const mv=(e:MouseEvent|TouchEvent)=>{ if(t) return; t=true; requestAnimationFrame(()=>{ const cx = e instanceof TouchEvent ? (e.touches[0]?.clientX ?? window.innerWidth/2) : e.clientX; const cy = e instanceof TouchEvent ? (e.touches[0]?.clientY ?? window.innerHeight/2) : e.clientY; const dx=cx/window.innerWidth-0.5, dy=cy/window.innerHeight-0.5; if(starsRef.current) starsRef.current.style.transform = `translate(${dx*4}px,${dy*2}px)`; t=false; }); };
       window.addEventListener('mousemove', mv); window.addEventListener('touchmove', mv, { passive:true });
       return ()=>{ window.removeEventListener('mousemove', mv); window.removeEventListener('touchmove', mv); };
@@ -506,7 +513,9 @@ function BeachBg() {
   /* ── Sunset ─────────────────────────────────────────────────── */
   function SunsetBg() {
     const refA = useRef<SVGGElement>(null);
-    useEffect(()=>{ let t=false; const mv=(e:MouseEvent|TouchEvent)=>{ if(t) return; t=true; requestAnimationFrame(()=>{ const cx = e instanceof TouchEvent ? (e.touches[0]?.clientX ?? window.innerWidth/2) : e.clientX; const cy = e instanceof TouchEvent ? (e.touches[0]?.clientY ?? window.innerHeight/2) : e.clientY; const dx=cx/window.innerWidth-0.5, dy=cy/window.innerHeight-0.5; if(refA.current) refA.current.style.transform = `translate(${dx*10}px,${dy*5}px)`; t=false; }); };
+    useEffect(()=>{
+      if (window.matchMedia('(pointer: coarse)').matches) return;
+      let t=false; const mv=(e:MouseEvent|TouchEvent)=>{ if(t) return; t=true; requestAnimationFrame(()=>{ const cx = e instanceof TouchEvent ? (e.touches[0]?.clientX ?? window.innerWidth/2) : e.clientX; const cy = e instanceof TouchEvent ? (e.touches[0]?.clientY ?? window.innerHeight/2) : e.clientY; const dx=cx/window.innerWidth-0.5, dy=cy/window.innerHeight-0.5; if(refA.current) refA.current.style.transform = `translate(${dx*10}px,${dy*5}px)`; t=false; }); };
       window.addEventListener('mousemove', mv); window.addEventListener('touchmove', mv, { passive:true });
       return ()=>{ window.removeEventListener('mousemove', mv); window.removeEventListener('touchmove', mv); };
     }, []);

@@ -18,12 +18,13 @@ import { TripTheme } from '@/lib/types';
 import { dbGetUserTrips } from '@/lib/db';
 import { CURRENCIES } from '@/lib/currency';
 
-// ─── Particle canvas ──────────────────────────────────────────────────────────
+// ─── Particle canvas — desktop only (coarse-pointer = touch device, skip) ────
 function AtmosphereCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
 
   useEffect(() => {
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -150,11 +151,11 @@ function AuthStep() {
         background: 'linear-gradient(162deg, #EDB87A 0%, #D9925A 22%, #C07248 45%, #8A5038 68%, #5A3025 100%)',
       }} />
 
-      {/* Warm ambient orbs */}
-      <div style={{ position: 'absolute', top: '-8%', right: '-12%', width: 'clamp(200px, 55vw, 400px)', height: 'clamp(200px, 55vw, 400px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,210,150,0.55) 0%, transparent 70%)', filter: 'blur(48px)', zIndex: 1, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '-12%', left: '-16%', width: 'clamp(220px, 60vw, 440px)', height: 'clamp(220px, 60vw, 440px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,100,60,0.48) 0%, transparent 70%)', filter: 'blur(64px)', zIndex: 1, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: '28%', left: '8%', width: 'clamp(120px, 30vw, 220px)', height: 'clamp(120px, 30vw, 220px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,235,190,0.28) 0%, transparent 70%)', filter: 'blur(32px)', zIndex: 1, pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', bottom: '20%', right: '10%', width: 'clamp(100px, 22vw, 160px)', height: 'clamp(100px, 22vw, 160px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,110,82,0.22) 0%, transparent 70%)', filter: 'blur(40px)', zIndex: 1, pointerEvents: 'none' }} />
+      {/* Warm ambient orbs — radial-gradient provides natural falloff; blur is a bonus on desktop */}
+      <div style={{ position: 'absolute', top: '-8%', right: '-12%', width: 'clamp(200px, 55vw, 400px)', height: 'clamp(200px, 55vw, 400px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,210,150,0.55) 0%, transparent 70%)', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '-12%', left: '-16%', width: 'clamp(220px, 60vw, 440px)', height: 'clamp(220px, 60vw, 440px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(160,100,60,0.48) 0%, transparent 70%)', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '28%', left: '8%', width: 'clamp(120px, 30vw, 220px)', height: 'clamp(120px, 30vw, 220px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,235,190,0.28) 0%, transparent 70%)', zIndex: 1, pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', bottom: '20%', right: '10%', width: 'clamp(100px, 22vw, 160px)', height: 'clamp(100px, 22vw, 160px)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(59,110,82,0.22) 0%, transparent 70%)', zIndex: 1, pointerEvents: 'none' }} />
 
       {/* Sparkle particles */}
       <AtmosphereCanvas />
@@ -162,8 +163,8 @@ function AuthStep() {
       {/* ── Main glass card ── */}
       <m.div
         ref={cardRef}
-        initial={{ opacity: 0, y: 48, scale: 0.93, filter: 'blur(12px)' }}
-        animate={{ opacity: 1, y: 0,  scale: 1,    filter: 'blur(0px)' }}
+        initial={{ opacity: 0, y: 48, scale: 0.93 }}
+        animate={{ opacity: 1, y: 0,  scale: 1    }}
         transition={{ duration: 0.6, ease: [0.25, 0, 0, 1], delay: 0.08 }}
         style={{
           position: 'relative', zIndex: 10,
@@ -192,15 +193,15 @@ function AuthStep() {
 
         {/* Globe Loader / Compass hero */}
         <m.div
-          initial={{ scale: 0.55, opacity: 0, filter: 'blur(8px)' }}
-          animate={{ scale: 1,    opacity: 1, filter: 'blur(0px)' }}
+          initial={{ scale: 0.55, opacity: 0 }}
+          animate={{ scale: 1,    opacity: 1 }}
           transition={{ duration: 0.55, ease: [0.34, 1.56, 0.64, 1], delay: 0.20 }}
           style={{ display: 'flex', justifyContent: 'center', marginBottom: 28, position: 'relative', zIndex: 1 }}
         >
           {googleLoading
             ? <CompassLoader theme={BRAND_THEME} size={88} />
             : (
-              <div style={{ animation: 'float 6s ease-in-out infinite' }}>
+              <div>
                 <CompassMark size={88} />
               </div>
             )

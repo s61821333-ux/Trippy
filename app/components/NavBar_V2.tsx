@@ -51,7 +51,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
 
   // -1 when on a non-tab screen (settings, notes, etc.) — blob should hide
   const activeTabIdx = TABS.findIndex(tb => tb.id === active);
-  const blobX = (isRTL ? -1 : 1) * Math.max(0, activeTabIdx) * 52;
+  const blobX = (isRTL ? -1 : 1) * Math.max(0, activeTabIdx) * 44;
 
   const handleChange = (id: Screen) => {
     onChange(id);
@@ -187,7 +187,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             alignItems: 'center',
             padding: 7,
             borderRadius: 9999,
-            height: 68,
+            height: 64,
           }}
         >
           {/* Liquid blob — hidden when on a non-tab screen like Settings */}
@@ -199,8 +199,8 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
               position: 'absolute',
               top: 7,
               [isRTL ? 'right' : 'left']: 7 + 44,
-              width: 52,
-              height: 54,
+              width: 44,
+              height: 50,
               borderRadius: 9999,
               background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
               boxShadow: 'var(--lg-glow-terra)',
@@ -254,8 +254,8 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                 style={{
                   position: 'relative',
                   zIndex: 1,
-                  width: 52,
-                  height: 54,
+                  width: 44,
+                  height: 50,
                   border: 0,
                   background: 'transparent',
                   cursor: 'pointer',
@@ -303,11 +303,11 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             animate={{ y: 0 }}
             transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
             whileTap={{ scale: 0.92 }}
-            className="lg-btn lg-btn-forest a-float"
+            className="lg-btn lg-btn-forest"
             aria-label="Add"
             style={{
-              width: 64,
-              height: 64,
+              width: 56,
+              height: 56,
               borderRadius: 9999,
               flexShrink: 0,
               WebkitTapHighlightColor: 'transparent',

@@ -133,6 +133,8 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
           textAlign: locale === 'he' ? 'right' : 'left',
           opacity: item.checked ? 0.6 : 1, transition: 'opacity 0.2s', width: '100%',
           WebkitTapHighlightColor: 'transparent', touchAction: 'pan-y',
+          backdropFilter: 'none', WebkitBackdropFilter: 'none',
+          borderRadius: 18,
         }}
       >
         <StampIcon iconKey={stampKey} size={38} aria-hidden="true" />
@@ -574,7 +576,6 @@ export default function Packing_V2() {
               flexShrink: 0, border: 0, cursor: 'pointer', borderRadius: 9999, padding: '8px 15px',
               fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
               background: activeCat === c ? 'var(--lg-forest)' : 'var(--lg-panel)',
-              backdropFilter: 'var(--lg-blur)',
               color:      activeCat === c ? '#fff' : 'var(--text-2)',
               boxShadow:  activeCat === c ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
               transition: 'all .3s', whiteSpace: 'nowrap',
