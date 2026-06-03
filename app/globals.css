@@ -1454,6 +1454,18 @@ body::after {
 }
 .lg > * { position: relative; z-index: 1; }
 
+/* NavBar pill — transparent (no background) on mobile */
+@media (max-width: 767px) {
+  .nav-pill.lg,
+  .nav-pill.lg-strong {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+  .nav-pill.lg::before { display: none; }
+}
+
 .lg-strong {
   background: var(--lg-panel-strong);
   backdrop-filter: var(--lg-blur-strong);
