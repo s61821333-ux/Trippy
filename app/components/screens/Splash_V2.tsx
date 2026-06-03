@@ -13,7 +13,14 @@ export default function Splash_V2() {
   useEffect(() => {
     // Skip auto-advance in Playwright test mode to prevent resetting injected state
     if ((window as unknown as Record<string, unknown>).__trippyTestMode__) return;
-    const id = setTimeout(() => setScreen('welcome'), ADVANCE_MS);
+    const id = setTimeout(() => {
+      // If auth has already found a user with a stored trip, loadTripById is in flight
+      // and will navigate to dashboard on its own. Firing setScreen('welcome') here would
+      // interrupt that and flash the auth screen over the loading trip.
+      const { authUser, tripDbId } = useAppStore.getState();
+      if (authUser && tripDbId) return;
+      setScreen('welcome');
+    }, ADVANCE_MS);
     return () => clearTimeout(id);
   }, [setScreen]);
 

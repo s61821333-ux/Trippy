@@ -189,10 +189,13 @@ function Shell() {
       if (session?.user) {
         const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
         useAppStore.setState({ authUser: { id: session.user.id, username }, userId: session.user.id });
-        // After sign-in: move to home if still on an unauthenticated screen
+        // After sign-in: move away from any unauthenticated screen.
+        // If the user already has a persisted trip, jump straight to dashboard so they
+        // never see the home/trip-picker screen flash before loadTripById navigates there.
         const cur = useAppStore.getState().screen;
         if (cur === 'login' || cur === 'welcome' || cur === 'splash') {
-          setScreen('home');
+          const { trip, tripDbId } = useAppStore.getState();
+          setScreen(trip || tripDbId ? 'dashboard' : 'home');
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });

@@ -80,6 +80,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       style={{ height: '100%' }}
       className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${hebrewFont.variable} ${heebo.variable}`}
     >
+      <head>
+        {/* Inline script: apply dark-mode token BEFORE first paint so there is no theme flash.
+            Reads themeMode from the Zustand-persist key in localStorage and applies data-dark
+            to <html> synchronously. suppressHydrationWarning on <html> silences the mismatch. */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var s=localStorage.getItem('trippy-storage');var m=s?JSON.parse(s)?.state?.themeMode:null;var dark=m==='dark'||(m!=='light'&&window.matchMedia('(prefers-color-scheme:dark)').matches);if(dark)document.documentElement.dataset.dark='true';}catch(e){}})();` }} />
+      </head>
       <body className="grain" style={{ height: '100%' }}>
         <MotionProvider>
           {children}

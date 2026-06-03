@@ -359,7 +359,11 @@ export const useAppStore = create<AppState>()(
             trip = { ...trip, events: filteredEvents };
           }
           const { screen: currentScreen } = get();
-          const navUpdate = isSameTrip && currentScreen !== 'login' && currentScreen !== 'home'
+          // Preserve the active screen/day only when the user is already inside the app.
+          // Always navigate to dashboard when coming from any auth or landing screen so the
+          // user is never stranded on splash/welcome/home after a trip loads.
+          const AUTH_SCREENS: string[] = ['login', 'home', 'splash', 'welcome'];
+          const navUpdate = isSameTrip && !AUTH_SCREENS.includes(currentScreen)
             ? {}  // preserve current screen/activeDay when refreshing an already-open trip
             : { screen: 'dashboard' as const, activeDay: 1 };
           set({
