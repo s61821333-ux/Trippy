@@ -364,7 +364,7 @@ function TimelineView({ events }: { events: TripEvent[] }) {
   const TICK_H = 32;
   const TICKS = 13;
   return (
-    <div style={{ position: 'relative', paddingInlineStart: 66, paddingInlineEnd: 20, paddingBottom: 130 }}>
+    <div style={{ position: 'relative', paddingInlineStart: 66, paddingInlineEnd: 20, paddingBottom: 'var(--nav-total-h)' }}>
       {Array.from({ length: TICKS }).map((_, h) => (
         <div key={h} style={{ position: 'relative', height: TICK_H, borderTop: '1px solid oklch(50% 0.02 60 / 10%)' }}>
           <span style={{ position: 'absolute', insetInlineStart: -46, top: -7, fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', width: 40, textAlign: 'end' }}>
@@ -1078,7 +1078,7 @@ export default function DayDetail_V2() {
       </div>
 
       {/* ── Body ── */}
-      <div className="lg-scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 130 }}>
+      <div className="lg-scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 'var(--nav-total-h)' }}>
         <div className="resp-container">
 
         {/* Context bar: Weather + Day budget */}

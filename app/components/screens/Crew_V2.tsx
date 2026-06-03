@@ -102,7 +102,7 @@ export default function Crew_V2() {
   return (
     <div
       className="lg-scroll"
-      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', paddingBottom: 110 }}
+      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', paddingBottom: 'var(--nav-total-h)' }}
     >
       {/* ── Dark hero ── */}
       <div

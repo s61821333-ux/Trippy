@@ -1053,7 +1053,7 @@ export default function DashboardScreenV2() {
       </div>
 
       {/* ══ Main content ════════════════════════════════════════════════ */}
-      <div className="resp-container" style={{ padding: '0 20px', paddingBottom: 110 }}>
+      <div className="resp-container" style={{ padding: '0 20px', paddingBottom: 'var(--nav-total-h)' }}>
         <div className="resp-dash-grid">
 
         {/* ── AI Budget Coach card ── */}

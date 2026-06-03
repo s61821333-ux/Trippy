@@ -821,13 +821,12 @@ select {
 }
 .screen-inset-nav {
   bottom: 0;
-  padding-bottom: var(--nav-total-h);
+  /* no extra padding — each screen's own scroll container carries the clearance */
 }
-/* On desktop keep the old behaviour — content above the nav */
+/* On desktop keep the old behaviour — content sits above the nav bar */
 @media (min-width: 1024px) {
   .screen-inset-nav {
     bottom: var(--nav-total-h);
-    padding-bottom: 0;
   }
 }
 
