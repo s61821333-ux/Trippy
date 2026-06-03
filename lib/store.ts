@@ -333,7 +333,11 @@ export const useAppStore = create<AppState>()(
         let userId = authUser?.id ?? null;
         if (!userId) userId = await getSessionUserId();
         if (!userId) throw new Error('not_authed');
-        set({ isGlobalLoading: true });
+        // Show the full-screen loader only for first-time loads (no cached data yet).
+        // Background refreshes triggered by real-time events or reconnect run silently
+        // so the UI never flashes blank while the user is actively viewing the trip.
+        const isFirstLoad = localTripDbId !== tripId || !localTrip;
+        if (isFirstLoad) set({ isGlobalLoading: true });
         try {
           const data = await dbLoadTripById(tripId);
           if (!data) throw new Error('not_found');
@@ -800,7 +804,7 @@ export const useAppStore = create<AppState>()(
         const supabase = createSupabaseClient();
 
         // Debounced reload — multiple tables changing at once (e.g. event + trip metadata)
-        // should produce only ONE reload. 600 ms is enough to batch a burst of inserts.
+        // should produce only ONE reload. 150 ms batches burst inserts while staying responsive.
         let debounceTimer: ReturnType<typeof setTimeout> | null = null;
         const scheduleReload = () => {
           if (debounceTimer) clearTimeout(debounceTimer);
@@ -809,7 +813,7 @@ export const useAppStore = create<AppState>()(
             // Skip reload if the store is already mid-load (prevents cascade)
             if (get().isGlobalLoading) return;
             get().loadTripById(tripId).catch(() => {});
-          }, 600);
+          }, 150);
         };
 
         const channel = supabase
@@ -826,9 +830,13 @@ export const useAppStore = create<AppState>()(
           .on('postgres_changes', { event: '*', schema: 'public', table: 'day_meta', filter: `trip_id=eq.${tripId}` },  scheduleReload)
           .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
-              // Initial full sync on connect — catches any changes that arrived
-              // between the last session and now (e.g. co-participant added events offline)
-              scheduleReload();
+              // Initial full sync on connect — catches any changes that arrived between sessions.
+              // Skip if we already have current data for this trip to prevent a double-load
+              // immediately after login (checkAuth already called loadTripById for us).
+              const { tripDbId: currentId, trip: currentTrip } = get();
+              if (currentId !== tripId || !currentTrip) {
+                scheduleReload();
+              }
             }
           });
 
