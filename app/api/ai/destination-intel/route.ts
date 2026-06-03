@@ -1,35 +1,26 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/env';
 
 export const maxDuration = 20;
 
 export interface DestinationIntel {
-  currency:  string;   // e.g. "Japanese Yen (¥). Cards widely accepted."
-  tipping:   string;   // e.g. "Tipping is considered rude in Japan."
-  customs:   string;   // e.g. "Remove shoes before entering homes."
-  safety:    string;   // e.g. "Very safe. Watch for pickpockets in Shinjuku."
-  adapter:   string;   // e.g. "Type A/B plugs, 100V. Bring a converter."
-  emergency: string;   // e.g. "Police: 110  Ambulance: 119"
+  currency:  string;
+  tipping:   string;
+  customs:   string;
+  safety:    string;
+  adapter:   string;
+  emergency: string;
 }
 
 export async function POST(request: NextRequest) {
-  const cookieStore = await cookies();
-  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
-    cookies: {
-      getAll: () => cookieStore.getAll(),
-      setAll: (c) => { try { c.forEach(({ name, value, options }) => cookieStore.set(name, value, options)); } catch {} },
-    },
-  });
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 });
-
-  // Light rate limit — this is called once per country per session
-  const rl = checkRateLimit(`ai:intel:${user.id}`, 20, 3600);
-  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 20);
+  // Destination intel is public travel information — no auth required.
+  // Rate-limit by IP so the AI cost stays bounded (10 req/hr per IP).
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    ?? request.headers.get('x-real-ip')
+    ?? 'unknown';
+  const rl = checkRateLimit(`ai:intel:ip:${ip}`, 10, 3600);
+  if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 10);
 
   let body: { country?: string; locale?: string };
   try { body = await request.json(); }
@@ -61,7 +52,7 @@ Return ONLY minified JSON (no markdown):
     const data  = JSON.parse(clean) as DestinationIntel;
 
     return Response.json(data, {
-      headers: { 'Cache-Control': 'public, max-age=86400' }, // cache 24h at CDN
+      headers: { 'Cache-Control': 'public, max-age=86400' },
     });
   } catch (err) {
     return Response.json({ error: err instanceof Error ? err.message : 'AI error' }, { status: 500 });

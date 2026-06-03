@@ -250,6 +250,7 @@ const INTEL_ICONS_HE: [keyof Intel, string, string][] = [
 
 function DestinationIntelCard({ country, locale }: { country: string; locale: string }) {
   const isHe = locale === 'he';
+  const isRTL = isHe;
   const cacheKey = `trippy-intel-${country}-${locale}`;
 
   const [intel,    setIntel]    = useState<Intel | null>(() => {
@@ -258,35 +259,51 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
   const [loading,  setLoading]  = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [fetched,  setFetched]  = useState(!!intel);
+  const [fetchErr, setFetchErr] = useState(false);
 
   const fetchIntel = async () => {
     if (fetched || loading) return;
     setLoading(true);
+    setFetchErr(false);
     try {
       const res  = await fetch('/api/ai/destination-intel', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({ country, locale }),
       });
+      if (!res.ok) { setFetchErr(true); return; }
       const data = await res.json() as Intel;
       if (data.currency) {
         setIntel(data);
         setFetched(true);
         try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch {}
+      } else {
+        setFetchErr(true);
       }
-    } catch {}
+    } catch { setFetchErr(true); }
     finally { setLoading(false); }
   };
 
   const icons = isHe ? INTEL_ICONS_HE : INTEL_ICONS;
 
+  // Arrow: points toward the content in both LTR (›) and RTL (‹)
+  const arrowChar = isRTL ? '‹' : '›';
+  const arrowRotate = expanded
+    ? (isRTL ? 'rotate(-90deg)' : 'rotate(90deg)')
+    : 'none';
+
   return (
     <div className="lg a-rise" style={{ borderRadius: 16, overflow: 'hidden' }}>
       <button
         onClick={() => { setExpanded(e => !e); if (!expanded && !fetched) fetchIntel(); }}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', border: 0, background: 'transparent', cursor: 'pointer', textAlign: 'start' }}
+        style={{
+          width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+          padding: '12px 14px', border: 0, background: 'transparent',
+          cursor: 'pointer', textAlign: 'start',
+          touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
+        }}
       >
-        <span style={{ fontSize: 18 }}>🗺</span>
+        <span style={{ fontSize: 18 }}>🗺️</span>
         <div style={{ flex: 1, minWidth: 0 }}>
           <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--lg-ink)' }}>
             {isHe ? `מדריך מהיר: ${country}` : `Quick guide: ${country}`}
@@ -299,7 +316,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
         </div>
         {loading
           ? <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite', flexShrink: 0 }} />
-          : <span style={{ fontSize: 11, transform: expanded ? 'rotate(90deg)' : 'none', transition: 'transform .25s', color: 'var(--text-3)', flexShrink: 0 }}>›</span>
+          : <span style={{ fontSize: 14, transform: arrowRotate, transition: 'transform .25s', color: 'var(--text-3)', flexShrink: 0, display: 'inline-block' }}>{arrowChar}</span>
         }
       </button>
 
@@ -315,6 +332,24 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {expanded && !intel && !loading && (
+        <div style={{ padding: '4px 14px 14px' }}>
+          {fetchErr ? (
+            <button
+              onClick={e => { e.stopPropagation(); setFetchErr(false); fetchIntel(); }}
+              style={{ fontSize: 12, color: 'var(--lg-terra)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, touchAction: 'manipulation' }}
+            >
+              {isHe ? '⟳ נסה שוב' : '⟳ Tap to retry'}
+            </button>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+              <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite' }} />
+              <span style={{ fontSize: 12, color: 'var(--text-3)' }}>{isHe ? 'טוען…' : 'Loading…'}</span>
+            </div>
+          )}
         </div>
       )}
     </div>
