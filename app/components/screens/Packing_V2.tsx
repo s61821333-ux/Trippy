@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/lib/store';
 import { useShallow as useShallowPacking } from 'zustand/react/shallow';
@@ -67,6 +67,87 @@ function CheckCircle({ done }: { done: boolean }) {
     >
       {done && <Icon name="check" size={16} color="#fff" />}
     </m.span>
+  );
+}
+
+// ── Swipe-to-delete item row ──────────────────────────────────────────────────
+
+function PackingItem({ item, i, onToggle, onDelete, locale }: {
+  item: SupplyItem;
+  i: number;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+  locale: string;
+}) {
+  const x = useMotionValue(0);
+  const DELETE_THRESHOLD = -72;
+  const didDrag = React.useRef(false);
+  const stampKey = supplyStamp(item.category);
+
+  return (
+    <m.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.22 } }}
+      transition={{ delay: 0.14 + i * 0.04, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+      role="listitem"
+      style={{ position: 'relative', overflow: 'hidden', borderRadius: 18 }}
+    >
+      {/* Red delete hint */}
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute', inset: 0, borderRadius: 'inherit',
+          background: 'oklch(48% 0.22 25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
+          paddingInlineEnd: 20, pointerEvents: 'none',
+        }}
+      >
+        <Icon name="trash" size={20} color="rgba(255,255,255,0.9)" />
+      </div>
+
+      <m.button
+        drag="x"
+        dragConstraints={{ left: DELETE_THRESHOLD, right: 0 }}
+        dragElastic={{ left: 0.15, right: 0 }}
+        style={{ x }}
+        whileTap={{ scale: 0.97 }}
+        onDragStart={() => { didDrag.current = false; }}
+        onDrag={(_, info) => { if (Math.abs(info.offset.x) > 5) didDrag.current = true; }}
+        onDragEnd={(_, info) => {
+          if (info.offset.x <= DELETE_THRESHOLD) {
+            animate(x, -320, { duration: 0.18 }).then(() => onDelete(item.id));
+          } else {
+            animate(x, 0, { type: 'spring', stiffness: 500, damping: 35 });
+          }
+        }}
+        onClick={() => {
+          if (didDrag.current) { didDrag.current = false; return; }
+          onToggle(item.id);
+        }}
+        aria-label={`${item.name}${item.checked ? ', packed' : ', not packed'}`}
+        aria-pressed={item.checked}
+        className="lg"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 13, padding: 13, border: 0, cursor: 'pointer',
+          textAlign: locale === 'he' ? 'right' : 'left',
+          opacity: item.checked ? 0.6 : 1, transition: 'opacity 0.2s', width: '100%',
+          WebkitTapHighlightColor: 'transparent', touchAction: 'pan-y',
+        }}
+      >
+        <StampIcon iconKey={stampKey} size={38} aria-hidden="true" />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)', textDecoration: item.checked ? 'line-through var(--text-3)' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {item.name}
+          </div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginTop: 2 }}>
+            {STORE_CAT_LABELS[item.category] ?? item.category}
+            {item.assignee && ` · ${item.assignee}`}
+          </div>
+        </div>
+        <CheckCircle done={item.checked} />
+      </m.button>
+    </m.div>
   );
 }
 
@@ -381,8 +462,8 @@ function AIPackingSheet({ trip, supplies, onClose }: {
 export default function Packing_V2() {
   const { t, locale } = useI18n();
 
-  const { trip, supplies, toggleSupply } = useAppStore(
-    useShallow(s => ({ trip: s.trip, supplies: s.supplies, toggleSupply: s.toggleSupply }))
+  const { trip, supplies, toggleSupply, deleteSupplyItem } = useAppStore(
+    useShallow(s => ({ trip: s.trip, supplies: s.supplies, toggleSupply: s.toggleSupply, deleteSupplyItem: s.deleteSupplyItem }))
   );
 
   const [activeCat, setActiveCat] = useState<FilterCat>('All');
@@ -511,40 +592,18 @@ export default function Packing_V2() {
         aria-label={t('suppliesLabel') || 'Packing list'}
         style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
       >
-        {filtered.map((item, i) => {
-          const stampKey = supplyStamp(item.category);
-          return (
-            <m.button
+        <AnimatePresence initial={false}>
+          {filtered.map((item, i) => (
+            <PackingItem
               key={item.id}
-              role="listitem"
-              initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.14 + i * 0.04, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => toggleSupply(item.id)}
-              aria-label={`${item.name}${item.checked ? ', packed' : ', not packed'}`}
-              aria-pressed={item.checked}
-              className="lg"
-              style={{
-                display: 'flex', alignItems: 'center', gap: 13, padding: 13, border: 0, cursor: 'pointer',
-                textAlign: locale === 'he' ? 'right' : 'left',
-                opacity: item.checked ? 0.6 : 1, transition: 'opacity 0.2s', width: '100%',
-                WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation',
-              }}
-            >
-              <StampIcon iconKey={stampKey} size={38} aria-hidden="true" />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)', textDecoration: item.checked ? 'line-through var(--text-3)' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {item.name}
-                </div>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginTop: 2 }}>
-                  {STORE_CAT_LABELS[item.category] ?? item.category}
-                  {item.assignee && ` · ${item.assignee}`}
-                </div>
-              </div>
-              <CheckCircle done={item.checked} />
-            </m.button>
-          );
-        })}
+              item={item}
+              i={i}
+              onToggle={toggleSupply}
+              onDelete={deleteSupplyItem}
+              locale={locale}
+            />
+          ))}
+        </AnimatePresence>
 
         {total === 0 && (
           <m.div

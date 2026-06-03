@@ -37,9 +37,17 @@ const PANEL_SPRING = { type: 'spring', stiffness: 400, damping: 28 } as const;
 export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes }: NavBarV2Props) {
   const { t, isRTL } = useI18n();
   const [expandOpen, setExpandOpen] = useState(false);
+  const menuBtnRef = React.useRef<HTMLButtonElement>(null);
 
   // Close the expand panel whenever the active screen changes
   React.useEffect(() => { setExpandOpen(false); }, [active]);
+
+  // Keep aria-expanded in sync via imperative DOM write — framer-motion can cache
+  // boolean prop values across animation frames, so this guarantees the attribute
+  // matches the React state even if the motion component lags.
+  React.useEffect(() => {
+    menuBtnRef.current?.setAttribute('aria-expanded', expandOpen ? 'true' : 'false');
+  }, [expandOpen]);
 
   // -1 when on a non-tab screen (settings, notes, etc.) — blob should hide
   const activeTabIdx = TABS.findIndex(tb => tb.id === active);
@@ -203,11 +211,12 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
 
           {/* Menu handle */}
           <m.button
+            ref={menuBtnRef}
             onClick={() => setExpandOpen(o => !o)}
             whileTap={{ scale: 0.92 }}
             transition={HANDLE_SPRING}
             aria-label="Menu"
-            aria-expanded={expandOpen}
+            aria-expanded={expandOpen ? 'true' : 'false'}
             style={{
               width: 44,
               height: 50,
