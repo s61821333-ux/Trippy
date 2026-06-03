@@ -110,7 +110,6 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
         drag="x"
         dragConstraints={{ left: DELETE_THRESHOLD, right: 0 }}
         dragElastic={{ left: 0.15, right: 0 }}
-        style={{ x }}
         whileTap={{ scale: 0.97 }}
         onDragStart={() => { didDrag.current = false; }}
         onDrag={(_, info) => { if (Math.abs(info.offset.x) > 5) didDrag.current = true; }}
@@ -129,6 +128,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
         aria-pressed={item.checked}
         className="lg"
         style={{
+          x,
           display: 'flex', alignItems: 'center', gap: 13, padding: 13, border: 0, cursor: 'pointer',
           textAlign: locale === 'he' ? 'right' : 'left',
           opacity: item.checked ? 0.6 : 1, transition: 'opacity 0.2s', width: '100%',
