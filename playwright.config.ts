@@ -16,8 +16,11 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'iPhone 15',
-      use: { ...devices['iPhone 15'] },
+      name: 'iPhone 17 Chrome',
+      use: {
+        ...devices['iPhone 15'],
+        viewport: { width: 393, height: 852 },
+      },
     },
     {
       name: 'Desktop Chrome',

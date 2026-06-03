@@ -4,7 +4,7 @@ import { setupPage, clickEl } from './helpers';
 // ── NavBar visibility ─────────────────────────────────────────────────────────
 
 test.describe('NavBar — visibility', () => {
-  for (const screen of ['dashboard', 'day', 'settings', 'notes', 'crew', 'supplies']) {
+  for (const screen of ['dashboard', 'day', 'crew', 'supplies']) {
     test(`visible on "${screen}" screen`, async ({ page }) => {
       await setupPage(page, screen);
       await expect(

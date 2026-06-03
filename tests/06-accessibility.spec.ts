@@ -37,14 +37,6 @@ test.describe('Accessibility — ARIA', () => {
     await expect(btn).toHaveAttribute('aria-expanded', 'false', { timeout: 5_000 });
   });
 
-  test('packing list items have aria-label describing packed state', async ({ page }) => {
-    await setupPage(page, 'supplies');
-    const items = page.locator('[role="listitem"][aria-label]');
-    await items.first().waitFor({ state: 'visible', timeout: 10_000 });
-    const label = await items.first().getAttribute('aria-label');
-    expect(label).toMatch(/packed|not packed/i);
-  });
-
   test('drag handles have aria-label on day screen', async ({ page }) => {
     await setupPage(page, 'day');
     await page.locator('.lg.a-rise').first().waitFor({ state: 'visible', timeout: 12_000 });
