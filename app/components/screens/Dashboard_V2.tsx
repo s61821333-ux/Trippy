@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Icon from '../ui/Icon';
 import { StampIcon } from '../ui/StampIcon';
 import Ring from '../ui/Ring';
@@ -333,12 +333,40 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
   trip: any; currSym: string; currCode: string; onClose: () => void; onAddBudget: (v: number) => void;
 }) {
   const { addExpense, deleteExpense } = useAppStore();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const { show } = useToast();
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState('');
   const [budgetVal, setBudgetVal] = useState(trip?.budget ? String(trip.budget) : '');
+  const [scanning, setScanning] = useState(false);
+  const fileRef = React.useRef<HTMLInputElement>(null);
+
+  const handleScanReceipt = async (file: File) => {
+    setScanning(true);
+    try {
+      const reader = new FileReader();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res  = await fetch('/api/ai/scan-receipt', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ imageBase64: base64, mediaType: file.type }),
+      });
+      const data = await res.json() as { description?: string; amount?: number; error?: string };
+      if (data.error) { show(locale === 'he' ? 'לא ניתן לקרוא את הקבלה' : 'Could not read receipt'); return; }
+      if (data.description) setDesc(data.description);
+      if (data.amount)      setAmount(String(data.amount));
+      show(locale === 'he' ? 'קבלה נסרקה!' : 'Receipt scanned!');
+    } catch {
+      show(locale === 'he' ? 'שגיאה בסריקה' : 'Scan failed');
+    } finally {
+      setScanning(false);
+    }
+  };
 
   const expenses = trip?.expenses ?? [];
   const total = expenses.reduce((s: number, e: any) => s + e.amount, 0);
@@ -380,7 +408,37 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
 
         {/* Add expense */}
         <div style={{ padding: '12px 14px', background: 'var(--lg-panel)', borderRadius: 16 }}>
-          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10, fontSize: 9 }}>{t('addExpenseLabel')}</p>
+          {/* Hidden file input for receipt scanning */}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            style={{ display: 'none' }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleScanReceipt(f); e.target.value = ''; }}
+          />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9, margin: 0 }}>{t('addExpenseLabel')}</p>
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={scanning}
+              title={locale === 'he' ? 'סרוק קבלה' : 'Scan receipt'}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                background: 'none', border: 0, cursor: scanning ? 'default' : 'pointer',
+                color: scanning ? 'var(--text-3)' : 'var(--lg-terra)',
+                fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
+                padding: '3px 6px', borderRadius: 8,
+                opacity: scanning ? 0.6 : 1,
+              }}
+            >
+              {scanning
+                ? <><div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite' }} /><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style></>
+                : <Icon name="camera" size={14} color="var(--lg-terra)" />
+              }
+              {locale === 'he' ? 'סרוק קבלה' : 'Scan receipt'}
+            </button>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <Field label={t('descriptionLabel')} placeholder="Coffee, taxi…" value={desc} onChange={setDesc} />
             <div style={{ display: 'flex', gap: 10 }}>
