@@ -231,53 +231,56 @@
   --compass-hub:  #F4EFE8;
 
   /* V2 Jelly Glass — dark mode */
-  --surface:        rgba(30, 26, 20, 0.72);
-  --surface-strong: rgba(25, 22, 16, 0.88);
-  --nav-surface:    rgba(25, 22, 16, 0.82);
+  --surface:        rgba(30, 26, 20, 0.82);
+  --surface-strong: rgba(25, 22, 16, 0.94);
+  --nav-surface:    rgba(25, 22, 16, 0.90);
 
   --bg:            #0E0C0A;
-  --bg-alt:        #17140F;
+  --bg-alt:        #1C1916;
   --bg-paper:      #0E0C0A;
-  --bg-warm:       #17140F;
-  --surface-warm:  #211D18;
+  --bg-warm:       #1C1916;
+  --surface-warm:  #252018;
 
-  --border:        #352C24;
-  --border-strong: #4A3E34;
+  /* Borders — higher contrast so dividers are visible on dark surfaces */
+  --border:        oklch(30% 0.016 65);
+  --border-strong: oklch(40% 0.020 65);
 
   --brand:              oklch(62% 0.100 155);
   --brand-hover:        oklch(55% 0.095 155);
-  --brand-light:        oklch(62% 0.100 155 / 18%);
-  --brand-muted:        oklch(62% 0.100 155 / 15%);
+  --brand-light:        oklch(62% 0.100 155 / 20%);
+  --brand-muted:        oklch(62% 0.100 155 / 16%);
   --primary-container:  oklch(55% 0.100 155);
   --coral-glow:         oklch(64% 0.138 30);
 
   --terra:         oklch(66% 0.118 38);
   --terra-hover:   oklch(60% 0.110 38);
-  --terra-light:   oklch(66% 0.118 38 / 18%);
-  --terra-muted:   oklch(66% 0.118 38 / 12%);
+  --terra-light:   oklch(66% 0.118 38 / 20%);
+  --terra-muted:   oklch(66% 0.118 38 / 14%);
 
   --sand:          oklch(72% 0.112 72);
-  --sand-light:    oklch(72% 0.112 72 / 18%);
+  --sand-light:    oklch(72% 0.112 72 / 20%);
 
-  --text:          oklch(92% 0.006 80);
-  --text-2:        oklch(72% 0.018 55);
-  --text-3:        oklch(56% 0.014 55);
+  /* Text — boosted for better readability on dark glass surfaces */
+  --text:          oklch(96% 0.005 80);
+  --text-2:        oklch(82% 0.014 65);
+  --text-3:        oklch(65% 0.012 65);
   --text-inv:      oklch(8% 0.008 55);
 
-  /* Form fields */
-  --field-bg:             oklch(16% 0.018 55 / 82%);
-  --field-bg-focused:     oklch(21% 0.020 55 / 92%);
-  --field-border:         oklch(100% 0 0 / 8%);
-  --field-border-focused:  oklch(62% 0.100 155 / 42%);
-  --field-label:          var(--text-3);
-  --field-icon:           var(--text-3);
+  /* Form fields — more opaque + visible borders */
+  --field-bg:              oklch(22% 0.018 65 / 95%);
+  --field-bg-focused:      oklch(26% 0.020 65 / 98%);
+  --field-border:          oklch(100% 0 0 / 18%);
+  --field-border-focused:  oklch(62% 0.100 155 / 55%);
+  --field-label:           var(--text-3);
+  --field-icon:            var(--text-3);
 
-  --success:       oklch(62% 0.090 155);
-  --success-bg:    oklch(62% 0.090 155 / 12%);
-  --warning:       oklch(66% 0.110 68);
-  --warning-bg:    oklch(66% 0.110 68 / 12%);
-  --danger:        oklch(60% 0.128 25);
-  --danger-bg:     oklch(60% 0.128 25 / 13%);
+  /* Semantic — brighter tones so badges/alerts read clearly */
+  --success:       oklch(68% 0.090 155);
+  --success-bg:    oklch(68% 0.090 155 / 14%);
+  --warning:       oklch(72% 0.110 68);
+  --warning-bg:    oklch(72% 0.110 68 / 14%);
+  --danger:        oklch(65% 0.128 25);
+  --danger-bg:     oklch(65% 0.128 25 / 15%);
 
   --shadow-xs: 0 1px 2px oklch(0% 0 0 / 40%),  0 1px 4px oklch(0% 0 0 / 28%);
   --shadow-sm: 0 2px 8px oklch(0% 0 0 / 48%),  0 1px 2px oklch(0% 0 0 / 30%);
@@ -321,39 +324,40 @@
   --bg:        oklch(17% 0.022 62);
   --bg-warm:   oklch(21% 0.024 62);
   --surface:   oklch(25% 0.026 62);
-  --text:      oklch(95% 0.01 80);
-  --text-2:    oklch(78% 0.018 75);
-  --text-3:    oklch(60% 0.016 75);
-  --field-bg:             oklch(16% 0.018 55 / 82%);
-  --field-bg-focused:     oklch(21% 0.020 55 / 92%);
-  --field-border:         oklch(100% 0 0 / 8%);
-  --field-border-focused:  oklch(62% 0.100 155 / 42%);
-  --field-label:          var(--text-3);
-  --field-icon:           var(--text-3);
-  --lg-ink:    oklch(95% 0.01 80);
-  --lg-forest:       oklch(62% 0.14 158);
-  --lg-forest-deep:  oklch(44% 0.11 158);
-  --lg-terra:        oklch(64% 0.17 36);
-  --lg-terra-bright: oklch(70% 0.185 34);
-  --lg-sand:         oklch(80% 0.14 78);
-  --hero-1: oklch(30% 0.07 158);
+  --text:      oklch(96% 0.005 80);
+  --text-2:    oklch(82% 0.014 65);
+  --text-3:    oklch(65% 0.012 65);
+  --field-bg:              oklch(22% 0.018 65 / 95%);
+  --field-bg-focused:      oklch(26% 0.020 65 / 98%);
+  --field-border:          oklch(100% 0 0 / 18%);
+  --field-border-focused:  oklch(62% 0.100 155 / 55%);
+  --field-label:           var(--text-3);
+  --field-icon:            var(--text-3);
+  --lg-ink:          oklch(96% 0.008 80);
+  --lg-forest:       oklch(64% 0.15 158);
+  --lg-forest-deep:  oklch(46% 0.12 158);
+  --lg-terra:        oklch(66% 0.18 36);
+  --lg-terra-bright: oklch(72% 0.19 34);
+  --lg-sand:         oklch(82% 0.14 78);
+  --lg-sky:          oklch(65% 0.14 235);
+  --hero-1: oklch(34% 0.09 158);
   --hero-2: oklch(15% 0.035 162);
   --hero-3: oklch(9% 0.018 60);
-  --lg-panel:        oklch(34% 0.026 62 / 55%);
-  --lg-panel-strong: oklch(36% 0.028 62 / 80%);
-  --lg-shadow:    0 8px 30px oklch(0% 0 0 / 45%), 0 2px 8px oklch(0% 0 0 / 30%);
-  --lg-shadow-lg: 0 20px 60px oklch(0% 0 0 / 55%), 0 6px 18px oklch(0% 0 0 / 32%);
+  --lg-panel:        oklch(26% 0.022 65 / 92%);
+  --lg-panel-strong: oklch(30% 0.024 65 / 98%);
+  --lg-shadow:    0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
+  --lg-shadow-lg: 0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
   --compass-ring: #F4EFE8; --compass-n: #E0916B; --compass-s: #8BB39A; --compass-ew: #E6B574; --compass-hub: #F4EFE8;
 }
 [data-theme="dark"] .lg {
-  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 14%), inset 0 0 0 1px oklch(100% 0 0 / 8%);
+  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 24%), inset 0 0 0 1px oklch(100% 0 0 / 16%);
 }
 [data-theme="dark"] .lg::before {
-  background: linear-gradient(135deg, oklch(100% 0 0 / 14%) 0%, transparent 40%, transparent 70%, oklch(100% 0 0 / 4%) 100%);
+  background: linear-gradient(135deg, oklch(100% 0 0 / 20%) 0%, transparent 40%, transparent 70%, oklch(100% 0 0 / 6%) 100%);
 }
 [data-theme="dark"] .lg-btn-glass {
   color: var(--lg-ink);
-  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 16%), inset 0 0 0 1px oklch(100% 0 0 / 10%);
+  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 20%), inset 0 0 0 1px oklch(100% 0 0 / 14%);
 }
 
 [data-dark="true"] input[type="date"],
@@ -1403,22 +1407,27 @@ body::after {
 
 /* ── Dark mode overrides ──────────────────────────────────────────── */
 [data-dark="true"] {
-  --lg-forest:        oklch(62% 0.14 158);
-  --lg-forest-deep:   oklch(44% 0.11 158);
-  --lg-terra:         oklch(64% 0.17 36);
-  --lg-terra-bright:  oklch(70% 0.185 34);
-  --lg-sand:          oklch(80% 0.14 78);
-  --lg-ink:           oklch(95% 0.01 80);
+  --lg-forest:        oklch(64% 0.15 158);
+  --lg-forest-deep:   oklch(46% 0.12 158);
+  --lg-terra:         oklch(66% 0.18 36);
+  --lg-terra-bright:  oklch(72% 0.19 34);
+  --lg-sand:          oklch(82% 0.14 78);
+  --lg-ink:           oklch(96% 0.008 80);
+  --lg-sky:           oklch(65% 0.14 235);
 
-  --hero-1: oklch(30% 0.07 158);
+  --hero-1: oklch(34% 0.09 158);
   --hero-2: oklch(15% 0.035 162);
   --hero-3: oklch(9% 0.018 60);
 
-  --lg-panel:         oklch(34% 0.026 62 / 55%);
-  --lg-panel-strong:  oklch(36% 0.028 62 / 80%);
+  /* Panels: significantly more opaque so card surfaces are clearly
+     distinct from the #0E0C0A page background (was 55% / 80%) */
+  --lg-panel:         oklch(26% 0.022 65 / 92%);
+  --lg-panel-strong:  oklch(30% 0.024 65 / 98%);
 
-  --lg-shadow:     0 8px 30px oklch(0% 0 0 / 45%), 0 2px 8px oklch(0% 0 0 / 30%);
-  --lg-shadow-lg:  0 20px 60px oklch(0% 0 0 / 55%), 0 6px 18px oklch(0% 0 0 / 32%);
+  --lg-shadow:     0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
+  --lg-shadow-lg:  0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
+  --lg-glow-terra: 0 10px 34px oklch(66% 0.18 36 / 45%);
+  --lg-glow-forest:0 10px 34px oklch(64% 0.15 158 / 42%);
 }
 
 /* ── True liquid-glass panel ──────────────────────────────────────── */
@@ -1463,10 +1472,11 @@ body::after {
 }
 
 [data-dark="true"] .lg {
-  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 14%), inset 0 0 0 1px oklch(100% 0 0 / 8%);
+  /* Stronger rim light + border so glass cards pop against the dark bg */
+  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 24%), inset 0 0 0 1px oklch(100% 0 0 / 16%);
 }
 [data-dark="true"] .lg::before {
-  background: linear-gradient(135deg, oklch(100% 0 0 / 14%) 0%, transparent 40%, transparent 70%, oklch(100% 0 0 / 4%) 100%);
+  background: linear-gradient(135deg, oklch(100% 0 0 / 20%) 0%, transparent 40%, transparent 70%, oklch(100% 0 0 / 6%) 100%);
 }
 
 /* ── Cinematic hero mesh ──────────────────────────────────────────── */
