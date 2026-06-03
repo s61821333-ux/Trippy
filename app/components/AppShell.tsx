@@ -384,7 +384,7 @@ function Shell() {
                 animate="animate"
                 exit="exit"
                 transition={screenTransition}
-                className={`screen-inset${showNav ? ' screen-inset-nav' : ''} flex flex-col overflow-hidden`}
+                className={`screen-inset${showNav && screen !== 'map' ? ' screen-inset-nav' : ''} flex flex-col overflow-hidden`}
               >
                 <div className="w-full h-full">
                   <div className="w-full h-full">
