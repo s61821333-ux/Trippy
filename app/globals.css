@@ -1454,14 +1454,18 @@ body::after {
 }
 .lg > * { position: relative; z-index: 1; }
 
-/* NavBar pill — transparent (no background) on mobile */
+/* NavBar pill — weak tint on mobile so icons stay readable without a heavy glass pill */
 @media (max-width: 767px) {
   .nav-pill.lg,
   .nav-pill.lg-strong {
-    background: transparent;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    background: oklch(99% 0.004 80 / 18%);
+    backdrop-filter: blur(12px) saturate(1.4);
+    -webkit-backdrop-filter: blur(12px) saturate(1.4);
     box-shadow: none;
+  }
+  [data-dark="true"] .nav-pill.lg,
+  [data-dark="true"] .nav-pill.lg-strong {
+    background: oklch(20% 0.015 65 / 30%);
   }
   .nav-pill.lg::before { display: none; }
 }
