@@ -227,6 +227,106 @@ function CalendarHeatmap({ trip }: { trip: any }) {
   );
 }
 
+// ── Budget breakdown charts ───────────────────────────────────────────────────
+
+const CAT_COLORS: Record<string, string> = {
+  food: '#C4714A', cafe: '#C8944A', transport: '#3B6E52', flight: '#2B7A8E',
+  attraction: '#6B5CE7', hotel: '#E05A3A', shopping: '#A03CB4', beach: '#1B6A8A',
+  nightlife: '#D4531A', museum: '#2B8A6E', hiking: '#B45309', other: '#888',
+};
+const catColor = (c: string) => CAT_COLORS[c] ?? '#888';
+
+function BudgetBreakdown({ trip, currSym, expenses }: {
+  trip: any; currSym: string; expenses: any[];
+}) {
+  const { locale } = useI18n();
+  const isHe = locale === 'he';
+
+  // Per-day event costs
+  const dayTotals: { day: number; amount: number }[] = [];
+  for (let d = 1; d <= trip.days; d++) {
+    const dayAmt = (trip.events[d] ?? []).reduce((s: number, ev: any) => s + (ev.cost ?? 0), 0);
+    if (dayAmt > 0) dayTotals.push({ day: d, amount: dayAmt });
+  }
+
+  // Category totals (events + expenses keyword match)
+  const catTotals: Record<string, number> = {};
+  for (let d = 1; d <= trip.days; d++) {
+    for (const ev of trip.events[d] ?? []) {
+      if (ev.cost > 0) catTotals[ev.category] = (catTotals[ev.category] ?? 0) + ev.cost;
+    }
+  }
+  // Bucket manual expenses into 'other'
+  const manualTotal = expenses.reduce((s: number, e: any) => s + e.amount, 0);
+  if (manualTotal > 0) catTotals['manual'] = (catTotals['manual'] ?? 0) + manualTotal;
+
+  const topCats = Object.entries(catTotals).sort(([, a], [, b]) => b - a).slice(0, 6);
+  const catTotal = topCats.reduce((s, [, v]) => s + v, 0);
+  const maxDay   = Math.max(...dayTotals.map(d => d.amount), 1);
+
+  if (catTotal === 0 && dayTotals.length === 0) return null;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* Category stacked bar */}
+      {catTotal > 0 && (
+        <div>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: '0 0 8px', fontWeight: 600 }}>
+            {isHe ? 'לפי קטגוריה' : 'By category'}
+          </p>
+          {/* Stacked bar */}
+          <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', marginBottom: 10 }}>
+            {topCats.map(([cat, val]) => (
+              <div key={cat} style={{ width: `${(val / catTotal) * 100}%`, background: cat === 'manual' ? '#999' : catColor(cat), transition: 'width .4s' }} />
+            ))}
+          </div>
+          {/* Legend */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
+            {topCats.map(([cat, val]) => (
+              <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: cat === 'manual' ? '#999' : catColor(cat), flexShrink: 0 }} />
+                <span style={{ fontSize: 11.5, color: 'var(--text-2)', fontWeight: 500 }}>
+                  {cat === 'manual' ? (isHe ? 'הוצאות' : 'Expenses') : cat.charAt(0).toUpperCase() + cat.slice(1)}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--text-3)' }}>
+                  {currSym}{val.toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Per-day bars */}
+      {dayTotals.length > 1 && (
+        <div>
+          <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: '0 0 8px', fontWeight: 600 }}>
+            {isHe ? 'לפי יום' : 'By day'}
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+            {dayTotals.map(({ day, amount }) => (
+              <div key={day} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', width: 28, flexShrink: 0 }}>
+                  D{day}
+                </span>
+                <div style={{ flex: 1, height: 7, borderRadius: 4, background: 'var(--lg-panel)', overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${(amount / maxDay) * 100}%`, height: '100%', borderRadius: 4,
+                    background: `var(--lg-terra)`, transition: 'width .4s',
+                  }} />
+                </div>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', width: 52, textAlign: 'end', flexShrink: 0 }}>
+                  {currSym}{amount.toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Expense manager ───────────────────────────────────────────────────────────
 
 function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
@@ -274,6 +374,9 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
             <CurrencyAmount amount={total} base={currCode} />
           </span>
         </div>
+
+        {/* Breakdown charts */}
+        <BudgetBreakdown trip={trip} currSym={currSym} expenses={expenses} />
 
         {/* Add expense */}
         <div style={{ padding: '12px 14px', background: 'var(--lg-panel)', borderRadius: 16 }}>
