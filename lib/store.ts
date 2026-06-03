@@ -525,6 +525,11 @@ export const useAppStore = create<AppState>()(
             return dbAddEvent(tripDbId, dayNumber, newEvent, sessionUserId);
           }).catch(err => {
             console.error('[addEvent] DB sync failed:', err);
+            // Queue the change so flushPendingChanges can retry on next reconnect
+            const { userId } = get();
+            if (tripDbId && userId) {
+              get().addPendingChange({ type: 'addEvent', payload: { dayNumber, event: newEvent }, tripId: tripDbId, userId, timestamp: Date.now() });
+            }
             set({ lastSyncError: err?.message ?? 'save_failed' });
           });
         }
@@ -793,20 +798,44 @@ export const useAppStore = create<AppState>()(
 
       subscribeToTrip: (tripId: string) => {
         const supabase = createSupabaseClient();
+
+        // Debounced reload — multiple tables changing at once (e.g. event + trip metadata)
+        // should produce only ONE reload. 600 ms is enough to batch a burst of inserts.
+        let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+        const scheduleReload = () => {
+          if (debounceTimer) clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(() => {
+            debounceTimer = null;
+            // Skip reload if the store is already mid-load (prevents cascade)
+            if (get().isGlobalLoading) return;
+            get().loadTripById(tripId).catch(() => {});
+          }, 600);
+        };
+
         const channel = supabase
-          .channel(`trip:${tripId}`)
-          .on(
-            'postgres_changes',
-            { event: 'UPDATE', schema: 'public', table: 'trips', filter: `id=eq.${tripId}` },
-            (payload) => {
-              // Guard: only act on changes for the active trip (defence-in-depth)
-              const changedId = (payload.new as any)?.id ?? (payload.old as any)?.id;
-              if (changedId && changedId !== tripId) return;
-              get().loadTripById(tripId).catch(() => {});
-            },
-          )
-          .subscribe();
-        return () => { supabase.removeChannel(channel); };
+          .channel(`trip-full:${tripId}`)
+          // Trip metadata (name, days, theme, countries, hotels, notes)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'trips',    filter: `id=eq.${tripId}` },       scheduleReload)
+          // Events — the main real-time gap that caused events to not sync live
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'events',   filter: `trip_id=eq.${tripId}` },  scheduleReload)
+          // Expenses
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'expenses', filter: `trip_id=eq.${tripId}` },  scheduleReload)
+          // Supplies / packing list
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'supplies', filter: `trip_id=eq.${tripId}` },  scheduleReload)
+          // Day meta (region labels, descriptions)
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'day_meta', filter: `trip_id=eq.${tripId}` },  scheduleReload)
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              // Initial full sync on connect — catches any changes that arrived
+              // between the last session and now (e.g. co-participant added events offline)
+              scheduleReload();
+            }
+          });
+
+        return () => {
+          if (debounceTimer) clearTimeout(debounceTimer);
+          supabase.removeChannel(channel);
+        };
       },
 
       setGlobalLoading: (v) => set({ isGlobalLoading: v }),

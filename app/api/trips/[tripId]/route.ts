@@ -168,13 +168,21 @@ export async function DELETE(
   const full = request.nextUrl.searchParams.get('full') === 'true'
 
   if (full) {
-    // Verify the requesting user is the trip owner
-    const { data: trip } = await client.from('trips').select('created_by').eq('id', tripId).maybeSingle()
-    if (!trip) return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
-    if (trip.created_by !== user.id) return NextResponse.json({ error: 'Only the trip owner can delete it' }, { status: 403 })
-    const { error } = await client.from('trips').delete().eq('id', tripId)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    return NextResponse.json({ ok: true })
+    // Full delete — always use admin client so RLS never silently blocks the operation.
+    // If admin is unavailable fall back to user client but the DELETE may fail under RLS.
+    const deleteClient = admin ?? supabase;
+
+    // Verify ownership before deleting
+    const { data: trip, error: fetchErr } = await deleteClient
+      .from('trips').select('created_by').eq('id', tripId).maybeSingle();
+    if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 });
+    if (!trip)    return NextResponse.json({ error: 'Trip not found' }, { status: 404 });
+    if (trip.created_by !== user.id)
+      return NextResponse.json({ error: 'Only the trip owner can delete it' }, { status: 403 });
+
+    const { error: delErr } = await deleteClient.from('trips').delete().eq('id', tripId);
+    if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
+    return NextResponse.json({ ok: true });
   }
 
   const { data: deleted, error } = await client
