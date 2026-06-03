@@ -61,18 +61,13 @@ test.describe('Persistence — trip state survives page reload', () => {
   test('adding an event updates localStorage immediately', async ({ page }) => {
     await setupPage(page, 'dashboard');
 
-    // Add a new event via the store
+    // Add a new event by patching localStorage directly (no setState call — that would wipe trip)
     await page.evaluate(() => {
-      (window as unknown as Record<string, (p: unknown) => void>).__trippySetState__({
-        trip: {
-          ...((window as any).__trippyGetScreen__ ? undefined : undefined), // just a trigger
-        },
-      });
-      // Use the real addEvent path by patching trip directly
       const raw = localStorage.getItem('trippy-storage');
       const s = raw ? JSON.parse(raw) : {};
       const trip = s?.state?.trip;
       if (!trip) return;
+      if (!trip.events) trip.events = {};
       trip.events[1] = [
         ...(trip.events[1] ?? []),
         { id: 'new-evt', time: '15:00', duration: 60, name: 'Sunset Walk', category: 'attraction', addedBy: 'Tester' },

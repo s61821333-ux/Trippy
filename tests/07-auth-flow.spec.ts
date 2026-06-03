@@ -37,10 +37,9 @@ test.describe('Auth — unauthenticated flow', () => {
     await page.waitForLoadState('domcontentloaded');
     // Wait well past the 1.9 s auto-advance
     await page.waitForTimeout(3_500);
-    // Look for a visible element that belongs to the welcome/auth screen
+    // Look for the "Start an adventure" button on the welcome/auth screen
     await expect(
-      page.getByText(/adventure|sign in|google|continue/i).first()
-        .or(page.locator('button').filter({ hasText: /adventure|sign|google/i }).first())
+      page.getByRole('button', { name: /adventure/i })
     ).toBeVisible({ timeout: 5_000 });
   });
 

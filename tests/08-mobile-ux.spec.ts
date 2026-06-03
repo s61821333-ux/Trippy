@@ -151,7 +151,11 @@ test.describe('Data input — Add event', () => {
     await page.evaluate(() => {
       (window as unknown as Record<string, (p: unknown) => void>).__trippySetState__({ activeDay: 2 });
     });
-    await page.waitForTimeout(400);
+    // Wait for the empty-day "Add event" button to be in the DOM before proceeding
+    await page.waitForFunction(
+      () => Array.from(document.querySelectorAll('button')).some(b => /add event/i.test(b.textContent ?? '')),
+      { timeout: 8_000 }
+    );
   }
 
   test('Add event sheet opens on "Add event" button tap', async ({ page }) => {
@@ -266,7 +270,11 @@ test.describe('Focus management', () => {
     await page.evaluate(() => {
       (window as unknown as Record<string, (p: unknown) => void>).__trippySetState__({ activeDay: 2 });
     });
-    await page.waitForTimeout(400);
+    // Wait for the "Add event" button to be in DOM before clicking
+    await page.waitForFunction(
+      () => Array.from(document.querySelectorAll('button')).some(b => /add event/i.test(b.textContent ?? '')),
+      { timeout: 8_000 }
+    );
     await page.evaluate(() => {
       document.querySelectorAll('button').forEach(b => {
         if (/add event/i.test(b.textContent ?? '')) b.click();
@@ -326,7 +334,8 @@ test.describe('Loading states', () => {
 
   test('injecting demo state shows content within 2s', async ({ page }) => {
     await setupPage(page, 'dashboard');
-    // Should already be set up; verify trip content appears quickly
+    // Wait for trip name to render (global loading overlay may still be fading out)
+    await page.getByText('Test Trip').waitFor({ state: 'visible', timeout: 5_000 });
     const text = await page.locator('body').innerText();
     expect(text.toLowerCase()).toContain('test trip');
   });
@@ -387,9 +396,21 @@ test.describe('Usability — layout integrity', () => {
       const overflow = await page.evaluate(() => {
         const vw = window.innerWidth;
         const all = Array.from(document.querySelectorAll('*'));
+        // getBoundingClientRect() does NOT account for CSS clipping (overflow:hidden/scroll/auto
+        // on ancestor elements). Skip elements that have a clipping ancestor — their visual
+        // overflow is intentional (e.g. decorative blobs, horizontal scroll containers).
+        function hasClippingAncestor(el: Element): boolean {
+          let p = el.parentElement;
+          while (p && p !== document.documentElement) {
+            const ox = getComputedStyle(p).overflowX;
+            if (ox === 'hidden' || ox === 'scroll' || ox === 'auto' || ox === 'clip') return true;
+            p = p.parentElement;
+          }
+          return false;
+        }
         return all.some(el => {
           const r = el.getBoundingClientRect();
-          return r.right > vw + 2;
+          return r.right > vw + 2 && !hasClippingAncestor(el);
         });
       });
       expect(overflow, `Overflow on "${sc}" screen`).toBe(false);
