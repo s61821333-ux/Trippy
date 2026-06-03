@@ -159,6 +159,100 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: 
   return lines.join(' ');
 }
 
+// ── Destination Intelligence card ─────────────────────────────────────────────
+
+interface Intel { currency: string; tipping: string; customs: string; safety: string; adapter: string; emergency: string }
+
+const INTEL_ICONS: [keyof Intel, string, string][] = [
+  ['currency',  '💱', 'Currency'],
+  ['tipping',   '🤝', 'Tipping'],
+  ['customs',   '🎌', 'Customs'],
+  ['safety',    '🛡',  'Safety'],
+  ['adapter',   '🔌', 'Power'],
+  ['emergency', '🚨', 'Emergency'],
+];
+const INTEL_ICONS_HE: [keyof Intel, string, string][] = [
+  ['currency',  '💱', 'מטבע'],
+  ['tipping',   '🤝', 'טיפים'],
+  ['customs',   '🎌', 'נימוסים'],
+  ['safety',    '🛡',  'בטיחות'],
+  ['adapter',   '🔌', 'חשמל'],
+  ['emergency', '🚨', 'חירום'],
+];
+
+function DestinationIntelCard({ country, locale }: { country: string; locale: string }) {
+  const isHe = locale === 'he';
+  const cacheKey = `trippy-intel-${country}-${locale}`;
+
+  const [intel,    setIntel]    = useState<Intel | null>(() => {
+    try { const s = localStorage.getItem(cacheKey); return s ? JSON.parse(s) : null; } catch { return null; }
+  });
+  const [loading,  setLoading]  = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [fetched,  setFetched]  = useState(!!intel);
+
+  const fetchIntel = async () => {
+    if (fetched || loading) return;
+    setLoading(true);
+    try {
+      const res  = await fetch('/api/ai/destination-intel', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ country, locale }),
+      });
+      const data = await res.json() as Intel;
+      if (data.currency) {
+        setIntel(data);
+        setFetched(true);
+        try { localStorage.setItem(cacheKey, JSON.stringify(data)); } catch {}
+      }
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  const icons = isHe ? INTEL_ICONS_HE : INTEL_ICONS;
+
+  return (
+    <div className="lg a-rise" style={{ borderRadius: 16, overflow: 'hidden' }}>
+      <button
+        onClick={() => { setExpanded(e => !e); if (!expanded && !fetched) fetchIntel(); }}
+        style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', border: 0, background: 'transparent', cursor: 'pointer', textAlign: 'start' }}
+      >
+        <span style={{ fontSize: 18 }}>🗺</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--lg-ink)' }}>
+            {isHe ? `מדריך מהיר: ${country}` : `Quick guide: ${country}`}
+          </span>
+          {!expanded && (
+            <span style={{ fontSize: 11, color: 'var(--text-3)', marginInlineStart: 8 }}>
+              {isHe ? 'מטבע · טיפים · חשמל…' : 'currency · tipping · power…'}
+            </span>
+          )}
+        </div>
+        {loading
+          ? <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite', flexShrink: 0 }} />
+          : <span style={{ fontSize: 11, transform: expanded ? 'rotate(90deg)' : 'none', transition: 'transform .25s', color: 'var(--text-3)', flexShrink: 0 }}>›</span>
+        }
+      </button>
+
+      {expanded && intel && (
+        <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ height: 1, background: 'oklch(50% 0.02 60 / 12%)', marginBottom: 2 }} />
+          {icons.map(([key, emoji, label]) => intel[key] && (
+            <div key={key} style={{ display: 'flex', gap: 10 }}>
+              <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>{emoji}</span>
+              <div>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 600, display: 'block', marginBottom: 2 }}>{label}</span>
+                <span style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5 }}>{intel[key]}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Calendar heatmap ─────────────────────────────────────────────────────────
 
 function CalendarHeatmap({ trip }: { trip: any }) {
@@ -1160,6 +1254,11 @@ export default function DashboardScreenV2() {
             </button>
           </div>
         )}
+
+        {/* ── Destination Intelligence cards ── */}
+        {(trip.countries ?? []).slice(0, 3).map((country: string) => (
+          <DestinationIntelCard key={country} country={country} locale={locale} />
+        ))}
 
         {/* ── Calendar heatmap toggle ── */}
         <div>
