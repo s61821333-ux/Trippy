@@ -113,19 +113,19 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: 
         const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000);
         return dt.toLocaleDateString('he-IL', { month: 'short', day: 'numeric' });
       });
-      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'עדיין ריק' : 'עדיין ריקים'} — כדאי להוסיף פעילויות.`);
+      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'עדיין ריק' : 'עדיין ריקים'} — מה לגבי להוסיף משהו?`);
     } else if (emptyDays.length > 3) {
-      lines.push(`${emptyDays.length} ימים עדיין ריקים — יש מקום להרבה הרפתקאות!`);
+      lines.push(`${emptyDays.length} ימים פנויים — הרבה מקום להרפתקאות!`);
     }
 
     if (budgetPct !== null) {
-      if (budgetPct > 90) lines.push('התקציב כמעט מלא — כדאי לבדוק עלויות קרובות.');
-      else if (budgetPct > 70) lines.push(`${budgetPct}% מהתקציב נוצל — במסלול הנכון.`);
-      else lines.push('הרבה מקום בתקציב — תיהנו!');
+      if (budgetPct > 90) lines.push('התקציב כמעט מוצה — שווה לבדוק הוצאות קרובות.');
+      else if (budgetPct > 70) lines.push(`${budgetPct}% מהתקציב בשימוש — תחת שליטה.`);
+      else lines.push('עדיין הרבה תקציב — תיהנו!');
     }
 
     if (packedPct < 50 && supplies.length > 0) {
-      lines.push(`הציוד ${packedPct}% ארוז — אל תשכחו את העיקריים לפני היציאה.`);
+      lines.push(`הציוד ${packedPct}% ארוז — אל תשכחו את הדברים החשובים לפני שיוצאים.`);
     } else if (packedPct === 100) {
       lines.push('כל הציוד ארוז. מוכנים לדרך!');
     }
@@ -138,19 +138,19 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: 
         const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000);
         return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       });
-      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'has' : 'have'} no activities yet — consider filling them in.`);
+      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'has' : 'have'} nothing planned yet — worth adding something.`);
     } else if (emptyDays.length > 3) {
-      lines.push(`${emptyDays.length} days still empty — plenty of room for more adventures!`);
+      lines.push(`${emptyDays.length} days still open — lots of room for adventures.`);
     }
 
     if (budgetPct !== null) {
-      if (budgetPct > 90) lines.push('Budget nearly full — review upcoming costs.');
-      else if (budgetPct > 70) lines.push(`${budgetPct}% of budget used — on track.`);
-      else lines.push('Plenty of budget headroom remaining.');
+      if (budgetPct > 90) lines.push('Budget almost used up — worth checking upcoming costs.');
+      else if (budgetPct > 70) lines.push(`${budgetPct}% of budget used — you\'re on track.`);
+      else lines.push('Plenty of budget left — enjoy it!');
     }
 
     if (packedPct < 50 && supplies.length > 0) {
-      lines.push(`Packing is ${packedPct}% done — check off essentials before departure.`);
+      lines.push(`Packing is ${packedPct}% done — don\'t forget the essentials before you leave.`);
     } else if (packedPct === 100) {
       lines.push('All packed. Ready to go!');
     }
@@ -1075,7 +1075,7 @@ export default function DashboardScreenV2() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
               <Icon name="ai" size={16} color="var(--lg-sand)" />
               <span className="eyebrow-lg" style={{ color: 'var(--lg-sand)' }}>
-                {coachAdvice ? (isRTL ? 'יועץ תקציב' : 'Budget Coach') : t('aiAnalysisLabel')}
+                {coachAdvice ? (isRTL ? 'עצות לדרך' : 'Travel tips') : t('aiAnalysisLabel')}
               </span>
             </div>
             {/* Refresh button — shown once advice is loaded */}
@@ -1096,7 +1096,7 @@ export default function DashboardScreenV2() {
               <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,.35)', borderTopColor: '#fff', animation: 'spin .8s linear infinite', flexShrink: 0 }} />
               <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
               <span style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', fontStyle: 'italic' }}>
-                {isRTL ? 'מנתח את התקציב שלך…' : 'Analysing your trip…'}
+                {isRTL ? 'חושב על עצות לדרך…' : 'Looking at your trip…'}
               </span>
             </div>
           ) : (
@@ -1120,7 +1120,7 @@ export default function DashboardScreenV2() {
                 }}
               >
                 <Icon name="sparkle" size={13} color="var(--lg-sand)" />
-                {isRTL ? 'קבל ייעוץ AI' : 'Get AI coaching'}
+                {isRTL ? 'קבל עצות לדרך' : 'Get travel tips'}
               </button>
             ) : <span />}
 

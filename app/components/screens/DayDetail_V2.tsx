@@ -349,7 +349,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
           <div className="lg-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
             <QuickAction icon="edit"    label={locale === 'he' ? 'עריכה'    : 'Edit'}       color="var(--lg-forest)" onClick={() => { setOpen(false); onEdit(event); }} />
             <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onReschedule(event); }} />
-            <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'AI suggest'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
+            <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'Ideas'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
             <QuickAction icon="trash"   label={locale === 'he' ? 'מחק'      : 'Delete'}     color="var(--danger)"    onClick={() => { setOpen(false); onDelete(event.id); }} />
           </div>
         </div>
@@ -995,7 +995,7 @@ export default function DayDetail_V2() {
               }}
             >
               <Icon name="sparkle" size={14} color="var(--lg-terra)" />
-              AI
+              Ideas
             </button>
             {/* Google Maps route link */}
             {(() => {

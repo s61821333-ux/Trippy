@@ -94,7 +94,7 @@ export default function EventAccordion({ event, index, onEdit, onSuggest }: Even
           <div className="lg-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
             <QuickAction icon="edit"    label={locale === 'he' ? 'עריכה'    : 'Edit'}       color="var(--lg-forest)" onClick={() => { setOpen(false); onEdit(event); }} />
             <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onEdit(event); }} />
-            <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'AI suggest'} color="var(--lg-sand)"  onClick={() => { setOpen(false); onSuggest(); }} />
+            <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'Ideas'} color="var(--lg-sand)"  onClick={() => { setOpen(false); onSuggest(); }} />
           </div>
         </div>
       </div>

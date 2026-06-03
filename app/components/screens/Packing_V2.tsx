@@ -274,7 +274,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
   const selectedCount = (suggestions ?? []).filter(s => s.selected).length;
 
   return (
-    <Sheet title={isHe ? 'הצעות AI לציוד' : 'AI Packing Suggestions'} onClose={onClose}>
+    <Sheet title={isHe ? 'מה לארוז?' : 'What to pack?'} onClose={onClose}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
         {/* Loading state */}
@@ -452,8 +452,8 @@ export default function Packing_V2() {
           <button
             onClick={() => setShowAI(true)}
             className="lg-btn"
-            aria-label="Fill with AI"
-            title="AI packing suggestions"
+            aria-label="Packing suggestions"
+            title="Packing suggestions"
             style={{
               width: 42, height: 42, padding: 0, borderRadius: 9999,
               display: 'flex', alignItems: 'center', justifyContent: 'center',

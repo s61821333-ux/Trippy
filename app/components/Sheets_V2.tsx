@@ -393,8 +393,8 @@ export function AISheet({ dayNumber }: AISheetProps) {
   return (
     <Sheet
       onClose={() => setShowSuggestions(false)}
-      title={t('AI suggestions') || 'AI suggestions'}
-      subtitle={t('Tailored to your day & pace') || 'Tailored to your day & pace'}
+      title={t('aiSuggestions')}
+      subtitle={t('aiSugSub')}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 

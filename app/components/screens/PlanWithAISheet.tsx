@@ -215,7 +215,7 @@ function StepPreview({ plan, locale, onConfirm, creating }: {
           <Icon name="compass" size={90} color="#fff" />
         </div>
         <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,.6)', margin: '0 0 4px' }}>
-          {isHe ? 'המסלול שלך' : 'Your AI-crafted trip'}
+          {isHe ? 'המסלול שלך' : 'Your trip plan'}
         </p>
         <h2 style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 26, color: '#fff', margin: '0 0 12px', lineHeight: 1.1 }}>
           {plan.name}
@@ -505,8 +505,8 @@ export default function PlanWithAISheet({ onClose }: { onClose: () => void }) {
 
   // ── Render ──────────────────────────────────────────────────────────────────
   const sheetTitle =
-    step === 'form'       ? (isHe ? 'תכנן עם AI' : 'Plan with AI') :
-    step === 'generating' ? (isHe ? 'מתכנן…'     : 'Planning…')    :
+    step === 'form'       ? (isHe ? 'בנה מסלול חכם' : 'Build a smart itinerary') :
+    step === 'generating' ? (isHe ? 'מתכנן…'       : 'Planning…')    :
     plan?.name ?? (isHe ? 'המסלול שלך' : 'Your Trip');
 
   return (

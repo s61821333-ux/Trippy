@@ -187,8 +187,8 @@ export default function Welcome_V2() {
           }}
         >
           {locale === 'he'
-            ? 'הסטנדרט החדש בטיולים משותפים. ממדבריות חול ועד אורות העיר, המסע שלך מתחיל כאן.'
-            : 'The new standard in collaborative travel. From desert dunes to city lights, your journey begins here.'}
+            ? 'תכנן טיולים עם אנשים שאתה אוהב. בנה מסלול, שמור הכל, ותיהנה מכל רגע.'
+            : 'Plan trips with the people you love. Build an itinerary, keep everything in one place, and enjoy every moment.'}
         </m.p>
 
         {/* Forest CTA */}
@@ -260,11 +260,11 @@ export default function Welcome_V2() {
             color: 'var(--text-3)',
           }}
         >
-          <span>Collaborate</span>
+          <span>{locale === 'he' ? 'תכנן' : 'Plan'}</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--lg-terra)', flexShrink: 0, opacity: 0.85 }} />
-          <span>Discover</span>
+          <span>{locale === 'he' ? 'גלה' : 'Explore'}</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'var(--lg-terra)', flexShrink: 0, opacity: 0.85 }} />
-          <span>Document</span>
+          <span>{locale === 'he' ? 'זכור' : 'Remember'}</span>
         </m.div>
       </m.div>
     </div>

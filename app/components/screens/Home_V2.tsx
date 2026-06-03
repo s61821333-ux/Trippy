@@ -400,7 +400,7 @@ export default function Home_V2() {
             marginTop: 10, fontFamily: 'var(--font-sans)', margin: '10px 0 0',
           }}
         >
-          Your adventures are waiting.
+          {locale === 'he' ? 'כל הטיולים שלך, במקום אחד.' : 'Every journey starts here.'}
         </m.p>
         </div>{/* /inner centering wrapper */}
       </div>
@@ -438,7 +438,7 @@ export default function Home_V2() {
           whileTap={{ scale: 0.97 }}
           onClick={() => setShowAIPlan(true)}
           className="lg"
-          aria-label={locale === 'he' ? 'תכנן עם AI' : 'Plan with AI'}
+          aria-label={locale === 'he' ? 'בנה מסלול חכם' : 'Build a smart itinerary'}
           style={{
             width: '100%', height: 60,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -450,10 +450,10 @@ export default function Home_V2() {
         >
           <span style={{ display: 'flex', alignItems: 'center', gap: 11, color: '#fff', fontWeight: 700 }}>
             <Icon name="sparkle" size={20} color="var(--lg-sand)" />
-            {locale === 'he' ? 'תכנן עם AI' : 'Plan with AI'}
+            {locale === 'he' ? 'בנה מסלול חכם' : 'Build a smart itinerary'}
           </span>
           <span style={{ fontSize: 12, color: 'rgba(255,255,255,.65)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-            {locale === 'he' ? 'מסלול מלא תוך שניות' : 'Full itinerary in seconds'}
+            {locale === 'he' ? 'תוכנית מלאה תוך שניות' : 'Full plan in seconds'}
           </span>
         </m.button>
 
@@ -471,7 +471,7 @@ export default function Home_V2() {
               style={{ marginBottom: 22 }}
             >
               <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
-                {locale === 'he' ? 'המשך מאיפה שעצרת' : 'Continue where you left off'}
+                {locale === 'he' ? 'ממשיכים?' : 'Pick up where you left off'}
               </p>
               <button
                 onClick={() => handleOpen(lastTrip.id)}
