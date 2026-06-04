@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
   const locale  = typeof body.locale  === 'string' ? body.locale : 'en';
   if (!country) return Response.json({ error: 'country required' }, { status: 400 });
 
-  const heNote = locale === 'he'
+  const langNote = locale === 'he'
     ? 'Reply in Hebrew. Keep numbers and proper nouns in English.'
-    : '';
+    : 'Reply in English only. Do not use any other language.';
 
-  const prompt = `Travel quick-facts for ${country}. ${heNote}
+  const prompt = `Travel quick-facts for ${country}. ${langNote}
 Return ONLY minified JSON (no markdown):
 {"currency":"1 sentence about local currency and card acceptance","tipping":"1 sentence on tipping culture","customs":"1 key local custom travelers must know","safety":"1 sentence on safety level and top tip","adapter":"plug type, voltage, and whether a converter is needed","emergency":"police and ambulance numbers"}`;
 
