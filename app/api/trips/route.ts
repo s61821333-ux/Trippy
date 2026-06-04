@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
         .select('created_at')
         .eq('id', cursor)
         .maybeSingle()
-      cursorTs = cursorRow?.created_at ?? null
+      cursorTs = (cursorRow as any)?.created_at ?? null
     }
 
     // Get trip IDs the user participates in
@@ -73,13 +73,23 @@ export async function GET(request: NextRequest) {
       .select('id, name, theme, days, start_date, created_at')
       .in('id', tripIds)
       .order('created_at', { ascending: false })
-      .limit(limit + 1) // fetch one extra to determine if a next page exists
+      .limit(limit + 1)
 
     if (cursorTs) {
       tripsQuery = tripsQuery.lt('created_at', cursorTs)
     }
 
-    const { data: trips, error } = await tripsQuery
+    let { data: trips, error } = await tripsQuery
+
+    // created_at column may not exist if the table was created manually — fall back to unordered
+    if (error && (error.message?.includes('created_at') || error.message?.includes('column'))) {
+      ({ data: trips, error } = await db
+        .from('trips')
+        .select('id, name, theme, days, start_date')
+        .in('id', tripIds)
+        .limit(limit))
+    }
+
     if (error) {
       return NextResponse.json(
         { trips: [], nextCursor: null },
@@ -91,7 +101,6 @@ export async function GET(request: NextRequest) {
     const page = (trips ?? []).slice(0, limit)
     const nextCursor = hasMore ? page[page.length - 1]?.id ?? null : null
 
-    // Strip created_at from the response — it was only needed for pagination
     const result = page.map(({ created_at: _, ...t }: any) => t)
 
     return NextResponse.json(

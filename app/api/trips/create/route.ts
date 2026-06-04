@@ -66,18 +66,30 @@ export async function POST(request: NextRequest) {
 
     if (admin) {
       // Admin path — bypasses RLS entirely
-      const { data: trip, error: tripErr } = await admin
+      const tripPayload: Record<string, unknown> = {
+        name,
+        days,
+        start_date: startDate,
+        theme: theme || null,
+        countries: countries?.length ? countries : null,
+        created_by: user.id,
+      }
+
+      let { data: trip, error: tripErr } = await admin
         .from('trips')
-        .insert({
-          name,
-          days,
-          start_date: startDate,
-          theme: theme || null,
-          countries: countries?.length ? countries : null,
-          created_by: user.id,
-        })
+        .insert(tripPayload)
         .select('id')
         .single()
+
+      // Retry without created_by if the column doesn't exist yet (rls_policies.sql not run)
+      if (tripErr?.message?.includes('created_by')) {
+        const { created_by: _, ...payloadFallback } = tripPayload;
+        ({ data: trip, error: tripErr } = await admin
+          .from('trips')
+          .insert(payloadFallback)
+          .select('id')
+          .single())
+      }
 
       if (tripErr || !trip) {
         return NextResponse.json({ error: tripErr?.message ?? 'Failed to create trip' }, { status: 500 })
@@ -116,18 +128,28 @@ export async function POST(request: NextRequest) {
     }
 
     // Fallback — direct inserts using the user's JWT (subject to RLS)
-    const { data: trip2, error: tripErr2 } = await supabase
+    const fallbackPayload: Record<string, unknown> = {
+      name, days,
+      start_date: startDate,
+      theme: theme || null,
+      countries: countries?.length ? countries : null,
+      created_by: user.id,
+    }
+
+    let { data: trip2, error: tripErr2 } = await supabase
       .from('trips')
-      .insert({
-        name,
-        days,
-        start_date: startDate,
-        theme: theme || null,
-        countries: countries?.length ? countries : null,
-        created_by: user.id,
-      })
+      .insert(fallbackPayload)
       .select('id')
       .single()
+
+    if (tripErr2?.message?.includes('created_by')) {
+      const { created_by: _, ...payloadFb } = fallbackPayload;
+      ({ data: trip2, error: tripErr2 } = await supabase
+        .from('trips')
+        .insert(payloadFb)
+        .select('id')
+        .single())
+    }
 
     if (tripErr2 || !trip2) {
       return NextResponse.json({ error: tripErr2?.message ?? 'Failed to create trip' }, { status: 500 })
