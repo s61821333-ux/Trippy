@@ -202,10 +202,12 @@ function Shell() {
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });
         // After splash auto-advance, land on welcome (not legacy login).
-        // Skip in test mode — __trippySetState__ presence means a test is injecting state.
+        // Skip in test mode — __trippyTestMode__ is set by addInitScript BEFORE page load,
+        // so it is reliably present when onAuthStateChange fires (unlike __trippySetState__
+        // which is set after AppShell mounts and races with this callback).
         const cur = useAppStore.getState().screen;
         const isTestMode = process.env.NODE_ENV !== 'production' &&
-          !!(window as unknown as Record<string, unknown>).__trippySetState__;
+          !!(window as unknown as Record<string, unknown>).__trippyTestMode__;
         if (!isTestMode && cur !== 'splash') setScreen('welcome');
       }
     });
