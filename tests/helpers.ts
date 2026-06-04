@@ -22,9 +22,9 @@ export const BASE_TRIP = {
 };
 
 export const BASE_SUPPLIES = [
-  { id: 's1', name: 'Sunscreen',    category: 'health',    checked: false, addedBy: 'Tester' },
-  { id: 's2', name: 'Passport',     category: 'documents', checked: true,  addedBy: 'Tester' },
-  { id: 's3', name: 'Water Bottle', category: 'drinks',    checked: false, addedBy: 'Tester' },
+  { id: 's1', name: 'Sunscreen',    category: 'Medical',   checked: false, critical: false },
+  { id: 's2', name: 'Passport',     category: 'Documents', checked: true,  critical: true  },
+  { id: 's3', name: 'Water Bottle', category: 'Water',     checked: false, critical: false },
 ];
 
 export const TEST_AUTH = { id: 'test-user-id', username: 'Test User' };

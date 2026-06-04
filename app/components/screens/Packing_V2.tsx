@@ -31,6 +31,16 @@ const STORE_CAT_LABELS: Record<SupplyItem['category'], string> = {
   Other:     'Other',
 };
 
+// Accent colors that mirror stamp bg colors for visual coherence
+const CAT_ACCENT: Record<string, string> = {
+  Documents: '#1446B4',
+  Gear:      '#3B6E52',
+  Medical:   '#C0392B',
+  Food:      '#C4714A',
+  Water:     '#5BB4D2',
+  Other:     '#C8944A',
+};
+
 function storeToFilter(cat: string): FilterCat | null {
   if (cat === 'Medical') return 'Health';
   if (FILTER_CATS.includes(cat as FilterCat)) return cat as FilterCat;
@@ -57,15 +67,17 @@ function CheckCircle({ done }: { done: boolean }) {
       whileTap={{ scale: 0.88 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       style={{
-        width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+        width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         background:  done ? 'var(--lg-forest)' : 'transparent',
-        boxShadow:   done ? 'var(--lg-glow-forest)' : 'inset 0 0 0 2px oklch(50% 0.02 60 / 22%)',
-        transition:  'background 0.2s, box-shadow 0.2s',
+        boxShadow:   done
+          ? 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 30%)'
+          : 'inset 0 0 0 2px oklch(50% 0.02 60 / 20%)',
+        transition:  'background 0.25s, box-shadow 0.25s',
       }}
       aria-hidden="true"
     >
-      {done && <Icon name="check" size={16} color="#fff" />}
+      {done && <Icon name="check" size={15} color="#fff" />}
     </m.span>
   );
 }
@@ -82,16 +94,18 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
   const x = useMotionValue(0);
   const DELETE_THRESHOLD = -72;
   const didDrag = React.useRef(false);
-  const stampKey = supplyStamp(item.category);
+  const stampKey  = supplyStamp(item.category);
+  const accentColor = CAT_ACCENT[item.category] ?? 'var(--lg-terra)';
+  const isRTL = locale === 'he';
 
   return (
     <m.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.22 } }}
-      transition={{ delay: 0.14 + i * 0.04, duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ delay: 0.06 + i * 0.04, duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
       role="listitem"
-      style={{ position: 'relative', overflow: 'hidden', borderRadius: 18 }}
+      style={{ position: 'relative', overflow: 'hidden', borderRadius: 20 }}
     >
       {/* Red delete hint */}
       <div
@@ -110,7 +124,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
         drag="x"
         dragConstraints={{ left: DELETE_THRESHOLD, right: 0 }}
         dragElastic={{ left: 0.15, right: 0 }}
-        whileTap={{ scale: 0.97 }}
+        whileTap={{ scale: 0.98 }}
         onDragStart={() => { didDrag.current = false; }}
         onDrag={(_, info) => { if (Math.abs(info.offset.x) > 5) didDrag.current = true; }}
         onDragEnd={(_, info) => {
@@ -126,27 +140,63 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
         }}
         aria-label={`${item.name}${item.checked ? ', packed' : ', not packed'}`}
         aria-pressed={item.checked}
-        className="lg"
         style={{
           x,
-          display: 'flex', alignItems: 'center', gap: 13, padding: 13, border: 0, cursor: 'pointer',
-          textAlign: locale === 'he' ? 'right' : 'left',
-          opacity: item.checked ? 0.6 : 1, transition: 'opacity 0.2s', width: '100%',
-          WebkitTapHighlightColor: 'transparent', touchAction: 'pan-y',
-          backdropFilter: 'none', WebkitBackdropFilter: 'none',
-          borderRadius: 18,
+          position: 'relative',
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '13px 14px',
+          paddingInlineStart: 20,
+          border: 0, cursor: 'pointer',
+          textAlign: isRTL ? 'right' : 'left',
+          opacity: item.checked ? 0.52 : 1,
+          transition: 'opacity 0.25s',
+          width: '100%',
+          WebkitTapHighlightColor: 'transparent',
+          touchAction: 'pan-y',
+          borderRadius: 20,
+          background: 'var(--lg-panel)',
+          backdropFilter: 'blur(14px) saturate(1.7)',
+          WebkitBackdropFilter: 'blur(14px) saturate(1.7)',
+          boxShadow: 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 22%), inset 0 0 0 1px oklch(100% 0 0 / 12%)',
         }}
       >
-        <StampIcon iconKey={stampKey} size={38} aria-hidden="true" />
+        {/* Category accent stripe */}
+        <div
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            [isRTL ? 'right' : 'left']: 0,
+            top: 0, bottom: 0, width: 4,
+            background: accentColor,
+            borderRadius: isRTL ? '0 20px 20px 0' : '20px 0 0 20px',
+            opacity: item.checked ? 0.45 : 1,
+            transition: 'opacity 0.25s',
+          }}
+        />
+
+        <StampIcon iconKey={stampKey} size={40} />
+
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)', textDecoration: item.checked ? 'line-through var(--text-3)' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div style={{
+            fontSize: 15, fontWeight: 600, lineHeight: 1.3,
+            color: 'var(--lg-ink)',
+            textDecoration: item.checked ? `line-through oklch(60% 0.01 60 / 55%)` : 'none',
+            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+          }}>
             {item.name}
           </div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginTop: 2 }}>
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em',
+            textTransform: 'uppercase', fontWeight: 600,
+            color: item.checked ? 'var(--text-3)' : accentColor,
+            opacity: item.checked ? 0.7 : 0.85,
+            marginTop: 3,
+          }}>
             {STORE_CAT_LABELS[item.category] ?? item.category}
             {item.assignee && ` · ${item.assignee}`}
           </div>
         </div>
+
         <CheckCircle done={item.checked} />
       </m.button>
     </m.div>
@@ -390,7 +440,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
             {Object.entries(grouped).map(([cat, items]) => (
               <div key={cat}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 0 8px' }}>
-                  <StampIcon iconKey={supplyStamp(cat)} size={22} aria-hidden="true" />
+                  <StampIcon iconKey={supplyStamp(cat)} size={22} />
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: 0, fontWeight: 600 }}>
                     {STORE_CAT_LABELS[cat as SupplyItem['category']] ?? cat}
                   </p>
@@ -459,6 +509,49 @@ function AIPackingSheet({ trip, supplies, onClose }: {
   );
 }
 
+// ── Section divider ────────────────────────────────────────────────────────────
+
+function SectionDivider({
+  label,
+  count,
+  open,
+  onToggle,
+}: {
+  label: string;
+  count: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      onClick={onToggle}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        width: '100%', padding: '10px 2px', border: 0, cursor: 'pointer',
+        background: 'none', WebkitTapHighlightColor: 'transparent',
+      }}
+    >
+      <div style={{ flex: 1, height: 1, background: 'oklch(50% 0.01 60 / 14%)' }} />
+      <span style={{
+        fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.12em',
+        textTransform: 'uppercase', fontWeight: 700,
+        color: 'var(--text-3)',
+      }}>
+        {label} · {count}
+      </span>
+      <span style={{
+        display: 'inline-flex', alignItems: 'center',
+        transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+        transition: 'transform 0.22s ease',
+        color: 'var(--text-3)',
+      }}>
+        <Icon name="chevR" size={13} color="var(--text-3)" />
+      </span>
+      <div style={{ flex: 1, height: 1, background: 'oklch(50% 0.01 60 / 14%)' }} />
+    </button>
+  );
+}
+
 // ── Main Packing_V2 ───────────────────────────────────────────────────────────
 
 export default function Packing_V2() {
@@ -468,9 +561,10 @@ export default function Packing_V2() {
     useShallow(s => ({ trip: s.trip, supplies: s.supplies, toggleSupply: s.toggleSupply, deleteSupplyItem: s.deleteSupplyItem }))
   );
 
-  const [activeCat, setActiveCat] = useState<FilterCat>('All');
-  const [showAdd,   setShowAdd]   = useState(false);
-  const [showAI,    setShowAI]    = useState(false);
+  const [activeCat,  setActiveCat]  = useState<FilterCat>('All');
+  const [showAdd,    setShowAdd]    = useState(false);
+  const [showAI,     setShowAI]     = useState(false);
+  const [packedOpen, setPackedOpen] = useState(true);
 
   const packed = supplies.filter(s => s.checked).length;
   const total  = supplies.length;
@@ -480,6 +574,10 @@ export default function Packing_V2() {
     ? supplies
     : supplies.filter(s => storeToFilter(s.category) === activeCat);
 
+  const unpackedItems = filtered.filter(s => !s.checked);
+  const packedItems   = filtered.filter(s =>  s.checked);
+  const hasBothGroups = unpackedItems.length > 0 && packedItems.length > 0;
+
   if (!trip) return null;
 
   return (
@@ -488,181 +586,249 @@ export default function Packing_V2() {
       style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}
     >
       <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
-      {/* ── Header ── */}
-      <m.p
-        className="eyebrow-lg"
-        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-        style={{ color: 'var(--lg-terra)', marginBottom: 2 }}
-      >
-        {t('adventurePrep') || 'Adventure prep'}
-      </m.p>
 
-      <m.h1
-        className="display-xl"
-        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.09, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{ fontSize: 38, color: 'var(--lg-ink)', margin: '0 0 16px' }}
-      >
-        {t('suppliesLabel') || 'Packing'}
-      </m.h1>
-
-      {/* ── Progress card ── */}
-      <m.div
-        className="lg"
-        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.13, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{ padding: 18, display: 'flex', alignItems: 'center', gap: 18, marginBottom: 16 }}
-      >
-        <Ring pct={pct} size={76} stroke={6} color="var(--lg-terra)">{pct}%</Ring>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, color: 'var(--lg-ink)', lineHeight: 1.1 }}>
-            {total === 0
-              ? (locale === 'he' ? 'מוכן להתחיל?' : 'Ready to pack?')
-              : pct === 100
-                ? t('allPacked')
-                : t('almostThere')}
-          </div>
-          <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 3 }}>
-            {total === 0
-              ? (locale === 'he' ? 'הוסף פריטים לרשימה' : 'Start adding items below')
-              : `${packed}/${total} ${t('packedShared')}`}
-          </div>
-        </div>
-
-        {/* AI fill + add buttons */}
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <button
-            onClick={() => setShowAI(true)}
-            className="lg-btn"
-            aria-label="Packing suggestions"
-            title="Packing suggestions"
-            style={{
-              width: 42, height: 42, padding: 0, borderRadius: 9999,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'var(--lg-panel)',
-              boxShadow: 'inset 0 0 0 1.5px var(--lg-terra)',
-            }}
-          >
-            <Icon name="sparkle" size={17} color="var(--lg-terra)" />
-          </button>
-          <button
-            onClick={() => setShowAdd(true)}
-            className="lg-btn lg-btn-forest"
-            aria-label="Add packing item"
-            style={{
-              width: 42, height: 42, padding: 0, borderRadius: 9999,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}
-          >
-            <Icon name="plus" size={20} color="#fff" />
-          </button>
-        </div>
-      </m.div>
-
-      {/* ── Category rail ── */}
-      <div
-        className="lg-scroll"
-        role="group"
-        aria-label="Filter by category"
-        style={{ display: 'flex', gap: 7, overflowX: 'auto', marginBottom: 16, paddingBottom: 2 }}
-      >
-        {FILTER_CATS.map(c => (
-          <button
-            key={c}
-            onClick={() => setActiveCat(c)}
-            aria-pressed={activeCat === c}
-            style={{
-              flexShrink: 0, border: 0, cursor: 'pointer', borderRadius: 9999, padding: '8px 15px',
-              fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
-              background: activeCat === c ? 'var(--lg-forest)' : 'var(--lg-panel)',
-              color:      activeCat === c ? '#fff' : 'var(--text-2)',
-              boxShadow:  activeCat === c ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
-              transition: 'all .3s', whiteSpace: 'nowrap',
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
-            {c === 'Water' ? (locale === 'he' ? 'שתייה' : 'Drinks') : (t(c) || c)}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Item list ── */}
-      <div
-        role="list"
-        aria-label={t('suppliesLabel') || 'Packing list'}
-        style={{ display: 'flex', flexDirection: 'column', gap: 10 }}
-      >
-        <AnimatePresence initial={false}>
-          {filtered.map((item, i) => (
-            <PackingItem
-              key={item.id}
-              item={item}
-              i={i}
-              onToggle={toggleSupply}
-              onDelete={deleteSupplyItem}
-              locale={locale}
-            />
-          ))}
-        </AnimatePresence>
-
-        {total === 0 && (
-          <m.div
-            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
-            style={{ textAlign: 'center', padding: '48px 24px', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-3)', lineHeight: 1.6 }}
-          >
-            <div style={{ marginBottom: 18, display: 'flex', justifyContent: 'center' }}>
-              <StampIcon iconKey="backpack" size={80} aria-hidden="true" />
-            </div>
-            <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', fontWeight: 400 }}>
-              {locale === 'he' ? 'הרשימה ריקה' : 'Your packing list is empty'}
-            </p>
-            <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--text-3)' }}>
-              {locale === 'he' ? 'הוסף פריטים שתצטרך לטיול' : 'Add items you\'ll need for this trip'}
-            </p>
-            <button
-              onClick={() => setShowAdd(true)}
-              className="lg-btn lg-btn-forest"
-              style={{ height: 46, padding: '0 22px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600 }}
-            >
-              <Icon name="plus" size={16} color="#fff" />
-              {locale === 'he' ? 'הוסף את הפריט הראשון' : 'Add your first item'}
-            </button>
-          </m.div>
-        )}
-        {total > 0 && filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '32px 0', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-3)' }}>
-            {locale === 'he' ? 'אין פריטים בקטגוריה זו' : 'No items in this category'}
-          </div>
-        )}
-      </div>
-
-      {/* Add item floating button (visible when list is not empty) */}
-      {total > 0 && (
-        <m.button
+        {/* ── Header ── */}
+        <m.p
+          className="eyebrow-lg"
           initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-          onClick={() => setShowAdd(true)}
-          className="lg-btn lg-btn-glass"
-          style={{
-            width: '100%', height: 50, marginTop: 16, gap: 7,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}
+          transition={{ delay: 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+          style={{ color: 'var(--lg-terra)', marginBottom: 2 }}
         >
-          <Icon name="plus" size={17} color="var(--lg-forest)" />
-          {locale === 'he' ? 'הוסף פריט' : 'Add item'}
-        </m.button>
-      )}
+          {t('adventurePrep') || 'Adventure prep'}
+        </m.p>
 
-      {showAdd && <AddItemSheet onClose={() => setShowAdd(false)} />}
-      {showAI && trip && (
-        <AIPackingSheet
-          trip={trip}
-          supplies={supplies}
-          onClose={() => setShowAI(false)}
-        />
-      )}
+        <m.h1
+          className="display-xl"
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.09, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          style={{ fontSize: 38, color: 'var(--lg-ink)', margin: '0 0 16px' }}
+        >
+          {t('suppliesLabel') || 'Packing'}
+        </m.h1>
+
+        {/* ── Progress card ── */}
+        <m.div
+          className="lg"
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.13, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          style={{ padding: '18px 18px 18px 16px', marginBottom: 16, overflow: 'hidden' }}
+        >
+          {/* Subtle background accent when fully packed */}
+          {pct === 100 && (
+            <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none',
+              background: 'linear-gradient(135deg, oklch(50% 0.10 155 / 8%) 0%, transparent 60%)',
+              borderRadius: 'inherit',
+            }} />
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18, position: 'relative' }}>
+            <Ring pct={pct} size={78} stroke={6} color={pct === 100 ? 'var(--lg-forest)' : 'var(--lg-terra)'}>
+              {pct}%
+            </Ring>
+
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{
+                fontFamily: 'var(--font-serif)', fontStyle: 'italic',
+                fontSize: 21, color: 'var(--lg-ink)', lineHeight: 1.15,
+              }}>
+                {total === 0
+                  ? (locale === 'he' ? 'מוכן להתחיל?' : 'Ready to pack?')
+                  : pct === 100
+                    ? t('allPacked')
+                    : t('almostThere')}
+              </div>
+              <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 4 }}>
+                {total === 0
+                  ? (locale === 'he' ? 'הוסף פריטים לרשימה' : 'Start adding items below')
+                  : (
+                    <span>
+                      <span style={{ fontWeight: 700, color: pct === 100 ? 'var(--lg-forest)' : 'var(--lg-terra)' }}>
+                        {packed}
+                      </span>
+                      <span style={{ color: 'var(--text-3)' }}>/{total}</span>
+                      {' '}
+                      {t('packedShared')}
+                    </span>
+                  )}
+              </div>
+            </div>
+
+            {/* AI fill + add buttons */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+              <button
+                onClick={() => setShowAI(true)}
+                className="lg-btn"
+                aria-label="Packing suggestions"
+                title="AI packing suggestions"
+                style={{
+                  width: 42, height: 42, padding: 0, borderRadius: 9999,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'var(--lg-panel)',
+                  boxShadow: 'inset 0 0 0 1.5px var(--lg-terra)',
+                }}
+              >
+                <Icon name="sparkle" size={17} color="var(--lg-terra)" />
+              </button>
+              <button
+                onClick={() => setShowAdd(true)}
+                className="lg-btn lg-btn-forest"
+                aria-label="Add packing item"
+                style={{
+                  width: 42, height: 42, padding: 0, borderRadius: 9999,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <Icon name="plus" size={20} color="#fff" />
+              </button>
+            </div>
+          </div>
+        </m.div>
+
+        {/* ── Category filter rail ── */}
+        <div
+          className="lg-scroll"
+          role="group"
+          aria-label="Filter by category"
+          style={{ display: 'flex', gap: 7, overflowX: 'auto', marginBottom: 18, paddingBottom: 2 }}
+        >
+          {FILTER_CATS.map(c => {
+            const isActive = activeCat === c;
+            const accent = c !== 'All' && c !== 'Health'
+              ? CAT_ACCENT[c]
+              : c === 'Health' ? CAT_ACCENT['Medical'] : undefined;
+            return (
+              <button
+                key={c}
+                onClick={() => setActiveCat(c)}
+                aria-pressed={isActive}
+                style={{
+                  flexShrink: 0, border: 0, cursor: 'pointer', borderRadius: 9999,
+                  padding: '8px 14px',
+                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
+                  background: isActive ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                  color:      isActive ? '#fff' : 'var(--text-2)',
+                  boxShadow:  isActive
+                    ? 'var(--lg-glow-forest)'
+                    : 'var(--lg-shadow), inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                  transition: 'all .25s', whiteSpace: 'nowrap',
+                  WebkitTapHighlightColor: 'transparent',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}
+              >
+                {!isActive && accent && (
+                  <span style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: accent, flexShrink: 0, opacity: 0.85,
+                  }} />
+                )}
+                {c === 'Water' ? (locale === 'he' ? 'שתייה' : 'Drinks') : (t(c) || c)}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── Item list ── */}
+        <div
+          role="list"
+          aria-label={t('suppliesLabel') || 'Packing list'}
+          style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+        >
+          <AnimatePresence initial={false}>
+            {unpackedItems.map((item, i) => (
+              <PackingItem
+                key={item.id}
+                item={item}
+                i={i}
+                onToggle={toggleSupply}
+                onDelete={deleteSupplyItem}
+                locale={locale}
+              />
+            ))}
+          </AnimatePresence>
+
+          {/* Packed section */}
+          {packedItems.length > 0 && (
+            <>
+              <SectionDivider
+                label={locale === 'he' ? 'ארוז' : 'Packed'}
+                count={packedItems.length}
+                open={packedOpen}
+                onToggle={() => setPackedOpen(p => !p)}
+              />
+              <AnimatePresence initial={false}>
+                {packedOpen && packedItems.map((item, i) => (
+                  <PackingItem
+                    key={item.id}
+                    item={item}
+                    i={i}
+                    onToggle={toggleSupply}
+                    onDelete={deleteSupplyItem}
+                    locale={locale}
+                  />
+                ))}
+              </AnimatePresence>
+            </>
+          )}
+
+          {/* Empty states */}
+          {total === 0 && (
+            <m.div
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.18, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
+              style={{ textAlign: 'center', padding: '48px 24px', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-3)', lineHeight: 1.6 }}
+            >
+              <div style={{ marginBottom: 18, display: 'flex', justifyContent: 'center' }}>
+                <StampIcon iconKey="backpack" size={80} />
+              </div>
+              <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', fontWeight: 400 }}>
+                {locale === 'he' ? 'הרשימה ריקה' : 'Your packing list is empty'}
+              </p>
+              <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--text-3)' }}>
+                {locale === 'he' ? 'הוסף פריטים שתצטרך לטיול' : 'Add items you\'ll need for this trip'}
+              </p>
+              <button
+                onClick={() => setShowAdd(true)}
+                className="lg-btn lg-btn-forest"
+                style={{ height: 46, padding: '0 22px', display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 14, fontWeight: 600 }}
+              >
+                <Icon name="plus" size={16} color="#fff" />
+                {locale === 'he' ? 'הוסף את הפריט הראשון' : 'Add your first item'}
+              </button>
+            </m.div>
+          )}
+          {total > 0 && filtered.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '32px 0', fontFamily: 'var(--font-sans)', fontSize: 14, color: 'var(--text-3)' }}>
+              {locale === 'he' ? 'אין פריטים בקטגוריה זו' : 'No items in this category'}
+            </div>
+          )}
+        </div>
+
+        {/* Add item button (when list is not empty) */}
+        {total > 0 && (
+          <m.button
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            onClick={() => setShowAdd(true)}
+            className="lg-btn lg-btn-glass"
+            style={{
+              width: '100%', height: 50, marginTop: 16, gap: 7,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+          >
+            <Icon name="plus" size={17} color="var(--lg-forest)" />
+            {locale === 'he' ? 'הוסף פריט' : 'Add item'}
+          </m.button>
+        )}
+
+        {showAdd && <AddItemSheet onClose={() => setShowAdd(false)} />}
+        {showAI && trip && (
+          <AIPackingSheet
+            trip={trip}
+            supplies={supplies}
+            onClose={() => setShowAI(false)}
+          />
+        )}
       </div>{/* /resp-container */}
     </div>
   );

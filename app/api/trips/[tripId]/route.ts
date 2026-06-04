@@ -138,7 +138,7 @@ export async function GET(
 
       if (error && isMissingColumnError(error.message)) {
         const fb = await admin.from('trips').select(TRIP_SELECT_FALLBACK).eq('id', tripId).maybeSingle()
-        data = fb.data; error = fb.error
+        data = fb.data as any; error = fb.error
       }
 
       if (error || !data) {
@@ -157,7 +157,7 @@ export async function GET(
 
     if (error && isMissingColumnError(error.message)) {
       const fb = await supabase.from('trips').select(TRIP_SELECT_FALLBACK).eq('id', tripId).maybeSingle()
-      data = fb.data; error = fb.error
+      data = fb.data as any; error = fb.error
     }
 
     if (error || !data) {

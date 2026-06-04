@@ -83,11 +83,12 @@ export async function GET(request: NextRequest) {
 
     // created_at column may not exist if the table was created manually — fall back to unordered
     if (error && (error.message?.includes('created_at') || error.message?.includes('column'))) {
-      ({ data: trips, error } = await db
+      const fb = await db
         .from('trips')
         .select('id, name, theme, days, start_date')
         .in('id', tripIds)
-        .limit(limit))
+        .limit(limit)
+      trips = fb.data as any; error = fb.error
     }
 
     if (error) {
