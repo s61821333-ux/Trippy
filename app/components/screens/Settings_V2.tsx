@@ -298,6 +298,23 @@ export default function Settings_V2() {
         />
       </m.div>
 
+      {/* ── Switch trip ── */}
+      <m.button
+        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+        whileTap={{ scale: 0.97 }}
+        onClick={() => setScreen('home')}
+        className="lg-btn"
+        style={{
+          width: '100%', height: 50,
+          background: 'var(--lg-panel)', color: 'var(--lg-ink)',
+          boxShadow: 'var(--lg-shadow), inset 0 0 0 1px oklch(100% 0 0 / 12%)',
+          marginBottom: 12, WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        {locale === 'he' ? 'החלף טיול' : 'Switch trip'}
+      </m.button>
+
       {/* ── Delete trip ── */}
       <m.button
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}

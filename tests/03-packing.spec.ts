@@ -26,11 +26,11 @@ test.describe('Packing list — rendering', () => {
 
   test('each item has an aria-label describing packed state', async ({ page }) => {
     await setupPage(page, 'supplies');
-    // At least one item should have an aria-label mentioning "packed" or "not packed"
+    // Each listitem has an aria-label like "Sunscreen, not packed"
     const items = page.locator('[role="listitem"][aria-label]');
     await items.first().waitFor({ state: 'visible', timeout: 10_000 });
     const label = await items.first().getAttribute('aria-label');
-    expect(label).toBeTruthy();
+    expect(label).toMatch(/packed|not packed/i);
   });
 });
 

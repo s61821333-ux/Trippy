@@ -1176,6 +1176,7 @@ export default function DayDetail_V2() {
                 </p>
                 <button
                   onClick={() => openAdd()}
+                  aria-label="Add event"
                   className="lg-btn lg-btn-forest"
                   style={{ height: 42, padding: '0 20px', display: 'inline-flex', alignItems: 'center', gap: 7 }}
                 >

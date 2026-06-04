@@ -105,6 +105,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
       exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.22 } }}
       transition={{ delay: 0.06 + i * 0.04, duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
       role="listitem"
+      aria-label={`${item.name}${item.checked ? ', packed' : ', not packed'}`}
       style={{ position: 'relative', overflow: 'hidden', borderRadius: 20 }}
     >
       {/* Red delete hint */}
