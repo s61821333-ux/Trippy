@@ -15,6 +15,22 @@ const TRIP_SELECT = `
   trip_participants ( user_id, initials, color )
 `
 
+// Fallback select used when optional migration columns (hotels, tags, votes) don't exist yet
+const TRIP_SELECT_FALLBACK = `
+  id, name, days, start_date, theme, trip_notes, countries, created_by,
+  day_meta ( day_index, region, emoji, lat, lng, description ),
+  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost ),
+  expenses ( id, description, amount, split_count ),
+  emergency_contacts ( id, name, phone, type ),
+  supplies ( id, name, category, checked, critical, assignee ),
+  trip_participants ( user_id, initials, color )
+`
+
+function isMissingColumnError(msg?: string) {
+  if (!msg) return false
+  return msg.includes('column') || msg.includes('hotels') || msg.includes('tags') || msg.includes('votes') || msg.includes('relationship')
+}
+
 function tryAdminClient() {
   try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
   catch { return null }
@@ -114,11 +130,16 @@ export async function GET(
         return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
       }
 
-      const { data, error } = await admin
+      let { data, error } = await admin
         .from('trips')
         .select(TRIP_SELECT)
         .eq('id', tripId)
         .maybeSingle()
+
+      if (error && isMissingColumnError(error.message)) {
+        const fb = await admin.from('trips').select(TRIP_SELECT_FALLBACK).eq('id', tripId).maybeSingle()
+        data = fb.data; error = fb.error
+      }
 
       if (error || !data) {
         return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
@@ -128,11 +149,16 @@ export async function GET(
     }
 
     // Fallback — query with user's JWT (subject to RLS)
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('trips')
       .select(TRIP_SELECT)
       .eq('id', tripId)
       .maybeSingle()
+
+    if (error && isMissingColumnError(error.message)) {
+      const fb = await supabase.from('trips').select(TRIP_SELECT_FALLBACK).eq('id', tripId).maybeSingle()
+      data = fb.data; error = fb.error
+    }
 
     if (error || !data) {
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })

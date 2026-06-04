@@ -60,7 +60,7 @@ export async function POST(
   }
 
   const d = parsed.data
-  const row = {
+  const row: Record<string, unknown> = {
     id: d.id,
     trip_id: tripId,
     day_index: d.day_index,
@@ -74,11 +74,18 @@ export async function POST(
     notes: d.notes ?? null,
     added_by: user.id,
     cost: d.cost ?? null,
-    tags: d.tags ?? null,
   }
+  // Only include tags if non-null — avoids errors when the tags migration hasn't been applied yet
+  if (d.tags != null) row.tags = d.tags
 
   const client = admin ?? await getUserClient()
-  const { error } = await client.from('events').insert(row)
+  let { error } = await client.from('events').insert(row)
+  // If insert fails due to a missing optional column, retry with only core columns
+  if (error && (error.message?.includes('column') || error.message?.includes('tags'))) {
+    const { id, trip_id, day_index, time, duration, name, category, location, lat, lng, notes, added_by, cost } = row as any
+    const coreRow = { id, trip_id, day_index, time, duration, name, category, location, lat, lng, notes, added_by, cost };
+    ({ error } = await client.from('events').insert(coreRow))
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
@@ -140,7 +147,15 @@ export async function PATCH(
   }
 
   const client = admin ?? await getUserClient()
-  const { error } = await client.from('events').update(parsed.data).eq('id', eventId)
+  const patch = { ...parsed.data }
+  let { error } = await client.from('events').update(patch).eq('id', eventId)
+  // Retry without optional columns if they don't exist yet in the schema
+  if (error && (error.message?.includes('column') || error.message?.includes('tags') || error.message?.includes('votes'))) {
+    const safePatch: Record<string, unknown> = {}
+    const allowed = ['time', 'duration', 'name', 'category', 'location', 'lat', 'lng', 'notes', 'cost', 'day_index']
+    for (const k of allowed) if ((patch as any)[k] !== undefined) safePatch[k] = (patch as any)[k];
+    ({ error } = await client.from('events').update(safePatch).eq('id', eventId))
+  }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
