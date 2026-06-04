@@ -353,7 +353,7 @@ export default function Settings_V2() {
               className="lg lg-strong"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={spring.gentle}
-              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '20px 20px 48px', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0', maxHeight: '65vh', overflowY: 'auto' }}
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '20px 20px calc(env(safe-area-inset-bottom, 0px) + 48px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0', maxHeight: '65vh', overflowY: 'auto' }}
             >
               <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 16px' }} />
               <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 14, fontSize: 9 }}>Select currency</p>
@@ -403,7 +403,7 @@ export default function Settings_V2() {
               className="lg lg-strong"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={spring.gentle}
-              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '24px 24px 48px', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0', maxHeight: '85vh', overflowY: 'auto' }}
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '24px 24px calc(env(safe-area-inset-bottom, 0px) + 48px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0', maxHeight: '85vh', overflowY: 'auto' }}
             >
               <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 20px' }} />
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 16 }}>
@@ -479,7 +479,7 @@ export default function Settings_V2() {
               className="lg lg-strong"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={spring.gentle}
-              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '24px 24px 40px', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0' }}
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '24px 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0' }}
             >
               <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 20px' }} />
               <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--lg-ink)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
@@ -500,9 +500,9 @@ export default function Settings_V2() {
                     setShowDeleteConfirm(false);
                     try {
                       await deleteTrip();
+                      show(locale === 'he' ? 'הטיול נמחק' : 'Trip deleted');
                     } catch {
-                      // Trip cleared locally even if DB delete fails
-                      show(locale === 'he' ? 'הטיול נמחק מקומית' : 'Trip removed locally. Remote delete may have failed.');
+                      show(locale === 'he' ? 'שגיאה במחיקה — נסה שוב' : 'Failed to delete trip. Please try again.');
                     }
                   }}
                   className="lg-btn"

@@ -550,6 +550,10 @@ export const useAppStore = create<AppState>()(
         set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
         if (tripDbId) dbEditEvent(eventId, { ...updates, tripId: tripDbId }).catch(err => {
           console.error('[editEvent] DB sync failed:', err);
+          const { userId } = get();
+          if (userId) {
+            get().addPendingChange({ type: 'editEvent', payload: { dayNumber, eventId, updates }, tripId: tripDbId, userId, timestamp: Date.now() });
+          }
           set({ lastSyncError: err?.message ?? 'sync_failed' });
         });
       },
@@ -868,6 +872,8 @@ export const useAppStore = create<AppState>()(
             const p = change.payload;
             if (change.type === 'addEvent') {
               await dbAddEvent(tripDbId, p.dayNumber as number, p.event as TripEvent, userId);
+            } else if (change.type === 'editEvent') {
+              await dbEditEvent(p.eventId as string, { ...(p.updates as Record<string, unknown>), tripId: tripDbId });
             } else if (change.type === 'deleteEvent') {
               await dbDeleteEvent(p.eventId as string, tripDbId);
             } else if (change.type === 'addExpense') {
@@ -905,6 +911,7 @@ export const useAppStore = create<AppState>()(
         termsAccepted: s.termsAccepted,
         pendingChanges: s.pendingChanges,
         lastSessionAt: s.lastSessionAt,
+        screen: s.screen,
       }),
     }
   )

@@ -14,16 +14,18 @@ const LoginScreen        = dynamic(() => import('./screens/LoginScreen'));
 import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { ToastProvider, useToast } from './ui/Toast';
 
-const Splash_V2         = dynamic(() => import('./screens/Splash_V2'));
-const Welcome_V2        = dynamic(() => import('./screens/Welcome_V2'));
-const Home_V2           = dynamic(() => import('./screens/Home_V2'));
-const DashboardScreen   = dynamic(() => import('./screens/Dashboard_V2'));
-const DayScreen         = dynamic(() => import('./screens/DayDetail_V2'));
-const SuppliesScreen    = dynamic(() => import('./screens/Packing_V2'));
-const SettingsScreen    = dynamic(() => import('./screens/Settings_V2'));
-const NotesScreen       = dynamic(() => import('./screens/NotesScreen'));
-const MapScreen         = dynamic(() => import('./screens/Map_V2'));
-const CrewScreen        = dynamic(() => import('./screens/Crew_V2'));
+const ScreenFallback = () => <div style={{ height: '100%', background: 'var(--bg)' }} />;
+
+const Splash_V2         = dynamic(() => import('./screens/Splash_V2'),      { loading: ScreenFallback });
+const Welcome_V2        = dynamic(() => import('./screens/Welcome_V2'),     { loading: ScreenFallback });
+const Home_V2           = dynamic(() => import('./screens/Home_V2'),        { loading: ScreenFallback });
+const DashboardScreen   = dynamic(() => import('./screens/Dashboard_V2'),   { loading: ScreenFallback });
+const DayScreen         = dynamic(() => import('./screens/DayDetail_V2'),   { loading: ScreenFallback });
+const SuppliesScreen    = dynamic(() => import('./screens/Packing_V2'),     { loading: ScreenFallback });
+const SettingsScreen    = dynamic(() => import('./screens/Settings_V2'),    { loading: ScreenFallback });
+const NotesScreen       = dynamic(() => import('./screens/NotesScreen'),    { loading: ScreenFallback });
+const MapScreen         = dynamic(() => import('./screens/Map_V2'),         { loading: ScreenFallback });
+const CrewScreen        = dynamic(() => import('./screens/Crew_V2'),        { loading: ScreenFallback });
 const TourOverlay        = dynamic(() => import('./TourOverlay'));
 const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
 const TermsModal         = dynamic(() => import('./TermsModal'));
@@ -281,6 +283,21 @@ function Shell() {
     const handler = (e: MediaQueryListEvent) => setOsDark(e.matches);
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
+  }, []);
+
+  // Respect system prefers-contrast: more — enable high contrast on first visit if OS requests it.
+  // Only auto-enables; never auto-disables so user manual toggle is preserved.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const contrastMq = window.matchMedia('(prefers-contrast: more)');
+    if (contrastMq.matches && !useAppStore.getState().highContrast) {
+      useAppStore.getState().toggleHighContrast();
+    }
+    const handler = (e: MediaQueryListEvent) => {
+      if (e.matches && !useAppStore.getState().highContrast) useAppStore.getState().toggleHighContrast();
+    };
+    contrastMq.addEventListener('change', handler);
+    return () => contrastMq.removeEventListener('change', handler);
   }, []);
 
   // Keep body background in sync with the resolved theme (prevents flash on page load)
