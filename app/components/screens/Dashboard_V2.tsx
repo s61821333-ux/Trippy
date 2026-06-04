@@ -1365,7 +1365,7 @@ export default function DashboardScreenV2() {
 
         {/* ── Destination Intelligence cards ── */}
         {(trip.countries ?? []).slice(0, 3).map((country: string) => (
-          <DestinationIntelCard key={country} country={country} locale={locale} />
+          <DestinationIntelCard key={`${country}-${locale}`} country={country} locale={locale} />
         ))}
 
         {/* ── Calendar heatmap toggle ── */}
