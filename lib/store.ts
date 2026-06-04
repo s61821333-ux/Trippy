@@ -867,8 +867,6 @@ export const useAppStore = create<AppState>()(
         // Replay each pending change in order
         for (const change of pendingChanges) {
           try {
-            const { trip: currentTrip } = get();
-            if (!currentTrip) continue;
             const p = change.payload;
             if (change.type === 'addEvent') {
               await dbAddEvent(tripDbId, p.dayNumber as number, p.event as TripEvent, userId);
@@ -893,10 +891,10 @@ export const useAppStore = create<AppState>()(
     {
       name: 'trippy-storage',
       partialize: (s) => ({
-        trip: s.trip,
+        // trip and supplies are intentionally excluded — always loaded fresh from the API
+        // to prevent stale localStorage data from shadowing real server state.
         nickname: s.nickname,
         activeDay: s.activeDay,
-        supplies: s.supplies,
         themeMode: s.themeMode,
         highContrast: s.highContrast,
         reducedMotion: s.reducedMotion,
