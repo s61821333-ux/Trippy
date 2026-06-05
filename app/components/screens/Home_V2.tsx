@@ -8,6 +8,7 @@ import { useToast } from '../ui/Toast';
 import { dbGetUserTrips } from '@/lib/db';
 import Icon from '../ui/Icon';
 import Btn from '../ui/Btn';
+import GlassBtn from '../ui/GlassBtn';
 import Sheet from '../ui/Sheet';
 import { StampIcon } from '../ui/StampIcon';
 import { CompassLoader, LoaderStyles, BRAND_THEME } from '../ui/TripLoaders';
@@ -214,36 +215,19 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
         {/* Dates — responsive, never overlapping */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           <div style={{ flex: '1 1 calc(50% - 5px)', minWidth: 140 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
-              {t('startDateLabel')}
-            </label>
-            <input
+            <Field
               type="date"
+              label={t('startDateLabel')}
               value={cDate}
-              onChange={e => setCDate(e.target.value)}
-              style={{
-                width: '100%', padding: '11px 12px', minWidth: 0,
-                borderRadius: 'var(--radius-md)', fontSize: 16, fontWeight: 500, minHeight: 44,
-                background: 'var(--field-bg)', color: 'var(--text)',
-                border: '1px solid var(--field-border)', outline: 'none', boxSizing: 'border-box',
-              }}
+              onChange={setCDate}
             />
           </div>
           <div style={{ flex: '1 1 calc(50% - 5px)', minWidth: 140 }}>
-            <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
-              {locale === 'he' ? 'תאריך סיום' : 'End date'}
-            </label>
-            <input
+            <Field
               type="date"
+              label={locale === 'he' ? 'תאריך סיום' : 'End date'}
               value={cEndDate}
-              min={cDate}
-              onChange={e => setCEndDate(e.target.value)}
-              style={{
-                width: '100%', padding: '11px 12px', minWidth: 0,
-                borderRadius: 'var(--radius-md)', fontSize: 16, fontWeight: 500, minHeight: 44,
-                background: 'var(--field-bg)', color: 'var(--text)',
-                border: '1px solid var(--field-border)', outline: 'none', boxSizing: 'border-box',
-              }}
+              onChange={setCEndDate}
             />
           </div>
         </div>
@@ -267,10 +251,12 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
             onChange={e => { setCurrencyTouched(true); setCCurrency(e.target.value); }}
             style={{
               width: '100%', padding: '11px 12px',
-              borderRadius: 'var(--radius-md)', fontSize: 16, fontWeight: 500, minHeight: 44,
+              borderRadius: 14, fontSize: 16, fontWeight: 500, minHeight: 44,
               background: 'var(--field-bg)', color: 'var(--text)',
-              border: '1px solid var(--field-border)', outline: 'none',
+              boxShadow: 'inset 0 0 0 1px var(--field-border), inset 0 1px 0 oklch(100% 0 0 / 44%)',
+              border: 'none', outline: 'none',
               boxSizing: 'border-box', fontFamily: 'var(--font-friendly), var(--font-sans)',
+              backdropFilter: 'blur(20px) saturate(1.8)',
             }}
           >
             {CURRENCIES.map(c => (
@@ -383,18 +369,15 @@ export default function Home_V2() {
             >
               {initials}
             </div>
-            <button
+            <GlassBtn
+              variant="ghost"
+              size="sm"
               onClick={() => logout()}
               aria-label="Sign out"
-              style={{
-                width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer',
-                background: 'oklch(100% 0 0 / 14%)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                WebkitTapHighlightColor: 'transparent',
-              }}
+              style={{ width: 34, height: 34, padding: 0, borderRadius: '50%', background: 'oklch(100% 0 0 / 14%)' }}
             >
               <Icon name="x" size={15} color="oklch(98% 0.005 80 / 80%)" />
-            </button>
+            </GlassBtn>
           </div>
         </div>
 

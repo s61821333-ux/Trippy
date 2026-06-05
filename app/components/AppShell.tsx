@@ -10,7 +10,6 @@ import { createClient } from '@/utils/supabase/client';
 import dynamic from 'next/dynamic';
 import NavBar_V2 from './NavBar_V2';
 
-const LoginScreen        = dynamic(() => import('./screens/LoginScreen'));
 import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { ToastProvider, useToast } from './ui/Toast';
 
@@ -127,13 +126,14 @@ function Shell() {
     }))
   );
 
-  const { trip, tripDbId, tripEntryCountries, authUser, termsAccepted, showTour } = useAppStore(
+  const { trip, tripDbId, tripEntryCountries, authUser, termsAccepted, termsChecked, showTour } = useAppStore(
     useShallow(s => ({
       trip:               s.trip,
       tripDbId:           s.tripDbId,
       tripEntryCountries: s.tripEntryCountries,
       authUser:           s.authUser,
       termsAccepted:      s.termsAccepted,
+      termsChecked:       s.termsChecked,
       showTour:           s.showTour,
     }))
   );
@@ -170,6 +170,18 @@ function Shell() {
         (patch: Record<string, unknown>) => useAppStore.setState(patch as unknown as Parameters<typeof useAppStore.setState>[0]);
       (window as unknown as Record<string, unknown>).__trippyGetScreen__ =
         () => useAppStore.getState().screen;
+    }
+
+    // Strip external ?next params — prevent open redirect attacks where
+    // a crafted URL like /?next=https://evil.com lingers in the address bar.
+    {
+      const p = new URLSearchParams(window.location.search);
+      const next = p.get('next');
+      if (next !== null && (!next.startsWith('/') || next.startsWith('//'))) {
+        p.delete('next');
+        const qs = p.toString();
+        window.history.replaceState({}, '', qs ? `/?${qs}` : '/');
+      }
     }
 
     // Stash any pending join trip ID from invite link redirect
@@ -342,7 +354,7 @@ function Shell() {
     );
   }
 
-  const showNav = trip && screen !== 'login' && screen !== 'home' && screen !== 'splash' && screen !== 'welcome';
+  const showNav = authUser && screen !== 'login' && screen !== 'splash' && screen !== 'welcome';
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
@@ -427,7 +439,7 @@ function Shell() {
             />
           )}
 
-          <div className="flex-1 flex flex-col relative overflow-hidden w-full">
+          <main className="flex-1 flex flex-col relative overflow-hidden w-full">
             <AnimatePresence mode="wait" initial={false}>
               <m.div
                 key={screen}
@@ -442,10 +454,8 @@ function Shell() {
                   <div className="w-full h-full">
                     {screen === 'splash' ? (
                       <Splash_V2 />
-                    ) : screen === 'welcome' ? (
+                    ) : screen === 'welcome' || screen === 'login' ? (
                       <Welcome_V2 />
-                    ) : screen === 'login' ? (
-                      <LoginScreen />
                     ) : !trip || screen === 'home' ? (
                       <Home_V2 />
                     ) : screen === 'dashboard' ? (
@@ -467,11 +477,12 @@ function Shell() {
                 </div>
               </m.div>
             </AnimatePresence>
-          </div>
+          </main>
           {showTour && <TourOverlay />}
 
-          {/* Terms modal: shown on first real login (not demo) */}
-          {authUser && !termsAccepted && <TermsModal />}
+          {/* Terms modal: shown only after checkAuth has verified terms with the DB,
+              preventing a flash for returning users whose persisted termsAccepted is stale */}
+          {authUser && termsChecked && !termsAccepted && <TermsModal />}
 
           {/* Onboarding: shown only on first-ever device visit */}
           <AnimatePresence>

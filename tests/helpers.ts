@@ -92,13 +92,10 @@ export async function setupPage(page: Page, screen = 'dashboard', colorScheme: '
   await page.waitForTimeout(400);
 }
 
-// ── Click via evaluate (bypasses Framer Motion stability check) ───────────────
+// ── Click via Playwright locator (supports :has-text() and other PW selectors) ─
 
 export async function clickEl(page: Page, selector: string) {
-  await page.waitForFunction(
-    (sel) => !!document.querySelector(sel), selector, { timeout: 8_000 }
-  );
-  await page.evaluate(
-    (sel) => (document.querySelector(sel) as HTMLElement)?.click(), selector
-  );
+  const locator = page.locator(selector).first();
+  await locator.waitFor({ state: 'visible', timeout: 8_000 });
+  await locator.click();
 }

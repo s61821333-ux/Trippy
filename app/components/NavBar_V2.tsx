@@ -42,6 +42,15 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
   // Close the expand panel whenever the active screen changes
   React.useEffect(() => { setExpandOpen(false); }, [active]);
 
+  // Close the expand panel on Escape key
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && expandOpen) setExpandOpen(false);
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [expandOpen]);
+
   // Keep aria-expanded in sync via imperative DOM write — framer-motion can cache
   // boolean prop values across animation frames, so this guarantees the attribute
   // matches the React state even if the motion component lags.

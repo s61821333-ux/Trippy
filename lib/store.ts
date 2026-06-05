@@ -21,6 +21,7 @@ import {
 
 interface AppState {
   screen: Screen;
+  termsChecked: boolean;
   trip: Trip | null;
   nickname: string;
   activeDay: number;
@@ -70,7 +71,7 @@ interface AppState {
   /** Permanently delete all personal data and auth account. Shared trip content stays for co-participants. */
   deleteAccount: () => Promise<void>;
   /** Sign completely out of Supabase. Does NOT remove the user from the trip. */
-  logout: () => void;
+  logout: () => Promise<void>;
   /** Keep auth but unload the current trip so the user can pick another. */
   switchTrip: () => void;
   /** Remove the user from this trip's participant list, then unload it. */
@@ -196,6 +197,7 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       screen: 'splash',
+      termsChecked: false,
       trip: null,
       nickname: '',
       activeDay: 1,
@@ -260,6 +262,7 @@ export const useAppStore = create<AppState>()(
           authUser: user,
           userId: user.id,
           termsAccepted,
+          termsChecked: true,
           lastSessionAt: Date.now(),
         })
 
@@ -444,8 +447,8 @@ export const useAppStore = create<AppState>()(
       },
 
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later
-      logout: () => {
-        signOut().catch(() => {});
+      logout: async () => {
+        try { await signOut(); } catch {}
         // Brute-force clear all Supabase auth cookies so onAuthStateChange cannot
         // re-authenticate the user on next page load (guards against path-mismatch
         // cookie deletion failures in signOut()).
@@ -457,7 +460,10 @@ export const useAppStore = create<AppState>()(
             }
           });
         }
-        set({ screen: 'welcome', trip: null, tripDbId: null, supplies: [], activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false, lastSessionAt: null });
+        set({ screen: 'splash', trip: null, tripDbId: null, supplies: [], activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false, termsChecked: false, lastSessionAt: null });
+        // Hard reload: clears all in-memory Supabase session state and forces
+        // a clean re-authentication on the next login.
+        if (typeof window !== 'undefined') window.location.href = '/';
       },
 
       // Keep the Supabase session but go back to the trip picker
@@ -972,6 +978,8 @@ export const useAppStore = create<AppState>()(
       partialize: (s) => ({
         // trip and supplies are intentionally excluded — always loaded fresh from the API
         // to prevent stale localStorage data from shadowing real server state.
+        // screen is intentionally excluded — always starts from 'splash' on every load
+        // so auth state is re-verified before showing any protected screen.
         nickname: s.nickname,
         activeDay: s.activeDay,
         themeMode: s.themeMode,
@@ -988,9 +996,16 @@ export const useAppStore = create<AppState>()(
         termsAccepted: s.termsAccepted,
         pendingChanges: s.pendingChanges,
         lastSessionAt: s.lastSessionAt,
-        screen: s.screen,
-        // pendingWriteCount intentionally excluded — resets to 0 on every load
+        // pendingWriteCount / termsChecked intentionally excluded — reset to defaults on every load
       }),
+      // Reset screen to 'splash' after rehydration — handles old stored 'screen' values
+      // (e.g. 'login', 'dashboard') that would otherwise skip the auth guard on reload.
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.screen = 'splash';
+          state.termsChecked = false;
+        }
+      },
     }
   )
 );

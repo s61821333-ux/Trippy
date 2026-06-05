@@ -12,19 +12,26 @@ function adminClient() {
 // POST /api/account/delete/request
 // Step 1: user taps "Delete account" — creates a pending deletion record and
 // sends a confirmation email. The account is NOT deleted yet.
-export async function POST() {
-  const cookieStore = await cookies()
+export async function POST(_request: Request) {
+  let user: { id: string; email?: string } | null = null
+  try {
+    const cookieStore = await cookies()
 
-  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
-    cookies: {
-      getAll: () => cookieStore.getAll(),
-      setAll: (cookiesToSet) => {
-        try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
+    const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {}
+        },
       },
-    },
-  })
+    })
 
-  const { data: { user } } = await supabase.auth.getUser()
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  }
+
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   // Rate limit: 3 requests/hour — prevent email flooding
