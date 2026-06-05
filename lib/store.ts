@@ -142,6 +142,8 @@ interface AppState {
   // Offline mode
   isOffline: boolean;
   pendingChanges: OfflineChange[];
+  /** Number of DB writes currently in-flight. >0 means "saving…" */
+  pendingWriteCount: number;
   setIsOffline: (v: boolean) => void;
   addPendingChange: (change: OfflineChange) => void;
   flushPendingChanges: () => Promise<void>;
@@ -223,6 +225,7 @@ export const useAppStore = create<AppState>()(
       lastSessionAt: null,
       isOffline: false,
       pendingChanges: [],
+      pendingWriteCount: 0,
       isGlobalLoading: false,
       pendingDeleteIds: [],
       lastBudgetAlert: null,
@@ -525,21 +528,24 @@ export const useAppStore = create<AppState>()(
         if (!trip) return;
         const newEvent: TripEvent = { ...event, id: uid(), addedBy: get().nickname || 'You' };
         const dayEvents = [...(trip.events[dayNumber] || []), newEvent];
-        set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
+        set(s => ({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } }, pendingWriteCount: s.pendingWriteCount + 1 }));
         if (tripDbId) {
           getSessionUserId().then(sessionUserId => {
-            if (!sessionUserId) { set({ lastSyncError: 'not_authed' }); return; }
+            if (!sessionUserId) { set(s => ({ lastSyncError: 'not_authed', pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) })); return; }
             if (sessionUserId !== get().userId) set({ userId: sessionUserId });
             return dbAddEvent(tripDbId, dayNumber, newEvent, sessionUserId);
+          }).then(() => {
+            set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
           }).catch(err => {
             console.error('[addEvent] DB sync failed:', err);
-            // Queue the change so flushPendingChanges can retry on next reconnect
             const { userId } = get();
             if (tripDbId && userId) {
               get().addPendingChange({ type: 'addEvent', payload: { dayNumber, event: newEvent }, tripId: tripDbId, userId, timestamp: Date.now() });
             }
-            set({ lastSyncError: err?.message ?? 'save_failed' });
+            set(s => ({ lastSyncError: err?.message ?? 'save_failed', pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
           });
+        } else {
+          set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
         }
       },
 
@@ -547,15 +553,21 @@ export const useAppStore = create<AppState>()(
         const { trip, tripDbId } = get();
         if (!trip) return;
         const dayEvents = (trip.events[dayNumber] || []).map(e => e.id === eventId ? { ...e, ...updates } : e);
-        set({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } } });
-        if (tripDbId) dbEditEvent(eventId, { ...updates, tripId: tripDbId }).catch(err => {
-          console.error('[editEvent] DB sync failed:', err);
-          const { userId } = get();
-          if (userId) {
-            get().addPendingChange({ type: 'editEvent', payload: { dayNumber, eventId, updates }, tripId: tripDbId, userId, timestamp: Date.now() });
-          }
-          set({ lastSyncError: err?.message ?? 'sync_failed' });
-        });
+        set(s => ({ trip: { ...trip, events: { ...trip.events, [dayNumber]: dayEvents } }, pendingWriteCount: s.pendingWriteCount + 1 }));
+        if (tripDbId) {
+          dbEditEvent(eventId, { ...updates, tripId: tripDbId })
+            .then(() => set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) })))
+            .catch(err => {
+              console.error('[editEvent] DB sync failed:', err);
+              const { userId } = get();
+              if (userId) {
+                get().addPendingChange({ type: 'editEvent', payload: { dayNumber, eventId, updates }, tripId: tripDbId, userId, timestamp: Date.now() });
+              }
+              set(s => ({ lastSyncError: err?.message ?? 'sync_failed', pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
+            });
+        } else {
+          set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
+        }
       },
 
       deleteEvent: (dayNumber, eventId) => {
@@ -677,25 +689,56 @@ export const useAppStore = create<AppState>()(
 
       toggleSupply: (id) => {
         const { tripDbId } = get();
+        let checked = false;
         set(s => {
           const supplies = s.supplies.map(i => i.id === id ? { ...i, checked: !i.checked } : i);
-          const item = supplies.find(i => i.id === id);
-          if (tripDbId && item) dbToggleSupply(id, item.checked, tripDbId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
-          return { supplies };
+          checked = supplies.find(i => i.id === id)?.checked ?? false;
+          return { supplies, pendingWriteCount: s.pendingWriteCount + 1 };
         });
+        if (tripDbId) {
+          dbToggleSupply(id, checked, tripDbId)
+            .then(() => set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) })))
+            .catch(err => {
+              const { userId } = get();
+              if (userId) get().addPendingChange({ type: 'toggleSupply', payload: { supplyId: id, checked }, tripId: tripDbId, userId, timestamp: Date.now() });
+              set(s => ({ lastSyncError: err?.message ?? 'save_failed', pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
+            });
+        } else {
+          set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
+        }
       },
 
       addSupplyItem: (name, category, assignee, critical) => {
         const { tripDbId } = get();
         const newItem: SupplyItem = { id: uid(), name, category, checked: false, assignee, critical: critical ?? false };
-        set(s => ({ supplies: [...s.supplies, newItem] }));
-        if (tripDbId) dbAddSupply(tripDbId, newItem).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        set(s => ({ supplies: [...s.supplies, newItem], pendingWriteCount: s.pendingWriteCount + 1 }));
+        if (tripDbId) {
+          dbAddSupply(tripDbId, newItem)
+            .then(() => set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) })))
+            .catch(err => {
+              const { userId } = get();
+              if (userId) get().addPendingChange({ type: 'addSupply', payload: { item: newItem }, tripId: tripDbId, userId, timestamp: Date.now() });
+              set(s => ({ lastSyncError: err?.message ?? 'save_failed', pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
+            });
+        } else {
+          set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
+        }
       },
 
       deleteSupplyItem: (id) => {
         const { tripDbId } = get();
-        set(s => ({ supplies: s.supplies.filter(i => i.id !== id) }));
-        if (tripDbId) dbDeleteSupply(id, tripDbId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        set(s => ({ supplies: s.supplies.filter(i => i.id !== id), pendingWriteCount: s.pendingWriteCount + 1 }));
+        if (tripDbId) {
+          dbDeleteSupply(id, tripDbId)
+            .then(() => set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) })))
+            .catch(err => {
+              const { userId } = get();
+              if (userId) get().addPendingChange({ type: 'deleteSupply', payload: { supplyId: id }, tripId: tripDbId, userId, timestamp: Date.now() });
+              set(s => ({ lastSyncError: err?.message ?? 'save_failed', pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
+            });
+        } else {
+          set(s => ({ pendingWriteCount: Math.max(0, s.pendingWriteCount - 1) }));
+        }
       },
 
       toggleSupplyCritical: (id) => set(s => {
@@ -862,22 +905,29 @@ export const useAppStore = create<AppState>()(
       })),
 
       flushPendingChanges: async () => {
-        const { pendingChanges, tripDbId, userId } = get();
-        if (!pendingChanges.length || !tripDbId || !userId) return;
-        // Replay each pending change in order
+        const { pendingChanges, userId } = get();
+        if (!pendingChanges.length || !userId) return;
+        // Replay each pending change in order, using each change's own tripId
         for (const change of pendingChanges) {
           try {
             const p = change.payload;
+            const tripId = change.tripId;
             if (change.type === 'addEvent') {
-              await dbAddEvent(tripDbId, p.dayNumber as number, p.event as TripEvent, userId);
+              await dbAddEvent(tripId, p.dayNumber as number, p.event as TripEvent, userId);
             } else if (change.type === 'editEvent') {
-              await dbEditEvent(p.eventId as string, { ...(p.updates as Record<string, unknown>), tripId: tripDbId });
+              await dbEditEvent(p.eventId as string, { ...(p.updates as Record<string, unknown>), tripId });
             } else if (change.type === 'deleteEvent') {
-              await dbDeleteEvent(p.eventId as string, tripDbId);
+              await dbDeleteEvent(p.eventId as string, tripId);
             } else if (change.type === 'addExpense') {
-              await dbAddExpense(tripDbId, p.expense as Expense, userId);
+              await dbAddExpense(tripId, p.expense as Expense, userId);
             } else if (change.type === 'deleteExpense') {
-              await dbDeleteExpense(p.expenseId as string, tripDbId);
+              await dbDeleteExpense(p.expenseId as string, tripId);
+            } else if (change.type === 'addSupply') {
+              await dbAddSupply(tripId, p.item as SupplyItem);
+            } else if (change.type === 'deleteSupply') {
+              await dbDeleteSupply(p.supplyId as string, tripId);
+            } else if (change.type === 'toggleSupply') {
+              await dbToggleSupply(p.supplyId as string, p.checked as boolean, tripId);
             }
             // Remove this change on success
             set(state => ({ pendingChanges: state.pendingChanges.filter(c => c.timestamp !== change.timestamp) }));
@@ -910,6 +960,7 @@ export const useAppStore = create<AppState>()(
         pendingChanges: s.pendingChanges,
         lastSessionAt: s.lastSessionAt,
         screen: s.screen,
+        // pendingWriteCount intentionally excluded — resets to 0 on every load
       }),
     }
   )

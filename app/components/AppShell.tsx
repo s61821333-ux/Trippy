@@ -143,11 +143,12 @@ function Shell() {
     useShallow(s => ({ highContrast: s.highContrast, reducedMotion: s.reducedMotion }))
   );
 
-  const { isOffline, pendingChanges, setIsOffline, flushPendingChanges } = useAppStore(
+  const { isOffline, pendingChanges, pendingWriteCount, setIsOffline, flushPendingChanges } = useAppStore(
     useShallow(s => ({
-      isOffline:          s.isOffline,
-      pendingChanges:     s.pendingChanges,
-      setIsOffline:       s.setIsOffline,
+      isOffline:           s.isOffline,
+      pendingChanges:      s.pendingChanges,
+      pendingWriteCount:   s.pendingWriteCount,
+      setIsOffline:        s.setIsOffline,
       flushPendingChanges: s.flushPendingChanges,
     }))
   );
@@ -383,6 +384,36 @@ function Shell() {
               📡 Offline{pendingChanges.length > 0
                 ? ` — ${pendingChanges.length} change${pendingChanges.length > 1 ? 's' : ''} pending`
                 : ' — viewing saved data'}
+            </div>
+          )}
+
+          {/* Saving indicator — subtle dot shown while writes are in-flight */}
+          {!isOffline && pendingWriteCount > 0 && (
+            <div style={{
+              position: 'fixed',
+              bottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
+              insetInlineEnd: 16,
+              zIndex: 9000,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
+              background: 'var(--lg-surface, rgba(30,30,30,0.85))',
+              backdropFilter: 'blur(8px)',
+              borderRadius: 20,
+              padding: '4px 10px',
+              fontSize: 11,
+              fontWeight: 600,
+              color: 'var(--text-2, #aaa)',
+              pointerEvents: 'none',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+            }}>
+              <span style={{
+                width: 6, height: 6, borderRadius: '50%',
+                background: 'var(--lg-sky, #38bdf8)',
+                animation: 'pulse 1.2s ease-in-out infinite',
+              }} />
+              <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}`}</style>
+              Saving…
             </div>
           )}
 
