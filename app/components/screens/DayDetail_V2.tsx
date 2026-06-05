@@ -779,16 +779,30 @@ function buildGoogleMapsUrl(evs: TripEvent[]): string {
 
 // ── Day map view ──────────────────────────────────────────────────────────────
 
-function DayMapView({ evs, activeDay, mapsUrl }: {
+function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
   evs: TripEvent[];
   activeDay: number;
   mapsUrl: string;
+  hotels?: HotelStay[];
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const tileApiKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY ?? '';
 
-  const mapEvents = useMemo<MapEvent[]>(() =>
-    evs
+  const hotelEvents = useMemo<MapEvent[]>(() =>
+    (hotels ?? [])
+      .filter(h => h.lat != null && h.lng != null && h.checkInDay <= activeDay && h.checkOutDay >= activeDay)
+      .map(h => ({
+        id: h.id, name: h.name ?? h.location ?? 'Hotel', category: 'hotel',
+        lat: h.lat!, lng: h.lng!,
+        day: activeDay, time: '',
+        location: h.location,
+      })),
+    [hotels, activeDay]
+  );
+
+  const mapEvents = useMemo<MapEvent[]>(() => [
+    ...hotelEvents,
+    ...evs
       .filter(e => e.lat != null && e.lng != null)
       .map(e => ({
         id: e.id, name: e.name, category: e.category,
@@ -796,8 +810,7 @@ function DayMapView({ evs, activeDay, mapsUrl }: {
         day: activeDay, time: e.time,
         location: e.location, cost: e.cost,
       })),
-    [evs, activeDay]
-  );
+  ], [evs, hotelEvents, activeDay]);
 
   const selected = mapEvents.find(e => e.id === selectedId) ?? null;
 
@@ -821,10 +834,13 @@ function DayMapView({ evs, activeDay, mapsUrl }: {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
+              {selected.category === 'hotel' && (
+                <div style={{ fontSize: 11, fontWeight: 600, color: '#6B5CE7', marginBottom: 2 }}>🏨 Hotel</div>
+              )}
               <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1410', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selected.name}</div>
               <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
-                {selected.time}
-                {selected.location ? ` · ${selected.location}` : ''}
+                {selected.category !== 'hotel' && selected.time}
+                {selected.location ? `${selected.category !== 'hotel' && selected.time ? ' · ' : ''}${selected.location}` : ''}
               </div>
             </div>
             <button onClick={() => setSelectedId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#888' }}>
@@ -1109,36 +1125,6 @@ export default function DayDetail_V2() {
           </div>
         )}
 
-        {/* Hotel stay banner — persistent when sleeping here tonight */}
-        {tonightHotel && (
-          <div
-            style={{
-              margin: '0 20px 12px',
-              padding: '10px 14px',
-              borderRadius: 14,
-              background: 'oklch(52% 0.14 310 / 12%)',
-              border: '1px solid oklch(52% 0.14 310 / 22%)',
-              display: 'flex', alignItems: 'center', gap: 10,
-            }}
-          >
-            <Icon name="home" size={16} color="oklch(52% 0.14 310)" />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'oklch(52% 0.14 310)' }}>
-                {locale === 'he' ? 'לינה הלילה: ' : 'Staying tonight: '}
-              </span>
-              <span style={{ fontSize: 12, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {tonightHotel.location}
-              </span>
-            </div>
-            <button
-              onClick={() => openHotelSheet(tonightHotel)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px' }}
-            >
-              <Icon name="edit" size={13} color="var(--text-3)" />
-            </button>
-          </div>
-        )}
-
         {viewMode === 'list' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
             {topHotel && (
@@ -1211,6 +1197,7 @@ export default function DayDetail_V2() {
             evs={evs}
             activeDay={activeDay}
             mapsUrl={buildGoogleMapsUrl(evs)}
+            hotels={trip?.hotels}
           />
         )}
         </div>{/* /resp-container */}

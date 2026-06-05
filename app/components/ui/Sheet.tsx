@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode, useRef, useEffect, useState, useId } from 'react';
+import { createPortal } from 'react-dom';
 import { m, AnimatePresence } from 'framer-motion';
 import { spring } from '@/lib/motion';
 import Icon from './Icon';
@@ -21,6 +22,9 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
   const scrollAtStart = useRef(0);
   const [kbH, setKbH] = useState(0);
   const titleId = useId();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   // Lock body scroll while sheet is open
   useEffect(() => {
@@ -84,13 +88,26 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
     if (dy > 80 && scrollAtStart.current === 0 && isDismissable) onClose();
   };
 
+  // Scroll the panel so the focused field is visible above the keyboard.
+  // Uses manual scrollTop calculation — scrollIntoView is unreliable inside
+  // position:fixed overflow containers on iOS.
   const handleFocusCapture = (e: React.FocusEvent) => {
     const target = e.target as HTMLElement;
     if (!['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)) return;
-    setTimeout(() => target.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 400);
+    const panel = panelRef.current;
+    if (!panel) return;
+    const scrollToField = () => {
+      const vvHeight = window.visualViewport?.height ?? window.innerHeight;
+      const targetRect = target.getBoundingClientRect();
+      if (targetRect.bottom > vvHeight - 20) {
+        panel.scrollTop += targetRect.bottom - (vvHeight - 20);
+      }
+    };
+    setTimeout(scrollToField, 50);
+    setTimeout(scrollToField, 350);
   };
 
-  return (
+  const sheetContent = (
     <AnimatePresence>
       <m.div
         key="sheet-backdrop"
@@ -136,7 +153,9 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
             padding: full ? 'var(--space-6) var(--space-6)' : 'var(--space-2) var(--space-5)',
             paddingBottom: kbH > 0
               ? 'max(20px, env(safe-area-inset-bottom, 20px))'
-              : full ? 'env(safe-area-inset-bottom, 20px)' : 'max(40px, env(safe-area-inset-bottom, 40px))',
+              : full
+                ? 'env(safe-area-inset-bottom, 20px)'
+                : 'calc(env(safe-area-inset-bottom, 0px) + 40px)',
             maxHeight: full ? '100vh' : '92dvh',
             overflowY: 'auto',
             boxShadow: full ? 'none' : 'var(--lg-shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 70%)',
@@ -203,4 +222,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
       </m.div>
     </AnimatePresence>
   );
+
+  if (!mounted) return null;
+  return createPortal(sheetContent, document.body);
 }

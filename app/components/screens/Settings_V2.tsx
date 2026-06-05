@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { m, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { spring } from '@/lib/motion';
@@ -91,6 +92,8 @@ export default function Settings_V2() {
   const [showDeleteConfirm,  setShowDeleteConfirm]  = useState(false);
   const [showTripEdit,       setShowTripEdit]       = useState(false);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   // Trip info edit state
   const [editName,      setEditName]      = useState(trip?.name ?? '');
@@ -338,7 +341,7 @@ export default function Settings_V2() {
       </p>
 
       {/* ── Currency picker sheet ── */}
-      <AnimatePresence>
+      {mounted && createPortal(<AnimatePresence>
         {showCurrencyPicker && (
           <>
             <m.div
@@ -385,10 +388,10 @@ export default function Settings_V2() {
             </m.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
 
       {/* ── Trip edit sheet ── */}
-      <AnimatePresence>
+      {mounted && createPortal(<AnimatePresence>
         {showTripEdit && (
           <>
             <m.div
@@ -461,10 +464,10 @@ export default function Settings_V2() {
             </m.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
 
       {/* ── Delete confirm overlay ── */}
-      <AnimatePresence>
+      {mounted && createPortal(<AnimatePresence>
         {showDeleteConfirm && (
           <>
             <m.div
@@ -514,7 +517,7 @@ export default function Settings_V2() {
             </m.div>
           </>
         )}
-      </AnimatePresence>
+      </AnimatePresence>, document.body)}
       </div>{/* /resp-container */}
     </div>
   );
