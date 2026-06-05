@@ -31,9 +31,9 @@
  *  5.  Auth cookie not readable from JS (HttpOnly enforced by Supabase)
  *  6.  No raw auth token stored in localStorage
  *  7.  No horizontal scroll overflow at 393 px mobile width
- *  8.  NavBar has correct ARIA roles and label
- *  9.  NavBar tab buttons meet 44 px touch-target minimum (WCAG 2.5.5)
- * 10.  Active tab is marked with aria-current="page"
+ *  8.  NavBar has correct ARIA roles and label (light + dark mode)
+ *  9.  NavBar tab buttons meet 44 px touch-target minimum (WCAG 2.5.5) (light + dark mode)
+ * 10.  Active tab is marked with aria-current="page" (light + dark mode)
  * 11.  Dashboard screen renders after state injection
  * 12.  Day-view screen renders after state injection
  * 13.  Packing screen renders after state injection
@@ -271,10 +271,61 @@ test.describe('Accessibility — NavBar ARIA', () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 8–10 (dark) · Accessibility — NavBar ARIA in dark mode
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('Accessibility — NavBar ARIA (dark mode)', () => {
+  let darkPage: Page;
+
+  test.beforeAll(async ({ browser }) => {
+    darkPage = await browser.newPage();
+    await darkPage.setViewportSize({ width: 393, height: 852 });
+    await setupPage(darkPage, 'dashboard', 'dark');
+  });
+
+  test.afterAll(() => darkPage.close());
+
+  test('NavBar has role="navigation" and aria-label="Main navigation" in dark mode', async () => {
+    await expect(
+      darkPage.locator('[role="navigation"][aria-label="Main navigation"]')
+    ).toBeVisible();
+  });
+
+  test('all NavBar tab buttons have aria-label in dark mode', async () => {
+    const nav  = darkPage.locator('[role="navigation"][aria-label="Main navigation"]');
+    const tabs = nav.locator('button[aria-label]');
+    await tabs.first().waitFor({ state: 'visible' });
+    expect(await tabs.count()).toBeGreaterThanOrEqual(4);
+  });
+
+  test('NavBar tab buttons meet 44 px touch-target minimum in dark mode (WCAG 2.5.5)', async () => {
+    const nav   = darkPage.locator('[role="navigation"][aria-label="Main navigation"]');
+    const tabs  = nav.locator('button');
+    const count = await tabs.count();
+    for (let i = 0; i < Math.min(count, 6); i++) {
+      const box = await tabs.nth(i).boundingBox();
+      if (box) {
+        expect(
+          box.height,
+          `NavBar button #${i} height ${box.height}px < 44px WCAG minimum`
+        ).toBeGreaterThanOrEqual(44);
+      }
+    }
+  });
+
+  test('active tab marked with aria-current="page" in dark mode', async () => {
+    await expect(darkPage.locator('[aria-current="page"]').first()).toBeVisible();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 11–14 · Smoke test — core screens render (no crash)
 // ─────────────────────────────────────────────────────────────────────────────
 
 test.describe('Core screens render', () => {
+  // Give Next.js dev server a moment to settle after previous describe's hot-reload activity
+  test.beforeAll(async () => { await new Promise(r => setTimeout(r, 2_000)); });
+
   for (const screen of ['dashboard', 'day', 'supplies', 'settings'] as const) {
     test(`${screen} screen renders without crash`, async ({ page }) => {
       await setupPage(page, screen);

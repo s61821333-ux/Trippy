@@ -10,8 +10,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 1,
   workers: 1,
-  reporter: [['html', { open: 'never' }], ['list']],
-  timeout: 90_000,
+  reporter: [['json', { outputFile: `test-results/results-${new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)}.json` }], ['list']],
+  timeout: 120_000,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',

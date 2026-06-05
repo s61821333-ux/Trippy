@@ -31,13 +31,32 @@ export const TEST_AUTH = { id: 'test-user-id', username: 'Test User' };
 
 // ── State injection ───────────────────────────────────────────────────────────
 
-export async function setupPage(page: Page, screen = 'dashboard') {
-  await page.addInitScript(() => {
+export async function setupPage(page: Page, screen = 'dashboard', colorScheme: 'light' | 'dark' = 'light') {
+  if (colorScheme === 'dark') await page.emulateMedia({ colorScheme: 'dark' });
+  await page.addInitScript((scheme) => {
     localStorage.setItem('trippy-onboarded', '1');
     (window as unknown as Record<string, unknown>).__trippyTestMode__ = true;
-  });
+    if (scheme === 'dark') {
+      try {
+        const stored = localStorage.getItem('app-storage');
+        const parsed = stored ? JSON.parse(stored) : {};
+        parsed.state = { ...(parsed.state ?? {}), themeMode: 'dark' };
+        localStorage.setItem('app-storage', JSON.stringify(parsed));
+      } catch {}
+    }
+  }, colorScheme);
   await page.route('**supabase.co/realtime/**', route => route.abort());
-  await page.goto('/');
+
+  // Retry goto — Next.js dev server may be briefly unavailable after a hot-reload
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      await page.goto('/', { timeout: 15_000 });
+      break;
+    } catch {
+      if (attempt === 3) throw new Error('Dev server unreachable after 4 attempts — is `npm run dev` running?');
+      await page.waitForTimeout(3_000);
+    }
+  }
 
   // Wait for AppShell to expose the hook
   await page.waitForFunction(
