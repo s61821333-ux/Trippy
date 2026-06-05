@@ -8,8 +8,8 @@ import { UpdateTripBody } from '@/lib/schemas'
 const TRIP_SELECT = `
   id, name, days, start_date, theme, trip_notes, countries, hotels, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
-  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes ),
-  expenses ( id, description, amount, split_count ),
+  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes, added_by ),
+  expenses ( id, description, amount, paid_by, split_count ),
   emergency_contacts ( id, name, phone, type ),
   supplies ( id, name, category, checked, critical, assignee ),
   trip_participants ( user_id, initials, color )
@@ -19,8 +19,8 @@ const TRIP_SELECT = `
 const TRIP_SELECT_FALLBACK = `
   id, name, days, start_date, theme, trip_notes, countries, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
-  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost ),
-  expenses ( id, description, amount, split_count ),
+  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, added_by ),
+  expenses ( id, description, amount, paid_by, split_count ),
   emergency_contacts ( id, name, phone, type ),
   supplies ( id, name, category, checked, critical, assignee ),
   trip_participants ( user_id, initials, color )

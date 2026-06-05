@@ -379,6 +379,12 @@ export const useAppStore = create<AppState>()(
             tripEntryCountries: !isSameTrip && trip.countries?.length ? trip.countries : null,
             isGlobalLoading: false,
           });
+          // Flush any writes that failed in a previous session for this trip.
+          // Run after state is settled so the retry uses the correct tripDbId.
+          const { pendingChanges } = get();
+          if (pendingChanges.some(c => c.tripId === data.id)) {
+            get().flushPendingChanges().catch(() => {});
+          }
         } catch (err: any) {
           set({ isGlobalLoading: false });
           throw err?.message === 'not_authed' || err?.message === 'not_found' ? err : new Error('load_failed');
@@ -857,6 +863,8 @@ export const useAppStore = create<AppState>()(
         // Debounced reload — multiple tables changing at once (e.g. event + trip metadata)
         // should produce only ONE reload. 150 ms batches burst inserts while staying responsive.
         let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+        let pollTimer: ReturnType<typeof setInterval> | null = null;
+
         const scheduleReload = () => {
           if (debounceTimer) clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => {
@@ -865,6 +873,20 @@ export const useAppStore = create<AppState>()(
             if (get().isGlobalLoading) return;
             get().loadTripById(tripId).catch(() => {});
           }, 150);
+        };
+
+        const startPolling = () => {
+          if (pollTimer) return; // already polling
+          // Poll every 30 s as a fallback when WebSocket is unavailable (e.g. Brave shields)
+          pollTimer = setInterval(() => {
+            if (!get().isGlobalLoading && get().tripDbId === tripId) {
+              get().loadTripById(tripId).catch(() => {});
+            }
+          }, 30_000);
+        };
+
+        const stopPolling = () => {
+          if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
         };
 
         const channel = supabase
@@ -881,6 +903,7 @@ export const useAppStore = create<AppState>()(
           .on('postgres_changes', { event: '*', schema: 'public', table: 'day_meta', filter: `trip_id=eq.${tripId}` },  scheduleReload)
           .subscribe((status) => {
             if (status === 'SUBSCRIBED') {
+              stopPolling(); // WebSocket works — no need to poll
               // Initial full sync on connect — catches any changes that arrived between sessions.
               // Skip if we already have current data for this trip to prevent a double-load
               // immediately after login (checkAuth already called loadTripById for us).
@@ -888,11 +911,17 @@ export const useAppStore = create<AppState>()(
               if (currentId !== tripId || !currentTrip) {
                 scheduleReload();
               }
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              // WebSocket unavailable (e.g. Brave Shields, corporate firewall) — fall back to polling
+              startPolling();
+            } else if (status === 'CLOSED') {
+              startPolling(); // channel closed unexpectedly — keep data fresh via polling
             }
           });
 
         return () => {
           if (debounceTimer) clearTimeout(debounceTimer);
+          stopPolling();
           supabase.removeChannel(channel);
         };
       },
