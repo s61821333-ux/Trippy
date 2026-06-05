@@ -1592,12 +1592,7 @@ body::after {
 .lg-scroll::-webkit-scrollbar { width: 0; height: 0; }
 .lg-scroll { scrollbar-width: none; }
 
-/* ── Heebo font in RTL (elevated over Noto Sans Hebrew) ──────────── */
-[dir="rtl"] {
-  --font-sans:    var(--font-heebo, 'Heebo'), var(--font-hebrew);
-  --font-serif:   var(--font-heebo, 'Heebo'), var(--font-hebrew);
-  --font-display: var(--font-heebo, 'Heebo'), var(--font-hebrew);
-}
+/* RTL font redirection is handled in the base RTL block above — Assistant covers both scripts */
 
 @media (prefers-reduced-motion: reduce) {
   .a-rise, .a-pop, .a-fade, .a-float {

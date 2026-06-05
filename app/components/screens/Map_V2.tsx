@@ -46,7 +46,7 @@ function EventCard({
   onClose,
   onGoToDay,
 }: {
-  ev: MapEvent;
+  ev: MapEvent & { dayLabel: string };
   currSym: string;
   onClose: () => void;
   onGoToDay: (day: number) => void;
@@ -117,7 +117,7 @@ function EventCard({
         }}
       >
         <Icon name="compass" size={14} color="#fff" />
-        Open Day {ev.day}
+        {ev.dayLabel}
       </button>
     </m.div>
   );
@@ -125,7 +125,7 @@ function EventCard({
 
 // ── No-pins empty state ───────────────────────────────────────────────────────
 
-function EmptyMapState({ onGoToDay }: { onGoToDay: (d: number) => void }) {
+function EmptyMapState({ onGoToDay, t }: { onGoToDay: (d: number) => void; t: (k: string) => string }) {
   return (
     <m.div
       initial={{ opacity: 0, y: 16 }}
@@ -136,22 +136,22 @@ function EmptyMapState({ onGoToDay }: { onGoToDay: (d: number) => void }) {
     >
       <Icon name="map" size={32} color="var(--text-3)" />
       <p style={{ margin: '10px 0 4px', fontSize: 15, fontWeight: 700, color: 'var(--lg-ink)' }}>
-        No locations yet
+        {t('mapNoEvents')}
       </p>
       <p style={{ margin: '0 0 14px', fontSize: 12, color: 'var(--text-3)', lineHeight: 1.5 }}>
-        Add a location to events on your day plan and they'll appear here as pins.
+        {t('mapNoEventsHint')}
       </p>
       <button
         onClick={() => onGoToDay(1)}
         style={{
-          height: 38, padding: '0 18px', border: 0, borderRadius: 10, cursor: 'pointer',
+          height: 44, padding: '0 18px', border: 0, borderRadius: 10, cursor: 'pointer',
           background: 'var(--lg-forest)', color: '#fff',
           fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
           display: 'inline-flex', alignItems: 'center', gap: 6,
         }}
       >
         <Icon name="compass" size={14} color="#fff" />
-        Add events
+        {t('addEvent')}
       </button>
     </m.div>
   );
@@ -159,42 +159,58 @@ function EmptyMapState({ onGoToDay }: { onGoToDay: (d: number) => void }) {
 
 // ── Day legend pill ───────────────────────────────────────────────────────────
 
-function DayLegend({ days, selectedDay, onSelect }: {
+function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
   days: number;
+  startDate: string | null;
   selectedDay: number | null;
   onSelect: (d: number | null) => void;
+  locale: string;
 }) {
+  const fmtChip = (d: number) => {
+    if (!startDate) return `D${d}`;
+    const date = new Date(startDate);
+    date.setDate(date.getDate() + d - 1);
+    return date.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', {
+      month: 'short', day: 'numeric',
+    });
+  };
+
   return (
     <div
       className="lg-scroll"
-      style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}
+      style={{
+        display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2,
+        scrollSnapType: 'x mandatory', paddingInline: 4,
+      }}
     >
       <button
         onClick={() => onSelect(null)}
         style={{
-          flexShrink: 0, height: 30, padding: '0 12px', borderRadius: 9999, border: 0, cursor: 'pointer',
+          flexShrink: 0, height: 44, padding: '0 14px', borderRadius: 9999, border: 0, cursor: 'pointer',
           background: selectedDay == null ? 'var(--lg-terra)' : 'var(--lg-panel)',
           color: selectedDay == null ? '#fff' : 'var(--text-3)',
           fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
           letterSpacing: '0.06em', boxShadow: selectedDay == null ? 'var(--lg-glow-terra)' : 'none',
-          transition: 'all .2s',
+          transition: 'all .2s', scrollSnapAlign: 'start',
+          WebkitTapHighlightColor: 'transparent',
         }}
       >
-        ALL
+        {locale === 'he' ? 'הכל' : 'ALL'}
       </button>
       {Array.from({ length: days }, (_, i) => i + 1).map(d => (
         <button
           key={d}
           onClick={() => onSelect(selectedDay === d ? null : d)}
           style={{
-            flexShrink: 0, height: 30, padding: '0 12px', borderRadius: 9999, border: 0, cursor: 'pointer',
+            flexShrink: 0, height: 44, padding: '0 14px', borderRadius: 9999, border: 0, cursor: 'pointer',
             background: selectedDay === d ? DAY_PALETTE[(d - 1) % DAY_PALETTE.length] : 'var(--lg-panel)',
             color: selectedDay === d ? '#fff' : 'var(--text-3)',
             fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-            transition: 'all .2s',
+            transition: 'all .2s', scrollSnapAlign: 'start',
+            WebkitTapHighlightColor: 'transparent', whiteSpace: 'nowrap',
           }}
         >
-          D{d}
+          {fmtChip(d)}
         </button>
       ))}
     </div>
@@ -213,7 +229,7 @@ export default function Map_V2() {
       currencyByTrip: s.currencyByTrip,
     }))
   );
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   const [selectedId,  setSelectedId]  = useState<string | null>(null);
   const [filterDay,   setFilterDay]   = useState<number | null>(null);
@@ -222,10 +238,14 @@ export default function Map_V2() {
   const currency = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
   const currSym  = getCurrencySymbol(currency);
 
+  // Build localized "Open Day N" label for event cards
+  const dayLabel = (d: number) =>
+    t('mapDay').replace('{day}', String(d));
+
   // Collect all geocoded events
-  const allMapEvents = useMemo<MapEvent[]>(() => {
+  const allMapEvents = useMemo<(MapEvent & { dayLabel: string })[]>(() => {
     if (!trip) return [];
-    const out: MapEvent[] = [];
+    const out: (MapEvent & { dayLabel: string })[] = [];
     for (let d = 1; d <= trip.days; d++) {
       for (const ev of trip.events[d] ?? []) {
         if (ev.lat != null && ev.lng != null) {
@@ -239,15 +259,16 @@ export default function Map_V2() {
             time:     ev.time,
             location: ev.location,
             cost:     ev.cost,
+            dayLabel: dayLabel(d),
           });
         }
       }
     }
     return out;
-  }, [trip]);
+  }, [trip, locale]);
 
   // Apply day filter + search
-  const visibleEvents = useMemo(() => {
+  const visibleEvents = useMemo<(MapEvent & { dayLabel: string })[]>(() => {
     let evs = allMapEvents;
     if (filterDay != null) evs = evs.filter(e => e.day === filterDay);
     if (searchQuery.trim()) {
@@ -330,7 +351,13 @@ export default function Map_V2() {
         {/* Day filter strip */}
         {trip.days > 1 && (
           <div style={{ pointerEvents: 'auto' }}>
-            <DayLegend days={trip.days} selectedDay={filterDay} onSelect={setFilterDay} />
+            <DayLegend
+              days={trip.days}
+              startDate={trip.startDate ?? null}
+              selectedDay={filterDay}
+              onSelect={setFilterDay}
+              locale={locale}
+            />
           </div>
         )}
       </div>
@@ -351,7 +378,7 @@ export default function Map_V2() {
               onGoToDay={handleGoToDay}
             />
           ) : allMapEvents.length === 0 ? (
-            <EmptyMapState key="empty" onGoToDay={handleGoToDay} />
+            <EmptyMapState key="empty" onGoToDay={handleGoToDay} t={t} />
           ) : null}
         </AnimatePresence>
       </div>

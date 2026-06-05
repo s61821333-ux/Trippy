@@ -58,6 +58,11 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
     return () => document.removeEventListener('keydown', handler);
   }, [onClose, isDismissable]);
 
+  // Scroll panel to top on open so long forms always start at the title
+  useEffect(() => {
+    if (panelRef.current) panelRef.current.scrollTop = 0;
+  }, []);
+
   // Auto-focus: after animation, focus the first INPUT (not a button which would fight with field autoFocus on mobile)
   useEffect(() => {
     const timer = setTimeout(() => {

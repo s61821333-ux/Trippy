@@ -459,6 +459,14 @@ const en = {
   almostThere: 'Almost there!',
   allPacked: 'All packed! 🎉',
   packedShared: 'packed · shared with crew',
+  // Packing category labels
+  packCatAll: 'All',
+  packCatDocuments: 'Documents',
+  packCatGear: 'Gear',
+  packCatHealth: 'Health',
+  packCatFood: 'Food',
+  packCatDrinks: 'Drinks',
+  packCatOther: 'Other',
 
   // Crew screen
   gatherTheTribe: 'Gather the tribe',
@@ -970,6 +978,14 @@ const he: typeof en = {
   almostThere: 'כמעט שם!',
   allPacked: 'הכל ארוז! 🎉',
   packedShared: 'ארוזים · משותף עם הצוות',
+  // Packing category labels
+  packCatAll: 'הכל',
+  packCatDocuments: 'מסמכים',
+  packCatGear: 'ציוד',
+  packCatHealth: 'בריאות',
+  packCatFood: 'אוכל',
+  packCatDrinks: 'שתייה',
+  packCatOther: 'אחר',
 
   // Crew screen
   gatherTheTribe: 'קבץ את הצוות',
@@ -1053,15 +1069,16 @@ function detectLocale(): Locale {
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en');
+  // Lazy initializer reads localStorage synchronously on the client, returning 'en' during SSR.
+  // AppShell hides all content behind a loading spinner until after mount, so there is no
+  // hydration mismatch in visible content — the locale is correct by the time users see the UI.
+  const [locale, setLocaleState] = useState<Locale>(() => detectLocale());
 
-  // Detect locale once on mount (client-side only)
+  // Sync <html> attrs on mount in case the SSR-rendered lang/dir differs from the saved locale.
   useEffect(() => {
-    const detected = detectLocale();
-    setLocaleState(detected);
-    // Sync <html> attrs in case server-rendered lang/dir differ from client locale
-    document.documentElement.lang = detected;
-    document.documentElement.dir  = detected === 'he' ? 'rtl' : 'ltr';
+    document.documentElement.lang = locale;
+    document.documentElement.dir  = locale === 'he' ? 'rtl' : 'ltr';
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setLocale = (l: Locale) => {

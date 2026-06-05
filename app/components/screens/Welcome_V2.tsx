@@ -36,10 +36,8 @@ export default function Welcome_V2() {
     }}>
 
       {/* Ambient orb — amber */}
-      <m.div
+      <div
         aria-hidden="true"
-        animate={{ x: [0, 20, -8, 0], y: [0, -28, 14, 0], opacity: [0.45, 0.65, 0.4, 0.45] }}
-        transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
         style={{
           position: 'absolute', top: '6%', right: '4%',
           width: 240, height: 240, borderRadius: '50%',
@@ -49,10 +47,8 @@ export default function Welcome_V2() {
       />
 
       {/* Ambient orb — forest */}
-      <m.div
+      <div
         aria-hidden="true"
-        animate={{ x: [0, -16, 10, 0], y: [0, 22, -20, 0], opacity: [0.3, 0.48, 0.28, 0.3] }}
-        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
         style={{
           position: 'absolute', bottom: '32%', left: '3%',
           width: 200, height: 200, borderRadius: '50%',
@@ -75,10 +71,8 @@ export default function Welcome_V2() {
         }}
       >
         {/* Outer orbit ring */}
-        <m.div
+        <div
           aria-hidden="true"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
           style={{
             position: 'absolute',
             width: 290, height: 290,
@@ -99,8 +93,9 @@ export default function Welcome_V2() {
 
         {/* Compass disc */}
         <m.div
-          animate={{ y: [0, -7, 0, 7, 0] }}
-          transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           style={{
             width: 112, height: 112,
             borderRadius: '50%',
@@ -219,8 +214,9 @@ export default function Welcome_V2() {
           {!loading && (
             <m.span
               aria-hidden="true"
-              animate={{ x: ['-140%', '240%'] }}
-              transition={{ duration: 2.8, repeat: Infinity, repeatDelay: 3, ease: 'easeInOut' }}
+              initial={{ x: '-140%' }}
+            animate={{ x: '240%' }}
+            transition={{ delay: 0.8, duration: 2.4, ease: 'easeInOut' }}
               style={{
                 position: 'absolute',
                 inset: 0,

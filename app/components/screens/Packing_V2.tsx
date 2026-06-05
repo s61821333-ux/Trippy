@@ -22,7 +22,7 @@ type FilterCat = 'All' | 'Documents' | 'Gear' | 'Health' | 'Food' | 'Water' | 'O
 const FILTER_CATS: FilterCat[] = ['All', 'Documents', 'Gear', 'Health', 'Food', 'Water', 'Other'];
 
 const STORE_CATS: SupplyItem['category'][] = ['Documents', 'Gear', 'Medical', 'Food', 'Water', 'Other'];
-const STORE_CAT_LABELS: Record<SupplyItem['category'], string> = {
+const STORE_CAT_LABELS_EN: Record<SupplyItem['category'], string> = {
   Documents: 'Documents',
   Gear:      'Gear',
   Medical:   'Health',
@@ -30,6 +30,20 @@ const STORE_CAT_LABELS: Record<SupplyItem['category'], string> = {
   Water:     'Drinks & Water',
   Other:     'Other',
 };
+const STORE_CAT_LABELS_HE: Record<SupplyItem['category'], string> = {
+  Documents: 'מסמכים',
+  Gear:      'ציוד',
+  Medical:   'בריאות',
+  Food:      'אוכל',
+  Water:     'שתייה',
+  Other:     'אחר',
+};
+function getCatLabel(cat: string, locale: string): string {
+  const labels = locale === 'he' ? STORE_CAT_LABELS_HE : STORE_CAT_LABELS_EN;
+  return (labels as Record<string, string>)[cat] ?? cat;
+}
+// Keep a default for backward compat in places that don't have locale
+const STORE_CAT_LABELS = STORE_CAT_LABELS_EN;
 
 // Accent colors that mirror stamp bg colors for visual coherence
 const CAT_ACCENT: Record<string, string> = {
@@ -193,7 +207,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
             opacity: item.checked ? 0.7 : 0.85,
             marginTop: 3,
           }}>
-            {STORE_CAT_LABELS[item.category] ?? item.category}
+            {getCatLabel(item.category, locale)}
             {item.assignee && ` · ${item.assignee}`}
           </div>
         </div>
@@ -274,13 +288,13 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
                   transition: 'all .25s',
                 }}
               >
-                {STORE_CAT_LABELS[c]}
+                {getCatLabel(c, locale)}
               </button>
             ))}
           </div>
           {autoDetected && (
             <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 7, fontFamily: 'var(--font-sans)', paddingInlineStart: 2 }}>
-              {locale === 'he' ? `זוהה אוטומטית: ${STORE_CAT_LABELS[category]} — אפשר לשנות` : `Suggested: ${STORE_CAT_LABELS[category]} — tap to change`}
+              {locale === 'he' ? `זוהה אוטומטית: ${getCatLabel(category, locale)} — אפשר לשנות` : `Suggested: ${getCatLabel(category, locale)} — tap to change`}
             </p>
           )}
         </div>
@@ -443,7 +457,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7, margin: '0 0 8px' }}>
                   <StampIcon iconKey={supplyStamp(cat)} size={22} />
                   <p style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', margin: 0, fontWeight: 600 }}>
-                    {STORE_CAT_LABELS[cat as SupplyItem['category']] ?? cat}
+                    {getCatLabel(cat, isHe ? 'he' : 'en')}
                   </p>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -636,7 +650,7 @@ export default function Packing_V2() {
                 {total === 0
                   ? (locale === 'he' ? 'מוכן להתחיל?' : 'Ready to pack?')
                   : pct === 100
-                    ? t('allPacked')
+                    ? <>{t('allPacked2')} <StampIcon iconKey="star" size={20} /></>
                     : t('almostThere')}
               </div>
               <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 4 }}>
@@ -688,16 +702,28 @@ export default function Packing_V2() {
 
         {/* ── Category filter rail ── */}
         <div
-          className="lg-scroll"
           role="group"
           aria-label="Filter by category"
-          style={{ display: 'flex', gap: 7, overflowX: 'auto', marginBottom: 18, paddingBottom: 2 }}
+          style={{
+            display: 'flex', gap: 7, overflowX: 'auto', marginBottom: 18, paddingBottom: 2,
+            scrollSnapType: 'x mandatory', scrollbarWidth: 'none',
+            paddingInline: 2,
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent 100%)',
+            maskImage: 'linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent 100%)',
+          } as React.CSSProperties}
         >
           {FILTER_CATS.map(c => {
             const isActive = activeCat === c;
             const accent = c !== 'All' && c !== 'Health'
               ? CAT_ACCENT[c]
               : c === 'Health' ? CAT_ACCENT['Medical'] : undefined;
+            const label = c === 'All' ? t('packCatAll')
+              : c === 'Documents' ? t('packCatDocuments')
+              : c === 'Gear' ? t('packCatGear')
+              : c === 'Health' ? t('packCatHealth')
+              : c === 'Food' ? t('packCatFood')
+              : c === 'Water' ? t('packCatDrinks')
+              : t('packCatOther');
             return (
               <button
                 key={c}
@@ -705,7 +731,7 @@ export default function Packing_V2() {
                 aria-pressed={isActive}
                 style={{
                   flexShrink: 0, border: 0, cursor: 'pointer', borderRadius: 9999,
-                  padding: '8px 14px',
+                  padding: '8px 14px', scrollSnapAlign: 'start',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
                   background: isActive ? 'var(--lg-forest)' : 'var(--lg-panel)',
                   color:      isActive ? '#fff' : 'var(--text-2)',
@@ -723,7 +749,7 @@ export default function Packing_V2() {
                     background: accent, flexShrink: 0, opacity: 0.85,
                   }} />
                 )}
-                {c === 'Water' ? (locale === 'he' ? 'שתייה' : 'Drinks') : (t(c) || c)}
+                {label}
               </button>
             );
           })}

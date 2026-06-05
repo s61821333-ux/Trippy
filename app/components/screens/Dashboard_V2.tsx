@@ -75,19 +75,11 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
 
 // ── Weather icon ─────────────────────────────────────────────────────────────
 
-const WEATHER_ICONS: [RegExp, string][] = [
-  [/clear|sunny/i,  '☀'],
-  [/partly|cloud/i, '⛅'],
-  [/rain|shower/i,  '🌧'],
-  [/thunder|storm/i,'⛈'],
-  [/snow/i,         '🌨'],
-  [/fog|mist/i,     '🌫'],
-  [/wind/i,         '💨'],
-];
-function weatherIcon(label?: string): string {
-  if (!label) return '🌡';
-  for (const [re, ic] of WEATHER_ICONS) if (re.test(label)) return ic;
-  return '🌡';
+function weatherIconName(label?: string): 'sun' | 'wind' | 'water' {
+  if (!label) return 'sun';
+  if (/thunder|storm/i.test(label)) return 'wind';
+  if (/rain|shower|drizzle/i.test(label)) return 'water';
+  return 'sun';
 }
 
 // ── AI analysis helper ───────────────────────────────────────────────────────
@@ -202,17 +194,16 @@ function WeatherAlerts({ trip, weather, onGoToDay }: {
         const color   = isStorm ? '#E05A3A' : '#C8944A';
         const bg      = isStorm ? 'oklch(62% 0.18 28 / 10%)' : 'oklch(68% 0.14 58 / 10%)';
         const border  = isStorm ? 'oklch(62% 0.18 28 / 25%)' : 'oklch(68% 0.14 58 / 25%)';
-        const emoji   = isStorm ? '⛈' : '🌧';
-
         const msg = isHe
-          ? `${emoji} יום ${day}: ${label} — ${outdoorCount} פעילות חיצונית מתוכננת${altDay ? `. יום ${altDay} נראה יותר יבש.` : '.'}`
-          : `${emoji} Day ${day}: ${label} — ${outdoorCount} outdoor ${outdoorCount === 1 ? 'activity' : 'activities'} planned${altDay ? `. Day ${altDay} looks clearer.` : '.'}`;
+          ? `יום ${day}: ${label} — ${outdoorCount} פעילות חיצונית מתוכננת${altDay ? `. יום ${altDay} נראה יותר יבש.` : '.'}`
+          : `Day ${day}: ${label} — ${outdoorCount} outdoor ${outdoorCount === 1 ? 'activity' : 'activities'} planned${altDay ? `. Day ${altDay} looks clearer.` : '.'}`;
 
         return (
           <div
             key={day}
             style={{ padding: '11px 14px', borderRadius: 14, background: bg, border: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: 10 }}
           >
+            <Icon name={isStorm ? 'wind' : 'water'} size={16} color={color} style={{ flexShrink: 0 }} />
             <p style={{ flex: 1, fontSize: 13, color, fontWeight: 500, margin: 0, lineHeight: 1.45 }}>{msg}</p>
             <button
               onClick={() => onGoToDay(day)}
@@ -232,20 +223,20 @@ function WeatherAlerts({ trip, weather, onGoToDay }: {
 interface Intel { currency: string; tipping: string; customs: string; safety: string; adapter: string; emergency: string }
 
 const INTEL_ICONS: [keyof Intel, string, string][] = [
-  ['currency',  '💱', 'Currency'],
-  ['tipping',   '🤝', 'Tipping'],
-  ['customs',   '🎌', 'Customs'],
-  ['safety',    '🛡',  'Safety'],
-  ['adapter',   '🔌', 'Power'],
-  ['emergency', '🚨', 'Emergency'],
+  ['currency',  'cash',      'Currency'],
+  ['tipping',   'wallet',    'Tipping'],
+  ['customs',   'passport',  'Customs'],
+  ['safety',    'first_aid', 'Safety'],
+  ['adapter',   'card',      'Power'],
+  ['emergency', 'first_aid', 'Emergency'],
 ];
 const INTEL_ICONS_HE: [keyof Intel, string, string][] = [
-  ['currency',  '💱', 'מטבע'],
-  ['tipping',   '🤝', 'טיפים'],
-  ['customs',   '🎌', 'נימוסים'],
-  ['safety',    '🛡',  'בטיחות'],
-  ['adapter',   '🔌', 'חשמל'],
-  ['emergency', '🚨', 'חירום'],
+  ['currency',  'cash',      'מטבע'],
+  ['tipping',   'wallet',    'טיפים'],
+  ['customs',   'passport',  'נימוסים'],
+  ['safety',    'first_aid', 'בטיחות'],
+  ['adapter',   'card',      'חשמל'],
+  ['emergency', 'first_aid', 'חירום'],
 ];
 
 function DestinationIntelCard({ country, locale }: { country: string; locale: string }) {
@@ -303,7 +294,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
           touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent',
         }}
       >
-        <span style={{ fontSize: 18 }}>🗺️</span>
+        <StampIcon iconKey="map" size={22} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <span style={{ fontSize: 13.5, fontWeight: 700, color: 'var(--lg-ink)' }}>
             {isHe ? `מדריך מהיר: ${country}` : `Quick guide: ${country}`}
@@ -323,9 +314,9 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
       {expanded && intel && (
         <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ height: 1, background: 'oklch(50% 0.02 60 / 12%)', marginBottom: 2 }} />
-          {icons.map(([key, emoji, label]) => intel[key] && (
+          {icons.map(([key, stampKey, label]) => intel[key] && (
             <div key={key} style={{ display: 'flex', gap: 10 }}>
-              <span style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }}>{emoji}</span>
+              <StampIcon iconKey={stampKey} size={28} style={{ flexShrink: 0 }} />
               <div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 600, display: 'block', marginBottom: 2 }}>{label}</span>
                 <span style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5 }}>{intel[key]}</span>
@@ -1041,8 +1032,9 @@ export default function DashboardScreenV2() {
                   {bottom}
                 </span>
                 {dayWeather && (
-                  <span style={{ fontSize: 9, opacity: 0.85, marginTop: 1 }}>
-                    {weatherIcon(dayWeather.label)} {dayWeather.tempMax}°
+                  <span style={{ fontSize: 9, opacity: 0.85, marginTop: 1, display: 'inline-flex', alignItems: 'center', gap: 2 }}>
+                    <Icon name={weatherIconName(dayWeather.label)} size={9} color="#fff" />
+                    {dayWeather.tempMax}°
                   </span>
                 )}
               </button>

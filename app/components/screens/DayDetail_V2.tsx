@@ -50,52 +50,52 @@ function getWeatherIcon(label?: string): string {
 
 // ── Category definitions ──────────────────────────────────────────────────────
 
-const CATS_CORE: [Category, string, string][] = [
-  ['flight',      'plane',    'Flight'],
-  ['transport',   'swap',     'Drive'],
-  ['food',        'wind',     'Food'],
-  ['cafe',        'water',    'Café'],
-  ['attraction',  'pin',      'Sight'],
-  ['museum',      'compass',  'Museum'],
-  ['hotel',       'home',     'Hotel'],
-  ['rest',        'tent',     'Rest'],
-  ['beach',       'sun',      'Beach'],
-  ['sport',       'users',    'Sport'],
-  ['concert',     'music',    'Concert'],
-  ['theme_park',  'star',     'Theme Park'],
-  ['other',       'grid',     'Other'],
+const CATS_CORE: [Category, string, string, string][] = [
+  ['flight',      'plane',    'Flight',      'טיסה'],
+  ['transport',   'swap',     'Drive',       'נסיעה'],
+  ['food',        'wind',     'Food',        'אוכל'],
+  ['cafe',        'water',    'Café',        'קפה'],
+  ['attraction',  'pin',      'Sight',       'אטרקציה'],
+  ['museum',      'compass',  'Museum',      'מוזיאון'],
+  ['hotel',       'home',     'Hotel',       'מלון'],
+  ['rest',        'tent',     'Rest',        'מנוחה'],
+  ['beach',       'sun',      'Beach',       'חוף'],
+  ['sport',       'users',    'Sport',       'ספורט'],
+  ['concert',     'music',    'Concert',     'קונצרט'],
+  ['theme_park',  'star',     'Theme Park',  'פארק שעשועים'],
+  ['other',       'grid',     'Other',       'אחר'],
 ];
 
-const CATS_EXTENDED: [Category, string, string][] = [
-  ['hiking',      'compass',  'Hiking'],
-  ['nature_walk', 'sun',      'Nature'],
-  ['cycling',     'bike',     'Cycling'],
-  ['boat',        'ship',     'Boat'],
-  ['water_sports','water',    'Water Sports'],
-  ['ski',         'arrow',    'Ski'],
-  ['aerial',      'plane',    'Aerial'],
-  ['golf',        'sun',      'Golf'],
-  ['safari',      'compass',  'Safari'],
-  ['nightlife',   'music',    'Nightlife'],
-  ['winery',      'water',    'Winery'],
-  ['cooking',     'wind',     'Cooking'],
-  ['theater',     'film',     'Theater'],
-  ['cinema',      'film',     'Cinema'],
-  ['art',         'camera',   'Art'],
-  ['festival',    'star',     'Festival'],
-  ['shopping',    'gift',     'Shopping'],
-  ['market',      'wind',     'Market'],
-  ['spa',         'hot',      'Spa'],
-  ['wellness',    'hot',      'Wellness'],
-  ['hot_springs', 'hot',      'Hot Springs'],
-  ['photography', 'camera',   'Photography'],
-  ['guided_tour', 'users',    'Guided Tour'],
-  ['national_park','sun',     'National Park'],
-  ['cultural',    'pin',      'Cultural'],
-  ['religious',   'tent',     'Religious'],
-  ['picnic',      'sun',      'Picnic'],
-  ['cruise',      'ship',     'Cruise'],
-  ['farm',        'tent',     'Farm'],
+const CATS_EXTENDED: [Category, string, string, string][] = [
+  ['hiking',      'compass',  'Hiking',       'טיול רגלי'],
+  ['nature_walk', 'sun',      'Nature',       'טבע'],
+  ['cycling',     'bike',     'Cycling',      'רכיבה'],
+  ['boat',        'ship',     'Boat',         'סירה'],
+  ['water_sports','water',    'Water Sports', 'ספורט מים'],
+  ['ski',         'arrow',    'Ski',          'סקי'],
+  ['aerial',      'plane',    'Aerial',       'אוויר'],
+  ['golf',        'sun',      'Golf',         'גולף'],
+  ['safari',      'compass',  'Safari',       'ספארי'],
+  ['nightlife',   'music',    'Nightlife',    'בילוי לילי'],
+  ['winery',      'water',    'Winery',       'יקב'],
+  ['cooking',     'wind',     'Cooking',      'בישול'],
+  ['theater',     'film',     'Theater',      'תיאטרון'],
+  ['cinema',      'film',     'Cinema',       'קולנוע'],
+  ['art',         'camera',   'Art',          'אמנות'],
+  ['festival',    'star',     'Festival',     'פסטיבל'],
+  ['shopping',    'gift',     'Shopping',     'קניות'],
+  ['market',      'wind',     'Market',       'שוק'],
+  ['spa',         'hot',      'Spa',          'ספא'],
+  ['wellness',    'hot',      'Wellness',     'בריאות'],
+  ['hot_springs', 'hot',      'Hot Springs',  'מעיינות חמים'],
+  ['photography', 'camera',   'Photography',  'צילום'],
+  ['guided_tour', 'users',    'Guided Tour',  'סיור מודרך'],
+  ['national_park','sun',     'National Park','פארק לאומי'],
+  ['cultural',    'pin',      'Cultural',     'תרבות'],
+  ['religious',   'tent',     'Religious',    'דתי'],
+  ['picnic',      'sun',      'Picnic',       'פיקניק'],
+  ['cruise',      'ship',     'Cruise',       'שייט'],
+  ['farm',        'tent',     'Farm',         'חווה'],
 ];
 
 // ── Duration presets ──────────────────────────────────────────────────────────
@@ -632,11 +632,13 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
               onClick={() => setShowExtended(e => !e)}
               style={{ fontSize: 11, fontWeight: 600, color: 'var(--brand)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-sans)', padding: 0 }}
             >
-              {showExtended ? 'Show less' : `+${CATS_EXTENDED.length} more`}
+              {showExtended
+                ? (locale === 'he' ? 'הצג פחות' : 'Show less')
+                : (locale === 'he' ? `+${CATS_EXTENDED.length} עוד` : `+${CATS_EXTENDED.length} more`)}
             </button>
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-            {allCats.map(([c, ic, lbl]) => (
+            {allCats.map(([c, ic, lbl, lblHe]) => (
               <button
                 key={c}
                 onClick={() => setCat(c)}
@@ -651,7 +653,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                 }}
               >
                 <Icon name={ic as any} size={13} color={cat === c ? '#fff' : 'var(--text-3)'} />
-                {lbl}
+                {locale === 'he' ? lblHe : lbl}
               </button>
             ))}
           </div>

@@ -81,24 +81,36 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
 
   const peekSym = peekCode ? getCurrencySymbol(peekCode) : null;
 
-  // Position: prefer above the anchor, fall back to below if near top of viewport
-  const POPOVER_W = 224;
+  // Position: prefer above the anchor, fall back to below if near top of viewport.
+  // Clamp both axes to always stay within the viewport (spec 5.2).
+  const POPOVER_W  = 224;
+  const POPOVER_H  = 180; // estimated max height
   const popStyle = (): React.CSSProperties => {
     if (!anchorRect) return { display: 'none' };
     const spaceAbove = anchorRect.top;
-    const above = spaceAbove > 160;
+    const spaceBelow = window.innerHeight - anchorRect.bottom;
+    const above = spaceAbove > 160 && spaceAbove >= spaceBelow;
     const left  = Math.min(
       Math.max(8, anchorRect.left + anchorRect.width / 2 - POPOVER_W / 2),
       window.innerWidth - POPOVER_W - 8,
     );
+    let top: number | undefined;
+    let bottom: number | undefined;
+    if (above) {
+      // Place above anchor, clamp so it never goes above viewport top
+      const rawBottom = window.innerHeight - anchorRect.top + 8;
+      bottom = Math.min(rawBottom, window.innerHeight - POPOVER_H - 8);
+    } else {
+      // Place below anchor, clamp so it never goes below viewport bottom
+      top = Math.min(anchorRect.bottom + 8, window.innerHeight - POPOVER_H - 8);
+      top = Math.max(8, top);
+    }
     return {
       position: 'fixed',
       zIndex: 9999,
       width: POPOVER_W,
       left,
-      ...(above
-        ? { bottom: window.innerHeight - anchorRect.top + 8 }
-        : { top: anchorRect.bottom + 8 }),
+      ...(above ? { bottom } : { top }),
     };
   };
 
