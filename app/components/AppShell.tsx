@@ -33,19 +33,19 @@ const OnboardingScreen   = dynamic(() => import('./OnboardingScreen'));
 
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
 function OfflineWatcher() {
-  const { setIsOffline, flushPendingChanges } = useAppStore();
   const { show } = useToast();
 
   useEffect(() => {
     const goOnline = () => {
+      const { setIsOffline, flushPendingChanges, pendingChanges } = useAppStore.getState();
       setIsOffline(false);
-      const count = useAppStore.getState().pendingChanges.length;
+      const count = pendingChanges.length;
       flushPendingChanges().then(() => {
         if (count > 0) show(`Back online — ${count} change${count > 1 ? 's' : ''} synced ✓`);
       }).catch(() => {});
     };
-    const goOffline = () => setIsOffline(true);
-    if (!navigator.onLine) setIsOffline(true);
+    const goOffline = () => useAppStore.getState().setIsOffline(true);
+    if (!navigator.onLine) useAppStore.getState().setIsOffline(true);
     window.addEventListener('online', goOnline);
     window.addEventListener('offline', goOffline);
     return () => {
@@ -61,11 +61,10 @@ function OfflineWatcher() {
 function BudgetAlertWatcher() {
   const lastBudgetAlert = useAppStore(s => s.lastBudgetAlert);
   const { show } = useToast();
-  const tripDbId = useAppStore(s => s.tripDbId);
-  const currencyByTrip = useAppStore(s => s.currencyByTrip);
 
   useEffect(() => {
     if (!lastBudgetAlert) return;
+    const { tripDbId, currencyByTrip } = useAppStore.getState();
     const currency = (tripDbId && currencyByTrip[tripDbId]) || '';
     const fmt = (n: number) => `${currency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     if (lastBudgetAlert.type === 'over') {
@@ -81,7 +80,7 @@ function BudgetAlertWatcher() {
 
 // Watches lastSyncError globally and shows a toast — must live inside ToastProvider
 function SyncErrorWatcher() {
-  const { lastSyncError } = useAppStore();
+  const lastSyncError = useAppStore(s => s.lastSyncError);
   const { show } = useToast();
   const { locale } = useI18n();
   useEffect(() => {

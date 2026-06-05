@@ -8,9 +8,14 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) {
+      // Code exchange failed (expired, already used, etc.) — send to login, not home
+      return NextResponse.redirect(`${origin}/?error=auth`)
+    }
   }
 
-  const redirectTo = next && next.startsWith('/') ? `${origin}${next}` : origin
+  // `next` must be a relative path to prevent open-redirect attacks
+  const redirectTo = next && next.startsWith('/') && !next.startsWith('//') ? `${origin}${next}` : origin
   return NextResponse.redirect(redirectTo)
 }
