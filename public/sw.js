@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trippy-v1';
+const CACHE_NAME = 'trippy-v2';
 
 // Cache app shell assets on install
 self.addEventListener('install', (event) => {
@@ -37,9 +37,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // CacheFirst for trips (TTL 24h)
+  // Network-first for trips — always fetch fresh data; fall back to cache only when offline
   if (url.pathname.startsWith('/api/trips')) {
-    event.respondWith(cacheFirst(event.request, 24 * 60 * 60 * 1000));
+    event.respondWith(networkWithCacheFallback(event.request));
     return;
   }
 
