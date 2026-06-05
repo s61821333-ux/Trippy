@@ -89,11 +89,12 @@
   --radius-4: 40px;
 
   /* Typography — 2027 variable font stack */
-  --font-sans:    'DM Sans Variable', 'DM Sans', -apple-system, system-ui, sans-serif;
-  --font-display: 'Instrument Serif', Georgia, serif;
-  --font-serif:   'Instrument Serif', Georgia, serif;
-  --font-mono:    'JetBrains Mono', ui-monospace, monospace;
-  --font-hebrew:  'Noto Sans Hebrew', 'DM Sans', sans-serif;
+  --font-sans:     'DM Sans Variable', 'DM Sans', -apple-system, system-ui, sans-serif;
+  --font-display:  'Instrument Serif', Georgia, serif;
+  --font-serif:    'Instrument Serif', Georgia, serif;
+  --font-mono:     'JetBrains Mono', ui-monospace, monospace;
+  --font-hebrew:   'Noto Sans Hebrew', 'DM Sans', sans-serif;
+  --font-friendly: 'Assistant', 'DM Sans', system-ui, sans-serif;
 
   /* V2 type scale — Major Third (1.25) */
   --text-xs:   0.64rem;
@@ -411,7 +412,7 @@ html, body {
   width: 100%;
   max-width: 100vw;
   overflow-x: hidden;
-  font-family: var(--font-sans);
+  font-family: var(--font-friendly), var(--font-sans);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   font-size: 16px;
@@ -435,30 +436,31 @@ h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
-/* ── RTL / Hebrew: redirect ALL font vars to Noto Sans Hebrew ──────
-   Using both [dir="rtl"] and :lang(he) so the override fires whether
-   direction is set on <html> (server) or inherited from a parent div
-   (client before hydration). Both selectors are needed for coverage. */
+/* ── RTL / Hebrew: redirect ALL UI font vars to Assistant (friendly bilingual) ──
+   Assistant covers both Hebrew and Latin scripts warmly.
+   Using both [dir="rtl"] and :lang(he) for coverage before and after hydration. */
 [dir="rtl"],
 :lang(he) {
-  --font-sans:    var(--font-hebrew);
-  --font-display: var(--font-hebrew);
-  --font-mono:    var(--font-hebrew);
-  --font-serif:   var(--font-hebrew);
-  font-family: var(--font-hebrew);
-  /* Noto Sans Hebrew is optically slightly larger — nudge down */
+  --font-sans:    var(--font-friendly);
+  --font-display: var(--font-friendly);
+  --font-mono:    var(--font-friendly);
+  --font-serif:   var(--font-friendly);
+  --font-hebrew:  var(--font-friendly);
+  font-family: var(--font-friendly);
   --text-base: 0.975rem;
   --leading-normal: 1.6;
 }
 [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4,
 :lang(he) h1, :lang(he) h2, :lang(he) h3, :lang(he) h4 {
-  font-family: var(--font-hebrew);
+  font-family: var(--font-friendly);
+  font-weight: 700;
   letter-spacing: 0;
 }
 [dir="rtl"] .section-eyebrow, [dir="rtl"] .eyebrow,
 :lang(he) .section-eyebrow, :lang(he) .eyebrow {
-  font-family: var(--font-hebrew);
-  letter-spacing: 0.05em;
+  font-family: var(--font-friendly);
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -507,12 +509,12 @@ select {
   transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease, backdrop-filter 0.3s ease;
 }
 
-/* Specular diagonal highlight inside every glass surface */
+/* Specular diagonal highlight inside every glass surface — softened, no hard band */
 .glass::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.40) 0%, transparent 50%, rgba(255,255,255,0.10) 100%);
+  background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.05) 35%, transparent 65%);
   pointer-events: none;
   border-radius: inherit;
   z-index: 1;
@@ -1448,7 +1450,8 @@ body::after {
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
-  background: linear-gradient(135deg, oklch(100% 0 0 / 55%) 0%, transparent 38%, transparent 70%, oklch(100% 0 0 / 12%) 100%);
+  /* Softened: wider fade so no hard band; max ~10% opacity for natural light feel */
+  background: linear-gradient(135deg, oklch(100% 0 0 / 10%) 0%, oklch(100% 0 0 / 6%) 30%, transparent 60%, oklch(100% 0 0 / 4%) 100%);
   z-index: 0;
 }
 .lg > * { position: relative; z-index: 1; }

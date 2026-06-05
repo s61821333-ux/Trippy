@@ -83,7 +83,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
         WebkitTransform: 'translateZ(0)',
       }}
     >
-      {/* Expanded focus panel */}
+      {/* Expanded options panel — 2-column grid, all options always visible */}
       <AnimatePresence>
         {expandOpen && (
           <m.div
@@ -94,77 +94,50 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             exit={{ opacity: 0, y: 10, scale: 0.9 }}
             transition={PANEL_SPRING}
             style={{
-              display: 'flex',
-              gap: 8,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 4,
               padding: 8,
-              borderRadius: 9999,
+              borderRadius: 28,
               pointerEvents: 'auto',
-              maxWidth: 'calc(100vw - 32px)',
-              overflowX: 'auto',
-              scrollbarWidth: 'none',
-              msOverflowStyle: 'none' as React.CSSProperties['msOverflowStyle'],
+              width: 'min(280px, calc(100vw - 32px))',
             }}
           >
             <button
               onClick={() => { setExpandOpen(false); onSwitch?.(); }}
               className="lg-btn"
-              style={{ height: 42, padding: '0 16px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center' }}
+              style={{ height: 44, padding: '0 14px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', borderRadius: 20 }}
             >
               <Icon name="swap" size={17} style={{ color: 'var(--lg-terra)' }} />
               <span>{(t('switchTrip') as string) || 'Switch trip'}</span>
             </button>
 
-            <div style={{ width: 1, background: 'oklch(50% 0.02 60 / 22%)', margin: '6px 0' }} />
-
             <button
               onClick={() => { setExpandOpen(false); onNotes?.(); }}
               className="lg-btn"
-              style={{ height: 42, padding: '0 16px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center' }}
+              style={{ height: 44, padding: '0 14px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', borderRadius: 20 }}
             >
               <Icon name="edit" size={17} style={{ color: 'var(--lg-forest)' }} />
-              <span>Notes</span>
+              <span>{(t('notes') as string) || 'Notes'}</span>
             </button>
-
-            <div style={{ width: 1, background: 'oklch(50% 0.02 60 / 22%)', margin: '6px 0' }} />
 
             <button
               onClick={() => { setExpandOpen(false); onSettings?.(); }}
               className="lg-btn"
-              style={{
-                height: 42,
-                padding: '0 16px',
-                gap: 7,
-                background: 'transparent',
-                color: 'var(--lg-ink)',
-                fontSize: 13,
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-              }}
+              style={{ height: 44, padding: '0 14px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', borderRadius: 20 }}
             >
               <Icon name="settings" size={17} style={{ color: 'var(--lg-forest)' }} />
               <span>{(t('settings') as string) || 'Settings'}</span>
             </button>
 
-            <div style={{ width: 1, background: 'oklch(50% 0.02 60 / 22%)', margin: '6px 0' }} />
-
+            {/* Danger action — visually separated */}
             <button
               onClick={() => { setExpandOpen(false); onLogout?.(); }}
               className="lg-btn"
-              style={{
-                height: 42,
-                padding: '0 16px',
-                gap: 7,
-                background: 'transparent',
-                color: 'oklch(52% 0.14 25)',
-                fontSize: 13,
-                fontWeight: 600,
-                display: 'flex',
-                alignItems: 'center',
-              }}
+              style={{ height: 44, padding: '0 14px', gap: 7, background: 'transparent', color: 'var(--danger)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', borderRadius: 20 }}
             >
-              <Icon name="x" size={17} style={{ color: 'oklch(52% 0.14 25)' }} />
-              <span>Log out</span>
+              <Icon name="x" size={17} style={{ color: 'var(--danger)' }} />
+              <span>{(t('logout') as string) || 'Log out'}</span>
             </button>
           </m.div>
         )}
@@ -260,10 +233,8 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                   background: 'transparent',
                   cursor: 'pointer',
                   display: 'flex',
-                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 3,
                   color: isActive ? '#fff' : 'var(--text-3)',
                   transition: 'color 0.3s',
                   flexShrink: 0,
@@ -272,24 +243,12 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                 }}
               >
                 <m.span
-                  animate={{ scale: isActive ? 1.05 : 1, y: isActive ? -1 : 0 }}
+                  animate={{ scale: isActive ? 1.08 : 1 }}
                   transition={ICON_SPRING}
                   style={{ display: 'flex' }}
                 >
-                  <Icon name={tab.icon} size={19} color={isActive ? '#fff' : 'var(--text-3)'} />
+                  <Icon name={tab.icon} size={20} color={isActive ? '#fff' : 'var(--text-3)'} />
                 </m.span>
-                <span style={{
-                  fontFamily: 'var(--font-sans)',
-                  fontSize: 9,
-                  fontWeight: 600,
-                  letterSpacing: '0.04em',
-                  lineHeight: 1,
-                  color: isActive ? 'rgba(255,255,255,0.9)' : 'var(--text-3)',
-                  transition: 'color 0.3s',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {t(tab.labelKey) as string}
-                </span>
               </m.button>
             );
           })}

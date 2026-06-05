@@ -14,7 +14,7 @@ import { CompassLoader, LoaderStyles, BRAND_THEME } from '../ui/TripLoaders';
 import Field from '../ui/Field';
 import CountriesInput from '../ui/CountriesInput';
 import { TripTheme } from '@/lib/types';
-import { CURRENCIES } from '@/lib/currency';
+import { CURRENCIES, getCountryCurrency } from '@/lib/currency';
 import dynamic from 'next/dynamic';
 
 const PlanWithAISheet = dynamic(() => import('./PlanWithAISheet'));
@@ -85,16 +85,23 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
   const { t, locale } = useI18n();
   const { show } = useToast();
 
-  const [loading,     setLoading]     = useState(false);
-  const [cName,       setCName]       = useState('');
-  const [cNick,       setCNick]       = useState(authUser?.username ?? '');
-  const [cTheme,      setCTheme]      = useState<TripTheme>('desert');
-  const [cDate,       setCDate]       = useState(new Date().toISOString().split('T')[0]);
-  const [cEndDate,    setCEndDate]    = useState(() => {
+  const [loading,          setLoading]          = useState(false);
+  const [cName,            setCName]            = useState('');
+  const [cNick,            setCNick]            = useState(authUser?.username ?? '');
+  const [cTheme,           setCTheme]           = useState<TripTheme>('desert');
+  const [cDate,            setCDate]            = useState(new Date().toISOString().split('T')[0]);
+  const [cEndDate,         setCEndDate]         = useState(() => {
     const d = new Date(); d.setDate(d.getDate() + 6); return d.toISOString().split('T')[0];
   });
-  const [cCountries,  setCCountries]  = useState<string[]>([]);
-  const [cCurrency,   setCCurrency]   = useState('USD');
+  const [cCountries,       setCCountries]       = useState<string[]>([]);
+  const [cCurrency,        setCCurrency]        = useState('USD');
+  const [currencyTouched,  setCurrencyTouched]  = useState(false);
+
+  // Auto-derive currency from first chosen country until user overrides
+  useEffect(() => {
+    if (currencyTouched) return;
+    if (cCountries.length) setCCurrency(getCountryCurrency(cCountries[0]));
+  }, [cCountries, currencyTouched]);
 
   const calcDays = (s: string, e: string) =>
     Math.max(1, Math.min(90, Math.round((new Date(e).getTime() - new Date(s).getTime()) / 86_400_000) + 1));
@@ -132,12 +139,12 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
     <Sheet
       onClose={onClose}
       title={t('createNewTrip')}
-      subtitle={locale === 'he' ? selectedTheme.labelHe : selectedTheme.label}
+      subtitle={locale === 'he' ? 'כמה פרטים ואתם בדרך.' : 'A few details and you\'re on your way.'}
       full
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-        {/* Theme picker */}
+        {/* Theme picker — horizontal scroller */}
         <div>
           <label style={{
             display: 'block', fontSize: 11, fontWeight: 700,
@@ -147,26 +154,35 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
           }}>
             {t('backgroundLabel')}
           </label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div style={{
+            display: 'flex', gap: 10, overflowX: 'auto',
+            scrollSnapType: 'x mandatory', scrollbarWidth: 'none',
+            paddingInline: 2, paddingBottom: 4,
+            WebkitMaskImage: 'linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%)',
+            maskImage: 'linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%)',
+          } as React.CSSProperties}>
             {THEMES.map(th => (
               <button
                 key={th.id}
                 onClick={() => setCTheme(th.id)}
                 aria-pressed={cTheme === th.id}
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-                  padding: '18px 10px', borderRadius: 28, cursor: 'pointer',
+                  flexShrink: 0, scrollSnapAlign: 'start',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  padding: '14px 10px', width: 88, minHeight: 104,
+                  borderRadius: 'var(--radius-lg)', cursor: 'pointer',
                   background:  cTheme === th.id ? th.bg   : 'var(--bg)',
                   border:      cTheme === th.id ? `2px solid ${th.accent}` : '1.5px solid var(--border)',
-                  boxShadow:   cTheme === th.id ? `0 4px 18px ${th.accent}30, inset 0 1px 0 rgba(255,255,255,0.60)` : 'none',
+                  boxShadow:   cTheme === th.id ? `0 4px 18px ${th.accent}30` : 'none',
                   transition:  'all 0.18s cubic-bezier(0.34,1.56,0.64,1)',
                   WebkitTapHighlightColor: 'transparent',
+                  position: 'relative',
                 }}
               >
-                <StampIcon iconKey={THEME_STAMP[th.id] ?? 'cactus'} size={52} />
+                <StampIcon iconKey={THEME_STAMP[th.id] ?? 'cactus'} size={40} />
                 <span style={{
                   fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-                  letterSpacing: '0.14em', textTransform: 'uppercase',
+                  letterSpacing: '0.10em', textTransform: 'uppercase',
                   color: cTheme === th.id ? th.accent : 'var(--text-2)',
                   transition: 'color 0.15s',
                 }}>
@@ -174,10 +190,11 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
                 </span>
                 {cTheme === th.id && (
                   <div style={{
-                    width: 20, height: 20, borderRadius: '50%', background: th.accent,
+                    position: 'absolute', top: 6, right: 6,
+                    width: 16, height: 16, borderRadius: '50%', background: th.accent,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Icon name="check" size={11} style={{ color: '#fff' }} />
+                    <Icon name="check" size={9} style={{ color: '#fff' }} />
                   </div>
                 )}
               </button>
@@ -185,6 +202,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
+        {/* Trip name */}
         <Field
           label={t('tripName')}
           placeholder={t('createPlaceholderName')}
@@ -192,42 +210,10 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
           onChange={setCName}
           icon={<Icon name="tent" size={15} />}
         />
-        <Field
-          label={t('yourNickname')}
-          placeholder={t('createPlaceholderNick')}
-          value={cNick}
-          onChange={setCNick}
-          icon={<Icon name="user" size={15} />}
-        />
-        <CountriesInput label={t('countriesLabel')} value={cCountries} onChange={setCCountries} />
 
-        {/* Currency */}
-        <div>
-          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
-            {t('currencyLabel')}
-          </label>
-          <select
-            value={cCurrency}
-            onChange={e => setCCurrency(e.target.value)}
-            style={{
-              width: '100%', padding: '11px 12px',
-              borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500, minHeight: 44,
-              background: 'var(--bg)', color: 'var(--text)',
-              border: '1px solid var(--border)', outline: 'none',
-              boxSizing: 'border-box', fontFamily: 'var(--font-sans)',
-            }}
-          >
-            {CURRENCIES.map(c => (
-              <option key={c.code} value={c.code}>
-                {c.symbol} {c.code} — {locale === 'he' ? c.labelHe : c.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Dates */}
-        <div style={{ display: 'flex', gap: 10 }}>
-          <div style={{ flex: 1 }}>
+        {/* Dates — responsive, never overlapping */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          <div style={{ flex: '1 1 calc(50% - 5px)', minWidth: 140 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
               {t('startDateLabel')}
             </label>
@@ -236,14 +222,14 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
               value={cDate}
               onChange={e => setCDate(e.target.value)}
               style={{
-                width: '100%', padding: '11px 12px',
-                borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500, minHeight: 44,
-                background: 'var(--bg)', color: 'var(--text)',
-                border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box',
+                width: '100%', padding: '11px 12px', minWidth: 0,
+                borderRadius: 'var(--radius-md)', fontSize: 16, fontWeight: 500, minHeight: 44,
+                background: 'var(--field-bg)', color: 'var(--text)',
+                border: '1px solid var(--field-border)', outline: 'none', boxSizing: 'border-box',
               }}
             />
           </div>
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: '1 1 calc(50% - 5px)', minWidth: 140 }}>
             <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
               {locale === 'he' ? 'תאריך סיום' : 'End date'}
             </label>
@@ -253,20 +239,63 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
               min={cDate}
               onChange={e => setCEndDate(e.target.value)}
               style={{
-                width: '100%', padding: '11px 12px',
-                borderRadius: 'var(--radius-md)', fontSize: 15, fontWeight: 500, minHeight: 44,
-                background: 'var(--bg)', color: 'var(--text)',
-                border: '1px solid var(--border)', outline: 'none', boxSizing: 'border-box',
+                width: '100%', padding: '11px 12px', minWidth: 0,
+                borderRadius: 'var(--radius-md)', fontSize: 16, fontWeight: 500, minHeight: 44,
+                background: 'var(--field-bg)', color: 'var(--text)',
+                border: '1px solid var(--field-border)', outline: 'none', boxSizing: 'border-box',
               }}
             />
           </div>
         </div>
 
         {cDate && cEndDate && cEndDate >= cDate && (
-          <p style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 500, textAlign: 'center', marginTop: -8 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-2)', fontWeight: 500, textAlign: 'center', marginTop: -6 }}>
             {calcDays(cDate, cEndDate)} {locale === 'he' ? 'ימים' : 'days'}
           </p>
         )}
+
+        {/* Destinations */}
+        <CountriesInput label={t('countriesLabel')} value={cCountries} onChange={setCCountries} />
+
+        {/* Currency — auto-filled from country */}
+        <div>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
+            {t('currencyLabel')}
+          </label>
+          <select
+            value={cCurrency}
+            onChange={e => { setCurrencyTouched(true); setCCurrency(e.target.value); }}
+            style={{
+              width: '100%', padding: '11px 12px',
+              borderRadius: 'var(--radius-md)', fontSize: 16, fontWeight: 500, minHeight: 44,
+              background: 'var(--field-bg)', color: 'var(--text)',
+              border: '1px solid var(--field-border)', outline: 'none',
+              boxSizing: 'border-box', fontFamily: 'var(--font-friendly), var(--font-sans)',
+            }}
+          >
+            {CURRENCIES.map(c => (
+              <option key={c.code} value={c.code}>
+                {c.symbol} {c.code} — {locale === 'he' ? c.labelHe : c.label}
+              </option>
+            ))}
+          </select>
+          {!currencyTouched && cCountries.length > 0 && (
+            <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4, fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
+              {locale === 'he'
+                ? `מטבע נקבע לפי ${cCountries[0]}`
+                : `Set from ${cCountries[0]} — change anytime`}
+            </p>
+          )}
+        </div>
+
+        {/* Nickname */}
+        <Field
+          label={t('yourNickname')}
+          placeholder={t('createPlaceholderNick')}
+          value={cNick}
+          onChange={setCNick}
+          icon={<Icon name="user" size={15} />}
+        />
 
         <Btn
           kind="forest"

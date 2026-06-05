@@ -30,21 +30,60 @@ export function getCurrencySymbol(code: string): string {
 
 // Maps ISO 3166 country name → local currency code
 const COUNTRY_CURRENCY: Record<string, string> = {
+  // Euro zone — full list
   'France': 'EUR', 'Germany': 'EUR', 'Italy': 'EUR', 'Spain': 'EUR',
   'Portugal': 'EUR', 'Netherlands': 'EUR', 'Greece': 'EUR', 'Austria': 'EUR',
-  'Belgium': 'EUR', 'Finland': 'EUR', 'Ireland': 'EUR',
-  'United Kingdom': 'GBP', 'UK': 'GBP',
+  'Belgium': 'EUR', 'Finland': 'EUR', 'Ireland': 'EUR', 'Luxembourg': 'EUR',
+  'Slovakia': 'EUR', 'Slovenia': 'EUR', 'Estonia': 'EUR', 'Latvia': 'EUR',
+  'Lithuania': 'EUR', 'Cyprus': 'EUR', 'Malta': 'EUR', 'Croatia': 'EUR',
+  // GBP
+  'United Kingdom': 'GBP', 'UK': 'GBP', 'England': 'GBP', 'Scotland': 'GBP',
+  // Asia
   'Japan': 'JPY',
   'Thailand': 'THB',
   'United Arab Emirates': 'AED', 'UAE': 'AED', 'Dubai': 'AED',
   'Turkey': 'TRY',
   'India': 'INR',
-  'Mexico': 'MXN',
-  'Switzerland': 'CHF',
-  'Canada': 'CAD',
-  'Australia': 'AUD',
   'Singapore': 'SGD',
+  'Hong Kong': 'HKD',
+  'South Korea': 'KRW', 'Korea': 'KRW',
+  'Vietnam': 'VND',
+  'Indonesia': 'IDR', 'Bali': 'IDR',
+  'Malaysia': 'MYR',
+  'Philippines': 'PHP',
+  'Sri Lanka': 'LKR',
+  'Nepal': 'NPR',
+  'China': 'CNY',
+  'Taiwan': 'TWD',
+  // Americas
+  'Mexico': 'MXN',
+  'Canada': 'CAD',
+  'Australia': 'AUD', 'New Zealand': 'NZD',
+  'Brazil': 'BRL',
+  'Argentina': 'ARS',
+  'Colombia': 'COP',
+  'Chile': 'CLP',
+  'Peru': 'PEN',
+  // Europe non-EUR
+  'Switzerland': 'CHF',
+  'Sweden': 'SEK',
+  'Norway': 'NOK',
+  'Denmark': 'DKK',
+  'Poland': 'PLN',
+  'Czech Republic': 'CZK', 'Czechia': 'CZK',
+  'Hungary': 'HUF',
+  'Romania': 'RON',
+  'Iceland': 'ISK',
+  // Middle East & Africa
   'Israel': 'ILS',
+  'Jordan': 'JOD',
+  'Egypt': 'EGP',
+  'Morocco': 'MAD',
+  'South Africa': 'ZAR',
+  'Kenya': 'KES',
+  'Saudi Arabia': 'SAR',
+  'Qatar': 'QAR',
+  // Default
   'United States': 'USD', 'USA': 'USD',
 };
 

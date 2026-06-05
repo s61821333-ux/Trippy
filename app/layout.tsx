@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { DM_Sans, Instrument_Serif, JetBrains_Mono, Noto_Sans_Hebrew, Heebo } from 'next/font/google';
+import { DM_Sans, Instrument_Serif, JetBrains_Mono, Noto_Sans_Hebrew, Assistant } from 'next/font/google';
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
 import MotionProvider from './components/MotionProvider';
@@ -35,9 +35,9 @@ const hebrewFont = Noto_Sans_Hebrew({
   weight: ['400', '500', '600', '700'],
 });
 
-const heebo = Heebo({
+const assistant = Assistant({
   subsets: ['hebrew', 'latin'],
-  variable: '--font-heebo',
+  variable: '--font-friendly',
   display: 'swap',
   weight: ['400', '500', '600', '700', '800'],
 });
@@ -78,7 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       dir={dir}
       suppressHydrationWarning
       style={{ height: '100%' }}
-      className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${hebrewFont.variable} ${heebo.variable}`}
+      className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${hebrewFont.variable} ${assistant.variable}`}
     >
       <head>
         {/* Inline script: apply dark-mode token BEFORE first paint so there is no theme flash.

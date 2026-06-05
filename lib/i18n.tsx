@@ -494,6 +494,24 @@ const en = {
   noActivitiesYet: 'Nothing here yet.',
   startPlanningCta: 'Start with Day 1 — drop in a restaurant, a hike, or just a rough idea.',
   planDay1: 'Plan Day 1',
+
+  // Section 11 — NavBar & more panel
+  notes: 'Notes',
+  logout: 'Log out',
+  switchTrip: 'Switch trip',
+  settings: 'Settings',
+
+  // Section 11 — Glossary / brand voice terms
+  appTaglineAlt: 'Plan together. Discover more.',
+  goodToKnow: 'Good to know',
+  tripTips: 'Trip tips',
+  showIn: 'Show in',
+  convertTo: 'Convert to',
+  allPacked2: 'All packed',
+  daysRemaining: '{n} days',
+  resumeTrip: 'Resume trip',
+  errorSave: "Couldn't save — your last version is safe.",
+  emptyTrips: 'No trips yet.',
 };
 
 const he: typeof en = {
@@ -987,6 +1005,24 @@ const he: typeof en = {
   noActivitiesYet: 'עדיין ריק כאן.',
   startPlanningCta: 'התחל ביום 1 — שמור מסעדה, טיול, או סתם רעיון ראשוני.',
   planDay1: 'תכנן יום 1',
+
+  // Section 11 — NavBar & more panel
+  notes: 'הערות',
+  logout: 'התנתקות',
+  switchTrip: 'החלף טיול',
+  settings: 'הגדרות',
+
+  // Section 11 — Glossary / brand voice terms
+  appTaglineAlt: 'תכנן יחד. גלה יותר.',
+  goodToKnow: 'טוב לדעת',
+  tripTips: 'עצות לדרך',
+  showIn: 'הצג ב…',
+  convertTo: 'המר ל…',
+  allPacked2: 'הכל ארוז',
+  daysRemaining: '{n} ימים',
+  resumeTrip: 'המשך טיול',
+  errorSave: 'לא הצלחנו לשמור — הגרסה האחרונה נשמרה.',
+  emptyTrips: 'עוד אין טיולים.',
 };
 
 const translations = { en, he } as const;
