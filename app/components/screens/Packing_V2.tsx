@@ -81,17 +81,17 @@ function CheckCircle({ done }: { done: boolean }) {
       whileTap={{ scale: 0.88 }}
       transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       style={{
-        width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
+        width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         background:  done ? 'var(--lg-forest)' : 'transparent',
         boxShadow:   done
           ? 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 30%)'
-          : 'inset 0 0 0 2px oklch(50% 0.02 60 / 20%)',
+          : 'inset 0 0 0 2px oklch(50% 0.02 60 / 22%)',
         transition:  'background 0.25s, box-shadow 0.25s',
       }}
       aria-hidden="true"
     >
-      {done && <Icon name="check" size={15} color="#fff" />}
+      {done && <Icon name="check" size={14} color="#fff" />}
     </m.span>
   );
 }
@@ -139,7 +139,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
         drag="x"
         dragConstraints={{ left: DELETE_THRESHOLD, right: 0 }}
         dragElastic={{ left: 0.15, right: 0 }}
-        whileTap={{ scale: 0.98 }}
+        whileTap={{ scale: 0.985 }}
         onDragStart={() => { didDrag.current = false; }}
         onDrag={(_, info) => { if (Math.abs(info.offset.x) > 5) didDrag.current = true; }}
         onDragEnd={(_, info) => {
@@ -158,61 +158,70 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
         style={{
           x,
           position: 'relative',
-          display: 'flex', alignItems: 'center', gap: 12,
-          padding: '13px 14px',
-          paddingInlineStart: 20,
+          display: 'flex', alignItems: 'center',
+          padding: 0,
           border: 0, cursor: 'pointer',
           textAlign: isRTL ? 'right' : 'left',
-          opacity: item.checked ? 0.52 : 1,
-          transition: 'opacity 0.25s',
           width: '100%',
           WebkitTapHighlightColor: 'transparent',
           touchAction: 'pan-y',
-          borderRadius: 20,
+          borderRadius: 18,
           background: 'var(--lg-panel)',
           backdropFilter: 'blur(14px) saturate(1.7)',
           WebkitBackdropFilter: 'blur(14px) saturate(1.7)',
-          boxShadow: 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 22%), inset 0 0 0 1px oklch(100% 0 0 / 12%)',
+          boxShadow: item.checked
+            ? 'inset 0 0 0 1px oklch(50% 0.02 60 / 10%)'
+            : 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 22%), inset 0 0 0 1px oklch(100% 0 0 / 12%)',
+          transition: 'box-shadow 0.25s',
+          overflow: 'hidden',
         }}
       >
         {/* Category accent stripe */}
         <div
           aria-hidden="true"
           style={{
-            position: 'absolute',
-            [isRTL ? 'right' : 'left']: 0,
-            top: 0, bottom: 0, width: 4,
+            flexShrink: 0,
+            alignSelf: 'stretch',
+            width: 4,
             background: accentColor,
-            borderRadius: isRTL ? '0 20px 20px 0' : '20px 0 0 20px',
-            opacity: item.checked ? 0.45 : 1,
+            opacity: item.checked ? 0.3 : 0.9,
             transition: 'opacity 0.25s',
+            borderRadius: isRTL ? '0 18px 18px 0' : '18px 0 0 18px',
           }}
         />
 
-        <StampIcon iconKey={stampKey} size={40} />
+        {/* Content — opacity only fades this inner layer, keeping glass bg opaque */}
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 11,
+          flex: 1, minWidth: 0,
+          padding: '12px 14px 12px 12px',
+          opacity: item.checked ? 0.46 : 1,
+          transition: 'opacity 0.25s',
+        }}>
+          <StampIcon iconKey={stampKey} size={36} style={{ flexShrink: 0 }} />
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: 15, fontWeight: 600, lineHeight: 1.3,
-            color: 'var(--lg-ink)',
-            textDecoration: item.checked ? `line-through oklch(60% 0.01 60 / 55%)` : 'none',
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
-            {item.name}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 14.5, fontWeight: 600, lineHeight: 1.3,
+              color: 'var(--lg-ink)',
+              textDecoration: item.checked ? `line-through oklch(60% 0.01 60 / 55%)` : 'none',
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {item.name}
+            </div>
+            <div style={{
+              fontFamily: 'var(--font-mono)', fontSize: 8.5, letterSpacing: '0.12em',
+              textTransform: 'uppercase', fontWeight: 600,
+              color: item.checked ? 'var(--text-3)' : accentColor,
+              marginTop: 2,
+            }}>
+              {getCatLabel(item.category, locale)}
+              {item.assignee && ` · ${item.assignee}`}
+            </div>
           </div>
-          <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em',
-            textTransform: 'uppercase', fontWeight: 600,
-            color: item.checked ? 'var(--text-3)' : accentColor,
-            opacity: item.checked ? 0.7 : 0.85,
-            marginTop: 3,
-          }}>
-            {getCatLabel(item.category, locale)}
-            {item.assignee && ` · ${item.assignee}`}
-          </div>
+
+          <CheckCircle done={item.checked} />
         </div>
-
-        <CheckCircle done={item.checked} />
       </m.button>
     </m.div>
   );
@@ -603,57 +612,55 @@ export default function Packing_V2() {
       <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
 
         {/* ── Header ── */}
-        <m.p
-          className="eyebrow-lg"
-          initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-          style={{ color: 'var(--lg-terra)', marginBottom: 2 }}
+        <m.div
+          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.04, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
+          style={{ marginBottom: 14 }}
         >
-          {t('adventurePrep') || 'Adventure prep'}
-        </m.p>
-
-        <m.h1
-          className="display-xl"
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.09, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          style={{ fontSize: 38, color: 'var(--lg-ink)', margin: '0 0 16px' }}
-        >
-          {t('suppliesLabel') || 'Packing'}
-        </m.h1>
+          <p className="eyebrow-lg" style={{ color: 'var(--lg-terra)', marginBottom: 3 }}>
+            {locale === 'he' ? 'הכנה להרפתקה' : 'Adventure prep'}
+          </p>
+          <h1 className="display-xl" style={{ fontSize: 36, color: 'var(--lg-ink)', margin: 0 }}>
+            {t('suppliesLabel') || (locale === 'he' ? 'ציוד' : 'Packing')}
+          </h1>
+        </m.div>
 
         {/* ── Progress card ── */}
         <m.div
           className="lg"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.13, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          style={{ padding: '18px 18px 18px 16px', marginBottom: 16, overflow: 'hidden' }}
+          style={{ marginBottom: 16, overflow: 'hidden', position: 'relative' }}
         >
-          {/* Subtle background accent when fully packed */}
-          {pct === 100 && (
-            <div style={{
-              position: 'absolute', inset: 0, pointerEvents: 'none',
-              background: 'linear-gradient(135deg, oklch(50% 0.10 155 / 8%) 0%, transparent 60%)',
-              borderRadius: 'inherit',
-            }} />
-          )}
+          {/* Gradient tint — shifts terra→forest as you pack more */}
+          <div aria-hidden style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 'inherit',
+            background: pct === 100
+              ? 'linear-gradient(135deg, oklch(50% 0.12 155 / 14%) 0%, transparent 65%)'
+              : pct > 0
+                ? `linear-gradient(135deg, oklch(62% 0.14 ${44 - pct * 0.16}deg / 10%) 0%, transparent 65%)`
+                : 'none',
+            transition: 'background 0.6s ease',
+          }} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18, position: 'relative' }}>
-            <Ring pct={pct} size={78} stroke={6} color={pct === 100 ? 'var(--lg-forest)' : 'var(--lg-terra)'}>
-              {pct}%
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '18px 16px', position: 'relative' }}>
+            <Ring pct={pct} size={76} stroke={6} color={pct === 100 ? 'var(--lg-forest)' : 'var(--lg-terra)'}>
+              <span style={{ fontSize: 14, fontWeight: 700 }}>{pct}%</span>
             </Ring>
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
                 fontFamily: 'var(--font-serif)', fontStyle: 'italic',
-                fontSize: 21, color: 'var(--lg-ink)', lineHeight: 1.15,
+                fontSize: 20, color: 'var(--lg-ink)', lineHeight: 1.2,
+                display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap',
               }}>
                 {total === 0
                   ? (locale === 'he' ? 'מוכן להתחיל?' : 'Ready to pack?')
                   : pct === 100
-                    ? <>{t('allPacked2')} <StampIcon iconKey="star" size={20} /></>
+                    ? <>{t('allPacked2')} <StampIcon iconKey="stargaze" size={22} /></>
                     : t('almostThere')}
               </div>
-              <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 4 }}>
+              <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 5 }}>
                 {total === 0
                   ? (locale === 'he' ? 'הוסף פריטים לרשימה' : 'Start adding items below')
                   : (
@@ -674,27 +681,27 @@ export default function Packing_V2() {
               <button
                 onClick={() => setShowAI(true)}
                 className="lg-btn"
-                aria-label="Packing suggestions"
-                title="AI packing suggestions"
+                aria-label={locale === 'he' ? 'הצעות AI' : 'AI suggestions'}
+                title={locale === 'he' ? 'הצעות AI לציוד' : 'AI packing suggestions'}
                 style={{
-                  width: 42, height: 42, padding: 0, borderRadius: 9999,
+                  width: 40, height: 40, padding: 0, borderRadius: 9999,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'var(--lg-panel)',
-                  boxShadow: 'inset 0 0 0 1.5px var(--lg-terra)',
+                  boxShadow: 'inset 0 0 0 1.5px var(--lg-terra), var(--lg-shadow)',
                 }}
               >
-                <Icon name="sparkle" size={17} color="var(--lg-terra)" />
+                <Icon name="sparkle" size={16} color="var(--lg-terra)" />
               </button>
               <button
                 onClick={() => setShowAdd(true)}
                 className="lg-btn lg-btn-forest"
-                aria-label="Add packing item"
+                aria-label={locale === 'he' ? 'הוסף פריט' : 'Add item'}
                 style={{
-                  width: 42, height: 42, padding: 0, borderRadius: 9999,
+                  width: 40, height: 40, padding: 0, borderRadius: 9999,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
-                <Icon name="plus" size={20} color="#fff" />
+                <Icon name="plus" size={19} color="#fff" />
               </button>
             </div>
           </div>
@@ -837,13 +844,14 @@ export default function Packing_V2() {
             initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             onClick={() => setShowAdd(true)}
-            className="lg-btn lg-btn-glass"
+            className="lg-btn lg-btn-forest"
             style={{
-              width: '100%', height: 50, marginTop: 16, gap: 7,
+              width: '100%', height: 52, marginTop: 16, gap: 8,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14,
             }}
           >
-            <Icon name="plus" size={17} color="var(--lg-forest)" />
+            <Icon name="plus" size={16} color="#fff" />
             {locale === 'he' ? 'הוסף פריט' : 'Add item'}
           </m.button>
         )}
