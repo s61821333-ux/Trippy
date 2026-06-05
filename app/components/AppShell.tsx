@@ -157,6 +157,7 @@ function Shell() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
+  const [entryTripName, setEntryTripName] = useState<string | undefined>();
   const prevScreen = React.useRef(screen);
 
   const resolvedDark = themeMode === 'dark' || (themeMode === 'system' && osDark);
@@ -259,6 +260,7 @@ function Shell() {
   useEffect(() => {
     if (tripEntryCountries) {
       setEntryCountries(tripEntryCountries);
+      setEntryTripName(useAppStore.getState().trip?.name);
       setShowEntryAnim(true);
       clearTripEntry();
     }
@@ -495,6 +497,7 @@ function Shell() {
             {showEntryAnim && (
               <TripEntryAnimation
                 countries={entryCountries}
+                tripName={entryTripName}
                 onDone={() => setShowEntryAnim(false)}
               />
             )}

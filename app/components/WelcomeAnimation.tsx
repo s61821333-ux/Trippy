@@ -1,174 +1,282 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { LoaderTheme } from '@/lib/deriveTheme';
 import { BRAND_THEME } from '@/lib/deriveTheme';
 
+export interface CountryEntry {
+  name: string;
+  accent: string;
+}
+
 interface Props {
   theme?: LoaderTheme;
-  speed?: number;
+  countries?: CountryEntry[];
   dark?: boolean;
   duration?: number;
-  loop?: boolean;
   onDone?: () => void;
 }
 
-// Injected once — continuous animations used by the orbits/ribbons
 function WelcomeStyles() {
   return (
     <style>{`
-      @keyframes wlSpin  { from { transform: rotate(0);    } to { transform: rotate(360deg);  } }
-      @keyframes wlSpinR { from { transform: rotate(0);    } to { transform: rotate(-360deg); } }
-      @keyframes wlWave  { 0%   { transform: translateX(-8%) skewY(-7deg) scaleY(1);    }
-                           50%  { transform: translateX(8%)  skewY(7deg)  scaleY(1.08); }
-                           100% { transform: translateX(-8%) skewY(-7deg) scaleY(1);    } }
-      @keyframes wlHalo  { 0%,100% { transform: scale(.9);    opacity:.6; }
-                           50%     { transform: scale(1.08);  opacity:1;  } }
-      @keyframes wlPing  { 0%   { transform: scale(.4);  opacity:.8; }
-                           100% { transform: scale(2.4);  opacity:0;  } }
+      @keyframes wlHaloBreath {
+        0%, 100% { transform: scale(0.86); opacity: 0.72; }
+        50%       { transform: scale(1.05); opacity: 1; }
+      }
+      @keyframes wlSpinCW  { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
+      @keyframes wlSpinCCW { from { transform: rotate(360deg); } to { transform: rotate(0deg);    } }
+      @keyframes wlIndeterminate {
+        0%   { transform: translateX(-130%); }
+        100% { transform: translateX(320%); }
+      }
+      @keyframes wlCompassIn {
+        from { opacity: 0; transform: scale(0.62); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+      @keyframes wlBeadPop {
+        0%   { opacity: 0; transform: scale(0); }
+        60%  { opacity: 1; transform: scale(1.28); }
+        100% { opacity: 1; transform: scale(1); }
+      }
+      @keyframes wlBlurUp {
+        from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+        to   { opacity: 1; transform: none; filter: none; }
+      }
+      @keyframes wlSegDraw {
+        from { transform: scaleX(0); }
+        to   { transform: scaleX(1); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .wl-anim { animation: none !important; opacity: 1 !important;
+          transform: none !important; filter: none !important; }
+      }
     `}</style>
   );
 }
 
 export default function WelcomeAnimation({
   theme = BRAND_THEME,
-  speed = 1,
+  countries = [],
   dark = false,
-  duration = 4,
-  loop = false,
+  duration = 3.6,
   onDone,
 }: Props) {
-  const t = theme;
-  const dur = Math.max(1.4, duration / speed);
-  const [p, setP] = useState(0);
-  const rafRef = useRef(0);
-  const startRef = useRef(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    startRef.current = 0;
-    const tick = (now: number) => {
-      if (!startRef.current) startRef.current = now;
-      let prog = (now - startRef.current) / (dur * 1000);
-      if (prog >= 1) {
-        if (loop) { startRef.current = now; prog = 0; }
-        else prog = 1;
-      }
-      setP(prog);
-      if (prog < 1 || loop) rafRef.current = requestAnimationFrame(tick);
-      else if (onDone) onDone();
-    };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [dur, loop]); // eslint-disable-line react-hooks/exhaustive-deps
+    timerRef.current = setTimeout(() => onDone?.(), duration * 1000);
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, [duration]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── easing helpers ────────────────────────────────────────────────────────
-  const clamp = (x: number) => Math.max(0, Math.min(1, x));
-  const ph = (a: number, b: number) => clamp((p - a) / (b - a));
-  const smooth = (x: number) => x * x * (3 - 2 * x);
-  const back = (x: number) => {
-    const c = 1.7; const u = x - 1;
-    return 1 + (c + 1) * u * u * u + c * u * u;
-  };
+  const t = theme;
+  const spring = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
+  const snap   = 'cubic-bezier(0.25, 0, 0, 1)';
 
-  // ── phase envelopes ───────────────────────────────────────────────────────
-  const ribbonIn      = smooth(ph(0, 0.16));
-  const ribbonOut     = smooth(ph(0.74, 0.96));
-  const ribbonOpacity = ribbonIn * (1 - ribbonOut) * (dark ? 0.5 : 0.62);
+  const textColor  = dark ? 'oklch(92% 0.006 80)' : 'oklch(13% 0.012 55)';
+  const mutedColor = dark ? 'oklch(56% 0.014 55)' : 'oklch(60% 0.014 55)';
+  const ruleColor  = dark ? 'rgba(255,255,255,0.10)' : 'rgba(26,20,16,0.12)';
+  const paperHi    = dark ? '#211D18' : '#FFFCF8';
+  const paper      = dark ? '#0E0C0A' : '#F9F5EE';
 
-  const orbitIn       = smooth(ph(0.08, 0.4));
-  const orbitConverge = smooth(ph(0.58, 0.8));
-  const orbitScale    = 0.4 + 0.6 * orbitIn - 0.82 * orbitConverge;
-  const orbitOpacity  = orbitIn * (1 - orbitConverge);
+  const hasCountries = countries.length > 0 && countries.some(c => c.name);
 
-  const markP       = ph(0.6, 0.82);
-  const markScale   = markP < 1 ? 0.2 + 0.8 * back(markP) : 1;
-  const markOpacity = smooth(ph(0.6, 0.74));
-  const settle      = smooth(ph(0.86, 1));
+  // Orbit bead config — each country rides its own ring
+  const RADII = [96, 82, 68, 54];
+  const DURS  = [5.4, 3.6, 4.7, 2.9];
+  const beads = countries.map((c, i) => ({
+    accent: c.accent,
+    r:   RADII[i % RADII.length],
+    dur: DURS[i % DURS.length],
+    ccw: i % 2 === 1,
+    delay: 0.15 + i * 0.12,
+  }));
 
-  const wash = t.wash && t.wash.length ? t.wash : [t.c1, t.c2, t.c3];
-  const paper = dark ? '#17140F' : '#F4EFE8';
-  const sp = (s: number) => `${s / speed}s`;
+  // Compass point colors cycle through country accents
+  const pt = (idx: number) => beads[idx % Math.max(beads.length, 1)]?.accent ?? [t.c2, t.c1, t.c3, t.c3][idx] ?? t.c2;
 
-  const Orbit = (r: number, dash: string, color: string, w: number, dir: string, durS: number, op: number) => (
-    <svg viewBox="0 0 240 240" style={{
-      position: 'absolute', inset: 0, overflow: 'visible',
-      animation: `${dir} ${sp(durS)} linear infinite`, transformOrigin: '50% 50%',
-    }}>
-      <circle cx="120" cy="120" r={r} fill="none" stroke={color} strokeWidth={w}
-        strokeDasharray={dash} strokeLinecap="round" opacity={op} />
-    </svg>
-  );
+  // Destination phrase: "A", "A & B", "A, B & C"
+  const n = countries.filter(c => c.name).length;
+  const destParts = countries.filter(c => c.name).map((c, i) => {
+    const sep = i === 0 ? '' : i === n - 1 ? ' & ' : ', ';
+    return (
+      <React.Fragment key={i}>
+        {sep && <span style={{ opacity: 0.45 }}>{sep}</span>}
+        {c.name}
+      </React.Fragment>
+    );
+  });
 
   return (
     <div style={{
       position: 'absolute', inset: 0, overflow: 'hidden',
-      background: paper,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', gap: 'clamp(34px, 5.5vh, 58px)',
+      background: [
+        `radial-gradient(70% 55% at 50% 30%, ${t.c3}1a 0%, transparent 70%)`,
+        `radial-gradient(60% 50% at 18% 88%, ${t.c1}14 0%, transparent 72%)`,
+        `radial-gradient(60% 55% at 86% 80%, ${t.c2}14 0%, transparent 72%)`,
+        paper,
+      ].join(', '),
     }}>
       <WelcomeStyles />
 
-      {/* flag-color ribbons */}
+      {/* Film grain */}
       <div style={{
-        position: 'absolute', inset: '-30%', opacity: ribbonOpacity,
-        filter: 'blur(2px)', display: 'flex', flexDirection: 'column',
-      }}>
-        {wash.concat(wash.slice(0, Math.max(0, 5 - wash.length))).slice(0, 6).map((c, i) => (
-          <div key={i} style={{
-            flex: 1, background: c, transformOrigin: 'center',
-            animation: `wlWave ${sp(3.2 + i * 0.35)} ease-in-out infinite`,
-            animationDelay: sp(i * -0.4),
-          }} />
-        ))}
-      </div>
-
-      {/* paper veil so ribbons read as a soft wash */}
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        opacity: dark ? 0.4 : 0.55,
+        backgroundImage: 'radial-gradient(rgba(26,20,16,0.05) 1px, transparent 1.4px)',
+        backgroundSize: '7px 7px',
+      }} />
+      {/* Soft vignette */}
       <div style={{
-        position: 'absolute', inset: 0,
-        background: `radial-gradient(60% 55% at 50% 50%, ${paper}cc 0%, ${paper}66 55%, transparent 100%)`,
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        boxShadow: 'inset 0 0 240px rgba(26,20,16,0.10)',
       }} />
 
-      {/* halo */}
+      {/* Loader column */}
       <div style={{
-        position: 'absolute', width: '62%', aspectRatio: '1', borderRadius: '50%',
-        background: `radial-gradient(circle, ${t.c1}44 0%, ${t.c1}1f 34%, transparent 64%)`,
-        opacity: orbitOpacity + markOpacity * 0.6,
-        animation: `wlHalo ${sp(2.6)} ease-in-out infinite`,
-      }} />
-
-      {/* assembling orbits */}
-      <div style={{
-        position: 'absolute', width: '58%', aspectRatio: '1',
-        transform: `scale(${orbitScale})`, opacity: orbitOpacity,
+        position: 'relative', zIndex: 1,
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        gap: 'clamp(30px, 4.5vh, 50px)',
       }}>
-        {Orbit(104, '150 320', t.c1, 1.6, 'wlSpinR', 9, 0.5)}
-        {Orbit(96, '120 84 18 357', t.c2, 2, 'wlSpin', 5.4, 0.85)}
-        {Orbit(86, '58 38 22 410', t.c3, 2, 'wlSpinR', 3.6, 0.9)}
-        {Orbit(76, '44 60 18 356', t.c1, 2.6, 'wlSpin', 2.4, 0.95)}
-      </div>
 
-      {/* resolve: the recolored compass mark */}
-      <div style={{
-        position: 'absolute', width: '46%', aspectRatio: '1',
-        transform: `scale(${markScale})`, opacity: markOpacity,
-      }}>
-        {markP > 0 && markP < 1 && (
+        {/* ── Compass ─────────────────────────────────────────────── */}
+        <div role="status" aria-label="Preparing your trip"
+          style={{ position: 'relative', width: 224, height: 224 }}>
+          <div className="wl-anim" style={{
+            position: 'absolute', inset: 0,
+            animation: `wlCompassIn 0.75s ${spring} both`,
+          }}>
+            {/* Halo */}
+            <div className="wl-anim" style={{
+              position: 'absolute', inset: 0, borderRadius: '50%',
+              background: `radial-gradient(circle, ${t.c2}38 0%, ${t.c3}1a 30%, transparent 60%)`,
+              animation: `wlHaloBreath 2.8s ease-in-out infinite`,
+            }} />
+
+            {/* Orbit rings */}
+            {([
+              { r: 96, stroke: t.c1, w: 1,   dash: '2 9',              dir: 'wlSpinCCW', dur: '9s',   op: 0.30 },
+              { r: 90, stroke: t.c1, w: 1.5, dash: '120 84 18 357',    dir: 'wlSpinCW',  dur: '5.4s', op: 0.55 },
+              { r: 78, stroke: t.c3, w: 1.5, dash: '58 38 22 410',     dir: 'wlSpinCCW', dur: '3.6s', op: 0.70 },
+              { r: 64, stroke: t.c2, w: 2,   dash: '40 60 14 360',     dir: 'wlSpinCW',  dur: '2.4s', op: 0.80 },
+            ] as const).map((o, i) => (
+              <svg key={i} aria-hidden="true" viewBox="0 0 200 200" style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%',
+                overflow: 'visible', transformOrigin: '50% 50%',
+                animation: `${o.dir} ${o.dur} linear infinite`,
+              }}>
+                <circle cx="100" cy="100" r={o.r} fill="none"
+                  stroke={o.stroke} strokeWidth={o.w}
+                  strokeDasharray={o.dash} strokeLinecap="round" opacity={o.op} />
+              </svg>
+            ))}
+
+            {/* Country beads */}
+            {beads.map((b, i) => (
+              <svg key={i} aria-hidden="true" viewBox="0 0 200 200" style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%',
+                overflow: 'visible', transformOrigin: '50% 50%',
+                animation: `wlSpinCW ${b.dur}s linear infinite`,
+                animationDirection: b.ccw ? 'reverse' : 'normal',
+              }}>
+                <g className="wl-anim" style={{
+                  transformBox: 'fill-box', transformOrigin: 'center',
+                  animation: `wlBeadPop 0.6s ${spring} ${b.delay}s both`,
+                }}>
+                  <circle cx="100" cy={100 - b.r} r="9"   fill={b.accent} opacity="0.22" />
+                  <circle cx="100" cy={100 - b.r} r="5"   fill={b.accent} />
+                  <circle cx="100" cy={100 - b.r} r="1.8" fill={paperHi} opacity="0.85" />
+                </g>
+              </svg>
+            ))}
+
+            {/* Compass mark — slow full spin */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              animation: 'wlSpinCW 20s linear infinite',
+              transformOrigin: '50% 50%',
+            }}>
+              <svg width="150" height="150" viewBox="0 0 240 240"
+                aria-hidden="true" style={{ overflow: 'visible', display: 'block' }}>
+                <circle cx="120" cy="120" r="90" fill="none" stroke={textColor} strokeWidth="4" />
+                <path d="M120 36 L138 120 L120 124 L102 120 Z" fill={pt(0)} />
+                <path d="M120 204 L102 120 L120 116 L138 120 Z" fill={pt(1)} />
+                <path d="M204 120 L120 102 L116 120 L120 138 Z" fill={pt(2)} />
+                <path d="M36 120 L120 138 L124 120 L120 102 Z"  fill={pt(0)} opacity="0.6" />
+                <circle cx="120" cy="120" r="6" fill={textColor} />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Caption ─────────────────────────────────────────────── */}
+        {hasCountries && (
           <div style={{
-            position: 'absolute', inset: '14%', borderRadius: '50%',
-            border: `2px solid ${t.c2}`,
-            animation: `wlPing ${sp(1.1)} ease-out infinite`,
-          }} />
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
+            gap: 16, textAlign: 'center', width: 'min(640px, 88vw)',
+          }}>
+            <div className="wl-anim" style={{
+              fontSize: '0.8rem', letterSpacing: '0.20em', color: mutedColor,
+              fontFamily: 'var(--font-sans, system-ui)',
+              animation: `wlBlurUp 500ms ${spring} 0.45s both`,
+            }}>
+              Preparing your trip
+            </div>
+            <h1 className="wl-anim" style={{
+              margin: 0, width: '100%',
+              fontFamily: 'var(--font-serif, "Instrument Serif", Georgia, serif)',
+              fontStyle: 'italic', fontWeight: 400,
+              fontSize: 'clamp(2.1rem, 6vw, 3.4rem)',
+              lineHeight: 1.04, letterSpacing: '-0.02em',
+              color: textColor,
+              animation: `wlBlurUp 500ms ${spring} 0.55s both`,
+            }}>
+              {destParts}
+            </h1>
+            {/* Per-country color bars */}
+            <div className="wl-anim" style={{
+              display: 'flex', gap: 6, justifyContent: 'center',
+              animation: `wlBlurUp 500ms ${spring} 0.7s both`,
+            }}>
+              {countries.filter(c => c.name).map((c, i) => (
+                <span key={i} className="wl-anim" style={{
+                  display: 'block',
+                  width: 'clamp(24px, 6vw, 44px)', height: 4,
+                  borderRadius: 9999, background: c.accent,
+                  transformOrigin: 'left center',
+                  animation: `wlSegDraw 0.5s ${snap} ${0.75 + i * 0.1}s both`,
+                }} />
+              ))}
+            </div>
+          </div>
         )}
-        <svg viewBox="0 0 240 240" style={{
-          width: '100%', height: '100%', overflow: 'visible',
-          transform: `rotate(${(1 - settle) * -22}deg)`,
+
+        {/* ── Progress bar ────────────────────────────────────────── */}
+        <div className="wl-anim" aria-hidden="true" style={{
+          position: 'relative', width: 176, height: 3, borderRadius: 9999,
+          background: ruleColor, overflow: 'hidden',
+          animation: `wlBlurUp 500ms ${spring} 0.9s both`,
         }}>
-          <circle cx="120" cy="120" r="92" fill="none" stroke={t.ink} strokeWidth="4" opacity="0.92" />
-          <path d="M120 36 L138 120 L120 124 L102 120 Z" fill={t.c2} />
-          <path d="M120 204 L102 120 L120 116 L138 120 Z" fill={t.c1} />
-          <path d="M204 120 L120 102 L116 120 L120 138 Z" fill={t.c3} />
-          <path d="M36 120 L120 138 L124 120 L120 102 Z" fill={t.c3} />
-          <circle cx="120" cy="120" r="6.5" fill={t.ink} />
-        </svg>
+          <span style={{
+            position: 'absolute', top: 0, left: 0, height: '100%', width: '42%',
+            borderRadius: 9999,
+            background: `linear-gradient(90deg, transparent, ${t.c2}, transparent)`,
+            animation: `wlIndeterminate 1.7s cubic-bezier(0.65, 0, 0.35, 1) infinite`,
+          }} />
+        </div>
+
+        {/* ── Wordmark ─────────────────────────────────────────────── */}
+        <div className="wl-anim" style={{
+          fontFamily: 'var(--font-sans, system-ui)',
+          fontWeight: 700, letterSpacing: '-0.04em',
+          fontSize: '1.25rem', color: textColor,
+          animation: `wlBlurUp 500ms ${spring} 1s both`,
+        }}>
+          Trippy<span style={{ color: t.c2 }}>.</span>
+        </div>
       </div>
     </div>
   );
