@@ -459,32 +459,7 @@ export default function Home_V2() {
           <Icon name="arrow" size={18} color="#fff" />
         </m.button>
 
-        {/* Plan with AI — full itinerary generator */}
-        <m.button
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.28, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setShowAIPlan(true)}
-          className="lg"
-          aria-label={locale === 'he' ? 'בנה מסלול חכם' : 'Build a smart itinerary'}
-          style={{
-            width: '100%', height: 60,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 24px', marginBottom: 26,
-            fontFamily: 'var(--font-sans)', fontSize: 16, border: 0, cursor: 'pointer',
-            background: 'linear-gradient(135deg, oklch(38% 0.10 148 / 90%), oklch(30% 0.08 148 / 95%))',
-            boxShadow: 'var(--lg-glow-forest)',
-          }}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 11, color: '#fff', fontWeight: 700 }}>
-            <Icon name="sparkle" size={20} color="var(--lg-sand)" />
-            {locale === 'he' ? 'בנה מסלול חכם' : 'Build a smart itinerary'}
-          </span>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.65)', fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
-            {locale === 'he' ? 'תוכנית מלאה תוך שניות' : 'Full plan in seconds'}
-          </span>
-        </m.button>
+        {/* Plan with AI — full itinerary generator (hidden for now) */}
 
         {/* ── Resume banner — shown when a previous trip session is remembered ── */}
         {(() => {
