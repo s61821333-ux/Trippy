@@ -88,6 +88,16 @@
             "statusMessage": "Running pre-push checks (lint + build)...",
             "asyncRewake": true,
             "rewakeSummary": "Pre-push check results"
+          },
+          {
+            "type": "command",
+            "command": "Set-Location 'c:\\Users\\guy9d\\Desktop\\Trippy'; npm run test:fast; if ($LASTEXITCODE -ne 0) { exit 2 } else { exit 0 }",
+            "shell": "powershell",
+            "timeout": 300,
+            "statusMessage": "Running fast regression tests...",
+            "asyncRewake": true,
+            "rewakeMessage": "fast_test detected failures. Review the output and fix the issues:\n",
+            "rewakeSummary": "Fast test results"
           }
         ]
       }

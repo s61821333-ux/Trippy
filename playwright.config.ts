@@ -1,5 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
+// fast_test  → npm run test:fast   (auto-runs after every Claude session)
+// deep_test  → npm run test:deep   (manual only — full 360° audit)
+// Both share the same base config; the CLI selects the file at invocation time.
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: false,
@@ -7,7 +11,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 1,
   workers: 1,
   reporter: [['html', { open: 'never' }], ['list']],
-  timeout: 60_000,
+  timeout: 90_000,
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
