@@ -140,15 +140,6 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
               <span>{(t('settings') as string) || 'Settings'}</span>
             </button>
 
-            <button
-              onClick={() => { setExpandOpen(false); onWishlist?.(); }}
-              className="lg-btn"
-              style={{ height: 44, padding: '0 14px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', borderRadius: 20 }}
-            >
-              <Icon name="star" size={17} style={{ color: 'var(--lg-sand)' }} />
-              <span>{(t('wishlist') as string) || 'Wish List'}</span>
-            </button>
-
             {/* Danger action — visually separated */}
             <button
               onClick={() => { setExpandOpen(false); onLogout?.(); }}
@@ -162,35 +153,41 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
         )}
       </AnimatePresence>
 
-      {/* Main row: wishlist FAB + tab bar + add FAB */}
+      {/* Main row: menu FAB + tab bar + add FAB */}
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', pointerEvents: 'auto' }}>
 
-        {/* Wishlist FAB — left side */}
-        {onWishlist && (
-          <m.button
-            onClick={onWishlist}
-            initial={{ y: 12 }}
-            animate={{ y: 0 }}
-            transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.08 }}
-            whileTap={{ scale: 0.92 }}
-            className="lg lg-strong"
-            aria-label="Wish list"
-            style={{
-              width: 56, height: 56,
-              borderRadius: 9999,
-              flexShrink: 0,
-              border: 0,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              WebkitTapHighlightColor: 'transparent',
-              touchAction: 'manipulation',
-            }}
+        {/* Menu FAB — left side */}
+        <m.button
+          ref={menuBtnRef}
+          onClick={() => setExpandOpen(o => !o)}
+          initial={{ y: 12 }}
+          animate={{ y: 0 }}
+          transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.08 }}
+          whileTap={{ scale: 0.92 }}
+          className="lg lg-strong"
+          aria-label="Menu"
+          aria-expanded={expandOpen ? 'true' : 'false'}
+          style={{
+            width: 56, height: 56,
+            borderRadius: 9999,
+            flexShrink: 0,
+            border: 0,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation',
+          }}
+        >
+          <m.span
+            animate={{ rotate: expandOpen ? 180 : 0 }}
+            transition={HANDLE_SPRING}
+            style={{ display: 'flex' }}
           >
-            <Icon name="star" size={22} style={{ color: 'var(--lg-sand)' }} />
-          </m.button>
-        )}
+            <Icon name="menu" size={22} style={{ color: 'var(--text-3)' }} />
+          </m.span>
+        </m.button>
 
         {/* Tab bar pill */}
         <m.nav
@@ -228,36 +225,32 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             }}
           />
 
-          {/* Menu handle */}
-          <m.button
-            ref={menuBtnRef}
-            onClick={() => setExpandOpen(o => !o)}
-            whileTap={{ scale: 0.92 }}
-            transition={HANDLE_SPRING}
-            aria-label="Menu"
-            aria-expanded={expandOpen ? 'true' : 'false'}
-            style={{
-              width: 44,
-              height: 50,
-              border: 0,
-              background: 'transparent',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1,
-              flexShrink: 0,
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
-            <m.span
-              animate={{ rotate: expandOpen ? 180 : 0 }}
-              transition={HANDLE_SPRING}
-              style={{ display: 'flex' }}
+          {/* Wishlist button — first slot inside pill */}
+          {onWishlist && (
+            <m.button
+              onClick={onWishlist}
+              whileTap={{ scale: 0.92 }}
+              transition={ICON_SPRING}
+              aria-label="Wish list"
+              style={{
+                position: 'relative',
+                zIndex: 1,
+                width: 44,
+                height: 50,
+                border: 0,
+                background: 'transparent',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation',
+              }}
             >
-              <Icon name="menu" size={18} style={{ color: 'var(--text-3)' }} />
-            </m.span>
-          </m.button>
+              <Icon name="star" size={20} style={{ color: 'var(--lg-sand)' }} />
+            </m.button>
+          )}
 
           {/* Tabs */}
           {TABS.map((tab, i) => {
