@@ -7,7 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { getCurrencySymbol } from '@/lib/currency';
-import type { MapEvent } from '../ui/LeafletMap';
+import type { MapEvent, MapHotel } from '../ui/LeafletMap';
 import Icon from '../ui/Icon';
 
 // ── Dynamically import Leaflet (client-only, no SSR) ─────────────────────────
@@ -106,19 +106,38 @@ function EventCard({
         </button>
       </div>
 
-      {/* Go-to-day button */}
-      <button
-        onClick={() => onGoToDay(ev.day)}
-        style={{
-          marginTop: 12, width: '100%', height: 40, border: 0, borderRadius: 12, cursor: 'pointer',
-          background: dayColor, color: '#fff',
-          fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
-        }}
-      >
-        <Icon name="compass" size={14} color="#fff" />
-        {ev.dayLabel}
-      </button>
+      {/* Action row */}
+      <div style={{ marginTop: 12, display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => onGoToDay(ev.day)}
+          style={{
+            flex: 1, height: 40, border: 0, borderRadius: 12, cursor: 'pointer',
+            background: dayColor, color: '#fff',
+            fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+          }}
+        >
+          <Icon name="compass" size={14} color="#fff" />
+          {ev.dayLabel}
+        </button>
+
+        {/* Open in Google Maps */}
+        <a
+          href={`https://www.google.com/maps/search/?api=1&query=${ev.lat},${ev.lng}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            flexShrink: 0, width: 40, height: 40, borderRadius: 12,
+            background: 'var(--lg-panel)',
+            boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            textDecoration: 'none',
+          }}
+          aria-label="Open in Google Maps"
+        >
+          <Icon name="map" size={16} color="var(--lg-terra)" />
+        </a>
+      </div>
     </m.div>
   );
 }
@@ -234,6 +253,7 @@ export default function Map_V2() {
   const [selectedId,  setSelectedId]  = useState<string | null>(null);
   const [filterDay,   setFilterDay]   = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [exportToast, setExportToast] = useState(false);
 
   const currency = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
   const currSym  = getCurrencySymbol(currency);
@@ -266,6 +286,39 @@ export default function Map_V2() {
     }
     return out;
   }, [trip, locale]);
+
+  // Collect geocoded hotels
+  const hotelMarkers = useMemo<MapHotel[]>(() => {
+    if (!trip) return [];
+    return (trip.hotels ?? [])
+      .filter(h => h.lat != null && h.lng != null)
+      .map(h => ({
+        id:          h.id,
+        name:        h.name,
+        location:    h.location,
+        lat:         h.lat!,
+        lng:         h.lng!,
+        checkInDay:  h.checkInDay,
+        checkOutDay: h.checkOutDay,
+      }));
+  }, [trip]);
+
+  // Build a Google Maps route URL with all geocoded places in chronological order
+  const openAllInGoogleMaps = () => {
+    const pts = allMapEvents.slice().sort((a, b) => a.day - b.day || a.time.localeCompare(b.time));
+    if (pts.length === 0) return;
+    if (pts.length === 1) {
+      window.open(`https://www.google.com/maps/search/?api=1&query=${pts[0].lat},${pts[0].lng}`, '_blank');
+      return;
+    }
+    const origin = `${pts[0].lat},${pts[0].lng}`;
+    const destination = `${pts[pts.length - 1].lat},${pts[pts.length - 1].lng}`;
+    const waypoints = pts.slice(1, -1).map(p => `${p.lat},${p.lng}`).join('|');
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints ? `&waypoints=${waypoints}` : ''}`;
+    window.open(url, '_blank');
+    setExportToast(true);
+    setTimeout(() => setExportToast(false), 2500);
+  };
 
   // Apply day filter + search
   const visibleEvents = useMemo<(MapEvent & { dayLabel: string })[]>(() => {
@@ -301,6 +354,7 @@ export default function Map_V2() {
           selectedId={selectedId}
           onSelect={ev => setSelectedId(ev?.id ?? null)}
           tileApiKey={tileApiKey}
+          hotels={hotelMarkers}
         />
       </div>
 
@@ -362,9 +416,58 @@ export default function Map_V2() {
         )}
       </div>
 
+      {/* ── Export to Google Maps FAB ── */}
+      {allMapEvents.length > 0 && (
+        <m.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4, type: 'spring', stiffness: 380, damping: 26 }}
+          onClick={openAllInGoogleMaps}
+          className="lg lg-strong"
+          style={{
+            position: 'absolute',
+            bottom: 'calc(var(--nav-total-h, 92px) + 16px)',
+            right: 16,
+            zIndex: 30,
+            border: 0, cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 7,
+            padding: '10px 16px', borderRadius: 9999,
+            fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
+            letterSpacing: '0.06em', color: 'var(--lg-forest)',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+          aria-label={locale === 'he' ? 'פתח ב-Google Maps' : 'Open route in Google Maps'}
+        >
+          <Icon name="map" size={14} color="var(--lg-forest)" />
+          {locale === 'he' ? 'מסלול ב-Google Maps' : 'Open in Maps'}
+        </m.button>
+      )}
+
+      {/* Export toast */}
+      <AnimatePresence>
+        {exportToast && (
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="lg lg-strong"
+            style={{
+              position: 'absolute',
+              bottom: 'calc(var(--nav-total-h, 92px) + 72px)',
+              left: '50%', transform: 'translateX(-50%)',
+              zIndex: 40, padding: '10px 18px', borderRadius: 9999,
+              fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600,
+              color: 'var(--lg-ink)', whiteSpace: 'nowrap',
+            }}
+          >
+            {locale === 'he' ? 'נפתח ב-Google Maps ✓' : 'Opened in Google Maps ✓'}
+          </m.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Bottom card: event detail OR empty state ── */}
       <div style={{
-        position: 'absolute', left: 16, right: 16,
+        position: 'absolute', left: 16, right: allMapEvents.length > 0 ? 120 : 16,
         bottom: 'calc(var(--nav-total-h, 92px) + 8px)',
         zIndex: 20,
       }}>

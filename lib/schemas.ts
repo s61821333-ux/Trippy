@@ -39,6 +39,8 @@ export const AiSuggestionsBody = z.object({
   gapStart: z.number().int().min(0).max(1440).optional(),
   gapEnd: z.number().int().min(0).max(1440).optional(),
   locale: z.string().max(10).optional(),
+  hotelLocation: z.string().max(300).optional(),
+  hotelName: z.string().max(200).optional(),
 })
 
 export const CreateTripBody = z.object({

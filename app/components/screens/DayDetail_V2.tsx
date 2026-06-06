@@ -578,7 +578,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
       onClose={onClose}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <Field label={locale === 'he' ? 'שם האירוע' : 'Event name'} placeholder="—" value={name} onChange={setName} />
+        <Field label={locale === 'he' ? 'שם האירוע' : 'Event name'} placeholder="—" value={name} onChange={setName} autoFocus />
 
         {/* Start + End times */}
         <div style={{ display: 'flex', gap: 12 }}>

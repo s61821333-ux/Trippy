@@ -411,7 +411,7 @@ html, body {
   height: 100%;
   width: 100%;
   max-width: 100vw;
-  overflow-x: hidden;
+  overflow: hidden;
   font-family: var(--font-friendly), var(--font-sans);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -421,6 +421,15 @@ html, body {
   color: var(--text);
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent pull-to-refresh on all inner scroll containers */
+.overflow-y-auto,
+[style*="overflow-y: auto"],
+[style*="overflow-y:auto"],
+[style*="overflow: auto"],
+[style*="overflow:auto"] {
+  overscroll-behavior-y: contain;
 }
 
 h1, h2, h3, .font-display {

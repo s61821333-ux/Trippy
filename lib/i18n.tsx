@@ -508,6 +508,13 @@ const en = {
   logout: 'Log out',
   switchTrip: 'Switch trip',
   settings: 'Settings',
+  wishlist: 'Wish List',
+  wishlistTitle: 'Wish List',
+  wishlistEmpty: 'No items yet — add places you want to visit!',
+  wishlistAdd: 'Add to wish list',
+  wishlistSchedule: 'Schedule',
+  wishlistScheduleHint: 'Choose a day and time to add this to your itinerary',
+  wishlistScheduled: 'Added to Day',
 
   // Section 11 — Glossary / brand voice terms
   appTaglineAlt: 'Plan together. Discover more.',
@@ -1027,6 +1034,13 @@ const he: typeof en = {
   logout: 'התנתקות',
   switchTrip: 'החלף טיול',
   settings: 'הגדרות',
+  wishlist: 'רשימת משאלות',
+  wishlistTitle: 'רשימת משאלות',
+  wishlistEmpty: 'עדיין ריק — הוסף מקומות שאתה רוצה לבקר!',
+  wishlistAdd: 'הוסף לרשימת משאלות',
+  wishlistSchedule: 'תזמן',
+  wishlistScheduleHint: 'בחר יום ושעה להוסיף לסדר היום',
+  wishlistScheduled: 'נוסף ליום',
 
   // Section 11 — Glossary / brand voice terms
   appTaglineAlt: 'תכנן יחד. גלה יותר.',

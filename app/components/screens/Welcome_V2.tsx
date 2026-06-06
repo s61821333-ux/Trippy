@@ -1,16 +1,50 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { m } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import CompassMark from '../ui/CompassMark';
 import Icon from '../ui/Icon';
+import { getCountryColors } from '@/lib/countryColors';
+import { deriveTheme } from '@/lib/deriveTheme';
 
 export default function Welcome_V2() {
   const { t, locale } = useI18n();
   const signInWithGoogle = useAppStore(s => s.signInWithGoogle);
+  const trip             = useAppStore(s => s.trip);
   const [loading, setLoading] = useState(false);
+
+  // Derive soft country-hinted background
+  const bg = useMemo(() => {
+    const countries = trip?.countries ?? [];
+    if (countries.length > 0) {
+      const { colors } = getCountryColors(countries);
+      if (colors.length > 0) {
+        const theme = deriveTheme(colors);
+        const hex2rgba = (hex: string, a: number) => {
+          const r = parseInt(hex.slice(1, 3), 16);
+          const g = parseInt(hex.slice(3, 5), 16);
+          const b = parseInt(hex.slice(5, 7), 16);
+          return `rgba(${r},${g},${b},${a})`;
+        };
+        return [
+          `radial-gradient(72% 58% at 18% 8%, ${hex2rgba(theme.c1, 0.65)} 0%, transparent 54%)`,
+          `radial-gradient(56% 46% at 84% 14%, ${hex2rgba(theme.c2, 0.55)} 0%, transparent 46%)`,
+          `radial-gradient(62% 52% at 10% 90%, ${hex2rgba(theme.c3, 0.42)} 0%, transparent 54%)`,
+          `radial-gradient(44% 36% at 78% 78%, ${hex2rgba(theme.c1, 0.38)} 0%, transparent 48%)`,
+          `linear-gradient(165deg, ${hex2rgba(theme.c1, 0.95)}, ${hex2rgba(theme.c2, 0.9)})`,
+        ].join(', ');
+      }
+    }
+    return [
+      'radial-gradient(72% 58% at 18% 8%,  oklch(72% 0.16 58) 0%, transparent 54%)',
+      'radial-gradient(56% 46% at 84% 14%,  oklch(65% 0.17 26) 0%, transparent 46%)',
+      'radial-gradient(62% 52% at 10% 90%,  oklch(40% 0.10 160) 0%, transparent 54%)',
+      'radial-gradient(44% 36% at 78% 78%,  oklch(48% 0.13 36) 0%, transparent 48%)',
+      'linear-gradient(165deg, oklch(54% 0.145 44), oklch(27% 0.082 52))',
+    ].join(', ');
+  }, [trip?.countries?.join(',')]);
 
   const handleStart = async () => {
     setLoading(true);
@@ -26,13 +60,7 @@ export default function Welcome_V2() {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'flex-end',
-      background: [
-        'radial-gradient(72% 58% at 18% 8%,  oklch(72% 0.16 58) 0%, transparent 54%)',
-        'radial-gradient(56% 46% at 84% 14%,  oklch(65% 0.17 26) 0%, transparent 46%)',
-        'radial-gradient(62% 52% at 10% 90%,  oklch(40% 0.10 160) 0%, transparent 54%)',
-        'radial-gradient(44% 36% at 78% 78%,  oklch(48% 0.13 36) 0%, transparent 48%)',
-        'linear-gradient(165deg, oklch(54% 0.145 44), oklch(27% 0.082 52))',
-      ].join(', '),
+      background: bg,
     }}>
 
       {/* Ambient orb — amber */}

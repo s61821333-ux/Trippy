@@ -120,26 +120,18 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
       transition={{ delay: 0.06 + i * 0.04, duration: 0.36, ease: [0.22, 1, 0.36, 1] }}
       role="listitem"
       aria-label={`${item.name}${item.checked ? ', packed' : ', not packed'}`}
-      style={{ position: 'relative', overflow: 'hidden', borderRadius: 20 }}
+      style={{ position: 'relative', borderRadius: 20 }}
     >
-      {/* Red delete hint */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: 'absolute', inset: 0, borderRadius: 'inherit',
-          background: 'oklch(48% 0.22 25)',
-          display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
-          paddingInlineEnd: 20, pointerEvents: 'none',
-        }}
-      >
-        <Icon name="trash" size={20} color="rgba(255,255,255,0.9)" />
-      </div>
-
-      <m.button
+      <m.div
         drag="x"
         dragConstraints={{ left: DELETE_THRESHOLD, right: 0 }}
         dragElastic={{ left: 0.15, right: 0 }}
         whileTap={{ scale: 0.985 }}
+        role="button"
+        tabIndex={0}
+        onKeyDown={e => {
+          if (!didDrag.current && (e.key === 'Enter' || e.key === ' ')) onToggle(item.id);
+        }}
         onDragStart={() => { didDrag.current = false; }}
         onDrag={(_, info) => { if (Math.abs(info.offset.x) > 5) didDrag.current = true; }}
         onDragEnd={(_, info) => {
@@ -153,14 +145,12 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
           if (didDrag.current) { didDrag.current = false; return; }
           onToggle(item.id);
         }}
-        aria-label={`${item.name}${item.checked ? ', packed' : ', not packed'}`}
         aria-pressed={item.checked}
         style={{
           x,
           position: 'relative',
           display: 'flex', alignItems: 'center',
           padding: 0,
-          border: 0, cursor: 'pointer',
           textAlign: isRTL ? 'right' : 'left',
           width: '100%',
           WebkitTapHighlightColor: 'transparent',
@@ -174,6 +164,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
             : 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 22%), inset 0 0 0 1px oklch(100% 0 0 / 12%)',
           transition: 'box-shadow 0.25s',
           overflow: 'hidden',
+          cursor: 'pointer',
         }}
       >
         {/* Category accent stripe */}
@@ -194,7 +185,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
         <div style={{
           display: 'flex', alignItems: 'center', gap: 11,
           flex: 1, minWidth: 0,
-          padding: '12px 14px 12px 12px',
+          padding: '12px 10px 12px 12px',
           opacity: item.checked ? 0.46 : 1,
           transition: 'opacity 0.25s',
         }}>
@@ -222,7 +213,29 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
 
           <CheckCircle done={item.checked} />
         </div>
-      </m.button>
+
+        {/* Trash button — always visible, tapping deletes the item */}
+        <button
+          onClick={e => { e.stopPropagation(); onDelete(item.id); }}
+          aria-label={`Delete ${item.name}`}
+          style={{
+            flexShrink: 0,
+            background: 'none', border: 'none', cursor: 'pointer',
+            padding: '0 14px 0 8px',
+            alignSelf: 'stretch',
+            display: 'flex', alignItems: 'center',
+            color: 'var(--text-3)',
+            opacity: 0.55,
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'manipulation',
+            transition: 'opacity 0.2s',
+          }}
+          onPointerEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
+          onPointerLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.55'; }}
+        >
+          <Icon name="trash" size={15} color="currentColor" />
+        </button>
+      </m.div>
     </m.div>
   );
 }
@@ -278,6 +291,7 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
             value={itemName}
             onChange={handleNameChange}
             autoComplete="off"
+            autoFocus
           />
         </div>
 

@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { dayNumber, dayMeta, existingEvents, tripName, countries = [], exclude = [], gapStart, gapEnd, locale } = parsed.data;
+  const { dayNumber, dayMeta, existingEvents, tripName, countries = [], exclude = [], gapStart, gapEnd, locale, hotelLocation, hotelName } = parsed.data;
 
   const client = new Anthropic();
 
@@ -112,17 +112,22 @@ export async function POST(request: NextRequest) {
     ? `\nFree slot to fill: ${toHHMM(gapStart)} – ${toHHMM(gapEnd)} (${gapEnd - gapStart} min available). Every suggestion MUST start at or after ${toHHMM(gapStart)} and finish by ${toHHMM(gapEnd)}. Set "time" to a value within this window and keep "duration" short enough to fit.`
     : '';
 
-  const languageInstruction = locale === 'he'
-    ? '\nחשוב: השב בעברית בלבד. כל שדות "name" ו-"description" חייבים להיות בעברית. כתוב בשפה יומיומית וטבעית — קצר, ישיר, כמו שחבר היה ממליץ בע"פ. אל תכתוב בסגנון רשמי או שיווקי. שמות פרטיים של מקומות, מסעדות, אתרים ומותגים — השאר בשמם המקורי באנגלית, אל תתרגם אותם. אל תשתמש בשום אות ערבית — גם לא בתוך מילה עברית. כתוב אך ורק באותיות עבריות ואנגליות.'
+  const hotelLine = hotelLocation
+    ? `\nThe traveler is staying at: ${hotelName ? `${hotelName}, ` : ''}${hotelLocation}. Prioritize activities that are close to or easy to reach from this location. Do NOT suggest activities in a completely different city or region.`
     : '';
 
-  const prompt = `You are a trip planning assistant for "${tripName}" — a trip to ${destinationText}.
+  const isHebrew = locale === 'he';
+  const languageInstruction = isHebrew
+    ? '\n\n🔴 CRITICAL LANGUAGE RULE: You MUST respond ENTIRELY in Hebrew. Every single word in "name" and "description" fields must be in Hebrew (עברית). This is mandatory — no exceptions. Write naturally and casually, like a friend recommending. Proper nouns (restaurant names, landmarks, brands) stay in their original language. No Arabic letters ever — Hebrew and Latin only.'
+    : '';
 
-Day ${dayNumber} — ${regionText}
+  const prompt = `${isHebrew ? 'אתה עוזר תכנון טיולים. חובה להשיב בעברית בלבד.\n\n' : ''}You are a trip planning assistant for "${tripName}" — a trip to ${destinationText}.
+
+Day ${dayNumber} — ${regionText}${hotelLine}
 Existing schedule:
 ${eventsText}
 ${gapLine}
-Suggest exactly 4 NEW activities that complement this day's existing schedule and fit ${destinationText}.${exclude.length > 0 ? `\nDo NOT suggest any of these already-shown activities: ${exclude.join(', ')}.` : ''}${languageInstruction}
+Suggest exactly 4 NEW activities that complement this day's existing schedule and fit ${destinationText}. All suggestions MUST be located in or near ${destinationText} — never suggest places in other cities or countries.${exclude.length > 0 ? `\nDo NOT suggest any of these already-shown activities: ${exclude.join(', ')}.` : ''}${languageInstruction}
 Return ONLY valid JSON — an array of 4 objects with this exact shape:
 [
   {
@@ -148,7 +153,7 @@ location is a string representing the address or place.
 Respond with ONLY the JSON array, no other text.`;
 
   const systemPrompt = locale === 'he'
-    ? 'אתה עוזר טיולים. תמיד השב עם JSON תקין בלבד — ללא markdown, ללא הסברים. כל שדות הטקסט בעברית. כתוב בשפה יומיומית ורגועה — קצר, ישיר, לא פורמלי ולא שיווקי. כאילו מסביר לחבר. שמות פרטיים של מקומות, מסעדות, אתרים ומותגים — השאר בשמם המקורי באנגלית, אל תתרגם אותם. חשוב מאוד: אל תשתמש בשום אות ערבית — גם לא בתוך מילה עברית. כתוב אך ורק באותיות עבריות ואנגליות.'
+    ? 'אתה עוזר טיולים שמשיב אך ורק בעברית. חוק ברזל: כל שדות name ו-description חייבים להיות בעברית בלבד — אין יוצאים מן הכלל. השב תמיד עם JSON תקין בלבד, ללא markdown וללא הסברים. כתוב בשפה יומיומית, קצרה וישירה כמו חבר שממליץ. שמות פרטיים של מקומות ומותגים — השאר בשמם המקורי. אסור בהחלט להשתמש באותיות ערביות. כתוב אך ורק באותיות עבריות ואנגליות.'
     : 'You are a travel planning assistant. Always respond with valid JSON only — no markdown, no explanation.';
 
   const validCategories: Category[] = [

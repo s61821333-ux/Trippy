@@ -14,6 +14,7 @@ interface NavBarV2Props {
   onAdd?: () => void;
   onLogout?: () => void;
   onNotes?: () => void;
+  onWishlist?: () => void;
 }
 
 const TABS: {
@@ -34,7 +35,7 @@ const ICON_SPRING = { type: 'spring', stiffness: 380, damping: 28 } as const;
 const HANDLE_SPRING = { type: 'spring', stiffness: 320, damping: 26 } as const;
 const PANEL_SPRING = { type: 'spring', stiffness: 400, damping: 28 } as const;
 
-export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes }: NavBarV2Props) {
+export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes, onWishlist }: NavBarV2Props) {
   const { t, isRTL } = useI18n();
   const [expandOpen, setExpandOpen] = useState(false);
   const menuBtnRef = React.useRef<HTMLButtonElement>(null);
@@ -137,6 +138,15 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             >
               <Icon name="settings" size={17} style={{ color: 'var(--lg-forest)' }} />
               <span>{(t('settings') as string) || 'Settings'}</span>
+            </button>
+
+            <button
+              onClick={() => { setExpandOpen(false); onWishlist?.(); }}
+              className="lg-btn"
+              style={{ height: 44, padding: '0 14px', gap: 7, background: 'transparent', color: 'var(--lg-ink)', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', borderRadius: 20 }}
+            >
+              <Icon name="star" size={17} style={{ color: 'var(--lg-sand)' }} />
+              <span>{(t('wishlist') as string) || 'Wish List'}</span>
             </button>
 
             {/* Danger action — visually separated */}

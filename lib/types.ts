@@ -109,6 +109,19 @@ export interface HotelStay {
   checkOutDay: number;  // 1-indexed day number (exclusive — don't show banner on this day)
 }
 
+export interface WishlistItem {
+  id: string;
+  name: string;
+  category: Category;
+  notes?: string;
+  duration?: number;   // estimated minutes
+  cost?: number;
+  location?: string;
+  lat?: number;
+  lng?: number;
+  addedBy: string;
+}
+
 export interface Trip {
   name: string;
   days: number;
@@ -122,6 +135,7 @@ export interface Trip {
   expenses?: Expense[];
   emergencyContacts?: EmergencyContact[];
   hotels?: HotelStay[];
+  wishlist?: WishlistItem[];
   createdBy?: string;
   budget?: number;       // optional total budget limit for alerts
 }

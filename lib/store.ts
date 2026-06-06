@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, HotelStay, Screen, SupplyItem, Trip, TripEvent, TripInvitation, TripTheme } from './types';
+import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, HotelStay, Screen, SupplyItem, Trip, TripEvent, TripInvitation, TripTheme, WishlistItem } from './types';
 import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
 import { createClient as createSupabaseClient } from '@/utils/supabase/client';
 import {
@@ -116,6 +116,10 @@ interface AppState {
 
   addEmergencyContact: (contact: Omit<EmergencyContact, 'id'>) => void;
   deleteEmergencyContact: (id: string) => void;
+
+  addWishlistItem: (item: Omit<WishlistItem, 'id' | 'addedBy'>) => void;
+  deleteWishlistItem: (id: string) => void;
+  scheduleWishlistItem: (id: string, dayNumber: number, time: string) => void;
 
   setShowAddEvent: (v: boolean) => void;
   setShowSuggestions: (v: boolean, gapStart?: number, gapEnd?: number) => void;
@@ -828,6 +832,41 @@ export const useAppStore = create<AppState>()(
           trip: s.trip ? { ...s.trip, emergencyContacts: (s.trip.emergencyContacts ?? []).filter(c => c.id !== id) } : null,
         }));
         if (tripDbId) dbDeleteEmergencyContact(id, tripDbId).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+      },
+
+      addWishlistItem: (item) => {
+        const { authUser } = get();
+        const newItem: WishlistItem = { ...item, id: uid(), addedBy: authUser?.username ?? 'Me' };
+        set(s => ({
+          trip: s.trip ? { ...s.trip, wishlist: [...(s.trip.wishlist ?? []), newItem] } : null,
+        }));
+      },
+
+      deleteWishlistItem: (id) => {
+        set(s => ({
+          trip: s.trip ? { ...s.trip, wishlist: (s.trip.wishlist ?? []).filter(w => w.id !== id) } : null,
+        }));
+      },
+
+      scheduleWishlistItem: (id, dayNumber, time) => {
+        const { trip } = get();
+        if (!trip) return;
+        const item = (trip.wishlist ?? []).find(w => w.id === id);
+        if (!item) return;
+        // Add to the day as a regular event
+        get().addEvent(dayNumber, {
+          time,
+          duration: item.duration ?? 60,
+          name: item.name,
+          category: item.category,
+          location: item.location,
+          lat: item.lat,
+          lng: item.lng,
+          cost: item.cost,
+          notes: item.notes,
+        });
+        // Remove from wishlist
+        get().deleteWishlistItem(id);
       },
 
       setShowAddEvent: (v) => set({ showAddEvent: v }),

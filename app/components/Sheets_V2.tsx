@@ -278,6 +278,11 @@ export function AISheet({ dayNumber }: AISheetProps) {
       const existingEvents = trip.events[dayNumber] ?? [];
       const dayMeta = trip.dayMeta[dayNumber - 1];
 
+      // Find the hotel where the traveler is sleeping on this day
+      const currentHotel = (trip.hotels ?? []).find(
+        h => h.checkInDay <= dayNumber && h.checkOutDay > dayNumber
+      );
+
       fetch('/api/ai/suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -288,6 +293,8 @@ export function AISheet({ dayNumber }: AISheetProps) {
           gapStart: activeGapStart ?? undefined,
           gapEnd:   activeGapEnd   ?? undefined,
           locale,
+          hotelLocation: currentHotel?.location,
+          hotelName:     currentHotel?.name,
         }),
       }).then(async res => {
         if (!res.ok) {

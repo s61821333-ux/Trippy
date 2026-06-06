@@ -1,14 +1,48 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { m } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import CompassMark from '../ui/CompassMark';
+import { getCountryColors } from '@/lib/countryColors';
+import { deriveTheme } from '@/lib/deriveTheme';
 
 const ADVANCE_MS = 1900;
 
 export default function Splash_V2() {
-  const setScreen = useAppStore(s => s.setScreen);
+  const setScreen  = useAppStore(s => s.setScreen);
+  const trip       = useAppStore(s => s.trip);
+
+  // Derive soft country-hinted background from persisted trip countries
+  const bg = useMemo(() => {
+    const countries = trip?.countries ?? [];
+    if (countries.length > 0) {
+      const { colors } = getCountryColors(countries);
+      if (colors.length > 0) {
+        const theme = deriveTheme(colors);
+        // Convert hex colors to soft background gradients
+        const hex2rgba = (hex: string, a: number) => {
+          const r = parseInt(hex.slice(1, 3), 16);
+          const g = parseInt(hex.slice(3, 5), 16);
+          const b = parseInt(hex.slice(5, 7), 16);
+          return `rgba(${r},${g},${b},${a})`;
+        };
+        return [
+          `radial-gradient(70% 60% at 22% 12%, ${hex2rgba(theme.c1, 0.55)} 0%, transparent 52%)`,
+          `radial-gradient(55% 48% at 85% 18%, ${hex2rgba(theme.c2, 0.45)} 0%, transparent 48%)`,
+          `radial-gradient(60% 55% at 12% 88%, ${hex2rgba(theme.c3, 0.35)} 0%, transparent 52%)`,
+          `linear-gradient(155deg, ${hex2rgba(theme.c1, 0.9)}, ${hex2rgba(theme.c2, 0.85)})`,
+        ].join(', ');
+      }
+    }
+    // Default Trippy brand gradient
+    return [
+      'radial-gradient(70% 60% at 22% 12%, oklch(68% 0.15 62) 0%, transparent 52%)',
+      'radial-gradient(55% 48% at 85% 18%, oklch(60% 0.16 28) 0%, transparent 48%)',
+      'radial-gradient(60% 55% at 12% 88%, oklch(38% 0.10 160) 0%, transparent 52%)',
+      'linear-gradient(155deg, oklch(50% 0.13 48), oklch(30% 0.08 58))',
+    ].join(', ');
+  }, [trip?.countries?.join(',')]);
 
   useEffect(() => {
     // Skip auto-advance in Playwright test mode to prevent resetting injected state
@@ -35,12 +69,8 @@ export default function Splash_V2() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: [
-          'radial-gradient(70% 60% at 22% 12%, oklch(68% 0.15 62) 0%, transparent 52%)',
-          'radial-gradient(55% 48% at 85% 18%, oklch(60% 0.16 28) 0%, transparent 48%)',
-          'radial-gradient(60% 55% at 12% 88%, oklch(38% 0.10 160) 0%, transparent 52%)',
-          'linear-gradient(155deg, oklch(50% 0.13 48), oklch(30% 0.08 58))',
-        ].join(', '),
+        background: bg,
+        transition: 'background 0.6s ease',
       }}
     >
       {/* Ambient amber orb */}

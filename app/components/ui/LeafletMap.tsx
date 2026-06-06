@@ -108,22 +108,56 @@ export interface MapEvent {
   cost?:     number;
 }
 
+export interface MapHotel {
+  id:       string;
+  name?:    string;
+  location?: string;
+  lat:      number;
+  lng:      number;
+  checkInDay:  number;
+  checkOutDay: number;
+}
+
 interface Props {
   events:     MapEvent[];
   selectedId: string | null;
   onSelect:   (ev: MapEvent | null) => void;
   tileApiKey: string;
+  hotels?:    MapHotel[];
+}
+
+// ── Hotel icon ────────────────────────────────────────────────────────────────
+
+function makeHotelIcon() {
+  return L.divIcon({
+    className: '',
+    html: `<div style="
+      width:40px;height:40px;border-radius:10px;
+      background:#3B6E52;
+      display:flex;align-items:center;justify-content:center;
+      border:2.5px solid rgba(255,255,255,.95);
+      font-size:18px;
+      box-shadow:0 2px 12px rgba(0,0,0,.32);
+    ">🏨</div>`,
+    iconSize:   [40, 40],
+    iconAnchor: [20, 20],
+  });
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function LeafletMap({ events, selectedId, onSelect, tileApiKey }: Props) {
-  // Default centre: use first event or Tel Aviv
-  const centre: [number, number] = events.length > 0
-    ? [events[0].lat, events[0].lng]
+export default function LeafletMap({ events, selectedId, onSelect, tileApiKey, hotels = [] }: Props) {
+  // Default centre: use first event or first hotel or Tel Aviv
+  const allPoints = [...events, ...hotels];
+  const centre: [number, number] = allPoints.length > 0
+    ? [allPoints[0].lat, allPoints[0].lng]
     : [32.0853, 34.7818];
 
   const latlngs: [number, number][] = events.map(e => [e.lat, e.lng]);
+  const allLatlngs: [number, number][] = [
+    ...latlngs,
+    ...hotels.map(h => [h.lat, h.lng] as [number, number]),
+  ];
 
   const tileUrl =
     `https://maps.geoapify.com/v1/tile/klokantech-basic/{z}/{x}/{y}.png?apiKey=${tileApiKey}`;
@@ -141,7 +175,7 @@ export default function LeafletMap({ events, selectedId, onSelect, tileApiKey }:
         attribution='&copy; <a href="https://geoapify.com">Geoapify</a> &copy; <a href="https://openstreetmap.org/copyright">OSM</a>'
       />
 
-      <AutoFit latlngs={latlngs} />
+      <AutoFit latlngs={allLatlngs} />
 
       {/* Dashed route line */}
       {latlngs.length > 1 && (
@@ -165,6 +199,19 @@ export default function LeafletMap({ events, selectedId, onSelect, tileApiKey }:
           zIndexOffset={selectedId === ev.id ? 1000 : i}
           eventHandlers={{
             click: () => onSelect(selectedId === ev.id ? null : ev),
+          }}
+        />
+      ))}
+
+      {/* Hotel markers — always visible, not filterable */}
+      {hotels.map(h => (
+        <Marker
+          key={`hotel-${h.id}`}
+          position={[h.lat, h.lng]}
+          icon={makeHotelIcon()}
+          zIndexOffset={500}
+          eventHandlers={{
+            click: () => onSelect(null),
           }}
         />
       ))}

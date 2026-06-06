@@ -29,6 +29,7 @@ const TourOverlay        = dynamic(() => import('./TourOverlay'));
 const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
 const TermsModal         = dynamic(() => import('./TermsModal'));
 const OnboardingScreen   = dynamic(() => import('./OnboardingScreen'));
+const WishlistSheet      = dynamic(() => import('./screens/WishlistSheet'));
 
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
 function OfflineWatcher() {
@@ -158,6 +159,7 @@ function Shell() {
   const [showEntryAnim, setShowEntryAnim] = useState(false);
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
   const [entryTripName, setEntryTripName] = useState<string | undefined>();
+  const [showWishlist, setShowWishlist] = useState(false);
   const prevScreen = React.useRef(screen);
 
   const resolvedDark = themeMode === 'dark' || (themeMode === 'system' && osDark);
@@ -378,6 +380,8 @@ function Shell() {
             paddingTop: 'env(safe-area-inset-top, 0px)',
             paddingLeft: 'env(safe-area-inset-left, 0px)',
             paddingRight: 'env(safe-area-inset-right, 0px)',
+            overscrollBehavior: 'none',
+            touchAction: 'pan-x pan-y',
           }}
         >
           {/* Offline banner — shown above nav and content */}
@@ -438,6 +442,7 @@ function Shell() {
               onSwitch={() => setScreen('home')}
               onLogout={() => logout()}
               onNotes={() => setScreen('notes')}
+              onWishlist={() => setShowWishlist(true)}
             />
           )}
 
@@ -481,6 +486,9 @@ function Shell() {
             </AnimatePresence>
           </main>
           {showTour && <TourOverlay />}
+
+          {/* Wishlist sheet */}
+          {showWishlist && <WishlistSheet onClose={() => setShowWishlist(false)} />}
 
           {/* Terms modal: shown only after checkAuth has verified terms with the DB,
               preventing a flash for returning users whose persisted termsAccepted is stale */}
