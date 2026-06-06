@@ -522,12 +522,13 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
 }) {
   const { addExpense, deleteExpense } = useAppStore();
   const { t, locale } = useI18n();
+  const isHe = locale === 'he';
   const { show } = useToast();
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
-  const [paidBy, setPaidBy] = useState('');
-  const [budgetVal, setBudgetVal] = useState(trip?.budget ? String(trip.budget) : '');
   const [scanning, setScanning] = useState(false);
+  const [showBudgetInput, setShowBudgetInput] = useState(false);
+  const [budgetVal, setBudgetVal] = useState(trip?.budget ? String(trip.budget) : '');
   const fileRef = React.useRef<HTMLInputElement>(null);
 
   const handleScanReceipt = async (file: File) => {
@@ -545,124 +546,179 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
         body:    JSON.stringify({ imageBase64: base64, mediaType: file.type }),
       });
       const data = await res.json() as { description?: string; amount?: number; error?: string };
-      if (data.error) { show(locale === 'he' ? 'לא ניתן לקרוא את הקבלה' : 'Could not read receipt'); return; }
+      if (data.error) { show(isHe ? 'לא ניתן לקרוא את הקבלה' : 'Could not read receipt'); return; }
       if (data.description) setDesc(data.description);
       if (data.amount)      setAmount(String(data.amount));
-      show(locale === 'he' ? 'קבלה נסרקה!' : 'Receipt scanned!');
+      show(isHe ? 'קבלה נסרקה!' : 'Receipt scanned!');
     } catch {
-      show(locale === 'he' ? 'שגיאה בסריקה' : 'Scan failed');
+      show(isHe ? 'שגיאה בסריקה' : 'Scan failed');
     } finally {
       setScanning(false);
     }
   };
 
   const expenses = trip?.expenses ?? [];
-  const total = expenses.reduce((s: number, e: any) => s + e.amount, 0);
+  const manualTotal  = expenses.reduce((s: number, e: any) => s + e.amount, 0);
+  const eventsCostLocal = Object.values(trip?.events ?? {}).reduce((sum: number, evs: any) => {
+    return sum + (evs as any[]).reduce((s: number, ev: any) => s + (ev.cost ?? 0), 0);
+  }, 0);
+  const total = manualTotal + eventsCostLocal;
+  const remaining = trip?.budget != null ? trip.budget - total : null;
+  const pct = trip?.budget ? Math.min(1, total / trip.budget) : 0;
+  const statusColor = pct > 0.9 ? 'var(--danger)' : pct > 0.7 ? 'oklch(70% 0.18 68)' : 'var(--lg-forest)';
 
   const handleAdd = () => {
     const n = parseFloat(amount);
     if (!desc.trim() || isNaN(n) || n <= 0) { show(t('validExpenseError')); return; }
-    addExpense({ description: desc.trim(), amount: n, paidBy: paidBy.trim() || t('youLabel'), splitCount: 1 });
-    setDesc(''); setAmount(''); setPaidBy('');
+    addExpense({ description: desc.trim(), amount: n, paidBy: t('youLabel'), splitCount: 1 });
+    setDesc(''); setAmount('');
     show(t('expenseAdded'));
   };
 
   return (
-    <Sheet title={t('budgetSheetTitle')} onClose={onClose}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {/* Budget limit */}
-        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
-          <div style={{ flex: 1 }}>
-            <Field label={`${t('budgetLabel')} (${currSym})`} placeholder="0" value={budgetVal} onChange={setBudgetVal} type="number" />
+    <Sheet title={isHe ? 'תקציב והוצאות' : 'Budget & Expenses'} onClose={onClose}>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+        {/* ── Visual summary ring ── */}
+        <div className="lg" style={{ padding: '18px 20px', display: 'flex', alignItems: 'center', gap: 18 }}>
+          {/* Mini ring */}
+          <div style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
+            <svg width={64} height={64} style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx={32} cy={32} r={26} fill="none" stroke="oklch(50% 0.02 60 / 12%)" strokeWidth={7} />
+              <circle
+                cx={32} cy={32} r={26} fill="none"
+                stroke={statusColor}
+                strokeWidth={7}
+                strokeLinecap="round"
+                strokeDasharray={`${Math.round(pct * 163.36)} 163.36`}
+                style={{ transition: 'stroke-dasharray .5s ease, stroke .3s' }}
+              />
+            </svg>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: statusColor }}>
+              {Math.round(pct * 100)}%
+            </div>
           </div>
+          {/* Key numbers */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{isHe ? 'הוצאות' : 'Spent'}</span>
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--lg-ink)' }}>{currSym}{total.toLocaleString()}</span>
+            </div>
+            {remaining !== null && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{remaining >= 0 ? (isHe ? 'נותר' : 'Left') : (isHe ? 'חריגה' : 'Over')}</span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: statusColor }}>{currSym}{Math.abs(remaining).toLocaleString()}</span>
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+              <span style={{ fontSize: 11, color: 'var(--text-3)' }}>{isHe ? 'תקציב' : 'Budget'}</span>
+              {trip?.budget
+                ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--text-2)' }}>{currSym}{trip.budget.toLocaleString()}</span>
+                : <button
+                    onClick={() => setShowBudgetInput(true)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--lg-terra)', padding: 0 }}
+                  >
+                    + {isHe ? 'הגדר' : 'Set'}
+                  </button>
+              }
+            </div>
+          </div>
+        </div>
+
+        {/* ── Change budget button ── */}
+        {trip?.budget && !showBudgetInput && (
           <button
-            onClick={() => { const n = parseFloat(budgetVal); if (!isNaN(n) && n > 0) { onAddBudget(n); show(t('budgetSavedToast')); } }}
-            style={{ height: 48, padding: '0 16px', border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: '#fff', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: 'var(--lg-glow-forest)' }}
+            onClick={() => setShowBudgetInput(true)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, color: 'var(--text-3)', textAlign: 'start', padding: '0 2px', alignSelf: 'flex-start', textDecoration: 'underline' }}
           >
-            {t('setBudget')}
+            {isHe ? 'שנה תקציב' : 'Change budget limit'}
           </button>
-        </div>
+        )}
 
-        {/* Summary */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 13, color: 'var(--text-2)' }}>{t('totalSpent')}</span>
-          <span style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)' }}>
-            <CurrencyAmount amount={total} base={currCode} />
-          </span>
-        </div>
+        {/* ── Budget limit input (collapsible) ── */}
+        {showBudgetInput && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+            <div style={{ flex: 1 }}>
+              <Field label={`${isHe ? 'סכום תקציב' : 'Budget limit'} (${currSym})`} placeholder="0" value={budgetVal} onChange={setBudgetVal} type="number" autoFocus />
+            </div>
+            <button
+              onClick={() => {
+                const n = parseFloat(budgetVal);
+                if (!isNaN(n) && n > 0) { onAddBudget(n); show(t('budgetSavedToast')); setShowBudgetInput(false); }
+              }}
+              style={{ height: 48, padding: '0 16px', border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: '#fff', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: 'var(--lg-glow-forest)', flexShrink: 0 }}
+            >
+              {t('saveBtn')}
+            </button>
+            <button
+              onClick={() => setShowBudgetInput(false)}
+              style={{ height: 48, padding: '0 12px', border: 0, borderRadius: 14, background: 'var(--lg-panel)', color: 'var(--text-2)', fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
+            >
+              {t('cancel')}
+            </button>
+          </div>
+        )}
 
-        {/* Breakdown charts */}
+        {/* ── Category breakdown ── */}
         <BudgetBreakdown trip={trip} currSym={currSym} expenses={expenses} />
 
-        {/* Add expense */}
-        <div style={{ padding: '12px 14px', background: 'var(--lg-panel)', borderRadius: 16 }}>
-          {/* Hidden file input for receipt scanning */}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            style={{ display: 'none' }}
-            onChange={e => { const f = e.target.files?.[0]; if (f) handleScanReceipt(f); e.target.value = ''; }}
-          />
+        {/* ── Quick add expense ── */}
+        <div style={{ background: 'var(--lg-panel)', borderRadius: 18, padding: '14px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9, margin: 0 }}>{t('addExpenseLabel')}</p>
+            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9, margin: 0 }}>{isHe ? 'הוסף הוצאה' : 'Add expense'}</p>
             <button
               onClick={() => fileRef.current?.click()}
               disabled={scanning}
-              title={locale === 'he' ? 'סרוק קבלה' : 'Scan receipt'}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                background: 'none', border: 0, cursor: scanning ? 'default' : 'pointer',
-                color: scanning ? 'var(--text-3)' : 'var(--lg-terra)',
-                fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
-                padding: '3px 6px', borderRadius: 8,
-                opacity: scanning ? 0.6 : 1,
-              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 0, cursor: scanning ? 'wait' : 'pointer', color: 'var(--lg-terra)', fontWeight: 600, fontSize: 12, padding: '3px 6px', borderRadius: 8, opacity: scanning ? 0.5 : 1 }}
+              title={isHe ? 'סרוק קבלה' : 'Scan receipt'}
             >
               {scanning
-                ? <><div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite' }} /><style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style></>
-                : <Icon name="camera" size={14} color="var(--lg-terra)" />
-              }
-              {locale === 'he' ? 'סרוק קבלה' : 'Scan receipt'}
+                ? <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite' }} />
+                : <Icon name="camera" size={14} color="var(--lg-terra)" />}
+              {isHe ? 'סרוק' : 'Scan'}
             </button>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Field label={t('descriptionLabel')} placeholder="Coffee, taxi…" value={desc} onChange={setDesc} />
-            <div style={{ display: 'flex', gap: 10 }}>
-              <Field label={`${t('amountLabel')} (${currSym})`} placeholder="0" value={amount} onChange={setAmount} type="number" />
-              <Field label={t('paidByLabel')} placeholder={t('youLabel')} value={paidBy} onChange={setPaidBy} />
+          <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
+            onChange={e => { const f = e.target.files?.[0]; if (f) handleScanReceipt(f); e.target.value = ''; }} />
+          {/* Inline row: desc + amount + add */}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
+            <div style={{ flex: 2 }}>
+              <Field label={isHe ? 'תיאור' : 'What for?'} placeholder={isHe ? 'קפה, מונית…' : 'Coffee, taxi…'} value={desc} onChange={setDesc} />
+            </div>
+            <div style={{ flex: 1 }}>
+              <Field label={currSym} placeholder="0" value={amount} onChange={setAmount} type="number" />
             </div>
             <button
               onClick={handleAdd}
-              className="lg-btn lg-btn-forest"
-              style={{ height: 44, gap: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              style={{ height: 48, width: 48, flexShrink: 0, border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--lg-glow-forest)' }}
+              aria-label={isHe ? 'הוסף' : 'Add'}
             >
-              <Icon name="plus" size={15} color="#fff" />
-              {t('addBtn')}
+              <Icon name="plus" size={20} color="#fff" />
             </button>
           </div>
         </div>
 
-        {/* Expense list */}
+        {/* ── Expense list ── */}
         {expenses.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>{t('expenseHistoryLabel')}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9, margin: 0 }}>{isHe ? 'היסטוריה' : 'History'}</p>
             {expenses.map((exp: any) => (
-              <div key={exp.id} className="lg" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px' }}>
+              <div key={exp.id} className="lg" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.description}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-3)' }}>{exp.paidBy}</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.description}</div>
+                  {exp.paidBy && <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{exp.paidBy}</div>}
                 </div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--lg-ink)', flexShrink: 0 }}>
-                  <CurrencyAmount amount={exp.amount} base={currCode} />
+                  {currSym}{exp.amount.toLocaleString()}
                 </span>
-                <button
-                  onClick={() => { deleteExpense(exp.id); show(t('expenseRemovedToast')); }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}
+                <button onClick={() => { deleteExpense(exp.id); show(t('expenseRemovedToast')); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, opacity: 0.5, transition: 'opacity .2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = '0.5')}
                   aria-label={t('deleteExpenseLabel')}
                 >
-                  <Icon name="trash" size={15} color="var(--danger)" />
+                  <Icon name="trash" size={14} color="var(--danger)" />
                 </button>
               </div>
             ))}
@@ -786,6 +842,10 @@ export default function DashboardScreenV2() {
   const expenses  = trip.expenses ?? [];
   const eventsCost = Object.values(trip.events).reduce((sum, evs) => sum + getDayBudget(evs), 0);
   const totalSpent = expenses.reduce((s, e) => s + e.amount, 0) + eventsCost;
+
+  const budgetPct           = trip.budget ? Math.min(1, totalSpent / trip.budget) : 0;
+  const budgetRemaining     = trip.budget != null ? trip.budget - totalSpent : null;
+  const budgetStatusColor   = budgetPct > 0.9 ? 'var(--danger)' : budgetPct > 0.7 ? 'oklch(70% 0.18 68)' : 'var(--lg-forest)';
 
   const packedCount = supplies.filter(s => s.checked).length;
   const totalCount  = supplies.length;
@@ -1183,7 +1243,7 @@ export default function DashboardScreenV2() {
             </span>
           </button>
 
-          {/* Budget — tap to open full expense manager */}
+          {/* Budget — shows remaining when budget set, otherwise total spent + set CTA */}
           {/* div+role instead of button because CurrencyAmount renders its own <button> inside */}
           <div
             role="button"
@@ -1191,38 +1251,47 @@ export default function DashboardScreenV2() {
             className="lg a-rise d3"
             onClick={() => setShowBudgetEdit(true)}
             onKeyDown={e => e.key === 'Enter' && setShowBudgetEdit(true)}
-            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 4, cursor: 'pointer', textAlign: 'start' }}
+            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5, cursor: 'pointer', textAlign: 'start', minWidth: 0 }}
             aria-label={t('budgetLabel')}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>
-                {t('budgetLabel')}
+                {trip.budget
+                  ? (budgetRemaining! >= 0 ? (locale === 'he' ? 'נותר' : 'Remaining') : (locale === 'he' ? 'חריגה' : 'Over'))
+                  : t('budgetLabel')}
               </span>
               <Icon name="edit" size={12} color="var(--text-3)" />
             </div>
-            <span style={{ fontFamily: 'var(--font-serif)', fontSize: 26, color: 'var(--lg-ink)', lineHeight: 1 }}>
-              <CurrencyAmount amount={totalSpent} base={currency} />
-            </span>
+
             {trip.budget ? (
               <>
-                <div style={{ height: 6, borderRadius: 3, background: 'oklch(50% 0.02 60 / 14%)', overflow: 'hidden', marginTop: 4 }}>
-                  <div
-                    style={{
-                      width: `${Math.min(100, Math.round((totalSpent / trip.budget) * 100))}%`,
-                      height: '100%',
-                      background: totalSpent / trip.budget > 0.9 ? 'var(--danger)' : 'var(--lg-terra)',
-                      borderRadius: 3,
-                    }}
-                  />
+                {/* Hero: remaining (or overage) */}
+                <span style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: budgetStatusColor, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <CurrencyAmount amount={Math.abs(budgetRemaining!)} base={currency} />
+                </span>
+                {/* Thin progress bar */}
+                <div style={{ height: 4, borderRadius: 2, background: 'oklch(50% 0.02 60 / 14%)', overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${Math.round(budgetPct * 100)}%`,
+                    height: '100%',
+                    background: budgetStatusColor,
+                    borderRadius: 2,
+                    transition: 'width .4s, background .3s',
+                  }} />
                 </div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)' }}>
-                  {t('of')} <CurrencyAmount amount={trip.budget} base={currency} style={{ fontSize: 9, fontFamily: 'var(--font-mono)', fontWeight: 400 }} />
+                  {currSym}{totalSpent.toLocaleString()} {locale === 'he' ? 'מתוך' : 'of'} {currSym}{trip.budget.toLocaleString()}
                 </span>
               </>
             ) : (
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)' }}>
-                {t('tapToSetLimit')}
-              </span>
+              <>
+                <span style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)', lineHeight: 1 }}>
+                  <CurrencyAmount amount={totalSpent} base={currency} />
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--lg-terra)', fontWeight: 700 }}>
+                  + {locale === 'he' ? 'קבע תקציב' : 'Set budget'}
+                </span>
+              </>
             )}
           </div>
         </div>

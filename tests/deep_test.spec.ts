@@ -183,7 +183,9 @@ test.describe('A — Security: API authentication enforcement', () => {
   });
 
   test('A18 — account delete endpoint requires auth', async ({ request }) => {
-    const res = await request.post('/api/account/delete/request');
+    const res = await request.post('/api/account/delete/request', {
+      headers: { 'Content-Type': 'application/json' },
+    });
     expect([401, 403, 405]).toContain(res.status());
   });
 });

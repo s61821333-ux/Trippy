@@ -9,6 +9,7 @@ import Sheet from '../ui/Sheet';
 import Field from '../ui/Field';
 import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
+import PlacesInput from '../ui/PlacesInput';
 import { StampIcon } from '../ui/StampIcon';
 import { catStamp } from '@/lib/categoryStamp';
 import type { Category, WishlistItem } from '@/lib/types';
@@ -39,6 +40,8 @@ function AddWishItemSheet({ onClose }: { onClose: () => void }) {
   const [name,     setName]     = useState('');
   const [cat,      setCat]      = useState<Category>('attraction');
   const [location, setLocation] = useState('');
+  const [lat,      setLat]      = useState<number | undefined>();
+  const [lng,      setLng]      = useState<number | undefined>();
   const [duration, setDuration] = useState('60');
   const [notes,    setNotes]    = useState('');
 
@@ -48,6 +51,8 @@ function AddWishItemSheet({ onClose }: { onClose: () => void }) {
       name: name.trim(),
       category: cat,
       location: location.trim() || undefined,
+      lat,
+      lng,
       duration: parseInt(duration) || 60,
       notes: notes.trim() || undefined,
     });
@@ -97,11 +102,12 @@ function AddWishItemSheet({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <Field
+        <PlacesInput
           label={locale === 'he' ? 'מיקום (לא חובה)' : 'Location (optional)'}
-          placeholder={locale === 'he' ? 'כתובת או אזור…' : 'Address or area…'}
+          placeholder={locale === 'he' ? 'חפש מקום…' : 'Search for a place…'}
           value={location}
-          onChange={setLocation}
+          onChange={(name) => { setLocation(name); setLat(undefined); setLng(undefined); }}
+          onSelect={(place) => { setLocation(place.name); setLat(place.lat); setLng(place.lng); }}
         />
 
         <Field

@@ -335,6 +335,36 @@ function Shell() {
     }
   }, []);
 
+  // Prevent iOS Safari pull-to-refresh (the gesture causes a full page reload
+  // which shows the global loader). Allow vertical panning inside scroll containers
+  // that are not at their top boundary.
+  useEffect(() => {
+    let touchStartY = 0;
+    const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; };
+    const onTouchMove = (e: TouchEvent) => {
+      const dy = e.touches[0].clientY - touchStartY;
+      if (dy <= 0) return; // scrolling up — always fine
+      // Walk up from the target to find a scrollable ancestor
+      let el: Element | null = e.target as Element;
+      while (el && el !== document.documentElement) {
+        const style = window.getComputedStyle(el);
+        const oy = style.overflowY;
+        if (oy === 'auto' || oy === 'scroll') {
+          if ((el as HTMLElement).scrollTop > 0) return; // not at top — allow
+          break; // at top of scroll container → fall through to prevent
+        }
+        el = el.parentElement;
+      }
+      e.preventDefault();
+    };
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchmove', onTouchMove);
+    };
+  }, []);
+
   if (!mounted) {
     return (
       <div style={{

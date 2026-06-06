@@ -162,8 +162,35 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
         )}
       </AnimatePresence>
 
-      {/* Main row: tab bar + FAB */}
+      {/* Main row: wishlist FAB + tab bar + add FAB */}
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', pointerEvents: 'auto' }}>
+
+        {/* Wishlist FAB — left side */}
+        {onWishlist && (
+          <m.button
+            onClick={onWishlist}
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.08 }}
+            whileTap={{ scale: 0.92 }}
+            className="lg lg-strong"
+            aria-label="Wish list"
+            style={{
+              width: 56, height: 56,
+              borderRadius: 9999,
+              flexShrink: 0,
+              border: 0,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              WebkitTapHighlightColor: 'transparent',
+              touchAction: 'manipulation',
+            }}
+          >
+            <Icon name="star" size={22} style={{ color: 'var(--lg-sand)' }} />
+          </m.button>
+        )}
 
         {/* Tab bar pill */}
         <m.nav
