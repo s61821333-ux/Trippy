@@ -294,6 +294,7 @@ function AuthStep() {
         >
           <Turnstile
             siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''}
+            options={{ appearance: 'always' }}
             onSuccess={(token) => setCaptchaToken(token)}
             onExpire={() => setCaptchaToken(undefined)}
             onError={() => setCaptchaToken(undefined)}
