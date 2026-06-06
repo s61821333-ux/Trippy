@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { m, AnimatePresence } from 'framer-motion';
 import { blurUpVariants, staggerContainer } from '@/lib/motion';
 import GlassBtn from '../ui/GlassBtn';
@@ -108,6 +109,7 @@ function AuthStep() {
   const { signInWithGoogle } = useAppStore();
   const { t } = useI18n();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string>();
   const [webView] = useState(() => isInWebView());
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -125,6 +127,7 @@ function AuthStep() {
   }, []);
 
   const handleGoogle = async () => {
+    if (!captchaToken) return;
     setGoogleLoading(true);
     await signInWithGoogle();
     setGoogleLoading(false);
@@ -282,13 +285,28 @@ function AuthStep() {
           </m.div>
         )}
 
+        {/* Turnstile CAPTCHA */}
+        <m.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.46, duration: 0.40, ease: [0.25, 0, 0, 1] }}
+          style={{ display: 'flex', justifyContent: 'center', marginBottom: 16, position: 'relative', zIndex: 1 }}
+        >
+          <Turnstile
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ''}
+            onSuccess={(token) => setCaptchaToken(token)}
+            onExpire={() => setCaptchaToken(undefined)}
+            onError={() => setCaptchaToken(undefined)}
+          />
+        </m.div>
+
         {/* CTA — morphic primary pill */}
         <m.button
           initial={{ opacity: 0, y: 14, filter: 'blur(6px)' }}
           animate={{ opacity: 1, y: 0,  filter: 'blur(0px)' }}
           transition={{ delay: 0.50, duration: 0.45, ease: [0.25, 0, 0, 1] }}
           onClick={handleGoogle}
-          disabled={googleLoading}
+          disabled={googleLoading || !captchaToken}
           whileHover={{ scale: 1.015, transition: { type: 'spring', stiffness: 400, damping: 20 } }}
           whileTap={{ scale: 0.97, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
           className="specular-hover btn-morphic"
@@ -304,8 +322,8 @@ function AuthStep() {
             fontWeight: 600,
             letterSpacing: '0.16em',
             textTransform: 'uppercase',
-            cursor: googleLoading ? 'wait' : 'pointer',
-            opacity: googleLoading ? 0.75 : 1,
+            cursor: googleLoading ? 'wait' : !captchaToken ? 'not-allowed' : 'pointer',
+            opacity: googleLoading || !captchaToken ? 0.55 : 1,
             boxShadow: 'var(--lg-glow-terra), inset 0 1px 0 oklch(100% 0 0 / 30%)',
             WebkitTapHighlightColor: 'transparent',
             touchAction: 'manipulation',
