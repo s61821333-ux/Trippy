@@ -130,24 +130,6 @@ export default function NavBar_V2({
               width: 'min(260px, calc(100vw - 32px))',
             }}
           >
-            {/* Wishlist — prominent first item */}
-            {onWishlist && (
-              <button
-                onClick={() => { setExpandOpen(false); onWishlist(); }}
-                className="lg-btn"
-                style={{
-                  ...PANEL_BTN,
-                  background: 'oklch(100% 0 0 / 8%)',
-                  borderRadius: 20,
-                  marginBottom: 2,
-                  color: 'var(--lg-sand)',
-                }}
-              >
-                <Icon name="star" size={18} style={{ color: 'var(--lg-sand)' }} />
-                <span>{isHe ? 'רשימת משאלות' : 'Wish list'}</span>
-              </button>
-            )}
-
             <button
               onClick={() => { setExpandOpen(false); onSwitch?.(); }}
               className="lg-btn"
@@ -314,13 +296,54 @@ export default function NavBar_V2({
           })}
         </m.nav>
 
+        {/* Wishlist FAB */}
+        {onWishlist && (
+          <m.button
+            onClick={() => { setExpandOpen(false); onWishlist(); }}
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
+            transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
+            whileTap={{ scale: 0.92 }}
+            className="lg lg-strong"
+            aria-label="Wish list"
+            style={{
+              width: 52, height: 52,
+              borderRadius: 9999,
+              flexShrink: 0,
+              border: 0,
+              cursor: 'pointer',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 3,
+              WebkitTapHighlightColor: 'transparent',
+              touchAction: 'manipulation',
+            }}
+          >
+            <Icon name="star" size={19} style={{ color: 'var(--lg-sand)' }} />
+            <span style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 7,
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              color: 'var(--lg-sand)',
+              lineHeight: 1,
+              textTransform: 'uppercase',
+              whiteSpace: 'nowrap',
+            }}>
+              {isHe ? 'רצונות' : 'Wish'}
+            </span>
+          </m.button>
+        )}
+
         {/* Add FAB */}
         {onAdd && (
           <m.button
             onClick={onAdd}
             initial={{ y: 12 }}
             animate={{ y: 0 }}
-            transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
+            transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.12 }}
             whileTap={{ scale: 0.92 }}
             className="lg-btn lg-btn-forest"
             aria-label="Add"
