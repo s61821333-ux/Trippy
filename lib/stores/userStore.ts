@@ -47,7 +47,7 @@ export const useUserStore = create<UserState>()(
 
       logout: () => {
         signOut().catch(() => {});
-        set({ authUser: null, userId: null });
+        set({ authUser: null, userId: null, nickname: '' });
       },
 
       deleteAccount: async () => {

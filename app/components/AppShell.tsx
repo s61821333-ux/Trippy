@@ -206,7 +206,7 @@ function Shell() {
     // sees the already-loaded session and never fires INITIAL_SESSION with a null session.
     if (!supabaseRef.current) supabaseRef.current = createClient();
     const supabase = supabaseRef.current;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
         useAppStore.setState({ authUser: { id: session.user.id, username }, userId: session.user.id });
@@ -215,16 +215,20 @@ function Shell() {
         // never see the home/trip-picker screen flash before loadTripById navigates there.
         const cur = useAppStore.getState().screen;
         if (cur === 'login' || cur === 'welcome' || cur === 'splash') {
-          // Check if MFA is required before navigating
-          try {
-            const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-            if (aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2') {
-              setShowMfaChallenge(true);
-              return;
-            }
-          } catch { /* ignore — proceed normally if AAL check fails */ }
-          const { trip, tripDbId } = useAppStore.getState();
-          setScreen(trip || tripDbId ? 'dashboard' : 'home');
+          // Defer MFA check outside the onAuthStateChange lock — calling auth methods
+          // (like getAuthenticatorAssuranceLevel) inside the callback deadlocks because
+          // onAuthStateChange already holds the Supabase auth lock.
+          setTimeout(async () => {
+            try {
+              const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+              if (aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2') {
+                setShowMfaChallenge(true);
+                return;
+              }
+            } catch { /* ignore — proceed normally if AAL check fails */ }
+            const { trip, tripDbId } = useAppStore.getState();
+            setScreen(trip || tripDbId ? 'dashboard' : 'home');
+          }, 0);
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });

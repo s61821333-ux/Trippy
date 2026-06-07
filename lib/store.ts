@@ -72,7 +72,7 @@ interface AppState {
   /** Permanently delete all personal data and auth account. Shared trip content stays for co-participants. */
   deleteAccount: () => Promise<void>;
   /** Sign completely out of Supabase. Does NOT remove the user from the trip. */
-  logout: () => Promise<void>;
+  logout: () => void;
   /** Keep auth but unload the current trip so the user can pick another. */
   switchTrip: () => void;
   /** Remove the user from this trip's participant list, then unload it. */
@@ -452,22 +452,29 @@ export const useAppStore = create<AppState>()(
       },
 
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later
-      logout: async () => {
-        try { await signOut(); } catch {}
-        // Brute-force clear all Supabase auth cookies so onAuthStateChange cannot
-        // re-authenticate the user on next page load (guards against path-mismatch
-        // cookie deletion failures in signOut()).
+      logout: () => {
+        // Fire signOut without awaiting — prevents UI freeze when the Supabase API
+        // is slow or unreachable; local cleanup below is what actually logs the user out.
+        signOut().catch(() => {});
+
+        // Clear every sb-* cookie (Supabase session tokens).
+        // Also clear from localStorage in case createBrowserClient wrote there.
         if (typeof document !== 'undefined') {
           document.cookie.split(';').forEach(c => {
             const name = c.split('=')[0].trim();
             if (name.startsWith('sb-')) {
               document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+              document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax; Secure`;
             }
           });
         }
+        if (typeof localStorage !== 'undefined') {
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sb-')) localStorage.removeItem(key);
+          });
+        }
+
         set({ screen: 'splash', trip: null, tripDbId: null, supplies: [], activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false, termsChecked: false, lastSessionAt: null });
-        // Hard reload: clears all in-memory Supabase session state and forces
-        // a clean re-authentication on the next login.
         if (typeof window !== 'undefined') window.location.href = '/';
       },
 
