@@ -287,11 +287,12 @@ export default function Map_V2() {
     return out;
   }, [trip, locale]);
 
-  // Collect geocoded hotels
+  // Collect geocoded hotels, filtered to the selected day when active
   const hotelMarkers = useMemo<MapHotel[]>(() => {
     if (!trip) return [];
     return (trip.hotels ?? [])
       .filter(h => h.lat != null && h.lng != null)
+      .filter(h => filterDay == null || (h.checkInDay <= filterDay && filterDay < h.checkOutDay))
       .map(h => ({
         id:          h.id,
         name:        h.name,
@@ -301,7 +302,7 @@ export default function Map_V2() {
         checkInDay:  h.checkInDay,
         checkOutDay: h.checkOutDay,
       }));
-  }, [trip]);
+  }, [trip, filterDay]);
 
   // Build a Google Maps route URL with all geocoded places in chronological order
   const openAllInGoogleMaps = () => {

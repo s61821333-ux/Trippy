@@ -40,7 +40,7 @@ interface UIState {
 export const useUIStore = create<UIState>()(
   persist(
     (set) => ({
-      screen: 'login',
+      screen: 'welcome',
       themeMode: 'system',
       highContrast: false,
       reducedMotion: false,

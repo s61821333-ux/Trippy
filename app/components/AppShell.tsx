@@ -214,7 +214,7 @@ function Shell() {
         // If the user already has a persisted trip, jump straight to dashboard so they
         // never see the home/trip-picker screen flash before loadTripById navigates there.
         const cur = useAppStore.getState().screen;
-        if (cur === 'login' || cur === 'welcome' || cur === 'splash') {
+        if (cur === 'welcome' || cur === 'splash') {
           // Defer MFA check outside the onAuthStateChange lock — calling auth methods
           // (like getAuthenticatorAssuranceLevel) inside the callback deadlocks because
           // onAuthStateChange already holds the Supabase auth lock.
@@ -227,7 +227,15 @@ function Shell() {
               }
             } catch { /* ignore — proceed normally if AAL check fails */ }
             const { trip, tripDbId } = useAppStore.getState();
-            setScreen(trip || tripDbId ? 'dashboard' : 'home');
+            if (trip) {
+              setScreen('dashboard');
+            } else if (!tripDbId) {
+              // No trip at all — go to the trip picker
+              setScreen('home');
+            }
+            // tripDbId exists but trip not yet loaded: checkAuth → loadTripById
+            // will navigate to 'dashboard' once the trip is ready, avoiding a
+            // Home_V2 flash while the trip data is in flight.
           }, 0);
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
@@ -404,7 +412,7 @@ function Shell() {
     );
   }
 
-  const showNav = authUser && screen !== 'login' && screen !== 'splash' && screen !== 'welcome';
+  const showNav = authUser && screen !== 'splash' && screen !== 'welcome';
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
@@ -507,9 +515,9 @@ function Shell() {
                   <div className="w-full h-full">
                     {screen === 'splash' ? (
                       <Splash_V2 />
-                    ) : screen === 'welcome' || screen === 'login' ? (
+                    ) : screen === 'welcome' ? (
                       <Welcome_V2 />
-                    ) : !trip || screen === 'home' ? (
+                    ) : screen === 'home' || !trip ? (
                       <Home_V2 />
                     ) : screen === 'dashboard' ? (
                       <DashboardScreen />
@@ -545,7 +553,9 @@ function Shell() {
               onSuccess={() => {
                 setShowMfaChallenge(false);
                 const { trip, tripDbId } = useAppStore.getState();
-                setScreen(trip || tripDbId ? 'dashboard' : 'home');
+                if (trip) setScreen('dashboard');
+                else if (!tripDbId) setScreen('home');
+                // tripDbId without trip: loadTripById is in-flight and will navigate
               }}
               onSignOut={() => {
                 setShowMfaChallenge(false);

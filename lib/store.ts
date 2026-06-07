@@ -373,7 +373,7 @@ export const useAppStore = create<AppState>()(
           // Preserve the active screen/day only when the user is already inside the app.
           // Always navigate to dashboard when coming from any auth or landing screen so the
           // user is never stranded on splash/welcome/home after a trip loads.
-          const AUTH_SCREENS: string[] = ['login', 'home', 'splash', 'welcome'];
+          const AUTH_SCREENS: string[] = ['home', 'splash', 'welcome'];
           const navUpdate = isSameTrip && !AUTH_SCREENS.includes(currentScreen)
             ? {}  // preserve current screen/activeDay when refreshing an already-open trip
             : { screen: 'dashboard' as const, activeDay: 1 };
@@ -1049,7 +1049,7 @@ export const useAppStore = create<AppState>()(
         // pendingWriteCount / termsChecked intentionally excluded — reset to defaults on every load
       }),
       // Reset screen to 'splash' after rehydration — handles old stored 'screen' values
-      // (e.g. 'login', 'dashboard') that would otherwise skip the auth guard on reload.
+      // (e.g. 'dashboard') that would otherwise skip the auth guard on reload.
       onRehydrateStorage: () => (state) => {
         if (state) {
           state.screen = 'splash';

@@ -147,4 +147,4 @@ export interface Settlement {
   currency: string;
 }
 
-export type Screen = 'splash' | 'welcome' | 'login' | 'home' | 'dashboard' | 'day' | 'supplies' | 'settings' | 'notes' | 'map' | 'crew';
+export type Screen = 'splash' | 'welcome' | 'home' | 'dashboard' | 'day' | 'supplies' | 'settings' | 'notes' | 'map' | 'crew';
