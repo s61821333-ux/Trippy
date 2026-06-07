@@ -28,7 +28,6 @@ const CrewScreen        = dynamic(() => import('./screens/Crew_V2'),        { lo
 const TourOverlay        = dynamic(() => import('./TourOverlay'));
 const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
 const TermsModal         = dynamic(() => import('./TermsModal'));
-const OnboardingScreen   = dynamic(() => import('./OnboardingScreen'));
 const WishlistSheet      = dynamic(() => import('./screens/WishlistSheet'));
 const SecuritySettings   = dynamic(() => import('./screens/SecuritySettings'));
 const MFAChallenge       = dynamic(() => import('./screens/MFAChallenge'));
@@ -157,7 +156,6 @@ function Shell() {
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [osDark, setOsDark] = useState(false);
-  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
   const [entryTripName, setEntryTripName] = useState<string | undefined>();
@@ -250,11 +248,6 @@ function Shell() {
         if (!isTestMode && cur !== 'splash') setScreen('welcome');
       }
     });
-
-    // Show onboarding on first-ever device visit
-    if (!localStorage.getItem('trippy-onboarded')) {
-      setShowOnboarding(true);
-    }
 
     // Reload trip data from DB if the user has a stored tripDbId (no auto-navigation).
     checkAuth();
@@ -567,13 +560,6 @@ function Shell() {
           {/* Terms modal: shown only after checkAuth has verified terms with the DB,
               preventing a flash for returning users whose persisted termsAccepted is stale */}
           {authUser && termsChecked && !termsAccepted && <TermsModal />}
-
-          {/* Onboarding: shown only on first-ever device visit */}
-          <AnimatePresence>
-            {showOnboarding && (
-              <OnboardingScreen onDone={() => setShowOnboarding(false)} />
-            )}
-          </AnimatePresence>
 
           <AnimatePresence>
             {showEntryAnim && (
