@@ -1,10 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
-import { getCountryColors } from '@/lib/countryColors';
-import { deriveTheme } from '@/lib/deriveTheme';
-import WelcomeAnimation, { type CountryEntry } from './WelcomeAnimation';
+import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 
 interface Props {
   countries: string[];
@@ -12,16 +10,11 @@ interface Props {
   onDone: () => void;
 }
 
-export default function TripEntryAnimation({ countries, onDone }: Props) {
-  const { colors, names } = getCountryColors(countries);
-  const theme = deriveTheme(colors);
-
-  // Cycle the 3 derived accent colors across each visited country
-  const accents = [theme.c1, theme.c2, theme.c3];
-  const countryEntries: CountryEntry[] = names.map((name, i) => ({
-    name,
-    accent: accents[i % accents.length],
-  }));
+export default function TripEntryAnimation({ tripName, onDone }: Props) {
+  useEffect(() => {
+    const id = setTimeout(onDone, 1800);
+    return () => clearTimeout(id);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <AnimatePresence>
@@ -30,15 +23,38 @@ export default function TripEntryAnimation({ countries, onDone }: Props) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
-        style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
+        transition={{ duration: 0.22 }}
+        style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'var(--bg)',
+          display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+          gap: 28,
+        }}
       >
-        <WelcomeAnimation
-          theme={theme}
-          countries={countryEntries}
-          duration={3.6}
-          onDone={onDone}
-        />
+        <LoaderStyles />
+        <CompassLoader theme={BRAND_THEME} size={200} />
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+          <span style={{
+            fontFamily: 'var(--font-sans)',
+            fontSize: 22, fontWeight: 700, letterSpacing: '-0.04em',
+            color: 'var(--text)', lineHeight: 1,
+            direction: 'ltr', unicodeBidi: 'isolate',
+          }}>
+            Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+          </span>
+          {tripName && (
+            <span style={{
+              fontFamily: 'var(--font-serif)',
+              fontStyle: 'italic',
+              fontSize: 15,
+              color: 'var(--text-2)',
+              letterSpacing: '0.01em',
+            }}>
+              {tripName}
+            </span>
+          )}
+        </div>
       </m.div>
     </AnimatePresence>
   );
