@@ -66,7 +66,7 @@ function Divider() {
 
 // ── Main Settings_V2 ─────────────────────────────────────────────────────────
 
-export default function Settings_V2() {
+export default function Settings_V2({ onSecurity }: { onSecurity?: () => void }) {
   const { t, locale, setLocale, isRTL } = useI18n();
   const { show } = useToast();
 
@@ -300,6 +300,29 @@ export default function Settings_V2() {
           right={<Toggle on={highContrast} onClick={toggleHighContrast} label="High contrast" />}
         />
       </m.div>
+
+      {/* ── Security ── */}
+      {onSecurity && (
+        <>
+          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
+            {locale === 'he' ? 'אבטחה' : 'Security'}
+          </p>
+          <m.div
+            className="lg"
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.23, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            style={{ padding: '4px 16px', marginBottom: 16 }}
+          >
+            <Row
+              icon="lock"
+              title={locale === 'he' ? 'אבטחת חשבון' : 'Account Security'}
+              sub={locale === 'he' ? 'MFA, Passkeys ואפשרויות נוספות' : 'MFA, passkeys & more'}
+              right={<Icon name={isRTL ? 'chevL' : 'chevR'} size={16} style={{ color: 'var(--text-3)', flexShrink: 0 }} />}
+              onClick={onSecurity}
+            />
+          </m.div>
+        </>
+      )}
 
       {/* ── Switch trip ── */}
       <m.button

@@ -30,6 +30,8 @@ const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
 const TermsModal         = dynamic(() => import('./TermsModal'));
 const OnboardingScreen   = dynamic(() => import('./OnboardingScreen'));
 const WishlistSheet      = dynamic(() => import('./screens/WishlistSheet'));
+const SecuritySettings   = dynamic(() => import('./screens/SecuritySettings'));
+const MFAChallenge       = dynamic(() => import('./screens/MFAChallenge'));
 
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
 function OfflineWatcher() {
@@ -159,7 +161,9 @@ function Shell() {
   const [showEntryAnim, setShowEntryAnim] = useState(false);
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
   const [entryTripName, setEntryTripName] = useState<string | undefined>();
-  const [showWishlist, setShowWishlist] = useState(false);
+  const [showWishlist,    setShowWishlist]    = useState(false);
+  const [showSecurity,    setShowSecurity]    = useState(false);
+  const [showMfaChallenge, setShowMfaChallenge] = useState(false);
   const prevScreen = React.useRef(screen);
 
   const resolvedDark = themeMode === 'dark' || (themeMode === 'system' && osDark);
@@ -202,7 +206,7 @@ function Shell() {
     // sees the already-loaded session and never fires INITIAL_SESSION with a null session.
     if (!supabaseRef.current) supabaseRef.current = createClient();
     const supabase = supabaseRef.current;
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         const username = session.user.user_metadata?.full_name ?? session.user.email?.split('@')[0] ?? 'Traveler';
         useAppStore.setState({ authUser: { id: session.user.id, username }, userId: session.user.id });
@@ -211,6 +215,14 @@ function Shell() {
         // never see the home/trip-picker screen flash before loadTripById navigates there.
         const cur = useAppStore.getState().screen;
         if (cur === 'login' || cur === 'welcome' || cur === 'splash') {
+          // Check if MFA is required before navigating
+          try {
+            const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+            if (aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2') {
+              setShowMfaChallenge(true);
+              return;
+            }
+          } catch { /* ignore — proceed normally if AAL check fails */ }
           const { trip, tripDbId } = useAppStore.getState();
           setScreen(trip || tripDbId ? 'dashboard' : 'home');
         }
@@ -506,7 +518,7 @@ function Shell() {
                     ) : screen === 'supplies' ? (
                       <SuppliesScreen />
                     ) : screen === 'settings' ? (
-                      <SettingsScreen />
+                      <SettingsScreen onSecurity={() => setShowSecurity(true)} />
                     ) : screen === 'notes' ? (
                       <NotesScreen />
                     ) : null}
@@ -519,6 +531,24 @@ function Shell() {
 
           {/* Wishlist sheet */}
           {showWishlist && <WishlistSheet onClose={() => setShowWishlist(false)} />}
+
+          {/* Security settings sheet */}
+          {showSecurity && <SecuritySettings onClose={() => setShowSecurity(false)} />}
+
+          {/* MFA challenge — shown after OAuth if the account has MFA enrolled */}
+          {showMfaChallenge && (
+            <MFAChallenge
+              onSuccess={() => {
+                setShowMfaChallenge(false);
+                const { trip, tripDbId } = useAppStore.getState();
+                setScreen(trip || tripDbId ? 'dashboard' : 'home');
+              }}
+              onSignOut={() => {
+                setShowMfaChallenge(false);
+                logout();
+              }}
+            />
+          )}
 
           {/* Terms modal: shown only after checkAuth has verified terms with the DB,
               preventing a flash for returning users whose persisted termsAccepted is stale */}

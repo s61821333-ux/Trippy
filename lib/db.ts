@@ -67,6 +67,52 @@ export async function getSessionUserId(): Promise<string | null> {
   return session?.user?.id ?? null
 }
 
+// ─── MFA ─────────────────────────────────────────────────────────────────────
+
+export async function mfaListFactors() {
+  const { data, error } = await sb().auth.mfa.listFactors()
+  if (error) throw error
+  return data
+}
+
+export async function mfaEnrollTotp(friendlyName: string) {
+  const { data, error } = await sb().auth.mfa.enroll({ factorType: 'totp', friendlyName })
+  if (error) throw error
+  return data as {
+    id: string
+    totp: { qr_code: string; secret: string; uri: string }
+    type: 'totp'
+    friendly_name: string
+  }
+}
+
+export async function mfaEnrollPasskey(friendlyName: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (sb().auth.mfa as any).enroll({ factorType: 'webauthn', friendlyName })
+  if (error) throw error
+  return data
+}
+
+export async function mfaChallengeAndVerify(factorId: string, code: string) {
+  const supabase = sb()
+  const { data: ch, error: chErr } = await supabase.auth.mfa.challenge({ factorId })
+  if (chErr) throw chErr
+  const { data, error } = await supabase.auth.mfa.verify({ factorId, challengeId: ch.id, code })
+  if (error) throw error
+  return data
+}
+
+export async function mfaUnenroll(factorId: string) {
+  const { error } = await sb().auth.mfa.unenroll({ factorId })
+  if (error) throw error
+}
+
+export async function mfaGetLevel() {
+  const { data, error } = await sb().auth.mfa.getAuthenticatorAssuranceLevel()
+  if (error) throw error
+  return data
+}
+
 // ─── Trips ───────────────────────────────────────────────────────────────────
 
 export async function dbCreateTrip(
