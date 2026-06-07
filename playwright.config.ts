@@ -14,6 +14,7 @@ export default defineConfig({
   timeout: 120_000,
   use: {
     baseURL: 'http://localhost:3000',
+    actionTimeout: 15_000,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'off',

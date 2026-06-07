@@ -8,7 +8,7 @@ import { UpdateTripBody } from '@/lib/schemas'
 const TRIP_SELECT = `
   id, name, days, start_date, theme, trip_notes, countries, hotels, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
-  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes, added_by ),
+  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes, added_by, wishlist ),
   expenses ( id, description, amount, paid_by, split_count ),
   emergency_contacts ( id, name, phone, type ),
   supplies ( id, name, category, checked, critical, assignee ),
@@ -19,7 +19,7 @@ const TRIP_SELECT = `
 const TRIP_SELECT_FALLBACK = `
   id, name, days, start_date, theme, trip_notes, countries, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
-  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, added_by ),
+  events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, added_by, wishlist ),
   expenses ( id, description, amount, paid_by, split_count ),
   emergency_contacts ( id, name, phone, type ),
   supplies ( id, name, category, checked, critical, assignee ),
@@ -28,7 +28,7 @@ const TRIP_SELECT_FALLBACK = `
 
 function isMissingColumnError(msg?: string) {
   if (!msg) return false
-  return msg.includes('column') || msg.includes('hotels') || msg.includes('tags') || msg.includes('votes') || msg.includes('relationship')
+  return msg.includes('column') || msg.includes('hotels') || msg.includes('tags') || msg.includes('votes') || msg.includes('wishlist') || msg.includes('relationship')
 }
 
 function tryAdminClient() {

@@ -1,7 +1,7 @@
 'use client';
 
 import { m, AnimatePresence } from 'framer-motion';
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import Icon from './ui/Icon';
 import { Screen } from '@/lib/types';
 import { useI18n } from '@/lib/i18n';
@@ -78,7 +78,7 @@ export default function NavBar_V2({
     return () => document.removeEventListener('keydown', handler);
   }, [expandOpen]);
 
-  React.useEffect(() => {
+  useLayoutEffect(() => {
     menuBtnRef.current?.setAttribute('aria-expanded', expandOpen ? 'true' : 'false');
   }, [expandOpen]);
 
@@ -185,7 +185,6 @@ export default function NavBar_V2({
           whileTap={{ scale: 0.92 }}
           className="lg lg-strong"
           aria-label="Menu"
-          aria-expanded={expandOpen ? 'true' : 'false'}
           style={{
             width: 52, height: 52,
             borderRadius: 9999,

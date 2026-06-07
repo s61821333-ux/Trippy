@@ -97,5 +97,8 @@ export async function setupPage(page: Page, screen = 'dashboard', colorScheme: '
 export async function clickEl(page: Page, selector: string) {
   const locator = page.locator(selector).first();
   await locator.waitFor({ state: 'visible', timeout: 8_000 });
-  await locator.click();
+  // force: true bypasses Playwright's stability check — Framer Motion keeps
+  // requestAnimationFrame running for gesture detection, so elements are never
+  // considered "stable" by Playwright's default heuristic.
+  await locator.click({ force: true });
 }
