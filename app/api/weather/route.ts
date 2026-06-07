@@ -114,12 +114,14 @@ async function fetchGoogleWeather(
   return { time, temperature_2m_max, temperature_2m_min, weathercode, icon, label };
 }
 
-async function fetchOpenMeteoWeather(
+const toYMD = (d: Date) => d.toISOString().split('T')[0];
+
+// Open-Meteo forecast: works up to 16 days ahead
+async function fetchOpenMeteoForecast(
   lat: string, lng: string, startDate: string, days: number,
 ): Promise<DailyWeather | null> {
   const endDate = new Date(startDate);
   endDate.setDate(endDate.getDate() + days - 1);
-  const toYMD = (d: Date) => d.toISOString().split('T')[0];
 
   const url = new URL('https://api.open-meteo.com/v1/forecast');
   url.searchParams.set('latitude',   lat);
@@ -151,6 +153,67 @@ async function fetchOpenMeteoWeather(
   };
 }
 
+// Open-Meteo ERA5 archive: fetch the same calendar dates from one year ago as a climate estimate.
+// Useful when trip is > 16 days away and no forecast is available.
+async function fetchOpenMeteoClimateEstimate(
+  lat: string, lng: string, startDate: string, days: number,
+): Promise<(DailyWeather & { isEstimate: true }) | null> {
+  // Shift dates back one year
+  const start = new Date(startDate);
+  start.setFullYear(start.getFullYear() - 1);
+  const end = new Date(start);
+  end.setDate(end.getDate() + days - 1);
+
+  // Archive API only has data up to ~5 days before today
+  const archiveCutoff = new Date();
+  archiveCutoff.setDate(archiveCutoff.getDate() - 5);
+  if (end > archiveCutoff) {
+    // Clamp end to what's available
+    end.setTime(archiveCutoff.getTime());
+  }
+  if (start > archiveCutoff) return null;
+
+  const url = new URL('https://archive-api.open-meteo.com/v1/archive');
+  url.searchParams.set('latitude',   lat);
+  url.searchParams.set('longitude',  lng);
+  url.searchParams.set('daily',      'temperature_2m_max,temperature_2m_min,weathercode');
+  url.searchParams.set('timezone',   'auto');
+  url.searchParams.set('start_date', toYMD(start));
+  url.searchParams.set('end_date',   toYMD(end));
+
+  const res = await fetch(url.toString(), { next: { revalidate: 86400 } }); // cache 24h — historical
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  // Remap dates to the actual trip dates (not last year's dates)
+  const historicTimes = data?.daily?.time               as string[] ?? [];
+  const maxTemps      = data?.daily?.temperature_2m_max as number[] ?? [];
+  const minTemps      = data?.daily?.temperature_2m_min as number[] ?? [];
+  const codes         = data?.daily?.weathercode        as number[] ?? [];
+
+  // Generate trip date strings
+  const tripTimes: string[] = historicTimes.map((_, i) => {
+    const d = new Date(startDate);
+    d.setDate(d.getDate() + i);
+    return toYMD(d);
+  });
+
+  const icon:  string[] = codes.map(c => wmoToWeather(c).icon);
+  const label: string[] = codes.map(c => wmoToWeather(c).label);
+
+  return {
+    isEstimate:         true,
+    time:               tripTimes,
+    temperature_2m_max: maxTemps.map(Math.round),
+    temperature_2m_min: minTemps.map(Math.round),
+    weathercode:        codes,
+    icon,
+    label,
+  };
+}
+
+const FORECAST_HORIZON_DAYS = 16;
+
 // GET /api/weather?lat=...&lng=...&start=YYYY-MM-DD&days=N
 export async function GET(request: NextRequest) {
   // Rate limit: 30 requests/60s per IP
@@ -169,17 +232,33 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Try Google Weather API first; fall back to Open-Meteo
-    const googleData = await fetchGoogleWeather(lat, lng, days).catch(() => null);
-    const daily = googleData ?? await fetchOpenMeteoWeather(lat, lng, start, days);
+    // Determine if the trip start is within forecast range
+    const tripStart   = new Date(start + 'T00:00:00');
+    const today       = new Date(); today.setHours(0, 0, 0, 0);
+    const daysUntil   = Math.round((tripStart.getTime() - today.getTime()) / 86_400_000);
+    const isFarFuture = daysUntil > FORECAST_HORIZON_DAYS;
+
+    let daily: (DailyWeather & { isEstimate?: boolean }) | null = null;
+    let source = 'unknown';
+
+    if (!isFarFuture) {
+      // Within forecast window — try Google first, then Open-Meteo forecast
+      const googleData = await fetchGoogleWeather(lat, lng, days).catch(() => null);
+      daily = googleData ?? await fetchOpenMeteoForecast(lat, lng, start, days);
+      source = googleData ? 'google' : 'open-meteo';
+    } else {
+      // Too far out for a real forecast — use historical climate estimate
+      daily = await fetchOpenMeteoClimateEstimate(lat, lng, start, days);
+      source = 'climate-estimate';
+    }
 
     if (!daily) {
       return NextResponse.json({ error: 'Upstream error' }, { status: 502 });
     }
 
     return NextResponse.json(
-      { daily, source: googleData ? 'google' : 'open-meteo' },
-      { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200' } },
+      { daily, source, isEstimate: (daily as any).isEstimate ?? false },
+      { headers: { 'Cache-Control': `public, s-maxage=${isFarFuture ? 86400 : 3600}, stale-while-revalidate=${isFarFuture ? 172800 : 7200}` } },
     );
   } catch {
     return NextResponse.json({ error: 'Failed to fetch weather' }, { status: 502 });

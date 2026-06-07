@@ -328,7 +328,7 @@ export default function Home_V2() {
   const handleOpen = async (tripId: string) => {
     if (loadingTripId) return;
     setLoadingTripId(tripId);
-    try { await loadTripById(tripId); }
+    try { await loadTripById(tripId, { showLoader: true, showEntry: true }); }
     catch { show(t('tripNotFound')); }
     finally { setLoadingTripId(null); }
   };

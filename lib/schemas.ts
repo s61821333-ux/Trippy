@@ -157,6 +157,18 @@ export const AddEmergencyContactBody = z.object({
   type: z.enum(['personal', 'medical', 'embassy', 'insurance']).nullable().optional(),
 })
 
+export const AddWishlistBody = z.object({
+  id: z.string().max(100).optional(),
+  name: z.string().min(1).max(200),
+  category: Category,
+  location: z.string().max(300).nullable().optional(),
+  lat: z.number().nullable().optional(),
+  lng: z.number().nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
+  duration: z.number().int().min(1).max(1440).nullable().optional(),
+  cost: z.number().min(0).max(1_000_000).nullable().optional(),
+})
+
 export const PatchDayMetaBody = z.object({
   dayIndex: z.number().int().min(0).max(364),
   region: z.string().max(200).nullable().optional(),

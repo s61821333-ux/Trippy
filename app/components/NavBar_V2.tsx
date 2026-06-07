@@ -36,7 +36,7 @@ const HANDLE_SPRING = { type: 'spring', stiffness: 320, damping: 26 } as const;
 const PANEL_SPRING = { type: 'spring', stiffness: 400, damping: 28 } as const;
 
 export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes, onWishlist }: NavBarV2Props) {
-  const { t, isRTL } = useI18n();
+  const { t, isRTL, locale } = useI18n();
   const [expandOpen, setExpandOpen] = useState(false);
   const menuBtnRef = React.useRef<HTMLButtonElement>(null);
 
@@ -203,7 +203,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
             alignItems: 'center',
             padding: 7,
             borderRadius: 9999,
-            height: 64,
+            height: 70,
           }}
         >
           {/* Liquid blob — hidden when on a non-tab screen like Settings */}
@@ -216,7 +216,7 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
               top: 7,
               [isRTL ? 'right' : 'left']: 7 + 44,
               width: 44,
-              height: 50,
+              height: 56,
               borderRadius: 9999,
               background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
               boxShadow: 'var(--lg-glow-terra)',
@@ -236,19 +236,32 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                 position: 'relative',
                 zIndex: 1,
                 width: 44,
-                height: 50,
+                height: 56,
                 border: 0,
                 background: 'transparent',
                 cursor: 'pointer',
                 display: 'flex',
+                flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
+                gap: 3,
                 flexShrink: 0,
                 WebkitTapHighlightColor: 'transparent',
                 touchAction: 'manipulation',
               }}
             >
-              <Icon name="star" size={20} style={{ color: 'var(--lg-sand)' }} />
+              <Icon name="star" size={18} style={{ color: 'var(--lg-sand)' }} />
+              <span style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 8.5,
+                fontWeight: 600,
+                letterSpacing: '0.03em',
+                color: 'var(--lg-sand)',
+                lineHeight: 1,
+                whiteSpace: 'nowrap',
+              }}>
+                {locale === 'he' ? 'רשימה' : 'Wish'}
+              </span>
             </m.button>
           )}
 
@@ -267,13 +280,15 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                   position: 'relative',
                   zIndex: 1,
                   width: 44,
-                  height: 50,
+                  height: 56,
                   border: 0,
                   background: 'transparent',
                   cursor: 'pointer',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  gap: 3,
                   color: isActive ? '#fff' : 'var(--text-3)',
                   transition: 'color 0.3s',
                   flexShrink: 0,
@@ -286,8 +301,21 @@ export default function NavBar_V2({ active, onChange, onSettings, onSwitch, onAd
                   transition={ICON_SPRING}
                   style={{ display: 'flex' }}
                 >
-                  <Icon name={tab.icon} size={20} color={isActive ? '#fff' : 'var(--text-3)'} />
+                  <Icon name={tab.icon} size={18} color={isActive ? '#fff' : 'var(--text-3)'} />
                 </m.span>
+                <span style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: 8.5,
+                  fontWeight: 600,
+                  letterSpacing: '0.03em',
+                  color: isActive ? '#fff' : 'var(--text-3)',
+                  lineHeight: 1,
+                  opacity: isActive ? 1 : 0.75,
+                  transition: 'opacity 0.3s',
+                  whiteSpace: 'nowrap',
+                }}>
+                  {t(tab.labelKey) as string}
+                </span>
               </m.button>
             );
           })}

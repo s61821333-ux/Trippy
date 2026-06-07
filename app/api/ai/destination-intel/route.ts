@@ -31,19 +31,22 @@ export async function POST(request: NextRequest) {
   if (!country) return Response.json({ error: 'country required' }, { status: 400 });
 
   const langNote = locale === 'he'
-    ? 'Reply in Hebrew. Keep numbers and proper nouns in English.'
-    : 'Reply in English only. Do not use any other language.';
+    ? 'ענה בעברית. שמות פרטיים, מספרים וקודים — השאר באנגלית.'
+    : 'Reply in English only.';
 
-  const prompt = `Travel quick-facts for ${country}. ${langNote}
-Return ONLY minified JSON (no markdown):
-{"currency":"1 sentence about local currency and card acceptance","tipping":"1 sentence on tipping culture","customs":"1 key local custom travelers must know","safety":"1 sentence on safety level and top tip","adapter":"plug type, voltage, and whether a converter is needed","emergency":"police and ambulance numbers"}`;
+  const prompt = `Practical travel quick-facts for a visitor to ${country}. ${langNote}
+Be specific and actionable — real numbers, real names, real tips. Not generic advice.
+Return ONLY minified JSON (no markdown, no explanation):
+{"currency":"local currency name, whether cards are widely accepted, and any cash tips","tipping":"local tipping norm with specific amounts or percentages","customs":"one concrete local etiquette rule that surprises most visitors","safety":"honest safety rating and one specific precaution that matters here","adapter":"plug type letter(s), voltage, and whether a converter/adapter is needed","emergency":"police number and ambulance number"}`;
 
   try {
     const client = new Anthropic();
     const msg = await client.messages.create({
       model:      'claude-haiku-4-5-20251001',
-      max_tokens: 250,
-      system:     'Travel facts expert. Return only minified JSON.',
+      max_tokens: 300,
+      system:     locale === 'he'
+        ? 'אתה מומחה מידע לטיולים. ענה אך ורק ב-JSON מינימלי בעברית. מידע ספציפי ומדויק בלבד.'
+        : 'You are a practical travel expert. Return only minified JSON. Give specific, actionable facts — not generic travel advice.',
       messages:   [{ role: 'user', content: prompt }],
     });
 

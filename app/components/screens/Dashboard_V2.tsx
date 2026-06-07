@@ -10,7 +10,7 @@ import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
 import { useI18n } from '@/lib/i18n';
 import { fmtDate, getNextEvent, CAT_FALLBACK, fmtDuration, toMins, getDayBudget } from '@/lib/utils';
-import { fetchWeatherForTrip, WeatherDay } from '@/lib/weather';
+import { fetchWeatherForTrip, WeatherDay, WeatherResult } from '@/lib/weather';
 import { getCapitalCoords } from '@/lib/capitals';
 import { getTimezoneForCountry } from '@/lib/countryTimezones';
 import { getCurrencySymbol } from '@/lib/currency';
@@ -75,10 +75,10 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
 
 // ── Weather icon ─────────────────────────────────────────────────────────────
 
-function weatherIconName(label?: string): 'sun' | 'wind' | 'water' {
+function weatherIconName(label?: string): 'sun' | 'wind' | 'wave' {
   if (!label) return 'sun';
   if (/thunder|storm/i.test(label)) return 'wind';
-  if (/rain|shower|drizzle/i.test(label)) return 'water';
+  if (/rain|shower|drizzle/i.test(label)) return 'wave';
   return 'sun';
 }
 
@@ -203,7 +203,7 @@ function WeatherAlerts({ trip, weather, onGoToDay }: {
             key={day}
             style={{ padding: '11px 14px', borderRadius: 14, background: bg, border: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: 10 }}
           >
-            <Icon name={isStorm ? 'wind' : 'water'} size={16} color={color} style={{ flexShrink: 0 }} />
+            <Icon name={isStorm ? 'wind' : 'wave'} size={16} color={color} style={{ flexShrink: 0 }} />
             <p style={{ flex: 1, fontSize: 13, color, fontWeight: 500, margin: 0, lineHeight: 1.45 }}>{msg}</p>
             <button
               onClick={() => onGoToDay(day)}
@@ -576,7 +576,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
   };
 
   return (
-    <Sheet title={isHe ? 'תקציב והוצאות' : 'Budget & Expenses'} onClose={onClose}>
+    <Sheet title={isHe ? 'תקציב / הוצאות' : 'Budget / Expenses'} onClose={onClose}>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
@@ -747,7 +747,7 @@ export default function DashboardScreenV2() {
   const { t, locale } = useI18n();
   const { show } = useToast();
 
-  const [weather, setWeather] = useState<WeatherDay[]>([]);
+  const [weatherResult, setWeatherResult] = useState<WeatherResult>({ days: [], isEstimate: false });
   const [localTime, setLocalTime] = useState('');
   const [showBudgetEdit, setShowBudgetEdit] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
@@ -810,7 +810,7 @@ export default function DashboardScreenV2() {
     }
     if (!lat || !lng) return;
     fetchWeatherForTrip(lat, lng, trip.startDate, trip.days)
-      .then(setWeather)
+      .then(setWeatherResult)
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trip?.startDate, trip?.days, trip?.countries?.join(',')]);
@@ -856,6 +856,8 @@ export default function DashboardScreenV2() {
     (a, b) => toMins(a.time) - toMins(b.time),
   );
 
+  const weather = weatherResult.days;
+  const isEstimatedWeather = weatherResult.isEstimate;
   const todayWeather: WeatherDay | null = weather[currentDisplayDay - 1] ?? weather[0] ?? null;
   const isRTL = locale === 'he';
 
@@ -1042,6 +1044,16 @@ export default function DashboardScreenV2() {
               <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
                 <Icon name="sun" size={14} color="var(--lg-sand)" />
                 {todayWeather.tempMax}° · {destCity}
+                {isEstimatedWeather && (
+                  <span style={{
+                    fontSize: 9, fontWeight: 500, letterSpacing: '0.04em',
+                    color: 'oklch(98% 0.005 80 / 55%)',
+                    background: 'oklch(98% 0.005 80 / 10%)',
+                    borderRadius: 99, padding: '1px 5px',
+                  }}>
+                    {locale === 'he' ? 'הערכה' : 'est.'}
+                  </span>
+                )}
               </span>
             )}
             {localTime && (
@@ -1189,7 +1201,19 @@ export default function DashboardScreenV2() {
 
         {/* ── Weather alerts ── */}
         {weather.length > 0 && (
-          <WeatherAlerts trip={trip} weather={weather} onGoToDay={handleDayClick} />
+          <>
+            <WeatherAlerts trip={trip} weather={weather} onGoToDay={handleDayClick} />
+            {isEstimatedWeather && (
+              <p style={{
+                margin: '4px 0 0', fontSize: 11, color: 'var(--text-3)',
+                textAlign: isRTL ? 'right' : 'left',
+              }}>
+                {locale === 'he'
+                  ? 'מזג אוויר משוער — נתונים היסטוריים מאותה עונה בשנה שעברה'
+                  : 'Typical weather estimate — based on historical data from the same dates last year'}
+              </p>
+            )}
+          </>
         )}
 
         {/* ── Next up ── */}
@@ -1258,7 +1282,7 @@ export default function DashboardScreenV2() {
               <span className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9 }}>
                 {trip.budget
                   ? (budgetRemaining! >= 0 ? (locale === 'he' ? 'נותר' : 'Remaining') : (locale === 'he' ? 'חריגה' : 'Over'))
-                  : t('budgetLabel')}
+                  : (locale === 'he' ? 'תקציב' : 'Budget')}
               </span>
               <Icon name="edit" size={12} color="var(--text-3)" />
             </div>

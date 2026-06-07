@@ -118,43 +118,49 @@ export async function POST(request: NextRequest) {
 
   const isHebrew = locale === 'he';
   const languageInstruction = isHebrew
-    ? '\n\n🔴 CRITICAL LANGUAGE RULE: You MUST respond ENTIRELY in Hebrew. Every single word in "name" and "description" fields must be in Hebrew (עברית). This is mandatory — no exceptions. Write naturally and casually, like a friend recommending. Proper nouns (restaurant names, landmarks, brands) stay in their original language. No Arabic letters ever — Hebrew and Latin only.'
+    ? '\n\n🔴 CRITICAL: Respond ENTIRELY in Hebrew. Every word in "name" and "description" must be in Hebrew (עברית). Proper nouns (restaurant names, landmarks, brands) stay in their original script. No Arabic letters — Hebrew and Latin only.'
     : '';
 
-  const prompt = `${isHebrew ? 'אתה עוזר תכנון טיולים. חובה להשיב בעברית בלבד.\n\n' : ''}You are a trip planning assistant for "${tripName}" — a trip to ${destinationText}.
+  const prompt = `${isHebrew ? 'אתה עוזר תכנון טיולים. חובה להשיב בעברית בלבד.\n\n' : ''}Trip: "${tripName}" → ${destinationText}.
 
 Day ${dayNumber} — ${regionText}${hotelLine}
-Existing schedule:
+Today's schedule:
 ${eventsText}
 ${gapLine}
-Suggest exactly 4 NEW activities that complement this day's existing schedule and fit ${destinationText}. All suggestions MUST be located in or near ${destinationText} — never suggest places in other cities or countries.${exclude.length > 0 ? `\nDo NOT suggest any of these already-shown activities: ${exclude.join(', ')}.` : ''}${languageInstruction}
-Return ONLY valid JSON — an array of 4 objects with this exact shape:
+Give exactly 4 activity suggestions that:
+• Are genuinely worth doing in ${destinationText} — real local gems, not generic tourist traps
+• Complement what's already planned (no time conflicts, good variety of category and vibe)
+• Are all located in or near ${destinationText} — never suggest places in other cities
+• Feel like recommendations from someone who actually knows the place${exclude.length > 0 ? `\nSkip these already-suggested ones: ${exclude.join(', ')}.` : ''}${languageInstruction}
+
+For each description: 1–2 sentences max. Be specific and vivid — mention what makes it special, the atmosphere, or a practical tip. Sound like a knowledgeable local friend, not a tour brochure.
+
+Return ONLY valid JSON — array of exactly 4 objects:
 [
   {
     "id": "ai-1",
     "name": "Activity name",
     "category": "attraction",
-    "description": "One or two short sentences — casual and direct, like a friend recommending it.",
+    "description": "Specific, vivid, practical. What makes it worth going.",
     "duration": 90,
     "time": "10:00",
     "distance": "2.3 km away",
     "open": true,
     "cost": 150,
-    "location": "Address or general location"
+    "location": "Specific address or neighborhood"
   }
 ]
 
-category must be one of: food | cafe | attraction | rest | transport | flight | other
-time must be HH:MM and should not conflict with existing events.
-duration is in minutes (integer).
-open is a boolean indicating whether the place is likely open now.
-cost is an estimated cost in local currency (number).
-location is a string representing the address or place.
-Respond with ONLY the JSON array, no other text.`;
+category: food | cafe | attraction | rest | transport | other
+time: HH:MM, avoid conflicts with existing events
+duration: minutes (integer)
+open: true/false — best guess for typical opening
+cost: estimated local currency (number, 0 if free)
+Respond with ONLY the JSON array.`;
 
   const systemPrompt = locale === 'he'
-    ? 'אתה עוזר טיולים שמשיב אך ורק בעברית. חוק ברזל: כל שדות name ו-description חייבים להיות בעברית בלבד — אין יוצאים מן הכלל. השב תמיד עם JSON תקין בלבד, ללא markdown וללא הסברים. כתוב בשפה יומיומית, קצרה וישירה כמו חבר שממליץ. שמות פרטיים של מקומות ומותגים — השאר בשמם המקורי. אסור בהחלט להשתמש באותיות ערביות. כתוב אך ורק באותיות עבריות ואנגליות.'
-    : 'You are a travel planning assistant. Always respond with valid JSON only — no markdown, no explanation.';
+    ? 'אתה מדריך טיולים מקומי שמשיב אך ורק בעברית. חוק ברזל: שדות name ו-description חייבים להיות בעברית — אין יוצאים מן הכלל. השב עם JSON תקין בלבד, ללא markdown. כתוב בצורה חיה וספציפית — כמו חבר שמכיר את המקום, לא כמו מדריך תיירים. שמות פרטיים של מקומות ומותגים — השאר בשמם המקורי. אסור להשתמש באותיות ערביות.'
+    : 'You are a local travel expert. Respond with valid JSON only — no markdown, no preamble. Write descriptions that are specific, vivid, and practical — like a knowledgeable friend who actually knows the destination, not a generic travel guide.';
 
   const validCategories: Category[] = [
     'food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other',

@@ -279,7 +279,7 @@ function Shell() {
     }
     if (lastLoadedTripRef.current === tripDbId) return;
     lastLoadedTripRef.current = tripDbId;
-    loadTripById(tripDbId).catch(() => {
+    loadTripById(tripDbId, { showLoader: true, showEntry: false }).catch(() => {
       lastLoadedTripRef.current = null;
     });
   }, [authUser, tripDbId, trip, loadTripById]);

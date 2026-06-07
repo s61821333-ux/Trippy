@@ -35,7 +35,8 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
     if (timerRef.current) clearTimeout(timerRef.current);
   };
 
-  const handleOpen = () => {
+  const handleOpen = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
     if (isPeeking) { reset(); return; }
     if (!btnRef.current) return;
     setAnchorRect(btnRef.current.getBoundingClientRect());
@@ -120,7 +121,7 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
     <span style={{ display: 'inline-flex', alignItems: 'center', ...style }} className={className}>
       <button
         ref={btnRef}
-        onClick={handleOpen}
+        onClick={(e) => handleOpen(e)}
         title={isPeeking ? 'Click to reset' : 'Click to convert'}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',

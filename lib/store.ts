@@ -17,6 +17,7 @@ import {
   dbUpdateTripInfo as dbSyncTripInfo, dbUpdateTripTheme,
   dbGetPrivacyConsent, dbSavePrivacyConsent, TERMS_VERSION,
   dbDeleteAccount,
+  dbAddWishlistItem, dbDeleteWishlistItem,
 } from './db';
 
 interface AppState {
@@ -61,7 +62,7 @@ interface AppState {
   clearTripEntry: () => void;
   recordDemoClick: () => void;
   loadDemoTrip: () => void;
-  loadTripById: (tripId: string) => Promise<void>;
+  loadTripById: (tripId: string, opts?: { showLoader?: boolean; showEntry?: boolean }) => Promise<void>;
   createTrip: (name: string, days: number, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[], currency?: string) => Promise<void>;
   loadInvitations: () => Promise<void>;
   acceptInvitation: (invitationId: string) => Promise<void>;
@@ -336,18 +337,18 @@ export const useAppStore = create<AppState>()(
       })),
 
 
-      loadTripById: async (tripId) => {
+      loadTripById: async (tripId, { showLoader = true, showEntry = false } = {}) => {
         const { authUser, trip: localTrip, tripDbId: localTripDbId, nickname: storedNickname } = get();
         // Preserve any custom nickname the user already set; only fall back to authUser.username on first load
         const nickname = storedNickname || (authUser?.username ?? 'Traveler');
         let userId = authUser?.id ?? null;
         if (!userId) userId = await getSessionUserId();
         if (!userId) throw new Error('not_authed');
-        // Show the full-screen loader only for first-time loads (no cached data yet).
-        // Background refreshes triggered by real-time events or reconnect run silently
-        // so the UI never flashes blank while the user is actively viewing the trip.
+        // Show the full-screen loader for explicit navigations (home screen → trip).
+        // Background refreshes (realtime, reconnect) call with showLoader=false so the UI
+        // never flashes blank while the user is actively viewing the trip.
         const isFirstLoad = localTripDbId !== tripId || !localTrip;
-        if (isFirstLoad) set({ isGlobalLoading: true });
+        if (isFirstLoad || showLoader) set({ isGlobalLoading: true });
         try {
           const data = await dbLoadTripById(tripId);
           if (!data) throw new Error('not_found');
@@ -383,7 +384,7 @@ export const useAppStore = create<AppState>()(
             supplies,
             nickname,
             ...navUpdate,
-            tripEntryCountries: !isSameTrip && trip.countries?.length ? trip.countries : null,
+            tripEntryCountries: (showEntry || !isSameTrip) && trip.countries?.length ? trip.countries : null,
             isGlobalLoading: false,
           });
           // Flush any writes that failed in a previous session for this trip.
@@ -835,17 +836,20 @@ export const useAppStore = create<AppState>()(
       },
 
       addWishlistItem: (item) => {
-        const { authUser } = get();
+        const { authUser, tripDbId } = get();
         const newItem: WishlistItem = { ...item, id: uid(), addedBy: authUser?.username ?? 'Me' };
         set(s => ({
           trip: s.trip ? { ...s.trip, wishlist: [...(s.trip.wishlist ?? []), newItem] } : null,
         }));
+        if (tripDbId) dbAddWishlistItem(tripDbId, newItem).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
       },
 
       deleteWishlistItem: (id) => {
+        const { tripDbId } = get();
         set(s => ({
           trip: s.trip ? { ...s.trip, wishlist: (s.trip.wishlist ?? []).filter(w => w.id !== id) } : null,
         }));
+        if (tripDbId) dbDeleteWishlistItem(tripDbId, id).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
       },
 
       scheduleWishlistItem: (id, dayNumber, time) => {
@@ -916,7 +920,7 @@ export const useAppStore = create<AppState>()(
             debounceTimer = null;
             // Skip reload if the store is already mid-load (prevents cascade)
             if (get().isGlobalLoading) return;
-            get().loadTripById(tripId).catch(() => {});
+            get().loadTripById(tripId, { showLoader: false }).catch(() => {});
           }, 150);
         };
 
@@ -925,7 +929,7 @@ export const useAppStore = create<AppState>()(
           // Poll every 30 s as a fallback when WebSocket is unavailable (e.g. Brave shields)
           pollTimer = setInterval(() => {
             if (!get().isGlobalLoading && get().tripDbId === tripId) {
-              get().loadTripById(tripId).catch(() => {});
+              get().loadTripById(tripId, { showLoader: false }).catch(() => {});
             }
           }, 30_000);
         };

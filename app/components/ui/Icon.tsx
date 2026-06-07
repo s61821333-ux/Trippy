@@ -7,7 +7,8 @@ type IconName =
   | 'share' | 'map' | 'sparkle' | 'trash' | 'edit' | 'x' | 'check' | 'sun'
   | 'wind' | 'lock' | 'pin' | 'download' | 'compass' | 'tent' | 'water'
   | 'calExport' | 'user' | 'users' | 'search' | 'filter' | 'ai' | 'clock' | 'arrow' | 'menu' | 'grid' | 'swap'
-  | 'plane' | 'music' | 'film' | 'gift' | 'camera' | 'ship' | 'bike' | 'hot' | 'star';
+  | 'plane' | 'music' | 'film' | 'gift' | 'camera' | 'ship' | 'bike' | 'hot' | 'star'
+  | 'fork' | 'cup' | 'wave' | 'ticket' | 'tag';
 
 interface IconProps {
   name: IconName;
@@ -60,6 +61,11 @@ const PATHS: Partial<Record<IconName, string>> = {
   bike:      `<circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6a1 1 0 0 0-1-1h-1M9.5 14l5-8.5M12 17.5h3l3-8.5M6 10l1.5 7.5"/>`,
   hot:       `<path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/><path d="M12 22V12"/>`,
   star:      `<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>`,
+  fork:      `<path d="M5 3v4a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2V3M9 9v12M19 3v18M17 3v3a2 2 0 0 0 4 0V3"/>`,
+  cup:       `<path d="M17 8h1a4 4 0 0 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4zM6 2v3M10 2v3M14 2v3"/>`,
+  wave:      `<path d="M2 12c1.5-2 3-3 5-3s3.5 2 5.5 2 3.5-2 5.5-2M2 6c1.5-2 3-3 5-3s3.5 2 5.5 2 3.5-2 5.5-2M2 18c1.5-2 3-3 5-3s3.5 2 5.5 2 3.5-2 5.5-2"/>`,
+  ticket:    `<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4zM10 7v10"/>`,
+  tag:       `<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5"/>`,
 };
 
 export default function Icon({ name, size = 20, style = {}, color }: IconProps) {

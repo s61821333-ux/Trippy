@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/client'
-import type { Category, DayMeta, EmergencyContact, Expense, HotelStay, SupplyItem, TripEvent, TripInvitation, TripTheme } from './types'
+import type { Category, DayMeta, EmergencyContact, Expense, HotelStay, SupplyItem, TripEvent, TripInvitation, TripTheme, WishlistItem } from './types'
 
 // Bump this string whenever the terms/privacy text changes materially.
 // Users who accepted a previous version will be shown the modal again.
@@ -473,6 +473,32 @@ export async function dbDeleteAccount(): Promise<void> {
   }
 }
 
+// ─── Wishlist ─────────────────────────────────────────────────────────────────
+
+export async function dbAddWishlistItem(tripId: string, item: WishlistItem): Promise<void> {
+  const r = await fetch(`/api/trips/${tripId}/wishlist`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id:       item.id,
+      name:     item.name,
+      category: item.category,
+      location: item.location ?? null,
+      lat:      item.lat ?? null,
+      lng:      item.lng ?? null,
+      notes:    item.notes ?? null,
+      duration: item.duration ?? null,
+      cost:     item.cost ?? null,
+    }),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
+}
+
+export async function dbDeleteWishlistItem(tripId: string, itemId: string): Promise<void> {
+  const r = await fetch(`/api/trips/${tripId}/wishlist?itemId=${encodeURIComponent(itemId)}`, { method: 'DELETE' })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 // Reconstruct a Trip + supplies array from a DB row
@@ -495,9 +521,27 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     }
   })
 
+  // Separate wishlist items (wishlist=true, day_index=999) from real events
+  const allEventRows: any[] = (data.events as any[]) ?? []
+  const wishlistRows = allEventRows.filter((e: any) => e.wishlist === true)
+  const regularEventRows = allEventRows.filter((e: any) => !e.wishlist)
+
+  const wishlist: WishlistItem[] = wishlistRows.map((e: any) => ({
+    id:       e.id,
+    name:     e.name,
+    category: (e.category ?? 'other') as Category,
+    location: e.location ?? undefined,
+    lat:      e.lat ?? undefined,
+    lng:      e.lng ?? undefined,
+    notes:    e.notes ?? undefined,
+    duration: e.duration ?? undefined,
+    cost:     e.cost ?? undefined,
+    addedBy:  userToInitials.get(e.added_by) ?? 'Unknown',
+  }))
+
   const events: Record<number, TripEvent[]> = {}
   for (let d = 1; d <= days; d++) {
-    events[d] = ((data.events as any[]) ?? [])
+    events[d] = regularEventRows
       .filter((e: any) => e.day_index === d - 1)
       .map((e: any) => ({
         id:       e.id,
@@ -584,6 +628,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     events,
     expenses,
     emergencyContacts,
+    wishlist,
     createdBy: (data as any).created_by ?? undefined,
   }
 

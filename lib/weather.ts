@@ -6,6 +6,12 @@ export interface WeatherDay {
   code: number;
   icon: string;
   label: string;
+  isEstimate?: boolean;
+}
+
+export interface WeatherResult {
+  days: WeatherDay[];
+  isEstimate: boolean;
 }
 
 const WMO: Record<number, { icon: string; label: string }> = {
@@ -39,7 +45,7 @@ function wmoToWeather(code: number): { icon: string; label: string } {
 }
 
 interface WeatherCache {
-  data: WeatherDay[];
+  result: WeatherResult;
   ts: number;
 }
 const cache = new Map<string, WeatherCache>();
@@ -50,10 +56,10 @@ export async function fetchWeatherForTrip(
   lng: number,
   startDateStr: string,
   days: number,
-): Promise<WeatherDay[]> {
+): Promise<WeatherResult> {
   const key = `${lat.toFixed(2)},${lng.toFixed(2)},${startDateStr},${days}`;
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.data;
+  if (cached && Date.now() - cached.ts < CACHE_TTL) return cached.result;
 
   const params = new URLSearchParams({
     lat:   String(lat),
@@ -64,9 +70,10 @@ export async function fetchWeatherForTrip(
 
   try {
     const res = await fetch(`/api/weather?${params}`);
-    if (!res.ok) return [];
+    if (!res.ok) return { days: [], isEstimate: false };
     const data = await res.json();
 
+    const isEstimate = data?.isEstimate === true;
     const dates    = data?.daily?.time                as string[] ?? [];
     const maxTemps = data?.daily?.temperature_2m_max  as number[] ?? [];
     const minTemps = data?.daily?.temperature_2m_min  as number[] ?? [];
@@ -74,7 +81,7 @@ export async function fetchWeatherForTrip(
     const icons    = data?.daily?.icon                as string[] | undefined;
     const labels   = data?.daily?.label               as string[] | undefined;
 
-    const result: WeatherDay[] = dates.map((_, i) => {
+    const weatherDays: WeatherDay[] = dates.map((_, i) => {
       const code = codes[i] ?? 0;
       // Prefer server-resolved icon/label (from Google); fall back to WMO
       const { icon, label } = (icons?.[i] && labels?.[i])
@@ -86,13 +93,16 @@ export async function fetchWeatherForTrip(
         code,
         icon,
         label,
+        isEstimate,
       };
     });
 
-    cache.set(key, { data: result, ts: Date.now() });
+    const result: WeatherResult = { days: weatherDays, isEstimate };
+    const ttl = isEstimate ? 86_400_000 : CACHE_TTL; // climate estimates cached 24h
+    cache.set(key, { result, ts: Date.now() - (CACHE_TTL - ttl) });
     return result;
   } catch {
-    return [];
+    return { days: [], isEstimate: false };
   }
 }
 

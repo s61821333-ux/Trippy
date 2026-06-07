@@ -50,26 +50,29 @@ export async function POST(request: NextRequest) {
   const uniqueActivities = [...new Set(eventCats)].slice(0, 12).join(', ');
   const existingStr = existing.slice(0, 30).join(', ');
   const heNote = locale === 'he'
-    ? 'Return all "name" values in Hebrew. Keep brand names in English.'
+    ? 'כתוב את כל שמות הפריטים בעברית. שמות מותגים — השאר באנגלית.'
     : '';
 
-  const prompt = `Packing list for a ${days}-day trip to ${destination}.${season ? ` Season: ${season}.` : ''}${weatherSummary ? ` Weather: ${weatherSummary}.` : ''}
-Activities: ${uniqueActivities || 'general sightseeing'}.
-Already packed: ${existingStr || 'nothing yet'} — do NOT repeat these.
+  const prompt = `Smart packing list for a ${days}-day trip to ${destination}.${season ? ` Season: ${season}.` : ''}${weatherSummary ? ` Expected weather: ${weatherSummary}.` : ''}
+Planned activities: ${uniqueActivities || 'general sightseeing and exploration'}.
+Already on the list: ${existingStr || 'nothing yet'} — skip these completely.
 ${heNote}
 
-Return ONLY a JSON array, no markdown:
-[{"name":"Item name","category":"Documents|Gear|Medical|Food|Water|Other"}]
+Think like an experienced traveler who knows ${destination} well — include items specific to this destination (voltage adapters, local health risks, cultural dress requirements, etc).
 
-15–18 practical, specific items. Include destination-specific adapters, currency notes, and activity-relevant gear.
-Skip items the hotel/airline always provides (hangers, basic toiletries if not relevant, etc).`;
+Return ONLY a JSON array, no markdown, no explanation:
+[{"name":"Specific item name","category":"Documents|Gear|Medical|Food|Water|Other"}]
+
+Aim for 15–20 items. Be specific (e.g. "SPF 50 sunscreen" not just "sunscreen"). Skip anything the hotel typically provides.`;
 
   try {
     const client = new Anthropic();
     const msg = await client.messages.create({
       model:      'claude-haiku-4-5-20251001',
-      max_tokens: 500,
-      system: 'Travel packing expert. Return only a JSON array. No markdown.',
+      max_tokens: 600,
+      system: locale === 'he'
+        ? 'אתה מומחה אריזה לטיולים. החזר רק JSON תקין בעברית. מידע ספציפי ומעשי.'
+        : 'You are an expert travel packer who knows destinations well. Return only a JSON array — no markdown, no preamble. Be specific and destination-aware.',
       messages: [{ role: 'user', content: prompt }],
     });
 
