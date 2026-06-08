@@ -202,37 +202,43 @@ async function searchAndEnrich(ctx: {
     : '';
 
   const systemPrompt = isHe
-    ? 'אתה מומחה טיולים מקומי. השב עם JSON תקין בלבד — ללא markdown, ללא הקדמה.'
-    : 'You are a local travel expert. Respond with valid JSON only — no markdown, no preamble. Recommend real, specific places that exist.';
+    ? 'אתה מומחה טיולים מקומי. כלל ברזל: הפלט הוא אך ורק מערך JSON תקין — ללא markdown, ללא הקדמה, ללא שום טקסט מחוץ למערך. פתח מיד עם [.'
+    : 'You are a local travel expert. Iron rule: output ONLY a raw JSON array — no markdown fences, no intro sentence, no explanation. Start your response with [ and end with ].';
 
   const userPrompt = `Recommend exactly 4 ${styleLabel}s${budgetLine} in ${locationText} during ${ctx.season}. Each should take ${DURATION_LABEL[ctx.duration_bucket] ?? '1–3 hours'} to enjoy.${exclusionLine}${langNote}
 
-Return ONLY a valid JSON array of exactly 4 objects:
-[
-  {
-    "name": "Exact place name",
-    "description": "1–2 specific, vivid sentences — what makes it special, the atmosphere, a practical tip",
-    "location": "Specific address or neighbourhood"
-  }
-]`;
+Output a JSON array of exactly 4 objects with keys: name, description, location.
+Example shape (replace content):
+[{"name":"...","description":"...","location":"..."},{"name":"...","description":"...","location":"..."},{"name":"...","description":"...","location":"..."},{"name":"...","description":"...","location":"..."}]`;
 
+  // Prime the assistant turn with `[` so it can't prepend prose
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 1024,
     system: systemPrompt,
-    messages: [{ role: 'user', content: userPrompt }],
+    messages: [
+      { role: 'user', content: userPrompt },
+      { role: 'assistant', content: '[' },
+    ],
   });
 
   const textBlock = message.content.find(b => b.type === 'text');
-  const rawText = textBlock && textBlock.type === 'text' ? textBlock.text : '';
-  const clean = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+  const rawText = '[' + (textBlock && textBlock.type === 'text' ? textBlock.text : '');
 
+  // Extract the JSON array robustly — find the first [ … ] span
   let candidates: Array<{ name: string; description: string; location?: string }> = [];
-  try {
-    const parsed = JSON.parse(clean);
-    if (Array.isArray(parsed)) candidates = parsed;
-  } catch {
-    candidates = [];
+  const arrayMatch = rawText.match(/\[[\s\S]*\]/);
+  if (arrayMatch) {
+    try {
+      const parsed = JSON.parse(arrayMatch[0]);
+      if (Array.isArray(parsed)) candidates = parsed;
+    } catch {
+      // partial array: try extracting complete objects
+      try {
+        const objects = [...arrayMatch[0].matchAll(/\{[^{}]*\}/g)].map(m => JSON.parse(m[0]));
+        if (objects.length > 0) candidates = objects;
+      } catch { /* give up */ }
+    }
   }
 
   // Enrich each candidate with Google Places structured data
@@ -396,7 +402,7 @@ export async function POST(request: NextRequest) {
   // ── Claude fallback (awaited, returns JSON — no streaming protocol) ──────────
   try {
     const timeoutPromise = new Promise<AiSuggestion[]>((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), 7500)
+      setTimeout(() => reject(new Error('timeout')), 22000)
     );
 
     const searchPromise = searchAndEnrich(
