@@ -41,48 +41,41 @@ export async function GET(request: NextRequest) {
     const admin = tryAdminClient()
     const db = admin ?? supabase
 
-    // Resolve cursor to a created_at timestamp for keyset pagination
-    let cursorTs: string | null = null
+    // Single JOIN query: trips the user participates in, newest first.
+    // trip_participants!inner filters to only trips where the user is a member.
+    let tripsQuery = (db as any)
+      .from('trips')
+      .select('id, name, theme, days, start_date, created_at, trip_participants!inner(user_id)')
+      .eq('trip_participants.user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(limit + 1)
+
+    // Resolve cursor to a created_at timestamp and apply keyset filter
     if (cursor) {
       const { data: cursorRow } = await db
         .from('trips')
         .select('created_at')
         .eq('id', cursor)
         .maybeSingle()
-      cursorTs = (cursorRow as any)?.created_at ?? null
-    }
-
-    // Get trip IDs the user participates in
-    let participantQuery = db
-      .from('trip_participants')
-      .select('trip_id')
-      .eq('user_id', user.id)
-
-    const { data: participantRows, error: partErr } = await participantQuery
-    if (partErr || !participantRows?.length) {
-      return NextResponse.json(
-        { trips: [], nextCursor: null },
-        { status: 200, headers: { 'Cache-Control': 'no-store' } },
-      )
-    }
-
-    const tripIds = participantRows.map((r: any) => r.trip_id)
-
-    let tripsQuery = db
-      .from('trips')
-      .select('id, name, theme, days, start_date, created_at')
-      .in('id', tripIds)
-      .order('created_at', { ascending: false })
-      .limit(limit + 1)
-
-    if (cursorTs) {
-      tripsQuery = tripsQuery.lt('created_at', cursorTs)
+      const cursorTs = (cursorRow as any)?.created_at ?? null
+      if (cursorTs) tripsQuery = tripsQuery.lt('created_at', cursorTs)
     }
 
     let { data: trips, error } = await tripsQuery
 
-    // created_at column may not exist if the table was created manually — fall back to unordered
-    if (error && (error.message?.includes('created_at') || error.message?.includes('column'))) {
+    // created_at column may not exist if the table was created manually — fall back to two-query approach
+    if (error && (error.message?.includes('created_at') || error.message?.includes('column') || error.message?.includes('trip_participants'))) {
+      const { data: participantRows } = await db
+        .from('trip_participants')
+        .select('trip_id')
+        .eq('user_id', user.id)
+      const tripIds = (participantRows ?? []).map((r: any) => r.trip_id)
+      if (!tripIds.length) {
+        return NextResponse.json(
+          { trips: [], nextCursor: null },
+          { status: 200, headers: { 'Cache-Control': 'no-store' } },
+        )
+      }
       const fb = await db
         .from('trips')
         .select('id, name, theme, days, start_date')
@@ -102,7 +95,8 @@ export async function GET(request: NextRequest) {
     const page = (trips ?? []).slice(0, limit)
     const nextCursor = hasMore ? page[page.length - 1]?.id ?? null : null
 
-    const result = page.map(({ created_at: _, ...t }: any) => t)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const result = page.map(({ created_at: _ca, trip_participants: _tp, ...t }: any) => t)
 
     return NextResponse.json(
       { trips: result, nextCursor },

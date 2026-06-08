@@ -111,7 +111,7 @@ export async function DELETE(
   }
 
   const client = admin ?? await getUserClient()
-  const { error } = await client.from('events').delete().eq('id', eventId)
+  const { error } = await client.from('events').delete().eq('id', eventId).eq('trip_id', tripId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
@@ -148,13 +148,13 @@ export async function PATCH(
 
   const client = admin ?? await getUserClient()
   const patch = { ...parsed.data }
-  let { error } = await client.from('events').update(patch).eq('id', eventId)
+  let { error } = await client.from('events').update(patch).eq('id', eventId).eq('trip_id', tripId)
   // Retry without optional columns if they don't exist yet in the schema
   if (error && (error.message?.includes('column') || error.message?.includes('tags') || error.message?.includes('votes'))) {
     const safePatch: Record<string, unknown> = {}
     const allowed = ['time', 'duration', 'name', 'category', 'location', 'lat', 'lng', 'notes', 'cost', 'day_index']
     for (const k of allowed) if ((patch as any)[k] !== undefined) safePatch[k] = (patch as any)[k];
-    ({ error } = await client.from('events').update(safePatch).eq('id', eventId))
+    ({ error } = await client.from('events').update(safePatch).eq('id', eventId).eq('trip_id', tripId))
   }
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

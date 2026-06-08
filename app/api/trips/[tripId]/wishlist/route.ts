@@ -114,7 +114,7 @@ export async function DELETE(
   }
 
   const client = admin ?? await getUserClient()
-  const { error } = await client.from('events').delete().eq('id', itemId).eq('wishlist', true)
+  const { error } = await client.from('events').delete().eq('id', itemId).eq('trip_id', tripId).eq('wishlist', true)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

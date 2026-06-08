@@ -89,7 +89,7 @@ export async function DELETE(
   const client = admin ?? createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
     cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} },
   })
-  const { error } = await client.from('expenses').delete().eq('id', expenseId)
+  const { error } = await client.from('expenses').delete().eq('id', expenseId).eq('trip_id', tripId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

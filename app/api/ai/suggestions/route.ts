@@ -1,12 +1,18 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest } from 'next/server';
 import type { AiSuggestion, Category } from '@/lib/types';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
+import { checkRateLimitPersistent, rateLimitResponse } from '@/lib/rateLimit';
 import { AiSuggestionsBody } from '@/lib/schemas';
-import { GOOGLE_MAPS_API_KEY } from '@/lib/env';
+import { GOOGLE_MAPS_API_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/env';
+
+function tryAdminClient() {
+  try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
+  catch { return null }
+}
 
 async function enrichWithPlaces(
   suggestions: AiSuggestion[],
@@ -72,8 +78,9 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 });
 
-  // Rate limit: 10 requests/60s per user
-  const rl = checkRateLimit(`ai:${user.id}`, 10, 60);
+  // Rate limit: 10 requests/60s per user (persistent across serverless instances)
+  const admin = tryAdminClient();
+  const rl = await checkRateLimitPersistent(admin, `ai:${user.id}`, 10, 60);
   if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 10);
 
   // Validate request body

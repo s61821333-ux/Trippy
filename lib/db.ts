@@ -50,11 +50,11 @@ export async function signInWithGoogle(): Promise<void> {
 }
 
 export async function getCurrentUser(): Promise<{ id: string; username: string } | null> {
-  const { data: { session } } = await sb().auth.getSession()
-  if (!session?.user) return null
-  const email = session.user.email ?? ''
-  const username = session.user.user_metadata?.full_name ?? email.split('@')[0]
-  return { id: session.user.id, username }
+  const { data: { user } } = await sb().auth.getUser()
+  if (!user) return null
+  const email = user.email ?? ''
+  const username = user.user_metadata?.full_name ?? email.split('@')[0]
+  return { id: user.id, username }
 }
 
 
@@ -63,8 +63,8 @@ export async function signOut() {
 }
 
 export async function getSessionUserId(): Promise<string | null> {
-  const { data: { session } } = await sb().auth.getSession()
-  return session?.user?.id ?? null
+  const { data: { user } } = await sb().auth.getUser()
+  return user?.id ?? null
 }
 
 // ─── MFA ─────────────────────────────────────────────────────────────────────

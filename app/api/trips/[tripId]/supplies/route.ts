@@ -95,7 +95,7 @@ export async function PATCH(
   if (parsed.data.critical  !== undefined) patch.critical  = parsed.data.critical
   if (parsed.data.assignee  !== undefined) patch.assignee  = parsed.data.assignee
 
-  const { error } = await r.client.from('supplies').update(patch).eq('id', supplyId)
+  const { error } = await r.client.from('supplies').update(patch).eq('id', supplyId).eq('trip_id', tripId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
@@ -112,7 +112,7 @@ export async function DELETE(
   const r = await setup(request, tripId)
   if ('error' in r) return r.error
 
-  const { error } = await r.client.from('supplies').delete().eq('id', supplyId)
+  const { error } = await r.client.from('supplies').delete().eq('id', supplyId).eq('trip_id', tripId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

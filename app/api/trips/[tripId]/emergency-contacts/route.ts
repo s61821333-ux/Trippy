@@ -76,7 +76,7 @@ export async function DELETE(
   const r = await setup(tripId)
   if ('error' in r) return r.error
 
-  const { error } = await r.client.from('emergency_contacts').delete().eq('id', contactId)
+  const { error } = await r.client.from('emergency_contacts').delete().eq('id', contactId).eq('trip_id', tripId)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }

@@ -1,9 +1,15 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { createClient } from '@supabase/supabase-js';
 import { NextRequest } from 'next/server';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
+import { checkRateLimitPersistent, rateLimitResponse } from '@/lib/rateLimit';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/env';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env';
+
+function tryAdminClient() {
+  try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }) }
+  catch { return null }
+}
 
 export const maxDuration = 45;
 
@@ -50,7 +56,8 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 });
 
-  const rl = checkRateLimit(`ai:plan:${user.id}`, 5, 3600);
+  const admin = tryAdminClient();
+  const rl = await checkRateLimitPersistent(admin, `ai:plan:${user.id}`, 5, 3600);
   if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 5);
 
   let body: Record<string, unknown>;
