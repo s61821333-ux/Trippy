@@ -41,7 +41,7 @@ interface PlaceData {
   userRatingCount?: number;
   googleMapsUri?: string;
   priceLevel?: string;
-  regularOpeningHours?: { openNow?: boolean };
+  currentOpeningHours?: { openNow?: boolean };
 }
 
 const PRICE_LEVEL_MAP: Record<string, number> = {
@@ -59,7 +59,7 @@ async function fetchPlaceData(query: string, key: string): Promise<PlaceData | n
       headers: {
         'Content-Type': 'application/json',
         'X-Goog-Api-Key': key,
-        'X-Goog-FieldMask': 'places.id,places.rating,places.userRatingCount,places.googleMapsUri,places.priceLevel,places.regularOpeningHours.openNow',
+        'X-Goog-FieldMask': 'places.id,places.rating,places.userRatingCount,places.googleMapsUri,places.priceLevel,places.currentOpeningHours.openNow',
       },
       body: JSON.stringify({ textQuery: query, maxResultCount: 1 }),
     });
@@ -241,8 +241,6 @@ Return ONLY a valid JSON array of exactly 4 objects:
       const query = `${c.name}, ${locationText}`;
       const place = googleKey ? await fetchPlaceData(query, googleKey) : null;
 
-      if (place?.rating != null && place.rating < 4.0) return null;
-
       return {
         id: `rec-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         name: c.name,
@@ -251,7 +249,7 @@ Return ONLY a valid JSON array of exactly 4 objects:
         duration: ctx.duration_bucket === 'short' ? 90 : ctx.duration_bucket === 'half_day' ? 210 : 390,
         time: '10:00',
         distance: '—',
-        open: place?.regularOpeningHours?.openNow ?? true,
+        open: place?.currentOpeningHours?.openNow ?? true,
         rating: place?.rating,
         ratingCount: place?.userRatingCount,
         priceLevel: place?.priceLevel ? (PRICE_LEVEL_MAP[place.priceLevel] ?? undefined) : undefined,
@@ -395,17 +393,13 @@ export async function POST(request: NextRequest) {
     return Response.json(suggestions);
   }
 
-  // ── Internet fallback (streaming) ─────────────────────────────────────────
-  const encoder = new TextEncoder();
+  // ── Claude fallback (awaited, returns JSON — no streaming protocol) ──────────
+  try {
+    const timeoutPromise = new Promise<AiSuggestion[]>((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), 7500)
+    );
 
-  const stream = new ReadableStream({
-    async start(controller) {
-      try {
-        const timeoutPromise = new Promise<AiSuggestion[]>((_, reject) =>
-          setTimeout(() => reject(new Error('timeout')), 7500)
-        );
-
-        const searchPromise = searchAndEnrich(
+    const searchPromise = searchAndEnrich(
           {
             city: ctx.city, area: ctx.area, country: ctx.country,
             style: ctx.style, style_detail: ctx.style_detail,
@@ -416,68 +410,29 @@ export async function POST(request: NextRequest) {
           googleKey
         );
 
-        let suggestions: AiSuggestion[];
-        let timedOut = false;
+    let suggestions: AiSuggestion[];
+    let timedOut = false;
+    try {
+      suggestions = await Promise.race([searchPromise, timeoutPromise]);
+    } catch (err) {
+      timedOut = err instanceof Error && err.message === 'timeout';
+      suggestions = [];
+      if (!timedOut) throw err;
+    }
 
-        try {
-          suggestions = await Promise.race([searchPromise, timeoutPromise]);
-        } catch (err) {
-          timedOut = err instanceof Error && err.message === 'timeout';
-          suggestions = [];
-          if (!timedOut) throw err;
-        }
+    // Store to cache in background (don't block the response)
+    if (suggestions.length > 0) {
+      void storeToCache(suggestions, {
+        city: ctx.city, area: ctx.area, country: ctx.country, region: ctx.region,
+        lat: ctx.lat, lng: ctx.lng,
+        style: ctx.style, style_detail: ctx.style_detail,
+        duration_bucket: ctx.duration_bucket, budget_tier: ctx.budget_tier, season: ctx.season,
+      }, supabaseUrl, serviceKey);
+    }
 
-        controller.enqueue(encoder.encode('\n__ENRICHED__' + JSON.stringify(suggestions)));
-
-        if (timedOut) {
-          controller.enqueue(encoder.encode('\n__PARTIAL__searching for more in the background'));
-        }
-
-        controller.close();
-
-        // Store to cache after streaming (fire and forget)
-        if (suggestions.length > 0) {
-          void storeToCache(suggestions, {
-            city: ctx.city, area: ctx.area, country: ctx.country, region: ctx.region,
-            lat: ctx.lat, lng: ctx.lng,
-            style: ctx.style, style_detail: ctx.style_detail,
-            duration_bucket: ctx.duration_bucket, budget_tier: ctx.budget_tier, season: ctx.season,
-          }, supabaseUrl, serviceKey);
-        }
-
-        // If we timed out, continue searching in the background and cache results
-        if (timedOut) {
-          searchAndEnrich(
-            {
-              city: ctx.city, area: ctx.area, country: ctx.country,
-              style: ctx.style, style_detail: ctx.style_detail,
-              season: ctx.season, duration_bucket: ctx.duration_bucket,
-              budget_tier: ctx.budget_tier, locale: ctx.locale, exclude: ctx.exclude,
-            },
-            googleKey
-          ).then(bg => {
-            if (bg.length > 0) {
-              return storeToCache(bg, {
-                city: ctx.city, area: ctx.area, country: ctx.country, region: ctx.region,
-                lat: ctx.lat, lng: ctx.lng,
-                style: ctx.style, style_detail: ctx.style_detail,
-                duration_bucket: ctx.duration_bucket, budget_tier: ctx.budget_tier, season: ctx.season,
-              }, supabaseUrl, serviceKey);
-            }
-          }).catch(() => {});
-        }
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unknown error';
-        controller.enqueue(encoder.encode('\n__ERROR__' + msg));
-        controller.close();
-      }
-    },
-  });
-
-  return new Response(stream, {
-    headers: {
-      'Content-Type': 'text/plain; charset=utf-8',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
+    return Response.json(suggestions);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Unknown error';
+    return Response.json({ error: msg }, { status: 500 });
+  }
 }

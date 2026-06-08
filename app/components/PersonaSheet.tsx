@@ -103,13 +103,22 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
   );
 
   const dayMeta = trip?.dayMeta[dayNumber - 1];
-  const defaultCity = dayMeta?.region ?? (trip?.countries?.[0] ?? '');
+  // Default to hotel for this day, falling back to dayMeta region
+  const hotel = useMemo(() => {
+    return (trip?.hotels ?? []).find(
+      h => h.checkInDay <= dayNumber && h.checkOutDay > dayNumber
+    );
+  }, [trip?.hotels, dayNumber]);
+
+  const defaultCity = hotel?.location ?? dayMeta?.region ?? (trip?.countries?.[0] ?? '');
+  const defaultLat  = hotel?.lat ?? dayMeta?.lat;
+  const defaultLng  = hotel?.lng ?? dayMeta?.lng;
 
   const [style, setStyle]             = useState<PersonaStyle | null>(null);
   const [styleDetail, setStyleDetail]   = useState('');
   const [cityName, setCityName]         = useState(defaultCity);
-  const [cityLat, setCityLat]           = useState<number | undefined>(dayMeta?.lat);
-  const [cityLng, setCityLng]           = useState<number | undefined>(dayMeta?.lng);
+  const [cityLat, setCityLat]           = useState<number | undefined>(defaultLat);
+  const [cityLng, setCityLng]           = useState<number | undefined>(defaultLng);
   const [area, setArea]                 = useState('');
   const [duration, setDuration]         = useState<DurationBucket | null>(null);
   const [budget, setBudget]             = useState<BudgetTier>('any');
@@ -129,13 +138,6 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
     return computeSeason(start, lat);
   }, [trip?.startDate, dayNumber, dayMeta?.lat]);
 
-  // Resolve hotel coordinates for this day
-  const hotel = useMemo(() => {
-    return (trip?.hotels ?? []).find(
-      h => h.checkInDay <= dayNumber && h.checkOutDay > dayNumber
-    );
-  }, [trip?.hotels, dayNumber]);
-
   const canSubmit = style !== null && duration !== null && cityName.trim().length > 0;
 
   const handleSubmit = () => {
@@ -146,8 +148,8 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
       region:         dayMeta?.region,
       city:           cityName.trim(),
       area:           area.trim() || undefined,
-      lat:            cityLat ?? hotel?.lat ?? dayMeta?.lat,
-      lng:            cityLng ?? hotel?.lng ?? dayMeta?.lng,
+      lat:            cityLat ?? defaultLat,
+      lng:            cityLng ?? defaultLng,
       radius_km:      5,
       style,
       style_detail:   style === 'other' && styleDetail.trim() ? styleDetail.trim() : undefined,
