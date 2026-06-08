@@ -30,7 +30,7 @@ export async function GET(_request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) {
-    return NextResponse.json([])
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
   const email = user.email.toLowerCase()

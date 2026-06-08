@@ -1,5 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/env';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
 
 export const maxDuration = 20;
@@ -14,12 +17,22 @@ export interface DestinationIntel {
 }
 
 export async function POST(request: NextRequest) {
-  // Destination intel is public travel information — no auth required.
-  // Rate-limit by IP so the AI cost stays bounded (10 req/hr per IP).
+  const cookieStore = await cookies();
+  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: (cookiesToSet) => {
+        try { cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options)); } catch {}
+      },
+    },
+  });
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 });
+
   const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
     ?? request.headers.get('x-real-ip')
-    ?? 'unknown';
-  const rl = checkRateLimit(`ai:intel:ip:${ip}`, 10, 3600);
+    ?? user.id;
+  const rl = checkRateLimit(`ai:intel:user:${ip}`, 10, 3600);
   if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 10);
 
   let body: { country?: string; locale?: string };

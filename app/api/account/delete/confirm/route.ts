@@ -12,7 +12,7 @@ function adminClient() {
 export async function POST(request: NextRequest) {
   const token = request.nextUrl.searchParams.get('token')
   if (!token || !/^[0-9a-f]{32}$/.test(token)) {
-    return NextResponse.json({ error: 'Invalid token' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid or missing confirmation token' }, { status: 401 })
   }
 
   try {
