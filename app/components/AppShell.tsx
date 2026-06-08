@@ -15,7 +15,6 @@ import { ToastProvider, useToast } from './ui/Toast';
 
 const ScreenFallback = () => <div style={{ height: '100%', background: 'var(--bg)' }} />;
 
-const Splash_V2         = dynamic(() => import('./screens/Splash_V2'),      { loading: ScreenFallback });
 const Welcome_V2        = dynamic(() => import('./screens/Welcome_V2'),     { loading: ScreenFallback });
 const Home_V2           = dynamic(() => import('./screens/Home_V2'),        { loading: ScreenFallback });
 const DashboardScreen   = dynamic(() => import('./screens/Dashboard_V2'),   { loading: ScreenFallback });
@@ -185,7 +184,7 @@ function Shell() {
       if (next !== null && (!next.startsWith('/') || next.startsWith('//'))) {
         p.delete('next');
         const qs = p.toString();
-        window.history.replaceState({}, '', qs ? `/?${qs}` : '/');
+        window.history.replaceState({}, '', qs ? `/app?${qs}` : '/app');
       }
     }
 
@@ -193,7 +192,7 @@ function Shell() {
     const params = new URLSearchParams(window.location.search);
     const joinId = params.get('join');
     if (joinId) {
-      window.history.replaceState({}, '', '/');
+      window.history.replaceState({}, '', '/app');
       sessionStorage.setItem('trippy-pending-join', joinId);
     }
 
@@ -245,7 +244,7 @@ function Shell() {
         const cur = useAppStore.getState().screen;
         const isTestMode = process.env.NODE_ENV !== 'production' &&
           !!(window as unknown as Record<string, unknown>).__trippyTestMode__;
-        if (!isTestMode && cur !== 'splash') setScreen('welcome');
+        if (!isTestMode && cur !== 'welcome') setScreen('welcome');
       }
     });
 
@@ -335,13 +334,14 @@ function Shell() {
     return () => contrastMq.removeEventListener('change', handler);
   }, []);
 
-  // Keep body background in sync with the resolved theme (prevents flash on page load)
+  // Keep body background and <html data-dark> in sync with the resolved theme.
+  // Also writes a cookie so the layout server component can pre-apply the correct
+  // theme on the next page load — eliminating any theme flash without a script tag.
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      // Propagate data-dark to <html> so var(--bg) resolves correctly on body/html
-      // (data-dark on the inner div doesn't affect var(--bg) resolution on ancestors)
       document.documentElement.dataset.dark = resolvedDark ? 'true' : '';
       document.body.style.background = 'var(--bg)';
+      document.cookie = `trippy-dark=${resolvedDark ? 'true' : 'false'}; path=/; max-age=31536000; SameSite=Lax`;
     }
   }, [resolvedDark]);
 
@@ -405,7 +405,7 @@ function Shell() {
     );
   }
 
-  const showNav = authUser && screen !== 'splash' && screen !== 'welcome';
+  const showNav = authUser && screen !== 'welcome';
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
@@ -506,9 +506,7 @@ function Shell() {
               >
                 <div className="w-full h-full">
                   <div className="w-full h-full">
-                    {screen === 'splash' ? (
-                      <Splash_V2 />
-                    ) : screen === 'welcome' ? (
+                    {(screen === 'welcome' || screen === 'splash') ? (
                       <Welcome_V2 />
                     ) : screen === 'home' || !trip ? (
                       <Home_V2 />

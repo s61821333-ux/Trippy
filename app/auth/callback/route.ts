@@ -11,11 +11,11 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
       // Code exchange failed (expired, already used, etc.) — send to login, not home
-      return NextResponse.redirect(`${origin}/?error=auth`)
+      return NextResponse.redirect(`${origin}/app?error=auth`)
     }
   }
 
   // `next` must be a relative path to prevent open-redirect attacks
-  const redirectTo = next && next.startsWith('/') && !next.startsWith('//') ? `${origin}${next}` : origin
+  const redirectTo = next && next.startsWith('/') && !next.startsWith('//') ? `${origin}${next}` : `${origin}/app`
   return NextResponse.redirect(redirectTo)
 }

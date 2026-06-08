@@ -1257,6 +1257,15 @@ body::after {
 /* Ensure page content layers above ambient orbs */
 #__next, main { position: relative; z-index: 1; }
 
+/* ─── Landing page footer links ──────────────────────────────── */
+.footer-link {
+  font-size: 13px;
+  color: var(--text-3);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-link:hover { color: var(--text); }
+
 @media (prefers-reduced-motion: reduce) {
   body::before, body::after { animation: none !important; }
 }

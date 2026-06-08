@@ -97,6 +97,7 @@ interface CacheRow {
 async function queryCacheHits(ctx: {
   city: string; lat?: number; lng?: number; radius_km: number;
   style: string; season: string; duration_bucket: string; budget_tier: string;
+  exclude?: string[];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }, authedSupa: SupabaseClient<any>): Promise<CacheRow[]> {
   const adjSeasons = adjacentSeasons(ctx.season as Parameters<typeof adjacentSeasons>[0]);
@@ -110,7 +111,7 @@ async function queryCacheHits(ctx: {
     .in('season', allSeasons)
     .order('google_rating', { ascending: false, nullsFirst: false })
     .order('popularity_count', { ascending: false, nullsFirst: false })
-    .limit(6);
+    .limit(12);
 
   if (ctx.budget_tier !== 'any') {
     q = q.or(`budget_tier.eq.${ctx.budget_tier},budget_tier.eq.any`);
@@ -123,18 +124,22 @@ async function queryCacheHits(ctx: {
   }
   if (!data) return [];
 
+  const excludeLower = (ctx.exclude ?? []).map(e => e.toLowerCase());
+
   // Additional geo filter when coordinates are available
   if (ctx.lat != null && ctx.lng != null) {
     const dLat = latDelta(ctx.radius_km);
     const dLng = lngDelta(ctx.radius_km, ctx.lat);
     const rows = data as CacheRow[];
-  return rows.filter(r =>
-      r.lat == null ||
-      (Math.abs(r.lat - ctx.lat!) <= dLat && Math.abs((r.lng ?? 0) - ctx.lng!) <= dLng)
-    );
+    return rows
+      .filter(r =>
+        r.lat == null ||
+        (Math.abs(r.lat - ctx.lat!) <= dLat && Math.abs((r.lng ?? 0) - ctx.lng!) <= dLng)
+      )
+      .filter(r => !excludeLower.includes(r.title.toLowerCase()));
   }
 
-  return data as CacheRow[];
+  return (data as CacheRow[]).filter(r => !excludeLower.includes(r.title.toLowerCase()));
 }
 
 // ── Map cache row → AiSuggestion ─────────────────────────────────────────────
@@ -201,7 +206,7 @@ async function searchAndEnrich(ctx: {
     ? `\nSkip these already-suggested names: ${ctx.exclude.join(', ')}.` : '';
 
   const langNote = isHe
-    ? '\n\n🔴 כל שדות "name" ו-"description" חייבים להיות בעברית.'
+    ? '\n\n🔴 שדה "description" חייב להיות בעברית. שדה "name" — השאר שמות מקומות, עסקים ומותגים בשמם המקורי (לטינית/אנגלית). אל תתרגם שמות פרטיים.'
     : '';
 
   const systemPrompt = isHe
@@ -381,7 +386,7 @@ export async function POST(request: NextRequest) {
   const cacheHits = await queryCacheHits(
     { city: ctx.city, lat: ctx.lat, lng: ctx.lng, radius_km: ctx.radius_km,
       style: ctx.style, season: ctx.season, duration_bucket: ctx.duration_bucket,
-      budget_tier: ctx.budget_tier },
+      budget_tier: ctx.budget_tier, exclude: ctx.exclude },
     supabase
   );
 

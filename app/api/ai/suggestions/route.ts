@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
 
   const isHebrew = locale === 'he';
   const languageInstruction = isHebrew
-    ? '\n\n🔴 CRITICAL: Respond ENTIRELY in Hebrew. Every word in "name" and "description" must be in Hebrew (עברית). Proper nouns (restaurant names, landmarks, brands) stay in their original script. No Arabic letters — Hebrew and Latin only.'
+    ? '\n\n🔴 שדה "description" חייב להיות בעברית. שדה "name" — השאר שמות מקומות, עסקים ומותגים בשמם המקורי (לטינית/אנגלית). אל תתרגם שמות פרטיים. אסור אותיות ערביות.'
     : '';
 
   const prompt = `${isHebrew ? 'אתה עוזר תכנון טיולים. חובה להשיב בעברית בלבד.\n\n' : ''}Trip: "${tripName}" → ${destinationText}.
