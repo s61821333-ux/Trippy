@@ -43,9 +43,12 @@ function priceDots(level: number | undefined): string {
 
 // ── Suggestion card ───────────────────────────────────────────────────────────
 
+type AiSuggestionExtended = AiSuggestion & { source_site?: string; source_url?: string };
+
 function SuggCard({
   s, currCode, onAdd, onDismiss,
 }: { s: AiSuggestion; currCode: string; onAdd: (s: AiSuggestion) => void; onDismiss: (s: AiSuggestion) => void }) {
+  const sx = s as AiSuggestionExtended;
   const { t, locale } = useI18n();
   const { key: stampKey, color } = catStamp(s.category);
   const label = CAT_LABEL[s.category] ?? 'Place';
@@ -211,9 +214,35 @@ function SuggCard({
 
       {/* ── Description ── */}
       {s.description && (
-        <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--text-2)', margin: '0 0 14px' }}>
+        <p style={{ fontSize: 13, lineHeight: 1.55, color: 'var(--text-2)', margin: '0 0 8px' }}>
           {s.description}
         </p>
+      )}
+
+      {/* ── Source attribution ── */}
+      {sx.source_site && (
+        <div style={{ marginBottom: 10 }}>
+          {sx.source_url ? (
+            <a
+              href={sx.source_url} target="_blank" rel="noopener noreferrer"
+              style={{ textDecoration: 'none' }}
+            >
+              <span style={{
+                fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.08em',
+                color: 'var(--text-3)', textTransform: 'uppercase',
+              }}>
+                via {sx.source_site}
+              </span>
+            </a>
+          ) : (
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.08em',
+              color: 'var(--text-3)', textTransform: 'uppercase',
+            }}>
+              via {sx.source_site}
+            </span>
+          )}
+        </div>
       )}
 
       {/* ── Actions ── */}
@@ -248,7 +277,11 @@ interface AISheetProps {
 export function AISheet({ dayNumber }: AISheetProps) {
   const { t, locale } = useI18n();
 
-  const { trip, tripDbId, currencyByTrip, activeGapStart, activeGapEnd, setShowSuggestions, setAiSuggestions, addSuggestionToDay } = useAppStore(
+  const {
+    trip, tripDbId, currencyByTrip, activeGapStart, activeGapEnd,
+    setShowSuggestions, setAiSuggestions, addSuggestionToDay,
+    personaContext, setPersonaContext,
+  } = useAppStore(
     useShallow(s => ({
       trip:               s.trip,
       tripDbId:           s.tripDbId,
@@ -258,6 +291,8 @@ export function AISheet({ dayNumber }: AISheetProps) {
       setShowSuggestions: s.setShowSuggestions,
       setAiSuggestions:   s.setAiSuggestions,
       addSuggestionToDay: s.addSuggestionToDay,
+      personaContext:     s.personaContext,
+      setPersonaContext:  s.setPersonaContext,
     }))
   );
 
@@ -272,13 +307,88 @@ export function AISheet({ dayNumber }: AISheetProps) {
   const [streamingText, setStreamingText] = useState('');
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const handleClose = () => {
+    setShowSuggestions(false);
+    setPersonaContext(null);
+  };
+
+  // ── Streaming helper (shared by both endpoints) ─────────────────────────────
+  const readStream = (res: Response): Promise<AiSuggestion[]> => {
+    return new Promise((resolve, reject) => {
+      const reader = res.body?.getReader();
+      if (!reader) { reject(new Error('No response body')); return; }
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      const pump = async () => {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          accumulated += decoder.decode(value, { stream: true });
+
+          const enrichedIdx = accumulated.indexOf('\n__ENRICHED__');
+          const errorIdx    = accumulated.indexOf('\n__ERROR__');
+
+          if (enrichedIdx !== -1) {
+            try { resolve(JSON.parse(accumulated.slice(enrichedIdx + '\n__ENRICHED__'.length)) as AiSuggestion[]); }
+            catch { reject(new Error('Failed to parse suggestions')); }
+            return;
+          }
+          if (errorIdx !== -1) {
+            reject(new Error(accumulated.slice(errorIdx + '\n__ERROR__'.length) || 'AI request failed'));
+            return;
+          }
+          setStreamingText(accumulated.replace(/\n__[A-Z]*$/, ''));
+        }
+        const clean = accumulated.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+        try { resolve(JSON.parse(clean) as AiSuggestion[]); }
+        catch { reject(new Error('Incomplete stream response')); }
+      };
+
+      pump().catch(reject);
+    });
+  };
+
   const fetchSuggestions = (exclude: string[] = []): Promise<AiSuggestion[]> => {
     return new Promise((resolve, reject) => {
       if (!trip) { reject(new Error('No trip')); return; }
+
+      // ── Recommend endpoint (persona-aware, cache-first) ──────────────────
+      if (personaContext) {
+        const body = { ...personaContext, exclude: [...(personaContext.exclude ?? []), ...exclude] };
+        fetch('/api/ai/recommend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }).then(async res => {
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({})) as { error?: string; retryAfter?: number };
+            if (res.status === 429 && err.retryAfter) {
+              reject(new Error(`Rate limited — try again in ${err.retryAfter}s`));
+            } else {
+              reject(new Error(err.error ?? `Server error ${res.status}`));
+            }
+            return;
+          }
+
+          const contentType = res.headers.get('content-type') ?? '';
+
+          // Fast path: cache hit returns JSON directly
+          if (contentType.includes('application/json')) {
+            try { resolve(await res.json() as AiSuggestion[]); }
+            catch { reject(new Error('Failed to parse response')); }
+            return;
+          }
+
+          // Slow path: streaming response
+          readStream(res).then(resolve).catch(reject);
+        }).catch(reject);
+        return;
+      }
+
+      // ── Legacy endpoint (no persona context) ────────────────────────────
       const existingEvents = trip.events[dayNumber] ?? [];
       const dayMeta = trip.dayMeta[dayNumber - 1];
-
-      // Find the hotel where the traveler is sleeping on this day
       const currentHotel = (trip.hotels ?? []).find(
         h => h.checkInDay <= dayNumber && h.checkOutDay > dayNumber
       );
@@ -306,39 +416,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
           }
           return;
         }
-
-        const reader = res.body?.getReader();
-        if (!reader) { reject(new Error('No response body')); return; }
-
-        const decoder = new TextDecoder();
-        let accumulated = '';
-
-        const pump = async () => {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            accumulated += decoder.decode(value, { stream: true });
-
-            const enrichedIdx = accumulated.indexOf('\n__ENRICHED__');
-            const errorIdx    = accumulated.indexOf('\n__ERROR__');
-
-            if (enrichedIdx !== -1) {
-              try { resolve(JSON.parse(accumulated.slice(enrichedIdx + '\n__ENRICHED__'.length)) as AiSuggestion[]); }
-              catch { reject(new Error('Failed to parse suggestions')); }
-              return;
-            }
-            if (errorIdx !== -1) {
-              reject(new Error(accumulated.slice(errorIdx + '\n__ERROR__'.length) || 'AI request failed'));
-              return;
-            }
-            setStreamingText(accumulated.replace(/\n__[A-Z]*$/, ''));
-          }
-          const clean = accumulated.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-          try { resolve(JSON.parse(clean) as AiSuggestion[]); }
-          catch { reject(new Error('Incomplete stream response')); }
-        };
-
-        pump().catch(reject);
+        readStream(res).then(resolve).catch(reject);
       }).catch(reject);
     });
   };
@@ -399,8 +477,10 @@ export function AISheet({ dayNumber }: AISheetProps) {
 
   return (
     <Sheet
-      onClose={() => setShowSuggestions(false)}
-      title={t('aiSuggestions')}
+      onClose={handleClose}
+      title={personaContext
+        ? (locale === 'he' ? 'המקומות שלך' : 'Your spots')
+        : t('aiSuggestions')}
       subtitle={t('aiSugSub')}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -425,7 +505,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
                   style={{ display: 'inline-block', fontSize: 16 }}
                 >✨</m.span>
                 <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--lg-ink)', flex: 1 }}>
-                  {locale === 'he' ? 'מחפש פעילויות מומלצות...' : 'Finding great activities…'}
+                  {locale === 'he' ? 'מחפשים בשבילך את המקומות המדויקים!' : 'Finding your perfect spots…'}
                 </span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: elapsed >= 8 ? 'var(--danger)' : 'var(--text-3)' }}>
                   {elapsed}s

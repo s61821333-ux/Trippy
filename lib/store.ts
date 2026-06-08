@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, HotelStay, Screen, SupplyItem, Trip, TripEvent, TripInvitation, TripTheme, WishlistItem } from './types';
+import { AiSuggestion, Category, DayMeta, EmergencyContact, Expense, HotelStay, QueryContext, Screen, SupplyItem, Trip, TripEvent, TripInvitation, TripTheme, WishlistItem } from './types';
 import { MOCK_SUPPLIES, MOCK_TRIP } from './mockData';
 import { createClient as createSupabaseClient } from '@/utils/supabase/client';
 import {
@@ -128,6 +128,12 @@ interface AppState {
   setAiSuggestions: (suggestions: AiSuggestion[]) => void;
   addSuggestionToDay: (dayNumber: number, suggId: string) => void;
 
+  // Persona prompt (AI recommendation engine)
+  showPersona: boolean;
+  personaContext: QueryContext | null;
+  setShowPersona: (v: boolean) => void;
+  setPersonaContext: (ctx: QueryContext | null) => void;
+
   // Real-time: subscribe to DB changes on a trip, returns unsubscribe fn
   subscribeToTrip: (tripId: string) => () => void;
 
@@ -209,6 +215,8 @@ export const useAppStore = create<AppState>()(
       supplies: [],
       showAddEvent: false,
       showSuggestions: false,
+      showPersona: false,
+      personaContext: null,
       showTour: false,
       activeGapStart: null,
       activeGapEnd: null,
@@ -887,6 +895,8 @@ export const useAppStore = create<AppState>()(
       },
       setShowSuggestions: (v, gapStart, gapEnd) => set({ showSuggestions: v, activeGapStart: gapStart ?? null, activeGapEnd: gapEnd ?? null }),
       setAiSuggestions: (suggestions) => set({ aiSuggestions: suggestions }),
+      setShowPersona: (v) => set({ showPersona: v }),
+      setPersonaContext: (ctx) => set({ personaContext: ctx }),
 
       addSuggestionToDay: (dayNumber, suggId) => {
         const { trip, aiSuggestions, userId, tripDbId } = get();

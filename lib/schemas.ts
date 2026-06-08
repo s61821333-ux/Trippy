@@ -177,3 +177,22 @@ export const PatchDayMetaBody = z.object({
   lng: z.number().nullable().optional(),
   desc: z.string().max(500).nullable().optional(),
 })
+
+export const RecommendBody = z.object({
+  city: z.string().min(1).max(200),
+  area: z.string().max(200).optional(),
+  country: z.string().max(100).optional(),
+  region: z.string().max(200).optional(),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  radius_km: z.number().min(1).max(50).default(5),
+  style: z.enum(['food', 'bars', 'quiet', 'relaxed', 'other']),
+  style_detail: z.string().max(200).optional(),
+  duration_bucket: z.enum(['short', 'half_day', 'full_day']),
+  budget_tier: z.enum(['low', 'mid', 'high', 'any']).default('any'),
+  season: z.enum(['spring', 'summer', 'autumn', 'winter']),
+  dayNumber: z.number().int().min(1).max(366),
+  tripName: z.string().min(1).max(100),
+  locale: z.string().max(10).default('en'),
+  exclude: z.array(z.string().max(200)).max(20).optional(),
+})

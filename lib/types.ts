@@ -148,3 +148,51 @@ export interface Settlement {
 }
 
 export type Screen = 'splash' | 'welcome' | 'home' | 'dashboard' | 'day' | 'supplies' | 'settings' | 'notes' | 'map' | 'crew';
+
+// ── AI Recommendation Engine ─────────────────────────────────────────────────
+
+export type PersonaStyle = 'food' | 'bars' | 'quiet' | 'relaxed' | 'other';
+export type DurationBucket = 'short' | 'half_day' | 'full_day';
+export type BudgetTier = 'low' | 'mid' | 'high' | 'any';
+export type Season = 'spring' | 'summer' | 'autumn' | 'winter';
+
+export interface QueryContext {
+  country?: string;
+  region?: string;
+  city: string;
+  area?: string;
+  lat?: number;
+  lng?: number;
+  radius_km: number;
+  style: PersonaStyle;
+  style_detail?: string;
+  duration_bucket: DurationBucket;
+  budget_tier: BudgetTier;
+  season: Season;
+  // runtime-only fields (not stored in cache)
+  dayNumber: number;
+  tripName: string;
+  locale: string;
+  exclude?: string[];
+}
+
+export interface RecCacheEntry {
+  rec_id: string;
+  city: string;
+  area?: string;
+  lat?: number;
+  lng?: number;
+  style: string;
+  duration_bucket: string;
+  budget_tier: string;
+  season: string;
+  title: string;
+  short_description?: string;
+  source_site?: string;
+  source_url?: string;
+  google_place_id?: string;
+  google_rating?: number;
+  avg_duration_min?: number;
+  price_level?: number;
+  popularity_count: number;
+}

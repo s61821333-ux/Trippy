@@ -28,6 +28,7 @@ import { catStamp } from '@/lib/categoryStamp';
 import { Category, HotelStay, TripEvent } from '@/lib/types';
 import { useToast } from '../ui/Toast';
 import { AISheet } from '../Sheets_V2';
+import PersonaSheet from '../PersonaSheet';
 import { useI18n } from '@/lib/i18n';
 import { getCapitalCoords } from '@/lib/capitals';
 
@@ -349,7 +350,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
           <div className="lg-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
             <QuickAction icon="edit"    label={locale === 'he' ? 'עריכה'    : 'Edit'}       color="var(--lg-forest)" onClick={() => { setOpen(false); onEdit(event); }} />
             <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onReschedule(event); }} />
-            <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'Ideas'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
+            <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'Suggest'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
             <QuickAction icon="trash"   label={locale === 'he' ? 'מחק'      : 'Delete'}     color="var(--danger)"    onClick={() => { setOpen(false); onDelete(event.id); }} />
           </div>
         </div>
@@ -893,6 +894,7 @@ export default function DayDetail_V2() {
     trip, activeDay, setActiveDay,
     addEvent, editEvent, deleteEvent,
     setShowSuggestions, showSuggestions,
+    showPersona, setShowPersona,
     dayEndHour, currencyByTrip, tripDbId, setScreen,
   } = useAppStore();
   const { locale } = useI18n();
@@ -1002,7 +1004,7 @@ export default function DayDetail_V2() {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {/* AI suggestions button */}
             <button
-              onClick={() => setShowSuggestions(true)}
+              onClick={() => setShowPersona(true)}
               className="lg-btn"
               style={{
                 height: 38, padding: '0 14px', gap: 6, display: 'flex', alignItems: 'center',
@@ -1013,7 +1015,7 @@ export default function DayDetail_V2() {
               }}
             >
               <Icon name="sparkle" size={14} color="var(--lg-terra)" />
-              Ideas
+              Suggest
             </button>
             {/* Google Maps route link */}
             {(() => {
@@ -1147,7 +1149,7 @@ export default function DayDetail_V2() {
                     currCode={currCode}
                     onEdit={e => { setEditTarget(e); setShowAdd(true); }}
                     onReschedule={e => { setRescheduleTarget(e); setShowReschedule(true); }}
-                    onSuggest={() => setShowSuggestions(true)}
+                    onSuggest={() => setShowPersona(true)}
                     onDelete={id => deleteEvent(activeDay, id)}
                   />
                 ))}
@@ -1228,6 +1230,7 @@ export default function DayDetail_V2() {
         />
       )}
 
+      {showPersona && <PersonaSheet dayNumber={activeDay} />}
       {showSuggestions && <AISheet dayNumber={activeDay} />}
     </div>
   );
