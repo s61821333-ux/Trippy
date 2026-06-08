@@ -65,7 +65,7 @@ export default function JoinPage() {
     if (r.ok) {
       setStatus('joined')
       // Give the user a moment to see the success message, then redirect
-      setTimeout(() => { window.location.href = `/?join=${data.tripId}` }, 1400)
+      setTimeout(() => { window.location.href = `/?join=${data.tripId}` }, 350)
     } else {
       setJoinError(data.error ?? 'Could not join trip — please try again')
       setStatus('ready')

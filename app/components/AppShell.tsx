@@ -13,7 +13,12 @@ import NavBar_V2 from './NavBar_V2';
 import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { ToastProvider, useToast } from './ui/Toast';
 
-const ScreenFallback = () => <div style={{ height: '100%', background: 'var(--bg)' }} />;
+const ScreenFallback = () => (
+  <div style={{ height: '100%', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <LoaderStyles />
+    <CompassLoader theme={BRAND_THEME} size={56} />
+  </div>
+);
 
 const Home_V2           = dynamic(() => import('./screens/Home_V2'),        { loading: ScreenFallback });
 const DashboardScreen   = dynamic(() => import('./screens/Dashboard_V2'),   { loading: ScreenFallback });
@@ -508,7 +513,9 @@ function Shell() {
               >
                 <div className="w-full h-full">
                   <div className="w-full h-full">
-                    {screen === 'home' || !trip ? (
+                    {screen === 'splash' ? (
+                      null
+                    ) : screen === 'home' || !trip ? (
                       <Home_V2 />
                     ) : screen === 'dashboard' ? (
                       <DashboardScreen />

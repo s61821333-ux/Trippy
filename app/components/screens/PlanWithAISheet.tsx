@@ -478,7 +478,6 @@ export default function PlanWithAISheet({ onClose }: { onClose: () => void }) {
         plan.theme, startDate || undefined,
         plan.countries, plan.currency || currency,
       );
-      await new Promise(r => setTimeout(r, 80));
 
       for (const day of plan.days) {
         updateDayMeta(day.dayNumber - 1, { region: day.region, desc: day.description });

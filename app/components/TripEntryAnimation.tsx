@@ -12,7 +12,7 @@ interface Props {
 
 export default function TripEntryAnimation({ tripName, onDone }: Props) {
   useEffect(() => {
-    const id = setTimeout(onDone, 1800);
+    const id = setTimeout(onDone, 600);
     return () => clearTimeout(id);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 

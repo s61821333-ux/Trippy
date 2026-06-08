@@ -37,7 +37,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
 
   useEffect(() => {
     if (!loading) {
-      setTimeout(() => inputRef.current?.focus(), 300);
+      setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [loading]);
 

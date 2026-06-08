@@ -278,8 +278,10 @@ export const useAppStore = create<AppState>()(
             set({ termsAccepted, termsChecked: true })
           })(),
           // Trip restore: reload the persisted trip from DB on page refresh.
+          // Run silently (showLoader: false) so the splash screen covers this wait;
+          // the global overlay is only shown for explicit user-triggered navigations.
           (!sessionExpired && persistedTripDbId)
-            ? get().loadTripById(persistedTripDbId)
+            ? get().loadTripById(persistedTripDbId, { showLoader: false })
             : Promise.resolve(),
         ]);
       },
@@ -352,11 +354,10 @@ export const useAppStore = create<AppState>()(
         let userId = authUser?.id ?? null;
         if (!userId) userId = await getSessionUserId();
         if (!userId) throw new Error('not_authed');
-        // Show the full-screen loader for explicit navigations (home screen → trip).
-        // Background refreshes (realtime, reconnect) call with showLoader=false so the UI
-        // never flashes blank while the user is actively viewing the trip.
-        const isFirstLoad = localTripDbId !== tripId || !localTrip;
-        if (isFirstLoad || showLoader) set({ isGlobalLoading: true });
+        // Show the full-screen loader only for explicit user-triggered navigations.
+        // Background refreshes (realtime, reconnect, boot) pass showLoader=false so the UI
+        // never double-loads behind the splash screen or flashes blank mid-session.
+        if (showLoader) set({ isGlobalLoading: true });
         try {
           const data = await dbLoadTripById(tripId);
           if (!data) throw new Error('not_found');
