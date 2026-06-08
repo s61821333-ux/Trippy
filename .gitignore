@@ -42,3 +42,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# MCP config (contains access tokens)
+.mcp.json
+
+# Database — local only, never commit
+supabase/
+
+# Claude Code agent skills & config
+.agents/
+.claude/skills/
+skills-lock.json

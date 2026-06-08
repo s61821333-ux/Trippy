@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { AiSuggestion, Category } from '@/lib/types';
@@ -97,20 +97,19 @@ interface CacheRow {
 async function queryCacheHits(ctx: {
   city: string; lat?: number; lng?: number; radius_km: number;
   style: string; season: string; duration_bucket: string; budget_tier: string;
-}, supabaseUrl: string, serviceKey: string): Promise<CacheRow[]> {
-  const supa = serviceClient(supabaseUrl, serviceKey);
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+}, authedSupa: SupabaseClient<any>): Promise<CacheRow[]> {
   const adjSeasons = adjacentSeasons(ctx.season as Parameters<typeof adjacentSeasons>[0]);
   const allSeasons = [ctx.season, ...adjSeasons];
 
-  let q = supa
+  let q = authedSupa
     .from('rec_cache')
     .select('*')
     .ilike('city', ctx.city)
     .eq('style', ctx.style)
     .in('season', allSeasons)
-    .order('google_rating', { ascending: false })
-    .order('popularity_count', { ascending: false })
+    .order('google_rating', { ascending: false, nullsFirst: false })
+    .order('popularity_count', { ascending: false, nullsFirst: false })
     .limit(6);
 
   if (ctx.budget_tier !== 'any') {
@@ -118,7 +117,11 @@ async function queryCacheHits(ctx: {
   }
 
   const { data, error } = await q;
-  if (error || !data) return [];
+  if (error) {
+    console.error('[rec_cache] DB query error:', error.message, error.code);
+    return [];
+  }
+  if (!data) return [];
 
   // Additional geo filter when coordinates are available
   if (ctx.lat != null && ctx.lng != null) {
@@ -326,14 +329,16 @@ async function storeToCache(
         .maybeSingle();
 
       if (existing) {
-        await supa
+        const { error: upErr } = await supa
           .from('rec_cache')
           .update({ popularity_count: (existing.popularity_count ?? 0) + 1, last_served_at: row.last_served_at })
           .eq('rec_id', existing.rec_id);
+        if (upErr) console.error('[rec_cache] update error:', upErr.message);
         continue;
       }
     }
-    await supa.from('rec_cache').insert(row);
+    const { error: insErr } = await supa.from('rec_cache').insert(row);
+    if (insErr) console.error('[rec_cache] insert error:', insErr.message, insErr.code, JSON.stringify(row).slice(0, 120));
   }
 }
 
@@ -372,12 +377,12 @@ export async function POST(request: NextRequest) {
   const serviceKey = SUPABASE_SERVICE_ROLE_KEY();
   const googleKey = GOOGLE_MAPS_API_KEY();
 
-  // ── Cache lookup ──────────────────────────────────────────────────────────
+  // ── Cache lookup — use authenticated user client (satisfies RLS policy) ──────
   const cacheHits = await queryCacheHits(
     { city: ctx.city, lat: ctx.lat, lng: ctx.lng, radius_km: ctx.radius_km,
       style: ctx.style, season: ctx.season, duration_bucket: ctx.duration_bucket,
       budget_tier: ctx.budget_tier },
-    supabaseUrl, serviceKey
+    supabase
   );
 
   if (cacheHits.length >= 3) {
@@ -426,14 +431,14 @@ export async function POST(request: NextRequest) {
       if (!timedOut) throw err;
     }
 
-    // Store to cache in background (don't block the response)
+    // Await storage before returning — Vercel may terminate after Response.json
     if (suggestions.length > 0) {
-      void storeToCache(suggestions, {
+      await storeToCache(suggestions, {
         city: ctx.city, area: ctx.area, country: ctx.country, region: ctx.region,
         lat: ctx.lat, lng: ctx.lng,
         style: ctx.style, style_detail: ctx.style_detail,
         duration_bucket: ctx.duration_bucket, budget_tier: ctx.budget_tier, season: ctx.season,
-      }, supabaseUrl, serviceKey);
+      }, supabaseUrl, serviceKey).catch(e => console.error('[rec_cache] storeToCache failed:', e));
     }
 
     return Response.json(suggestions);
