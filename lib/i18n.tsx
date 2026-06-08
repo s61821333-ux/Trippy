@@ -97,8 +97,8 @@ const en = {
   tripExportedJSON: 'Trip exported as JSON ✓',
   tripExportedMD: 'Trip exported as Markdown ✓',
   tripExportedPDF: 'Trip exported as PDF ✓',
-  pdfComingSoon: 'PDF export coming in v2',
-  pdfNoEvents: 'No activities scheduled.',
+  pdfComingSoon: 'PDF export coming soon',
+  pdfNoEvents: 'No activities scheduled yet.',
   pdfStarts: 'starts',
   pdfPopupBlocked: 'Allow pop-ups to export PDF',
   eventAdded: 'Activity added ✓',
@@ -499,7 +499,7 @@ const en = {
   seeAll: 'See all',
   todayLabel: 'Today',
   tapToSetLimit: 'Tap to set a limit',
-  noActivitiesYet: 'Nothing here yet.',
+  noActivitiesYet: 'Nothing planned yet — this day is all yours.',
   startPlanningCta: 'Start with Day 1 — drop in a restaurant, a hike, or just a rough idea.',
   planDay1: 'Plan Day 1',
 
@@ -525,8 +525,8 @@ const en = {
   allPacked2: 'All packed',
   daysRemaining: '{n} days',
   resumeTrip: 'Resume trip',
-  errorSave: "Couldn't save — your last version is safe.",
-  emptyTrips: 'No trips yet.',
+  errorSave: "Couldn't save right now — your last version is safe.",
+  emptyTrips: 'No trips yet — time to change that.',
 };
 
 const he: typeof en = {
@@ -609,12 +609,12 @@ const he: typeof en = {
   english: '🇺🇸 English',
   hebrew: '🇮🇱 עברית',
   aiSuggestions: 'רעיונות מקומיים',
-  aiSugSub: 'מקומות שהמקומיים אוהבים, ליד אתך',
+  aiSugSub: 'מקומות שהמקומיים אוהבים, קרוב אליך',
   scanningNearby: 'מחפשים מקומות בסביבה…',
   noSuggestions: 'לא נמצא כרגע — נסה שוב',
   noMoreSuggestions: 'אין עוד הצעות לפרק זמן זה.',
   tryAddingEvents: 'הוסף פעילויות כדי לפתוח זמנים פנויים לרעיונות.',
-  dismiss: 'דחה',
+  dismiss: 'דלג',
   addToDay: 'הוסף ליום',
   close: 'סגור',
   open: 'פתוח',
@@ -638,7 +638,7 @@ const he: typeof en = {
   enterNickname: 'בחר כינוי לעצמך',
   tripNotFound: 'הטיול לא נמצא — בדוק שוב את השם והקוד',
   createTripFailed: 'משהו השתבש — נסה שוב',
-  emailConfirmRequired: 'כבה ״אישור אימייל״ ב-Supabase → Authentication → Settings',
+  emailConfirmRequired: 'כבה ״אישור אימייל״ ב-Supabase / Authentication / Settings',
   signInWithGoogle: 'כניסה עם Google',
   webViewWarning: 'אתה בדפדפן מוטמע. פתח תפריט (⋮ או …) ובחר ״פתח ב-Chrome״ כדי להתחבר עם Google.',
   countriesLabel: 'יעדי הטיול',
@@ -708,7 +708,7 @@ const he: typeof en = {
   mapTitle: 'מפת המסלול',
   mapNoEvents: 'עדיין אין נקודות במפה',
   mapNoEventsHint: 'הוסף מיקום לפעילות כלשהי והיא תופיע כאן',
-  mapEventCount: 'סיכה {count}',
+  mapEventCount: '{count} סיכה',
   mapEventCountPlural: '{count} סיכות',
   mapAllDays: 'כל הימים',
   mapDay: 'יום {day}',
@@ -751,7 +751,7 @@ const he: typeof en = {
   expenses: 'הוצאות',
   whatFor: 'על מה זה?',
   paidByDefault: 'שולם ע״י (ברירת מחדל: {name})',
-  noExpensesYet: 'עדיין לא נרשמו הוצאות — התחל לעקוב!',
+  noExpensesYet: 'עדיין לא נרשמו הוצאות — הוסיפו את ההוצאה הראשונה!',
   paid: 'שילם',
   person: 'אדם',
   oneDayConflict: 'ביום {day} יש פעילויות חופפות',
@@ -996,7 +996,7 @@ const he: typeof en = {
 
   // Crew screen
   gatherTheTribe: 'קבץ את הצוות',
-  gatherSubtitle: 'הזמן את האנשים שלך — תכננו יחד, זכרו לנצח.',
+  gatherSubtitle: 'הזמינו את האנשים שלכם — תכננו ביחד, תיהנו ביחד.',
   inviteByEmailLabel: 'הזמן באימייל',
   sendInvitesBtn: 'שלח הזמנות',
   orMagicLink: 'או קישור קסם',
@@ -1025,7 +1025,7 @@ const he: typeof en = {
   seeAll: 'ראה הכל',
   todayLabel: 'היום',
   tapToSetLimit: 'לחץ לקביעת מגבלת תקציב',
-  noActivitiesYet: 'עדיין ריק כאן.',
+  noActivitiesYet: 'עדיין ריק — היום שלכם, תמלאו אותו.',
   startPlanningCta: 'התחל ביום 1 — שמור מסעדה, טיול, או סתם רעיון ראשוני.',
   planDay1: 'תכנן יום 1',
 
@@ -1051,8 +1051,8 @@ const he: typeof en = {
   allPacked2: 'הכל ארוז',
   daysRemaining: '{n} ימים',
   resumeTrip: 'המשך טיול',
-  errorSave: 'לא הצלחנו לשמור — הגרסה האחרונה נשמרה.',
-  emptyTrips: 'עוד אין טיולים.',
+  errorSave: 'לא הצלחנו לשמור עכשיו — הגרסה האחרונה שלכם בטוחה.',
+  emptyTrips: 'עדיין לא תיכננתם טיולים — הגיע הזמן!',
 };
 
 const translations = { en, he } as const;

@@ -5,51 +5,73 @@ import LandingSignIn from './components/LandingSignIn';
 import LandingLangToggle from './components/LandingLangToggle';
 
 export const metadata = {
-  title: 'Trippy — Plan trips together',
-  description: 'The collaborative trip planner for groups. Build itineraries, track budgets, discover places, and travel smarter.',
+  title: 'Trippy — Free Group Trip Planner | Plan Together',
+  description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
+  alternates: {
+    canonical: 'https://trippy.app',
+    languages: {
+      'en': 'https://trippy.app',
+      'he': 'https://trippy.app',
+      'x-default': 'https://trippy.app',
+    },
+  },
+  openGraph: {
+    title: 'Trippy — Free Group Trip Planner',
+    description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
+    url: 'https://trippy.app',
+    siteName: 'Trippy',
+    type: 'website',
+    images: [{ url: 'https://trippy.app/og-image.png', width: 1200, height: 630, alt: 'Trippy — Group Trip Planner' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Trippy — Free Group Trip Planner',
+    description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
+    images: ['https://trippy.app/og-image.png'],
+  },
 };
 
 type Locale = 'en' | 'he';
 
 const T = {
   en: {
-    eyebrow: 'Collaborative Trip Planning',
+    eyebrow: 'Group trip planning, done together',
     h1a: 'Plan trips.',
     h1b: 'Together.',
-    hero: 'Build a shared plan for every day, track your budget, find great places, and keep the whole group in the loop — all in real time.',
-    signIn: 'Sign in with Google',
-    featuresEyebrow: 'Everything your trip needs',
+    hero: 'One shared plan your whole crew can build, edit, and actually follow — itinerary, budget, map, and packing list, all in one place.',
+    signIn: 'Continue with Google',
+    featuresEyebrow: 'Everything your crew needs',
     about: {
-      eyebrow: 'About',
-      h2: 'Built for the way groups actually travel',
-      p1: 'Planning a group trip means juggling spreadsheets, endless chat threads, and competing Google Docs. Something always falls through the cracks.',
-      p2: 'Trippy brings everything into one place — a shared itinerary your whole group can see and edit, a budget tracker that splits costs fairly, an interactive map, and a packing list that stays in sync.',
-      p3: 'Whether you are organising a weekend city break or a month-long adventure, Trippy keeps everyone on the same page. Sign in to get started — no payment needed.',
+      eyebrow: 'Our story',
+      h2: 'Made for the chaos of group travel',
+      p1: 'Group trips should be fun — not a mess of competing spreadsheets, WhatsApp threads nobody keeps up with, and Google Docs where nothing is ever final.',
+      p2: 'Trippy puts everything in one shared space: a live itinerary everyone can edit, a budget that stays honest, an interactive map, and a packing list that syncs in real time.',
+      p3: 'Weekend escape or month-long adventure — Trippy keeps your whole crew on the same page. Free to start, no card needed.',
     },
     legalEyebrow: 'Legal',
-    legalH2: 'Terms of Use & Privacy',
-    ctaH2: 'A destination in mind?',
-    ctaBody: 'Sign in and your group can start planning in under a minute. No payment needed.',
+    legalH2: 'Terms & Privacy',
+    ctaH2: 'Where are you headed?',
+    ctaBody: 'Your group can start planning in under a minute. Free — no card, no catch.',
     footerLinks: ['Terms', 'Privacy', 'Contact'],
   },
   he: {
-    eyebrow: 'תכנון טיולים שיתופי',
-    h1a: 'תכנן טיולים.',
+    eyebrow: 'תכנון טיולים שיתופי — כולם בפנים',
+    h1a: 'תכננו טיולים.',
     h1b: 'ביחד.',
-    hero: 'בנו תוכנית משותפת לכל יום, עקבו אחר התקציב, מצאו מקומות מעולים, ושמרו על כל הקבוצה בתמונה — הכל בזמן אמת.',
+    hero: 'תוכנית משותפת אחת שכל הקבוצה בונה, עורכת ועוקבת אחריה — לוח זמנים, תקציב, מפה ורשימת אריזה, הכל במקום אחד.',
     signIn: 'כניסה עם Google',
-    featuresEyebrow: 'כל מה שהטיול שלכם צריך',
+    featuresEyebrow: 'כל מה שהצוות שלכם צריך',
     about: {
-      eyebrow: 'אודות',
-      h2: 'בנוי לאופן שבו קבוצות באמת נוסעות',
-      p1: 'תכנון טיול קבוצתי אומר להתמודד עם גיליונות אלקטרוניים, שרשורי צ׳אט אינסופיים ומסמכי גוגל מתחרים. תמיד משהו נופל בין הכסאות.',
-      p2: 'טריפי מביא הכל למקום אחד — לוח זמנים משותף שכל הקבוצה יכולה לראות ולערוך, מעקב תקציב שמחלק עלויות בצורה הוגנת, מפה אינטראקטיבית, ורשימת אריזה שנשארת מסונכרנת.',
-      p3: 'בין אם אתם מארגנים טיול סוף שבוע בעיר או הרפתקה חודשית, טריפי שומר על כולם באותו עמוד. התחברו כדי להתחיל — ללא תשלום.',
+      eyebrow: 'הסיפור שלנו',
+      h2: 'נולד מהכאוס של טיול קבוצתי',
+      p1: 'טיולים קבוצתיים אמורים להיות כיף — לא מלחמה בין גיליונות אלקטרוניים, שרשורי וואטסאפ שאף אחד לא מעודכן בהם, ומסמכי גוגל שתמיד מאחור.',
+      p2: 'טריפי מביא הכל למקום אחד: לוח זמנים חי שכולם יכולים לערוך, תקציב שמתעדכן לבד, מפה אינטראקטיבית ורשימת אריזה שמסתנכרנת בזמן אמת.',
+      p3: 'בין אם זה בריחה של סוף שבוע או הרפתקה של חודש — טריפי שומר על כל הקבוצה באותו עמוד. בחינם, ללא צורך בכרטיס אשראי.',
     },
     legalEyebrow: 'משפטי',
-    legalH2: 'תנאי שימוש ופרטיות',
-    ctaH2: 'יש יעד ביד?',
-    ctaBody: 'התחברו וכל הקבוצה יכולה להתחיל לתכנן תוך פחות מדקה. לא נדרש תשלום.',
+    legalH2: 'תנאים ופרטיות',
+    ctaH2: 'לאן הפעם?',
+    ctaBody: 'הקבוצה שלכם יכולה להתחיל לתכנן תוך פחות מדקה. בחינם, ללא כרטיס אשראי.',
     footerLinks: ['תנאים', 'פרטיות', 'יצירת קשר'],
   },
 };
@@ -59,92 +81,139 @@ const FEATURES = {
     {
       path: `<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>`,
       iconColor: 'var(--brand)', iconBg: 'var(--brand-muted)',
-      title: 'Hour-by-hour itineraries',
-      desc: 'Build a shared plan for every day — activities, hotels, transport, restaurants. Each change syncs to the whole group straight away.',
+      title: 'Day-by-day itinerary',
+      desc: 'Build a shared plan for every day — activities, hotels, transport, restaurants. Every change syncs to the whole group instantly.',
     },
     {
       path: `<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>`,
       iconColor: 'var(--terra)', iconBg: 'var(--terra-muted)',
-      title: 'Shared budget',
-      desc: 'Track expenses, split costs fairly, and see at a glance whether the group is on track.',
+      title: 'Group budget',
+      desc: 'Log expenses, split costs fairly, and see at a glance whether you\'re on track. No more post-trip surprises.',
     },
     {
       path: `<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/>`,
       iconColor: 'var(--brand)', iconBg: 'var(--brand-muted)',
-      title: 'Interactive map',
-      desc: 'Every stop on a live map. See the whole route, find what is nearby, and share it with anyone.',
+      title: 'Live trip map',
+      desc: 'Every stop on a live map. See the full route, discover what\'s nearby, and share it with your crew.',
     },
     {
       path: `<circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="3"/><path d="M22 21a5 5 0 0 0-8-4"/>`,
       iconColor: 'var(--sand)', iconBg: 'oklch(68% 0.108 75 / 12%)',
-      title: 'Your whole crew',
-      desc: 'Invite people by link. Everyone can add ideas, vote on plans, and edit anything until the day you leave.',
+      title: 'Bring your crew',
+      desc: 'Invite people by link. Everyone can add ideas, vote on plans, and edit anything — right up until you leave.',
     },
     {
       path: `<path d="M4 6.5l1.6 1.6L8.8 5M13 6.5h7M4 12.5l1.6 1.6L8.8 11M13 12.5h7M4 18.5l1.6 1.6L8.8 17M13 18.5h6"/>`,
       iconColor: 'var(--brand)', iconBg: 'var(--brand-muted)',
-      title: 'Packing lists',
-      desc: 'One shared checklist, organised by category. No one forgets the important things.',
+      title: 'Shared packing list',
+      desc: 'One checklist for the whole group, sorted by category. Nobody forgets the essentials.',
     },
     {
       path: `<path d="M11 3l1.4 5.6L18 10l-5.6 1.4L11 17l-1.4-5.6L4 10l5.6-1.4zM18.5 14l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z"/>`,
       iconColor: 'var(--terra)', iconBg: 'var(--terra-muted)',
-      title: 'AI assistance',
-      desc: 'Ask for place ideas, budget tips, or packing help. Gets smarter the more it knows about your trip.',
+      title: 'AI trip helper',
+      desc: 'Ask for place ideas, budget tips, or packing advice. The more it knows about your trip, the more useful it gets.',
     },
   ],
   he: [
     {
       path: `<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>`,
       iconColor: 'var(--brand)', iconBg: 'var(--brand-muted)',
-      title: 'לוח זמנים שעה-שעה',
+      title: 'לוח זמנים יום-יום',
       desc: 'בנו תוכנית משותפת לכל יום — פעילויות, מלונות, תחבורה, מסעדות. כל שינוי מסתנכרן לכל הקבוצה מיד.',
     },
     {
       path: `<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>`,
       iconColor: 'var(--terra)', iconBg: 'var(--terra-muted)',
-      title: 'תקציב משותף',
-      desc: 'עקבו אחרי ההוצאות, חלקו עלויות בצורה הוגנת, ודעו בכל רגע האם אתם בתקציב.',
+      title: 'תקציב הקבוצה',
+      desc: 'עקבו אחרי ההוצאות, חלקו עלויות בצורה הוגנת, ודעו בכל רגע אם אתם בגבולות. לא עוד הפתעות אחרי הטיול.',
     },
     {
       path: `<path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/>`,
       iconColor: 'var(--brand)', iconBg: 'var(--brand-muted)',
-      title: 'מפה אינטראקטיבית',
+      title: 'מפה חיה של המסלול',
       desc: 'כל עצירה על מפה חיה. ראו את המסלול המלא, מצאו מה יש בסביבה, ושתפו עם כולם.',
     },
     {
       path: `<circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="3"/><path d="M22 21a5 5 0 0 0-8-4"/>`,
       iconColor: 'var(--sand)', iconBg: 'oklch(68% 0.108 75 / 12%)',
-      title: 'כל הקבוצה שלכם',
-      desc: 'הזמינו אנשים בלינק. כולם יכולים להוסיף רעיונות, להצביע על תוכניות, ולערוך הכל עד יום הנסיעה.',
+      title: 'הביאו את כולם',
+      desc: 'הזמינו בקישור. כולם יכולים להוסיף רעיונות, להצביע על תוכניות ולערוך הכל — עד שיוצאים לדרך.',
     },
     {
       path: `<path d="M4 6.5l1.6 1.6L8.8 5M13 6.5h7M4 12.5l1.6 1.6L8.8 11M13 12.5h7M4 18.5l1.6 1.6L8.8 17M13 18.5h6"/>`,
       iconColor: 'var(--brand)', iconBg: 'var(--brand-muted)',
-      title: 'רשימות אריזה',
-      desc: 'צ׳ק-ליסט משותף אחד, מסודר לפי קטגוריות. אף אחד לא שוכח את הדברים החשובים.',
+      title: 'רשימת אריזה משותפת',
+      desc: 'צ׳ק-ליסט אחד לכל הקבוצה, מסודר לפי קטגוריות. אף אחד לא שוכח את הדברים החשובים.',
     },
     {
       path: `<path d="M11 3l1.4 5.6L18 10l-5.6 1.4L11 17l-1.4-5.6L4 10l5.6-1.4zM18.5 14l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z"/>`,
       iconColor: 'var(--terra)', iconBg: 'var(--terra-muted)',
-      title: 'עזרת AI',
+      title: 'עוזר AI לטיול',
       desc: 'בקשו המלצות על מקומות, טיפים לתקציב, או עזרה באריזה. ככל שיודע יותר על הטיול שלכם, כך הוא שימושי יותר.',
+    },
+  ],
+};
+
+const FAQ = {
+  en: [
+    {
+      q: 'What is Trippy?',
+      a: 'Trippy is a free collaborative group trip planner. It gives your whole group a shared space to build a day-by-day itinerary, track the group budget, see stops on a live map, and manage a shared packing list — all in real time.',
+    },
+    {
+      q: 'Is Trippy free?',
+      a: 'Yes, completely. Trippy is free to use with no credit card required. Everyone in your group can sign in, edit the trip, and see updates for free.',
+    },
+    {
+      q: 'How do I invite my group?',
+      a: 'Share a trip link and anyone you invite can join instantly, add ideas, and edit the plan. No app download required — Trippy works in any browser on any device.',
+    },
+    {
+      q: 'What can we plan together?',
+      a: 'Day-by-day activities, hotels, transport, restaurants, group expenses, a shared packing checklist, and an interactive map of all your stops.',
+    },
+    {
+      q: 'Does Trippy work on mobile?',
+      a: 'Yes. Trippy is a progressive web app that works on any smartphone or desktop browser. You can add it to your home screen for a native-app feel.',
+    },
+  ],
+  he: [
+    {
+      q: 'מה זה טריפי?',
+      a: 'טריפי הוא מתכנן טיולים קבוצתי חינמי. הוא נותן לכל הקבוצה מרחב משותף לבנות לוח זמנים יום-יום, לעקוב אחרי תקציב הקבוצה, לראות עצירות על מפה חיה, ולנהל רשימת אריזה משותפת — הכל בזמן אמת.',
+    },
+    {
+      q: 'האם טריפי חינמי?',
+      a: 'כן, לחלוטין. טריפי חינמי לשימוש ללא צורך בכרטיס אשראי. כל אחד בקבוצה יכול להיכנס, לערוך את הטיול ולראות עדכונים — בחינם.',
+    },
+    {
+      q: 'איך מזמינים את הקבוצה?',
+      a: 'שתפו קישור לטיול וכל מי שהזמנתם יכול להצטרף מיד, להוסיף רעיונות ולערוך את התוכנית. אין צורך בהורדת אפליקציה — טריפי עובד בכל דפדפן.',
+    },
+    {
+      q: 'מה אפשר לתכנן ביחד?',
+      a: 'פעילויות יום-יום, מלונות, תחבורה, מסעדות, הוצאות הקבוצה, צ׳ק-ליסט אריזה משותף ומפה אינטראקטיבית של כל העצירות.',
+    },
+    {
+      q: 'האם טריפי עובד בנייד?',
+      a: 'כן. טריפי הוא אפליקציית ווב שעובדת בכל סמארטפון או דפדפן מחשב. אפשר להוסיף אותה למסך הבית לחוויה כמו אפליקציה.',
     },
   ],
 };
 
 const LEGAL = {
   en: [
-    { title: 'Terms of Use', body: 'Trippy is provided for personal, non-commercial trip planning. By signing in you agree to use the service in good faith and not to misuse it or harm other users. We reserve the right to suspend accounts that violate these terms.' },
-    { title: 'Privacy', body: 'We store only the information you provide — your name and email via Google OAuth — and the trip data you create. We do not sell your data to third parties. All data is stored securely with row-level security policies.' },
-    { title: 'Your Data', body: 'You can delete your account and all associated trip data at any time from the Settings screen inside the app. Deletion is immediate and permanent.' },
-    { title: 'Contact', body: 'For questions, support, or concerns, email us at support@trippy.app. We aim to respond within 48 hours.' },
+    { title: 'Terms of Use', body: 'Trippy is for personal, non-commercial trip planning. By signing in you agree to use the service honestly and not to harm other users. We reserve the right to suspend accounts that violate these terms.' },
+    { title: 'Privacy', body: 'We store only the information you share with us — your name and email via Google OAuth — plus the trip data you create. We never sell your data. Everything is stored securely with row-level security policies.' },
+    { title: 'Your Data', body: 'You can delete your account and all your trip data at any time from Settings inside the app. Deletion is immediate and permanent.' },
+    { title: 'Contact', body: 'Questions, feedback, or just want to say hi? Email us at support@trippy.app — we aim to get back to you within 48 hours.' },
   ],
   he: [
-    { title: 'תנאי שימוש', body: 'טריפי מסופק לתכנון טיולים אישי, לא מסחרי. בכניסה אתם מסכימים להשתמש בשירות בתום לב ולא לפגוע במשתמשים אחרים. אנו שומרים את הזכות להשעות חשבונות שמפרים תנאים אלה.' },
-    { title: 'פרטיות', body: 'אנו שומרים רק את המידע שאתם מספקים — שם ואימייל דרך Google OAuth — ואת נתוני הטיול שאתם יוצרים. אנחנו לא מוכרים את הנתונים שלכם לצדדים שלישיים. כל המידע מאובטח עם מדיניות אבטחה ברמת שורה.' },
+    { title: 'תנאי שימוש', body: 'טריפי מיועד לתכנון טיולים אישי, לא מסחרי. בכניסה אתם מסכימים להשתמש בשירות בתום לב ולא לפגוע במשתמשים אחרים. אנו שומרים את הזכות להשעות חשבונות שמפרים תנאים אלה.' },
+    { title: 'פרטיות', body: 'אנו שומרים רק את המידע שאתם מספקים לנו — שם ואימייל דרך Google OAuth — ואת נתוני הטיול שיצרתם. לא נמכור את הנתונים שלכם לאף אחד. כל המידע מאוחסן בצורה מאובטחת.' },
     { title: 'הנתונים שלכם', body: 'תוכלו למחוק את החשבון ואת כל נתוני הטיול שלכם בכל עת מתוך מסך ההגדרות באפליקציה. המחיקה מיידית וקבועה.' },
-    { title: 'יצירת קשר', body: 'לשאלות, תמיכה או חששות, שלחו אימייל ל-support@trippy.app. אנו מתכוונים להשיב תוך 48 שעות.' },
+    { title: 'יצירת קשר', body: 'שאלות, משוב, או סתם רוצים להגיד שלום? שלחו אלינו אימייל ל-support@trippy.app — אנחנו מתכוונים לחזור תוך 48 שעות.' },
   ],
 };
 
@@ -156,9 +225,44 @@ export default async function LandingPage() {
   const locale: Locale = (cookieStore.get('trippy-locale')?.value === 'he') ? 'he' : 'en';
   const t = T[locale];
   const features = FEATURES[locale];
+  const faq = FAQ[locale];
   const legal = LEGAL[locale];
 
+  const appJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'Trippy',
+    applicationCategory: 'TravelApplication',
+    operatingSystem: 'Web',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    description: 'Collaborative group trip planner. Shared itinerary, group budget, live map, and packing list — free.',
+    url: 'https://trippy.app',
+  };
+
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ.en.map(item => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  };
+
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'Trippy',
+    url: 'https://trippy.app',
+    email: 'support@trippy.app',
+    description: 'Free collaborative group trip planning app for friends and families.',
+  };
+
   return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
     <div style={{ minHeight: '100dvh', background: 'var(--bg)', fontFamily: 'var(--font-sans)', color: 'var(--text)', overflowX: 'hidden' }}>
 
       {/* ── HEADER ── */}
@@ -237,14 +341,14 @@ export default async function LandingPage() {
         borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
       }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <p style={{
+          <h2 style={{
             textAlign: 'center',
             fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
             letterSpacing: '0.13em', textTransform: 'uppercase',
             color: 'var(--text-3)', marginBottom: 52,
           }}>
             {t.featuresEyebrow}
-          </p>
+          </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
             {features.map(f => (
               <div key={f.title} style={{
@@ -303,6 +407,39 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── FAQ ── */}
+      <section style={{
+        padding: 'clamp(60px, 8vh, 100px) clamp(20px, 5vw, 80px)',
+        background: 'var(--bg-alt)',
+        borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
+      }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 400,
+            letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 32,
+          }}>
+            {locale === 'he' ? 'שאלות נפוצות' : 'Frequently Asked Questions'}
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {faq.map(item => (
+              <div key={item.q} style={{
+                background: 'rgba(255,255,255,0.55)',
+                backdropFilter: 'blur(24px) saturate(1.6)',
+                WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-lg)', padding: '20px 22px',
+              }}>
+                <h3 style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 8 }}>
+                  {item.q}
+                </h3>
+                <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--text-2)' }}>{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── DIVIDER ── */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 clamp(20px, 5vw, 80px)', borderTop: '1px solid var(--border)' }} />
 
@@ -329,13 +466,13 @@ export default async function LandingPage() {
                 background: 'var(--bg-alt)', border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-lg)', padding: '20px 22px',
               }}>
-                <p style={{
+                <h3 style={{
                   fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
                   letterSpacing: '0.1em', textTransform: 'uppercase',
                   color: 'var(--text-3)', marginBottom: 8,
                 }}>
                   {item.title}
-                </p>
+                </h3>
                 <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--text-2)' }}>{item.body}</p>
               </div>
             ))}
@@ -379,6 +516,7 @@ export default async function LandingPage() {
       </footer>
 
     </div>
+    </>
   );
 }
 

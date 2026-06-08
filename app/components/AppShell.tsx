@@ -15,7 +15,6 @@ import { ToastProvider, useToast } from './ui/Toast';
 
 const ScreenFallback = () => <div style={{ height: '100%', background: 'var(--bg)' }} />;
 
-const Welcome_V2        = dynamic(() => import('./screens/Welcome_V2'),     { loading: ScreenFallback });
 const Home_V2           = dynamic(() => import('./screens/Home_V2'),        { loading: ScreenFallback });
 const DashboardScreen   = dynamic(() => import('./screens/Dashboard_V2'),   { loading: ScreenFallback });
 const DayScreen         = dynamic(() => import('./screens/DayDetail_V2'),   { loading: ScreenFallback });
@@ -41,7 +40,7 @@ function OfflineWatcher() {
       setIsOffline(false);
       const count = pendingChanges.length;
       flushPendingChanges().then(() => {
-        if (count > 0) show(`Back online — ${count} change${count > 1 ? 's' : ''} synced ✓`);
+        if (count > 0) show(`Back online — ${count} change${count > 1 ? 's' : ''} synced ✓ Welcome back!`);
       }).catch(() => {});
     };
     const goOffline = () => useAppStore.getState().setIsOffline(true);
@@ -154,6 +153,7 @@ function Shell() {
   );
   const { isRTL } = useI18n();
   const [mounted, setMounted] = useState(false);
+  const [authResolved, setAuthResolved] = useState(false);
   const [osDark, setOsDark] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
@@ -220,6 +220,7 @@ function Shell() {
               const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
               if (aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2') {
                 setShowMfaChallenge(true);
+                setAuthResolved(true);
                 return;
               }
             } catch { /* ignore — proceed normally if AAL check fails */ }
@@ -227,24 +228,25 @@ function Shell() {
             if (trip) {
               setScreen('dashboard');
             } else if (!tripDbId) {
-              // No trip at all — go to the trip picker
               setScreen('home');
             }
-            // tripDbId exists but trip not yet loaded: checkAuth → loadTripById
-            // will navigate to 'dashboard' once the trip is ready, avoiding a
-            // Home_V2 flash while the trip data is in flight.
+            // tripDbId exists but no trip yet: loadTripById is in-flight and will
+            // navigate to 'dashboard' once ready. isGlobalLoading covers the wait.
+            setAuthResolved(true);
           }, 0);
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });
-        // After splash auto-advance, land on welcome (not legacy login).
-        // Skip in test mode — __trippyTestMode__ is set by addInitScript BEFORE page load,
-        // so it is reliably present when onAuthStateChange fires (unlike __trippySetState__
-        // which is set after AppShell mounts and races with this callback).
-        const cur = useAppStore.getState().screen;
         const isTestMode = process.env.NODE_ENV !== 'production' &&
           !!(window as unknown as Record<string, unknown>).__trippyTestMode__;
-        if (!isTestMode && cur !== 'welcome') setScreen('welcome');
+        // Session gone — send the user back to the landing page instead of showing
+        // the old login screen. In test mode keep the current screen so test scripts
+        // can control auth state directly.
+        if (!isTestMode) {
+          window.location.href = '/';
+          return;
+        }
+        setAuthResolved(true);
       }
     });
 
@@ -382,7 +384,7 @@ function Shell() {
     };
   }, []);
 
-  if (!mounted) {
+  if (!mounted || !authResolved) {
     return (
       <div style={{
         position: 'fixed', inset: 0,
@@ -405,7 +407,7 @@ function Shell() {
     );
   }
 
-  const showNav = authUser && screen !== 'welcome';
+  const showNav = !!authUser;
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
@@ -445,9 +447,9 @@ function Shell() {
               gap: 6,
               zIndex: 9999,
             }}>
-              📡 Offline{pendingChanges.length > 0
-                ? ` — ${pendingChanges.length} change${pendingChanges.length > 1 ? 's' : ''} pending`
-                : ' — viewing saved data'}
+              📡 You're offline{pendingChanges.length > 0
+                ? ` — ${pendingChanges.length} change${pendingChanges.length > 1 ? 's' : ''} will sync when you're back`
+                : ' — viewing your saved plan'}
             </div>
           )}
 
@@ -506,9 +508,7 @@ function Shell() {
               >
                 <div className="w-full h-full">
                   <div className="w-full h-full">
-                    {(screen === 'welcome' || screen === 'splash') ? (
-                      <Welcome_V2 />
-                    ) : screen === 'home' || !trip ? (
+                    {screen === 'home' || !trip ? (
                       <Home_V2 />
                     ) : screen === 'dashboard' ? (
                       <DashboardScreen />

@@ -1,0 +1,36 @@
+# Trippy
+
+> Trippy is a free collaborative group trip planner for friends and families.
+
+## What Trippy Does
+
+Trippy gives a group of travelers one shared space to plan a trip together in real time. Members can:
+
+- Build a **day-by-day itinerary** (activities, hotels, transport, restaurants)
+- Track a **group budget** — log expenses and split costs fairly
+- See all stops on a **live interactive map**
+- Manage a **shared packing list** synced across the whole group
+- Invite crew members via **shareable link** — no app download required
+- Get **AI-powered suggestions** for places, budget tips, and packing advice
+
+## Key Facts
+
+- **Price:** Free. No credit card required.
+- **Platform:** Web app (Progressive Web App). Works on any browser, phone or desktop.
+- **Sign-in:** Google OAuth (name and email only)
+- **Languages:** English and Hebrew (bilingual)
+- **Real-time sync:** All changes visible to the group instantly
+- **Privacy:** User data never sold. Row-level security. Account deletion available any time.
+
+## Who It's For
+
+Groups of friends, families, or colleagues planning trips together — weekend escapes to month-long adventures.
+
+## Contact
+
+support@trippy.app
+
+## Links
+
+- Homepage: https://trippy.app
+- Sitemap: https://trippy.app/sitemap.xml

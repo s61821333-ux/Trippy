@@ -1,5 +1,10 @@
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
 import AppShell from '../components/AppShell';
 
-export default function AppPage() {
+export default async function AppPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/');
   return <AppShell />;
 }

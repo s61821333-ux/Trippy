@@ -43,8 +43,8 @@ const assistant = Assistant({
 });
 
 export const metadata: Metadata = {
-  title: 'Trippy - Friendly Trip Planner',
-  description: 'AI-powered collaborative trip planner with hour-by-hour itinerary planning.',
+  title: 'Trippy — Free Group Trip Planner | Plan Together',
+  description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -57,6 +57,20 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: 'black-translucent',
     title: 'Trippy',
+  },
+  openGraph: {
+    title: 'Trippy — Free Group Trip Planner',
+    description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
+    url: 'https://trippy.app',
+    siteName: 'Trippy',
+    type: 'website',
+    images: [{ url: 'https://trippy.app/og-image.png', width: 1200, height: 630, alt: 'Trippy — Group Trip Planner' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Trippy — Free Group Trip Planner',
+    description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
+    images: ['https://trippy.app/og-image.png'],
   },
 };
 

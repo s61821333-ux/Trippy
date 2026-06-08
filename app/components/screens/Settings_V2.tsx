@@ -128,7 +128,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     } else {
       updateTripInfo({ name: editName, countries: countriesUpdate });
     }
-    show('Trip updated');
+    show('Trip updated ✓');
     setShowTripEdit(false);
   };
 
@@ -510,8 +510,8 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
               <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 20px' }} />
               <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--lg-ink)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
                 {locale === 'he'
-                  ? 'מחיקה היא בלתי הפיכה. להמשיך?'
-                  : 'Deleting is permanent and cannot be undone. Continue?'}
+                  ? 'מחיקה היא בלתי הפיכה — בטוחים שאתם רוצים?'
+                  : 'This is permanent and cannot be undone. Sure you want to delete?'}
               </p>
               <div style={{ display: 'flex', gap: 10 }}>
                 <button
@@ -526,7 +526,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                     setShowDeleteConfirm(false);
                     try {
                       await deleteTrip();
-                      show(locale === 'he' ? 'הטיול נמחק' : 'Trip deleted');
+                      show(locale === 'he' ? 'הטיול נמחק בהצלחה' : 'Trip deleted — see you on the next one.');
                     } catch {
                       show(locale === 'he' ? 'שגיאה במחיקה — נסה שוב' : 'Failed to delete trip. Please try again.');
                     }

@@ -140,7 +140,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
     <Sheet
       onClose={onClose}
       title={t('createNewTrip')}
-      subtitle={locale === 'he' ? 'כמה פרטים ואתם בדרך.' : 'A few details and you\'re on your way.'}
+      subtitle={locale === 'he' ? 'כמה פרטים ואתם בדרך.' : 'A few details and the adventure begins.'}
       full
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -412,7 +412,7 @@ export default function Home_V2() {
             marginTop: 10, fontFamily: 'var(--font-sans)', margin: '10px 0 0',
           }}
         >
-          {locale === 'he' ? 'כל הטיולים שלך, במקום אחד.' : 'Every journey starts here.'}
+          {locale === 'he' ? 'כל הטיולים שלכם, במקום אחד.' : 'All your trips, right here.'}
         </m.p>
         </div>{/* /inner centering wrapper */}
       </div>
@@ -458,7 +458,7 @@ export default function Home_V2() {
               style={{ marginBottom: 22 }}
             >
               <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
-                {locale === 'he' ? 'ממשיכים?' : 'Pick up where you left off'}
+                {locale === 'he' ? 'ממשיכים מאיפה שעצרתם?' : 'Pick up where you left off'}
               </p>
               <button
                 onClick={() => handleOpen(lastTrip.id)}
