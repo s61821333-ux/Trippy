@@ -15,15 +15,6 @@ function serviceClient(url: string, key: string) {
 
 export const maxDuration = 30;
 
-// Domains verified accessible to Anthropic's crawler.
-// travelandleisure.com and nationalgeographic.com block the crawler (HTTP 403).
-const WHITELIST_DOMAINS = [
-  'lametayel.co.il',
-  'tripadvisor.com',
-  'lonelyplanet.com',
-  'atlasobscura.com',
-  'timeout.com',
-];
 
 const STYLE_TO_CATEGORY: Record<string, Category> = {
   food:    'food',
@@ -166,14 +157,28 @@ function cacheToSuggestion(r: CacheRow, style: string): AiSuggestion {
   };
 }
 
-// ── Web-search fallback via Claude ───────────────────────────────────────────
+// ── Claude fallback (persona-aware, direct call — no web search) ──────────────
 
-interface CandidatePlace {
-  name: string;
-  description: string;
-  source_site?: string;
-  source_url?: string;
-}
+const STYLE_LABEL: Record<string, string> = {
+  food:    'restaurant, food market, or dining experience',
+  bars:    'bar, craft cocktail spot, or local pub',
+  quiet:   'peaceful, low-key, or contemplative place',
+  relaxed: 'relaxed, casual, or leisurely spot',
+  other:   'interesting place or experience',
+};
+
+const DURATION_LABEL: Record<string, string> = {
+  short:    'under 2 hours',
+  half_day: 'half a day (2–5 hours)',
+  full_day: 'a full day (5+ hours)',
+};
+
+const BUDGET_LABEL: Record<string, string> = {
+  low:  'free or budget-friendly',
+  mid:  'mid-range',
+  high: 'upscale or splurge-worthy',
+  any:  '',
+};
 
 async function searchAndEnrich(ctx: {
   city: string; area?: string; country?: string;
@@ -182,64 +187,60 @@ async function searchAndEnrich(ctx: {
   locale: string; exclude?: string[];
 }, googleKey: string): Promise<AiSuggestion[]> {
   const client = new Anthropic();
+  const isHe = ctx.locale === 'he';
 
   const locationText = ctx.area ? `${ctx.area}, ${ctx.city}` : ctx.city;
-  const budgetHint = ctx.budget_tier !== 'any' ? ` (${ctx.budget_tier} budget)` : '';
-  const durationHint =
-    ctx.duration_bucket === 'short'    ? 'under 2 hours' :
-    ctx.duration_bucket === 'half_day' ? 'half a day' : 'full day';
-  const exclusionNote = ctx.exclude?.length
-    ? ` Skip these already-suggested places: ${ctx.exclude.join(', ')}.` : '';
+  const styleLabel = ctx.style === 'other' && ctx.style_detail
+    ? ctx.style_detail
+    : STYLE_LABEL[ctx.style] ?? 'interesting place';
+  const budgetLine = ctx.budget_tier !== 'any' ? ` that is ${BUDGET_LABEL[ctx.budget_tier]}` : '';
+  const exclusionLine = ctx.exclude?.length
+    ? `\nSkip these already-suggested names: ${ctx.exclude.join(', ')}.` : '';
 
-  const userPrompt = `Find exactly 4 recommended places for "${ctx.style}${ctx.style_detail ? ' — ' + ctx.style_detail : ''}" in ${locationText} during ${ctx.season}. Duration suitable for ${durationHint}.${budgetHint}${exclusionNote}
+  const langNote = isHe
+    ? '\n\n🔴 כל שדות "name" ו-"description" חייבים להיות בעברית.'
+    : '';
 
-Search reputable travel sites and extract real, specific places. Return ONLY a JSON array of exactly 4 objects:
-[{"name":"Place Name","description":"1-2 sentences, specific and vivid","source_site":"tripadvisor.com","source_url":"https://..."}]
+  const systemPrompt = isHe
+    ? 'אתה מומחה טיולים מקומי. השב עם JSON תקין בלבד — ללא markdown, ללא הקדמה.'
+    : 'You are a local travel expert. Respond with valid JSON only — no markdown, no preamble. Recommend real, specific places that exist.';
 
-Respond with valid JSON only.`;
+  const userPrompt = `Recommend exactly 4 ${styleLabel}s${budgetLine} in ${locationText} during ${ctx.season}. Each should take ${DURATION_LABEL[ctx.duration_bucket] ?? '1–3 hours'} to enjoy.${exclusionLine}${langNote}
 
-  const response = await (client.beta.messages as unknown as {
-    create: (params: object) => Promise<{
-      content: Array<{ type: string; text?: string; }>
-    }>
-  }).create({
+Return ONLY a valid JSON array of exactly 4 objects:
+[
+  {
+    "name": "Exact place name",
+    "description": "1–2 specific, vivid sentences — what makes it special, the atmosphere, a practical tip",
+    "location": "Specific address or neighbourhood"
+  }
+]`;
+
+  const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 2048,
-    betas: ['web-search-2025-03-05'],
-    tools: [{
-      type: 'web_search_20250305',
-      name: 'web_search',
-      allowed_domains: WHITELIST_DOMAINS,
-      max_uses: 3,
-    }],
+    max_tokens: 1024,
+    system: systemPrompt,
     messages: [{ role: 'user', content: userPrompt }],
   });
 
-  // Extract final text block from assistant response
-  let jsonText = '';
-  for (const block of response.content) {
-    if (block.type === 'text' && block.text) {
-      jsonText = block.text;
-    }
-  }
+  const textBlock = message.content.find(b => b.type === 'text');
+  const rawText = textBlock && textBlock.type === 'text' ? textBlock.text : '';
+  const clean = rawText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
 
-  // Parse candidates
-  const clean = jsonText.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
-  let candidates: CandidatePlace[] = [];
+  let candidates: Array<{ name: string; description: string; location?: string }> = [];
   try {
-    candidates = JSON.parse(clean) as CandidatePlace[];
-    if (!Array.isArray(candidates)) candidates = [];
+    const parsed = JSON.parse(clean);
+    if (Array.isArray(parsed)) candidates = parsed;
   } catch {
     candidates = [];
   }
 
-  // Enrich each candidate with Google Places
+  // Enrich each candidate with Google Places structured data
   const enriched = await Promise.allSettled(
     candidates.slice(0, 6).map(async (c): Promise<AiSuggestion | null> => {
       const query = `${c.name}, ${locationText}`;
       const place = googleKey ? await fetchPlaceData(query, googleKey) : null;
 
-      // Filter out low-rated places
       if (place?.rating != null && place.rating < 4.0) return null;
 
       return {
@@ -247,7 +248,7 @@ Respond with valid JSON only.`;
         name: c.name,
         category: STYLE_TO_CATEGORY[ctx.style] ?? 'other',
         description: c.description,
-        duration: ctx.duration_bucket === 'short' ? 90 : ctx.duration_bucket === 'half_day' ? 180 : 360,
+        duration: ctx.duration_bucket === 'short' ? 90 : ctx.duration_bucket === 'half_day' ? 210 : 390,
         time: '10:00',
         distance: '—',
         open: place?.regularOpeningHours?.openNow ?? true,
@@ -255,8 +256,8 @@ Respond with valid JSON only.`;
         ratingCount: place?.userRatingCount,
         priceLevel: place?.priceLevel ? (PRICE_LEVEL_MAP[place.priceLevel] ?? undefined) : undefined,
         mapsUrl: place?.googleMapsUri,
-        location: locationText,
-        ...({ source_site: c.source_site, source_url: c.source_url, google_place_id: place?.id } as object),
+        location: c.location ?? locationText,
+        ...({ google_place_id: place?.id } as object),
       };
     })
   );
