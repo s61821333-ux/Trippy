@@ -255,33 +255,33 @@ export const useAppStore = create<AppState>()(
         // Don't reset authUser to null here — sign-out is handled by onAuthStateChange in AppShell.
         // Only update the store when a user is actually found.
         if (!user) return
-        // Check whether this user has already accepted the current terms version.
-        // Keep the persisted value as the default — only override it when the DB
-        // returns a definitive answer (a record exists). Never downgrade true→false
-        // just because the DB returned null (could be RLS or no record yet).
-        let termsAccepted = get().termsAccepted
-        try {
-          const consent = await dbGetPrivacyConsent(user.id)
-          if (consent !== null) {
-            termsAccepted = consent.content_hash === TERMS_VERSION
-          }
-        } catch {}
-        // Set identity so auth-dependent effects (join-link, terms) can proceed immediately.
-        // Restore the previously-open trip on reload so DB-backed state survives refreshes.
-        const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
-        const { tripDbId: persistedTripDbId, lastSessionAt } = get();
-        const sessionExpired = lastSessionAt !== null && Date.now() - lastSessionAt > TWO_DAYS_MS;
-        set({
-          authUser: user,
-          userId: user.id,
-          termsAccepted,
-          termsChecked: true,
-          lastSessionAt: Date.now(),
-        })
 
-        if (!sessionExpired && persistedTripDbId) {
-          await get().loadTripById(persistedTripDbId)
-        }
+        const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
+        const { tripDbId: persistedTripDbId, lastSessionAt, termsAccepted: persistedTerms } = get();
+        const sessionExpired = lastSessionAt !== null && Date.now() - lastSessionAt > TWO_DAYS_MS;
+
+        // Set identity immediately so auth-dependent effects (join-link, terms) can proceed.
+        set({ authUser: user, userId: user.id, lastSessionAt: Date.now() })
+
+        // Run terms check and trip load in parallel — they don't depend on each other.
+        await Promise.allSettled([
+          // Terms check: reads persisted value as default, overrides only when DB responds.
+          // Never downgrades true→false from a null DB result (RLS / no record yet).
+          (async () => {
+            let termsAccepted = persistedTerms
+            try {
+              const consent = await dbGetPrivacyConsent(user.id)
+              if (consent !== null) {
+                termsAccepted = consent.content_hash === TERMS_VERSION
+              }
+            } catch {}
+            set({ termsAccepted, termsChecked: true })
+          })(),
+          // Trip restore: reload the persisted trip from DB on page refresh.
+          (!sessionExpired && persistedTripDbId)
+            ? get().loadTripById(persistedTripDbId)
+            : Promise.resolve(),
+        ]);
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
 

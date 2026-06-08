@@ -5,8 +5,10 @@ import type { Category, DayMeta, EmergencyContact, Expense, HotelStay, SupplyIte
 // Users who accepted a previous version will be shown the modal again.
 export const TERMS_VERSION = '2026-05-v1'
 
+let _client: ReturnType<typeof createClient> | null = null;
 function sb() {
-  return createClient()
+  if (!_client) _client = createClient();
+  return _client;
 }
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
