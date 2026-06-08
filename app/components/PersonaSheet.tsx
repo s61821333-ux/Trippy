@@ -9,6 +9,7 @@ import type { BudgetTier, DurationBucket, PersonaStyle, QueryContext } from '@/l
 import Sheet from './ui/Sheet';
 import Btn from './ui/Btn';
 import Icon from './ui/Icon';
+import PlacesInput, { PlaceResult } from './ui/PlacesInput';
 
 // ── Chip selector helper ──────────────────────────────────────────────────────
 
@@ -104,12 +105,20 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
   const dayMeta = trip?.dayMeta[dayNumber - 1];
   const defaultCity = dayMeta?.region ?? (trip?.countries?.[0] ?? '');
 
-  const [style, setStyle]           = useState<PersonaStyle | null>(null);
-  const [styleDetail, setStyleDetail] = useState('');
-  const [city, setCity]             = useState(defaultCity);
-  const [area, setArea]             = useState('');
-  const [duration, setDuration]     = useState<DurationBucket | null>(null);
-  const [budget, setBudget]         = useState<BudgetTier>('any');
+  const [style, setStyle]             = useState<PersonaStyle | null>(null);
+  const [styleDetail, setStyleDetail]   = useState('');
+  const [cityName, setCityName]         = useState(defaultCity);
+  const [cityLat, setCityLat]           = useState<number | undefined>(dayMeta?.lat);
+  const [cityLng, setCityLng]           = useState<number | undefined>(dayMeta?.lng);
+  const [area, setArea]                 = useState('');
+  const [duration, setDuration]         = useState<DurationBucket | null>(null);
+  const [budget, setBudget]             = useState<BudgetTier>('any');
+
+  const handlePlaceSelect = (place: PlaceResult) => {
+    setCityName(place.name);
+    setCityLat(place.lat);
+    setCityLng(place.lng);
+  };
 
   // Derive season from trip start date + day offset + lat
   const season = useMemo(() => {
@@ -127,7 +136,7 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
     );
   }, [trip?.hotels, dayNumber]);
 
-  const canSubmit = style !== null && duration !== null && city.trim().length > 0;
+  const canSubmit = style !== null && duration !== null && cityName.trim().length > 0;
 
   const handleSubmit = () => {
     if (!canSubmit || !style || !duration) return;
@@ -135,10 +144,10 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
     const ctx: QueryContext = {
       country:        trip?.countries?.[0],
       region:         dayMeta?.region,
-      city:           city.trim(),
+      city:           cityName.trim(),
       area:           area.trim() || undefined,
-      lat:            hotel?.lat ?? dayMeta?.lat,
-      lng:            hotel?.lng ?? dayMeta?.lng,
+      lat:            cityLat ?? hotel?.lat ?? dayMeta?.lat,
+      lng:            cityLng ?? hotel?.lng ?? dayMeta?.lng,
       radius_km:      5,
       style,
       style_detail:   style === 'other' && styleDetail.trim() ? styleDetail.trim() : undefined,
@@ -194,31 +203,17 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
         <div>
           <Label>{t('Where?', 'איפה?')}</Label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ position: 'relative' }}>
-              <Icon
-                name="pin" size={14} color="var(--text-3)"
-                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
-              />
-              <input
-                type="text"
-                value={city}
-                onChange={e => setCity(e.target.value)}
-                placeholder={t('City or region', 'עיר או אזור')}
-                maxLength={200}
-                style={{
-                  width: '100%', boxSizing: 'border-box',
-                  background: 'var(--lg-panel)', border: '1px solid oklch(50% 0.02 60 / 18%)',
-                  borderRadius: 12, padding: '10px 14px 10px 34px', fontSize: 14,
-                  color: 'var(--lg-ink)', outline: 'none',
-                  fontFamily: 'var(--font-body)',
-                }}
-              />
-            </div>
+            <PlacesInput
+              placeholder={t('City or area', 'עיר או אזור')}
+              value={cityName}
+              onChange={name => { setCityName(name); setCityLat(undefined); setCityLng(undefined); }}
+              onSelect={handlePlaceSelect}
+            />
             <input
               type="text"
               value={area}
               onChange={e => setArea(e.target.value)}
-              placeholder={t('Specific area (optional) — e.g. "Old City"', 'אזור ספציפי (אופציונלי)')}
+              placeholder={t('Specific neighbourhood (optional) — e.g. "Old City"', 'שכונה ספציפית (אופציונלי)')}
               maxLength={200}
               style={{
                 width: '100%', boxSizing: 'border-box',

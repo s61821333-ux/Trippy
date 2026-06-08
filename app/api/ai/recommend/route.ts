@@ -15,13 +15,14 @@ function serviceClient(url: string, key: string) {
 
 export const maxDuration = 30;
 
+// Domains verified accessible to Anthropic's crawler.
+// travelandleisure.com and nationalgeographic.com block the crawler (HTTP 403).
 const WHITELIST_DOMAINS = [
   'lametayel.co.il',
   'tripadvisor.com',
-  'travelandleisure.com',
-  'nationalgeographic.com',
   'lonelyplanet.com',
   'atlasobscura.com',
+  'timeout.com',
 ];
 
 const STYLE_TO_CATEGORY: Record<string, Category> = {
