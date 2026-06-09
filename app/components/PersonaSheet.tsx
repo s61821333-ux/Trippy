@@ -11,12 +11,63 @@ import Btn from './ui/Btn';
 import Icon from './ui/Icon';
 import PlacesInput, { PlaceResult } from './ui/PlacesInput';
 
-// ── Chip selector helper ──────────────────────────────────────────────────────
+// ── Style options — all travel categories ─────────────────────────────────────
+
+const STYLE_OPTIONS: { value: PersonaStyle; label: string; labelHe: string; emoji: string }[] = [
+  { value: 'food',      label: 'Food & dining',     labelHe: 'אוכל',          emoji: '🍜' },
+  { value: 'coffee',    label: 'Café & coffee',     labelHe: 'קפה',           emoji: '☕' },
+  { value: 'bars',      label: 'Bars & drinks',     labelHe: 'ברים',          emoji: '🍺' },
+  { value: 'nightlife', label: 'Nightlife',         labelHe: 'בילוי לילי',    emoji: '🎉' },
+  { value: 'culture',   label: 'Culture & local',   labelHe: 'תרבות',         emoji: '🏛' },
+  { value: 'museum',    label: 'Museums & history', labelHe: 'מוזיאונים',     emoji: '🖼' },
+  { value: 'art',       label: 'Art & galleries',   labelHe: 'אמנות',         emoji: '🎨' },
+  { value: 'nature',    label: 'Nature & parks',    labelHe: 'טבע',           emoji: '🌿' },
+  { value: 'beach',     label: 'Beach & water',     labelHe: 'חוף ים',        emoji: '🏖' },
+  { value: 'views',     label: 'Scenic views',      labelHe: 'נופים',         emoji: '🌅' },
+  { value: 'shopping',  label: 'Shopping',          labelHe: 'קניות',         emoji: '🛍' },
+  { value: 'adventure', label: 'Adventure & sport', labelHe: 'הרפתקאות',      emoji: '🧗' },
+  { value: 'wellness',  label: 'Wellness & spa',    labelHe: 'ספא ורוגע',     emoji: '🧘' },
+  { value: 'kids',      label: 'Family-friendly',   labelHe: 'משפחות וילדים', emoji: '👨‍👩‍👧' },
+  { value: 'quiet',     label: 'Quiet & calm',      labelHe: 'שקט',           emoji: '🍃' },
+  { value: 'other',     label: 'Custom',            labelHe: 'אחר',           emoji: '✏️' },
+];
+
+const DURATION_OPTIONS: { value: DurationBucket; label: string; labelHe: string }[] = [
+  { value: 'short',    label: 'Under 2 hrs',  labelHe: 'פחות מ-2 שעות' },
+  { value: 'half_day', label: 'Half day',     labelHe: 'חצי יום'        },
+  { value: 'full_day', label: 'Full day',     labelHe: 'יום שלם'        },
+];
+
+const BUDGET_OPTIONS: { value: BudgetTier; label: string; labelHe: string }[] = [
+  { value: 'low',  label: 'Free / Budget', labelHe: 'חינם / זול'  },
+  { value: 'mid',  label: 'Mid-range',     labelHe: 'בינוני'       },
+  { value: 'high', label: 'Splurge',       labelHe: 'יוקרה'        },
+  { value: 'any',  label: 'Any',           labelHe: 'כל תקציב'     },
+];
+
+// ── Shared styles ─────────────────────────────────────────────────────────────
+
+const SECTION_LABEL: React.CSSProperties = {
+  fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
+  letterSpacing: '0.12em', textTransform: 'uppercase',
+  color: 'var(--text-3)', marginBottom: 10,
+};
+
+const TEXT_INPUT: React.CSSProperties = {
+  width: '100%', boxSizing: 'border-box',
+  background: 'var(--lg-panel)', border: '1px solid oklch(50% 0.02 60 / 18%)',
+  borderRadius: 12, padding: '10px 14px', fontSize: 14,
+  color: 'var(--lg-ink)', outline: 'none',
+  fontFamily: 'var(--font-sans)',
+  resize: 'none' as const,
+};
+
+// ── Chip row ─────────────────────────────────────────────────────────────────
 
 function ChipRow<T extends string>({
   options, value, onChange,
 }: {
-  options: { value: T; label: string }[];
+  options: { value: T; label: string; emoji?: string }[];
   value: T | null;
   onChange: (v: T) => void;
 }) {
@@ -31,15 +82,17 @@ function ChipRow<T extends string>({
             onClick={() => onChange(o.value)}
             className="lg-btn"
             style={{
-              height: 38, padding: '0 16px', fontSize: 13, fontWeight: active ? 700 : 500,
+              height: 38, padding: '0 14px', fontSize: 13, fontWeight: active ? 700 : 500,
               background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
               color: active ? '#fff' : 'var(--lg-ink)',
               boxShadow: active
                 ? '0 0 0 2px var(--lg-forest)'
                 : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
               transition: 'all 160ms ease',
+              display: 'inline-flex', alignItems: 'center', gap: 6,
             }}
           >
+            {o.emoji && <span style={{ fontSize: 14 }}>{o.emoji}</span>}
             {o.label}
           </button>
         );
@@ -48,48 +101,14 @@ function ChipRow<T extends string>({
   );
 }
 
-// ── Label ─────────────────────────────────────────────────────────────────────
-
-function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-      letterSpacing: '0.12em', textTransform: 'uppercase',
-      color: 'var(--text-3)', marginBottom: 10,
-    }}>
-      {children}
-    </div>
-  );
-}
-
 // ── PersonaSheet ──────────────────────────────────────────────────────────────
 
 interface PersonaSheetProps {
   dayNumber: number;
+  onClose?: () => void;
 }
 
-const STYLE_OPTIONS: { value: PersonaStyle; label: string; labelHe: string }[] = [
-  { value: 'food',    label: 'Food',    labelHe: 'אוכל' },
-  { value: 'bars',    label: 'Bars',    labelHe: 'ברים' },
-  { value: 'quiet',   label: 'Quiet',   labelHe: 'שקט' },
-  { value: 'relaxed', label: 'Relaxed', labelHe: 'ריגלאקס' },
-  { value: 'other',   label: 'Other',   labelHe: 'אחר' },
-];
-
-const DURATION_OPTIONS: { value: DurationBucket; label: string; labelHe: string }[] = [
-  { value: 'short',    label: '< 2 hrs',   labelHe: 'פחות מ-2 שעות' },
-  { value: 'half_day', label: 'Half day',  labelHe: 'חצי יום' },
-  { value: 'full_day', label: 'Full day',  labelHe: 'יום שלם' },
-];
-
-const BUDGET_OPTIONS: { value: BudgetTier; label: string; labelHe: string }[] = [
-  { value: 'low',  label: 'Free / Budget', labelHe: 'חינם / זול' },
-  { value: 'mid',  label: 'Mid',           labelHe: 'בינוני' },
-  { value: 'high', label: 'Splurge',       labelHe: 'יוקרה' },
-  { value: 'any',  label: 'Any',           labelHe: 'כל תקציב' },
-];
-
-export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
+export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: PersonaSheetProps) {
   const { locale } = useI18n();
   const isHe = locale === 'he';
 
@@ -103,7 +122,6 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
   );
 
   const dayMeta = trip?.dayMeta[dayNumber - 1];
-  // Default to hotel for this day, falling back to dayMeta region
   const hotel = useMemo(() => {
     return (trip?.hotels ?? []).find(
       h => h.checkInDay <= dayNumber && h.checkOutDay > dayNumber
@@ -114,14 +132,14 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
   const defaultLat  = hotel?.lat ?? dayMeta?.lat;
   const defaultLng  = hotel?.lng ?? dayMeta?.lng;
 
-  const [style, setStyle]             = useState<PersonaStyle | null>(null);
-  const [styleDetail, setStyleDetail]   = useState('');
-  const [cityName, setCityName]         = useState(defaultCity);
-  const [cityLat, setCityLat]           = useState<number | undefined>(defaultLat);
-  const [cityLng, setCityLng]           = useState<number | undefined>(defaultLng);
-  const [area, setArea]                 = useState('');
-  const [duration, setDuration]         = useState<DurationBucket | null>(null);
-  const [budget, setBudget]             = useState<BudgetTier>('any');
+  const [style,    setStyle]    = useState<PersonaStyle | null>(null);
+  const [freeText, setFreeText] = useState('');
+  const [cityName, setCityName] = useState(defaultCity);
+  const [cityLat,  setCityLat]  = useState<number | undefined>(defaultLat);
+  const [cityLng,  setCityLng]  = useState<number | undefined>(defaultLng);
+  const [area,     setArea]     = useState('');
+  const [duration, setDuration] = useState<DurationBucket | null>(null);
+  const [budget,   setBudget]   = useState<BudgetTier>('any');
 
   const handlePlaceSelect = (place: PlaceResult) => {
     setCityName(place.name);
@@ -129,12 +147,11 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
     setCityLng(place.lng);
   };
 
-  // Derive season from trip start date + day offset + lat
   const season = useMemo(() => {
     if (!trip?.startDate) return 'summer' as const;
     const start = new Date(trip.startDate);
     start.setDate(start.getDate() + (dayNumber - 1));
-    const lat = dayMeta?.lat ?? 31.5; // default northern hemisphere
+    const lat = dayMeta?.lat ?? 31.5;
     return computeSeason(start, lat);
   }, [trip?.startDate, dayNumber, dayMeta?.lat]);
 
@@ -144,20 +161,20 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
     if (!canSubmit || !style || !duration) return;
 
     const ctx: QueryContext = {
-      country:        trip?.countries?.[0],
-      region:         dayMeta?.region,
-      city:           cityName.trim(),
-      area:           area.trim() || undefined,
-      lat:            cityLat ?? defaultLat,
-      lng:            cityLng ?? defaultLng,
-      radius_km:      5,
+      country:         trip?.countries?.[0],
+      region:          dayMeta?.region,
+      city:            cityName.trim(),
+      area:            area.trim() || undefined,
+      lat:             cityLat ?? defaultLat,
+      lng:             cityLng ?? defaultLng,
+      radius_km:       5,
       style,
-      style_detail:   style === 'other' && styleDetail.trim() ? styleDetail.trim() : undefined,
+      style_detail:    freeText.trim() || undefined,
       duration_bucket: duration,
-      budget_tier:    budget,
+      budget_tier:     budget,
       season,
       dayNumber,
-      tripName:       trip?.name ?? '',
+      tripName:        trip?.name ?? '',
       locale,
     };
 
@@ -170,40 +187,44 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
 
   return (
     <Sheet
-      title={t('Find your perfect spots', 'מצא את המקומות המושלמים')}
-      onClose={() => setShowPersona(false)}
+      title={t('What are you after?', 'מה מחפשים?')}
+      onClose={() => { setShowPersona(false); onCloseProp?.(); }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '4px 0 24px' }}>
 
-        {/* 1. Style */}
+        {/* 1. Category */}
         <div>
-          <Label>{t('What are you in the mood for?', 'במה אתה בא להיות?')}</Label>
+          <div style={SECTION_LABEL}>{t('What kind of place?', 'איזה סוג מקום?')}</div>
           <ChipRow
-            options={STYLE_OPTIONS.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label }))}
+            options={STYLE_OPTIONS.map(o => ({
+              value: o.value,
+              label: isHe ? o.labelHe : o.label,
+              emoji: o.emoji,
+            }))}
             value={style}
             onChange={setStyle}
           />
-          {style === 'other' && (
-            <input
-              type="text"
-              value={styleDetail}
-              onChange={e => setStyleDetail(e.target.value)}
-              placeholder={t('Describe what you want…', 'תאר מה אתה מחפש…')}
-              maxLength={200}
-              style={{
-                marginTop: 10, width: '100%', boxSizing: 'border-box',
-                background: 'var(--lg-panel)', border: '1px solid oklch(50% 0.02 60 / 18%)',
-                borderRadius: 12, padding: '10px 14px', fontSize: 14,
-                color: 'var(--lg-ink)', outline: 'none',
-                fontFamily: 'var(--font-body)',
-              }}
-            />
-          )}
         </div>
 
-        {/* 2. Location */}
+        {/* 2. Free-text — always visible */}
         <div>
-          <Label>{t('Where?', 'איפה?')}</Label>
+          <div style={SECTION_LABEL}>{t('Anything specific? (optional)', 'משהו ספציפי? (אופציונלי)')}</div>
+          <textarea
+            rows={2}
+            value={freeText}
+            onChange={e => setFreeText(e.target.value)}
+            placeholder={t(
+              'e.g. rooftop terrace, dog-friendly, authentic local, hidden gem…',
+              'למשל: גג עם נוף, פט-פרנדלי, מקומי ואותנטי, מקום נסתר…',
+            )}
+            maxLength={300}
+            style={{ ...TEXT_INPUT, lineHeight: 1.5 }}
+          />
+        </div>
+
+        {/* 3. Location */}
+        <div>
+          <div style={SECTION_LABEL}>{t('Where?', 'איפה?')}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             <PlacesInput
               placeholder={t('City or area', 'עיר או אזור')}
@@ -215,22 +236,16 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
               type="text"
               value={area}
               onChange={e => setArea(e.target.value)}
-              placeholder={t('Specific neighbourhood (optional) — e.g. "Old City"', 'שכונה ספציפית (אופציונלי)')}
+              placeholder={t('Specific neighbourhood (optional)', 'שכונה ספציפית (אופציונלי)')}
               maxLength={200}
-              style={{
-                width: '100%', boxSizing: 'border-box',
-                background: 'var(--lg-panel)', border: '1px solid oklch(50% 0.02 60 / 18%)',
-                borderRadius: 12, padding: '10px 14px', fontSize: 13,
-                color: 'var(--lg-ink)', outline: 'none',
-                fontFamily: 'var(--font-body)',
-              }}
+              style={{ ...TEXT_INPUT, height: 42 }}
             />
           </div>
         </div>
 
-        {/* 3. Duration */}
+        {/* 4. Duration */}
         <div>
-          <Label>{t('How much time do you have?', 'כמה זמן יש לך?')}</Label>
+          <div style={SECTION_LABEL}>{t('How long do you have?', 'כמה זמן?')}</div>
           <ChipRow
             options={DURATION_OPTIONS.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label }))}
             value={duration}
@@ -238,9 +253,9 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
           />
         </div>
 
-        {/* 4. Budget */}
+        {/* 5. Budget */}
         <div>
-          <Label>{t('Budget (optional)', 'תקציב (אופציונלי)')}</Label>
+          <div style={SECTION_LABEL}>{t('Budget', 'תקציב')}</div>
           <ChipRow
             options={BUDGET_OPTIONS.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label }))}
             value={budget}
@@ -257,7 +272,7 @@ export default function PersonaSheet({ dayNumber }: PersonaSheetProps) {
           style={{ height: 52, fontSize: 15, marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}
         >
           <Icon name="sparkle" size={16} color="#fff" />
-          {t('Find my spots', 'מצא לי מקומות')}
+          {t('Find spots', 'מצא לי מקומות')}
         </Btn>
 
       </div>

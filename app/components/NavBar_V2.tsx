@@ -15,31 +15,29 @@ interface NavBarV2Props {
   onLogout?: () => void;
   onNotes?: () => void;
   onWishlist?: () => void;
+  onAI?: () => void;
+  onCrew?: () => void;
 }
 
-// Short 3–5 char labels — keeps the pill compact and avoids "Dashboard" sprawl
-const TABS: {
-  id: Screen;
-  icon: 'grid' | 'compass' | 'map' | 'checklist' | 'users';
-  label: string;
-  labelHe: string;
-  ariaLabel: string;
-}[] = [
-  { id: 'dashboard', icon: 'grid',      label: 'Home',    labelHe: 'ראשי',  ariaLabel: 'Overview' },
-  { id: 'day',       icon: 'compass',   label: 'Explore', labelHe: 'גלה',   ariaLabel: 'Day planner' },
-  { id: 'map',       icon: 'map',       label: 'Map',     labelHe: 'מפה',   ariaLabel: 'Map' },
-  { id: 'supplies',  icon: 'checklist', label: 'Pack',    labelHe: 'ציוד',  ariaLabel: 'Packing list' },
-  { id: 'crew',      icon: 'users',     label: 'Crew',    labelHe: 'צוות',  ariaLabel: 'Crew' },
+type TabEntry =
+  | { kind: 'screen'; id: Screen; icon: 'grid' | 'compass' | 'map' | 'checklist'; label: string; labelHe: string; ariaLabel: string }
+  | { kind: 'action'; id: 'wishlist'; icon: 'star'; label: string; labelHe: string; ariaLabel: string };
+
+const TABS: TabEntry[] = [
+  { kind: 'screen', id: 'dashboard', icon: 'grid',      label: 'Home',     labelHe: 'ראשי', ariaLabel: 'Overview' },
+  { kind: 'screen', id: 'day',       icon: 'compass',   label: 'Explore',  labelHe: 'גלה',  ariaLabel: 'Day planner' },
+  { kind: 'screen', id: 'map',       icon: 'map',       label: 'Map',      labelHe: 'מפה',  ariaLabel: 'Map' },
+  { kind: 'screen', id: 'supplies',  icon: 'checklist', label: 'Pack',     labelHe: 'ציוד', ariaLabel: 'Packing list' },
+  { kind: 'action', id: 'wishlist',  icon: 'star',      label: 'Wishlist', labelHe: 'Wishlist', ariaLabel: 'Wishlist' },
 ];
 
-const TAB_W       = 50;   // px — each tab slot width
-const PILL_PAD    = 7;    // px — inner padding on pill
-const BLOB_SPRING = { type: 'spring', stiffness: 380, damping: 32 } as const;
-const ICON_SPRING = { type: 'spring', stiffness: 380, damping: 28 } as const;
+const TAB_W       = 50;
+const PILL_PAD    = 7;
+const BLOB_SPRING   = { type: 'spring', stiffness: 380, damping: 32 } as const;
+const ICON_SPRING   = { type: 'spring', stiffness: 380, damping: 28 } as const;
 const HANDLE_SPRING = { type: 'spring', stiffness: 320, damping: 26 } as const;
 const PANEL_SPRING  = { type: 'spring', stiffness: 400, damping: 28 } as const;
 
-// Shared style for every row in the expand panel
 const PANEL_BTN: React.CSSProperties = {
   height: 48,
   padding: '0 16px',
@@ -60,7 +58,7 @@ const PANEL_BTN: React.CSSProperties = {
 };
 
 export default function NavBar_V2({
-  active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes, onWishlist,
+  active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes, onWishlist, onAI, onCrew,
 }: NavBarV2Props) {
   const { locale } = useI18n();
   const isHe = locale === 'he';
@@ -82,9 +80,8 @@ export default function NavBar_V2({
     menuBtnRef.current?.setAttribute('aria-expanded', expandOpen ? 'true' : 'false');
   }, [expandOpen]);
 
-  const activeTabIdx = TABS.findIndex(tb => tb.id === active);
-
-  // Blob translates from its initial position (leftmost tab slot)
+  // Blob only tracks real screen tabs
+  const activeTabIdx = TABS.findIndex(tb => tb.kind === 'screen' && tb.id === active);
   const blobX = (isHe ? -1 : 1) * Math.max(0, activeTabIdx) * TAB_W;
 
   const handleChange = (id: Screen) => {
@@ -149,6 +146,15 @@ export default function NavBar_V2({
             </button>
 
             <button
+              onClick={() => { setExpandOpen(false); onCrew?.(); }}
+              className="lg-btn"
+              style={{ ...PANEL_BTN }}
+            >
+              <Icon name="users" size={17} style={{ color: 'var(--lg-forest)' }} />
+              <span>{isHe ? 'צוות' : 'Crew'}</span>
+            </button>
+
+            <button
               onClick={() => { setExpandOpen(false); onSettings?.(); }}
               className="lg-btn"
               style={{ ...PANEL_BTN }}
@@ -207,7 +213,7 @@ export default function NavBar_V2({
           </m.span>
         </m.button>
 
-        {/* Tab bar pill — 5 tabs × TAB_W + 2×PILL_PAD */}
+        {/* Tab bar pill — 5 tabs (4 screens + Wishlist action) */}
         <m.nav
           role="navigation"
           aria-label="Main navigation"
@@ -244,11 +250,17 @@ export default function NavBar_V2({
           />
 
           {TABS.map((tab, i) => {
-            const isActive = i === activeTabIdx;
+            const isActive = tab.kind === 'screen' && i === activeTabIdx;
             return (
               <m.button
                 key={tab.id}
-                onClick={() => handleChange(tab.id)}
+                onClick={() => {
+                  if (tab.kind === 'action') {
+                    onWishlist?.();
+                  } else {
+                    handleChange(tab.id);
+                  }
+                }}
                 whileTap={{ scale: 0.9 }}
                 transition={ICON_SPRING}
                 aria-label={tab.ariaLabel}
@@ -295,16 +307,16 @@ export default function NavBar_V2({
           })}
         </m.nav>
 
-        {/* Wishlist FAB */}
-        {onWishlist && (
+        {/* AI FAB */}
+        {onAI && (
           <m.button
-            onClick={() => { setExpandOpen(false); onWishlist(); }}
+            onClick={() => { setExpandOpen(false); onAI(); }}
             initial={{ y: 12 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
             whileTap={{ scale: 0.92 }}
             className="lg lg-strong"
-            aria-label="Wish list"
+            aria-label={isHe ? 'הצעות AI' : 'AI suggestions'}
             style={{
               width: 52, height: 52,
               borderRadius: 9999,
@@ -320,18 +332,18 @@ export default function NavBar_V2({
               touchAction: 'manipulation',
             }}
           >
-            <Icon name="star" size={19} style={{ color: 'var(--lg-sand)' }} />
+            <Icon name="sparkle" size={19} style={{ color: 'var(--lg-terra)' }} />
             <span style={{
               fontFamily: 'var(--font-sans)',
               fontSize: 7,
               fontWeight: 700,
               letterSpacing: '0.04em',
-              color: 'var(--lg-sand)',
+              color: 'var(--lg-terra)',
               lineHeight: 1,
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',
             }}>
-              {isHe ? 'רצונות' : 'Wish'}
+              AI
             </span>
           </m.button>
         )}

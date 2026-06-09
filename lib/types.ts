@@ -151,7 +151,12 @@ export type Screen = 'splash' | 'welcome' | 'home' | 'dashboard' | 'day' | 'supp
 
 // ── AI Recommendation Engine ─────────────────────────────────────────────────
 
-export type PersonaStyle = 'food' | 'bars' | 'quiet' | 'relaxed' | 'other';
+export type PersonaStyle =
+  | 'food' | 'coffee' | 'bars' | 'nightlife'
+  | 'culture' | 'museum' | 'art'
+  | 'nature' | 'beach' | 'views'
+  | 'shopping' | 'adventure' | 'wellness'
+  | 'kids' | 'quiet' | 'other';
 export type DurationBucket = 'short' | 'half_day' | 'full_day';
 export type BudgetTier = 'low' | 'mid' | 'high' | 'any';
 export type Season = 'spring' | 'summer' | 'autumn' | 'winter';

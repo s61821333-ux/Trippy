@@ -52,7 +52,10 @@ export async function signInWithGoogle(): Promise<void> {
 }
 
 export async function getCurrentUser(): Promise<{ id: string; username: string } | null> {
-  const { data: { user } } = await sb().auth.getUser()
+  // getSession() reads the local cookie — no network call unless the token needs
+  // refreshing. getUser() always hits the server; avoid it on the client hot path.
+  const { data: { session } } = await sb().auth.getSession()
+  const user = session?.user
   if (!user) return null
   const email = user.email ?? ''
   const username = user.user_metadata?.full_name ?? email.split('@')[0]
@@ -65,8 +68,8 @@ export async function signOut() {
 }
 
 export async function getSessionUserId(): Promise<string | null> {
-  const { data: { user } } = await sb().auth.getUser()
-  return user?.id ?? null
+  const { data: { session } } = await sb().auth.getSession()
+  return session?.user?.id ?? null
 }
 
 // ─── MFA ─────────────────────────────────────────────────────────────────────

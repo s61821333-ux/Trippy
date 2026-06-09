@@ -34,6 +34,7 @@ const TermsModal         = dynamic(() => import('./TermsModal'));
 const WishlistSheet      = dynamic(() => import('./screens/WishlistSheet'));
 const SecuritySettings   = dynamic(() => import('./screens/SecuritySettings'));
 const MFAChallenge       = dynamic(() => import('./screens/MFAChallenge'));
+const PersonaSheet       = dynamic(() => import('./PersonaSheet'));
 
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
 function OfflineWatcher() {
@@ -164,6 +165,7 @@ function Shell() {
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
   const [entryTripName, setEntryTripName] = useState<string | undefined>();
   const [showWishlist,    setShowWishlist]    = useState(false);
+  const [showAIFromNav,   setShowAIFromNav]   = useState(false);
   const [showSecurity,    setShowSecurity]    = useState(false);
   const [showMfaChallenge, setShowMfaChallenge] = useState(false);
   const prevScreen = React.useRef(screen);
@@ -217,27 +219,27 @@ function Shell() {
         // never see the home/trip-picker screen flash before loadTripById navigates there.
         const cur = useAppStore.getState().screen;
         if (cur === 'welcome' || cur === 'splash') {
-          // Defer MFA check outside the onAuthStateChange lock — calling auth methods
-          // (like getAuthenticatorAssuranceLevel) inside the callback deadlocks because
-          // onAuthStateChange already holds the Supabase auth lock.
+          // Resolve auth immediately so the spinner goes away — don't block on the
+          // MFA network call. The challenge overlay appears as soon as the check
+          // completes (usually <1 s later); users without MFA never pay that cost.
+          const { trip, tripDbId } = useAppStore.getState();
+          if (trip) {
+            setScreen('dashboard');
+          } else if (!tripDbId) {
+            setScreen('home');
+          }
+          // tripDbId exists but no trip yet: loadTripById is in-flight and will
+          // navigate to 'dashboard' once ready. isGlobalLoading covers the wait.
+          setAuthResolved(true);
+          // MFA check runs outside the onAuthStateChange lock (calling auth methods
+          // inside the callback deadlocks). Non-blocking — shows challenge if needed.
           setTimeout(async () => {
             try {
               const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
               if (aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2') {
                 setShowMfaChallenge(true);
-                setAuthResolved(true);
-                return;
               }
             } catch { /* ignore — proceed normally if AAL check fails */ }
-            const { trip, tripDbId } = useAppStore.getState();
-            if (trip) {
-              setScreen('dashboard');
-            } else if (!tripDbId) {
-              setScreen('home');
-            }
-            // tripDbId exists but no trip yet: loadTripById is in-flight and will
-            // navigate to 'dashboard' once ready. isGlobalLoading covers the wait.
-            setAuthResolved(true);
           }, 0);
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
@@ -497,6 +499,8 @@ function Shell() {
               onLogout={() => logout()}
               onNotes={() => setScreen('notes')}
               onWishlist={() => setShowWishlist(true)}
+              onAI={() => setShowAIFromNav(true)}
+              onCrew={() => setScreen('crew')}
             />
           )}
 
@@ -541,6 +545,11 @@ function Shell() {
 
           {/* Wishlist sheet */}
           {showWishlist && <WishlistSheet onClose={() => setShowWishlist(false)} />}
+
+          {/* AI suggestions sheet (opened from NavBar) */}
+          {showAIFromNav && (
+            <PersonaSheet dayNumber={1} onClose={() => setShowAIFromNav(false)} />
+          )}
 
           {/* Security settings sheet */}
           {showSecurity && <SecuritySettings onClose={() => setShowSecurity(false)} />}

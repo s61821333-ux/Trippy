@@ -56,7 +56,7 @@ function AddWishItemSheet({ onClose }: { onClose: () => void }) {
       duration: parseInt(duration) || 60,
       notes: notes.trim() || undefined,
     });
-    show(locale === 'he' ? 'נוסף לרשימת המשאלות' : 'Added to wish list');
+    show(locale === 'he' ? 'נוסף ל-Wishlist' : 'Added to Wishlist');
     onClose();
   };
 
@@ -68,7 +68,7 @@ function AddWishItemSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <Sheet
-      title={locale === 'he' ? 'הוסף לרשימת משאלות' : 'Add to wish list'}
+      title={locale === 'he' ? 'הוסף ל-Wishlist' : 'Add to Wishlist'}
       onClose={onClose}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -126,7 +126,7 @@ function AddWishItemSheet({ onClose }: { onClose: () => void }) {
 
         <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
           <GlassBtn variant="accent" size="lg" onClick={handleSave} style={{ flex: 2 }}>
-            {locale === 'he' ? 'הוסף' : 'Add to wish list'}
+            {locale === 'he' ? 'הוסף' : 'Add to Wishlist'}
           </GlassBtn>
           <GlassBtn variant="ghost" size="lg" onClick={onClose} style={{ flex: 1 }}>
             {locale === 'he' ? 'ביטול' : 'Cancel'}
@@ -322,7 +322,7 @@ function WishCard({ item, onDelete, onSchedule }: {
         {/* Delete button */}
         <button
           onClick={onDelete}
-          aria-label="Remove from wish list"
+          aria-label="Remove from Wishlist"
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--text-3)', opacity: 0.6, flexShrink: 0 }}
         >
           <Icon name="trash" size={15} color="currentColor" />
@@ -370,7 +370,7 @@ export default function WishlistSheet({ onClose }: WishlistSheetProps) {
 
   return (
     <Sheet
-      title={locale === 'he' ? 'רשימת משאלות' : 'Wish List'}
+      title="Wishlist"
       subtitle={locale === 'he' ? 'מקומות שאתה רוצה לבקר' : 'Places you want to visit'}
       onClose={onClose}
     >

@@ -24,6 +24,7 @@ import Sheet from './ui/Sheet';
 import Btn from './ui/Btn';
 import Icon from './ui/Icon';
 import CurrencyAmount from './ui/CurrencyAmount';
+import { useToast } from './ui/Toast';
 
 // ── Category label map ────────────────────────────────────────────────────────
 
@@ -253,15 +254,15 @@ function SuggCard({
           onClick={() => onAdd(s)}
           style={{ height: 44, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}
         >
-          <Icon name="plus" size={15} color="#fff" />
-          {t('Add to day') || 'Add to day'}
+          <Icon name="star" size={15} color="#fff" />
+          {locale === 'he' ? 'הוסף ל-Wishlist' : 'Add to Wishlist'}
         </Btn>
         <button
           onClick={() => onDismiss(s)}
           className="lg-btn lg-btn-glass"
           style={{ height: 44, padding: '0 20px', flexShrink: 0 }}
         >
-          {t('Dismiss') || 'Dismiss'}
+          {locale === 'he' ? 'דחה' : 'Dismiss'}
         </button>
       </div>
     </div>
@@ -276,10 +277,11 @@ interface AISheetProps {
 
 export function AISheet({ dayNumber }: AISheetProps) {
   const { t, locale } = useI18n();
+  const { show } = useToast();
 
   const {
     trip, tripDbId, currencyByTrip, activeGapStart, activeGapEnd,
-    setShowSuggestions, setAiSuggestions, addSuggestionToDay,
+    setShowSuggestions, setAiSuggestions, addWishlistItem,
     personaContext, setPersonaContext,
   } = useAppStore(
     useShallow(s => ({
@@ -290,7 +292,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
       activeGapEnd:       s.activeGapEnd,
       setShowSuggestions: s.setShowSuggestions,
       setAiSuggestions:   s.setAiSuggestions,
-      addSuggestionToDay: s.addSuggestionToDay,
+      addWishlistItem:    s.addWishlistItem,
       personaContext:     s.personaContext,
       setPersonaContext:  s.setPersonaContext,
     }))
@@ -469,8 +471,14 @@ export function AISheet({ dayNumber }: AISheetProps) {
   };
 
   const handleAdd = (s: AiSuggestion) => {
-    addSuggestionToDay(dayNumber, s.id);
-    setShowSuggestions(false);
+    addWishlistItem({
+      name:     s.name,
+      category: s.category,
+      location: s.location,
+      duration: s.duration,
+      notes:    s.description || undefined,
+    });
+    show(locale === 'he' ? `"${s.name}" נוסף ל-Wishlist` : `"${s.name}" added to Wishlist`);
   };
 
   const visible = suggestions.filter(s => !dismissed.includes(s.id));
