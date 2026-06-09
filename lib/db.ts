@@ -93,7 +93,11 @@ export async function mfaEnrollTotp(friendlyName: string) {
 
 // ─── Passkeys (primary auth, not MFA) ────────────────────────────────────────
 
-// ─── Passkeys (primary auth, not MFA) ────────────────────────────────────────
+export async function signInWithPasskey() {
+  const { data, error } = await sb().auth.signInWithPasskey()
+  if (error) throw error
+  return data
+}
 
 export async function passkeyRegister() {
   // Triggers the browser's WebAuthn ceremony (Face ID / fingerprint / PIN)
