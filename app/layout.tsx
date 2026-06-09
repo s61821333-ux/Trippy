@@ -91,14 +91,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Read resolved dark value from cookie so the server renders the correct theme
   // on every page load — prevents the flash without any client-side script.
   // AppShell's useEffect writes this cookie whenever the resolved theme changes.
-  const isDark = cookieStore.get('trippy-dark')?.value === 'true';
+  const darkCookie = cookieStore.get('trippy-dark')?.value;
+  const isDark = darkCookie === 'true';
+  // Explicitly set data-dark="false" when the user has chosen light so the
+  // prefers-color-scheme:dark media query in globals.css doesn't override it.
+  const darkAttr = isDark ? 'true' : darkCookie === 'false' ? 'false' : undefined;
 
   return (
     <html
       lang={locale}
       dir={dir}
       suppressHydrationWarning
-      data-dark={isDark ? 'true' : undefined}
+      data-dark={darkAttr}
       style={{ height: '100%' }}
       className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${hebrewFont.variable} ${assistant.variable}`}
     >

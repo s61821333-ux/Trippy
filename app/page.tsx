@@ -35,41 +35,45 @@ type Locale = 'en' | 'he';
 
 const T = {
   en: {
-    eyebrow: 'Group trip planning, done together',
+    eyebrow: 'Free group trip planning',
     h1a: 'Plan trips.',
     h1b: 'Together.',
     hero: 'One shared plan your whole crew can build, edit, and actually follow — itinerary, budget, map, and packing list, all in one place.',
     signIn: 'Continue with Google',
+    trust: ['Completely free', 'No app to download', 'Works on any device'],
     featuresEyebrow: 'Everything your crew needs',
     about: {
       eyebrow: 'Our story',
       h2: 'Made for the chaos of group travel',
-      p1: 'Group trips should be fun — not a mess of competing spreadsheets, WhatsApp threads nobody keeps up with, and Google Docs where nothing is ever final.',
-      p2: 'Trippy puts everything in one shared space: a live itinerary everyone can edit, a budget that stays honest, an interactive map, and a packing list that syncs in real time.',
-      p3: 'Weekend escape or month-long adventure — Trippy keeps your whole crew on the same page. Free to start, no card needed.',
+      p1: 'Group trips should be fun — not a mess of competing spreadsheets, WhatsApp threads nobody keeps up with, and Google Docs that are never finished.',
+      p2: 'Trippy puts everything in one shared space: a live itinerary everyone can edit, a budget you can all see and trust, an interactive map, and a packing list that syncs in real time.',
+      p3: 'Weekend trip or month on the road — Trippy keeps your whole crew on the same page. Free to start, no card needed.',
     },
     legalEyebrow: 'Legal',
     legalH2: 'Terms & Privacy',
+    ctaEyebrow: 'Ready when you are',
     ctaH2: 'Where are you headed?',
     ctaBody: 'Your group can start planning in under a minute. Free — no card, no catch.',
     footerLinks: ['Terms', 'Privacy', 'Contact'],
   },
   he: {
-    eyebrow: 'תכנון טיולים שיתופי — כולם בפנים',
+    eyebrow: 'תכנון טיולים קבוצתי — בחינם',
     h1a: 'תכננו טיולים.',
     h1b: 'ביחד.',
     hero: 'תוכנית משותפת אחת שכל הקבוצה בונה, עורכת ועוקבת אחריה — לוח זמנים, תקציב, מפה ורשימת אריזה, הכל במקום אחד.',
     signIn: 'כניסה עם Google',
+    trust: ['חינמי לחלוטין', 'ללא הורדת אפליקציה', 'עובד בכל מכשיר'],
     featuresEyebrow: 'כל מה שהצוות שלכם צריך',
     about: {
       eyebrow: 'הסיפור שלנו',
       h2: 'נולד מהכאוס של טיול קבוצתי',
-      p1: 'טיולים קבוצתיים אמורים להיות כיף — לא מלחמה בין גיליונות אלקטרוניים, שרשורי וואטסאפ שאף אחד לא מעודכן בהם, ומסמכי גוגל שתמיד מאחור.',
-      p2: 'טריפי מביא הכל למקום אחד: לוח זמנים חי שכולם יכולים לערוך, תקציב שמתעדכן לבד, מפה אינטראקטיבית ורשימת אריזה שמסתנכרנת בזמן אמת.',
-      p3: 'בין אם זה בריחה של סוף שבוע או הרפתקה של חודש — טריפי שומר על כל הקבוצה באותו עמוד. בחינם, ללא צורך בכרטיס אשראי.',
+      p1: 'טיולים קבוצתיים אמורים להיות כיף — לא מלחמה בין גיליונות אלקטרוניים, שרשורי וואטסאפ שאף אחד לא עוקב אחריהם, ומסמכי גוגל שאף פעם לא מוגמרים.',
+      p2: 'טריפי מביא הכל למקום אחד: לוח זמנים חי שכולם יכולים לערוך, תקציב שנשאר מעודכן, מפה אינטראקטיבית ורשימת אריזה שמסתנכרנת בזמן אמת.',
+      p3: 'בין אם זה חופשת סוף שבוע או חודש בדרכים — טריפי שומר על כל הקבוצה באותו עמוד. בחינם, ללא צורך בכרטיס אשראי.',
     },
     legalEyebrow: 'משפטי',
     legalH2: 'תנאים ופרטיות',
+    ctaEyebrow: 'מוכנים?',
     ctaH2: 'לאן הפעם?',
     ctaBody: 'הקבוצה שלכם יכולה להתחיל לתכנן תוך פחות מדקה. בחינם, ללא כרטיס אשראי.',
     footerLinks: ['תנאים', 'פרטיות', 'יצירת קשר'],
@@ -98,7 +102,7 @@ const FEATURES = {
     },
     {
       path: `<circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="3"/><path d="M22 21a5 5 0 0 0-8-4"/>`,
-      iconColor: 'var(--sand)', iconBg: 'oklch(68% 0.108 75 / 12%)',
+      iconColor: 'var(--sand)', iconBg: 'var(--sand-light)',
       title: 'Bring your crew',
       desc: 'Invite people by link. Everyone can add ideas, vote on plans, and edit anything — right up until you leave.',
     },
@@ -136,7 +140,7 @@ const FEATURES = {
     },
     {
       path: `<circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><circle cx="17" cy="9" r="3"/><path d="M22 21a5 5 0 0 0-8-4"/>`,
-      iconColor: 'var(--sand)', iconBg: 'oklch(68% 0.108 75 / 12%)',
+      iconColor: 'var(--sand)', iconBg: 'var(--sand-light)',
       title: 'הביאו את כולם',
       desc: 'הזמינו בקישור. כולם יכולים להוסיף רעיונות, להצביע על תוכניות ולערוך הכל — עד שיוצאים לדרך.',
     },
@@ -147,7 +151,7 @@ const FEATURES = {
       desc: 'צ׳ק-ליסט אחד לכל הקבוצה, מסודר לפי קטגוריות. אף אחד לא שוכח את הדברים החשובים.',
     },
     {
-      path: `<path d="M11 3l1.4 5.6L18 10l-5.6 1.4L11 17l-1.4-5.6L4 10l5.6-1.4zM18.5 14l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7z"/>`,
+      path: `<path d="M11 3l1.4 5.6L18 10l-5.6 1.4L11 17l-1.4-5.6L4 10l5.6-1.4zM18.5 14l.7 2.3 2.3.7-2.3.7-.7 2.3-.7 2.3-.7-2.3-2.3-.7 2.3-.7z"/>`,
       iconColor: 'var(--terra)', iconBg: 'var(--terra-muted)',
       title: 'עוזר AI לטיול',
       desc: 'בקשו המלצות על מקומות, טיפים לתקציב, או עזרה באריזה. ככל שיודע יותר על הטיול שלכם, כך הוא שימושי יותר.',
@@ -227,6 +231,7 @@ export default async function LandingPage() {
   const features = FEATURES[locale];
   const faq = FAQ[locale];
   const legal = LEGAL[locale];
+  const isRTL = locale === 'he';
 
   const appJsonLd = {
     '@context': 'https://schema.org',
@@ -263,259 +268,375 @@ export default async function LandingPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
-    <div style={{ minHeight: '100dvh', background: 'var(--bg)', fontFamily: 'var(--font-sans)', color: 'var(--text)', overflowX: 'hidden' }}>
 
-      {/* ── HEADER ── */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        backdropFilter: 'blur(40px) saturate(1.8)',
-        WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
-        background: 'oklch(98% 0.010 75 / 82%)',
-        borderBottom: '1px solid var(--border)',
-        padding: '0 clamp(20px, 5vw, 80px)',
-        height: 60,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: 12,
-      }}>
-        <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-          <CompassMark size={26} />
-          <span style={{ fontWeight: 700, fontSize: 20, letterSpacing: '-0.04em', color: 'var(--text)' }}>
-            Trippy<span style={{ color: 'var(--terra)' }}>.</span>
-          </span>
-        </a>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <LandingLangToggle locale={locale} />
-          <LandingSignIn compact locale={locale} />
-        </div>
-      </header>
+      {/* Scroll wrapper — body has overflow:hidden for the app shell; this is the landing scroll container */}
+      <div
+        className="landing-scroll"
+        dir={isRTL ? 'rtl' : 'ltr'}
+        lang={locale}
+      >
 
-      {/* ── HERO ── */}
-      <section style={{
-        position: 'relative',
-        padding: 'clamp(80px, 14vh, 160px) clamp(20px, 5vw, 80px) clamp(72px, 11vh, 130px)',
-        textAlign: 'center',
-        overflow: 'hidden',
-      }}>
-        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
-          <div style={{ position: 'absolute', top: '-10%', left: '10%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, oklch(62% 0.115 40 / 8%) 0%, transparent 70%)' }} />
-          <div style={{ position: 'absolute', top: '5%', right: '5%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, oklch(42% 0.092 155 / 7%) 0%, transparent 70%)' }} />
-          <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: 700, height: 300, borderRadius: '50%', background: 'radial-gradient(ellipse, oklch(68% 0.108 75 / 6%) 0%, transparent 70%)' }} />
-        </div>
+        {/* ── HEADER ── */}
+        <header className="landing-header">
+          <a
+            href="/"
+            style={{
+              textDecoration: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              flexShrink: 0,
+            }}
+          >
+            <CompassMark size={26} />
+            <span className="wordmark" style={{ fontSize: 20, color: 'var(--text)' }}>
+              Trippy<span className="dot">.</span>
+            </span>
+          </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <LandingLangToggle locale={locale} />
+            <LandingSignIn compact locale={locale} />
+          </div>
+        </header>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 820, margin: '0 auto' }}>
-          <p style={{
-            display: 'inline-block',
-            fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-            letterSpacing: '0.14em', textTransform: 'uppercase',
-            color: 'var(--terra)', background: 'var(--terra-light)',
-            padding: '5px 14px', borderRadius: 'var(--radius-full)', marginBottom: 36,
-          }}>
-            {t.eyebrow}
-          </p>
-
-          <h1 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(52px, 9vw, 116px)',
-            fontWeight: 400, lineHeight: 1.03, letterSpacing: '-0.025em',
-            color: 'var(--text)', marginBottom: 28,
-          }}>
-            {t.h1a}<br />
-            <em style={{ color: 'var(--brand)', fontStyle: 'italic' }}>{t.h1b}</em>
-          </h1>
-
-          <p style={{
-            fontSize: 'clamp(16px, 2vw, 20px)', lineHeight: 1.7,
-            color: 'var(--text-2)', maxWidth: 540, margin: '0 auto 52px',
-          }}>
-            {t.hero}
-          </p>
-
-          <LandingSignIn locale={locale} />
-        </div>
-      </section>
-
-      {/* ── FEATURES ── */}
-      <section style={{
-        padding: 'clamp(60px, 8vh, 100px) clamp(20px, 5vw, 80px)',
-        background: 'var(--bg-alt)',
-        borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
-      }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h2 style={{
+        {/* ── HERO ── */}
+        <section
+          style={{
+            position: 'relative',
+            padding: 'clamp(72px, 13vh, 148px) clamp(20px, 5vw, 80px) clamp(64px, 10vh, 120px)',
             textAlign: 'center',
-            fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-            letterSpacing: '0.13em', textTransform: 'uppercase',
-            color: 'var(--text-3)', marginBottom: 52,
-          }}>
-            {t.featuresEyebrow}
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
-            {features.map(f => (
-              <div key={f.title} style={{
-                background: 'rgba(255,255,255,0.55)',
-                backdropFilter: 'blur(24px) saturate(1.6)',
-                WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
-                border: '1px solid var(--border)',
-                borderTop: '1px solid rgba(255,255,255,0.7)',
-                borderLeft: '1px solid rgba(255,255,255,0.4)',
-                borderRadius: 'var(--radius-xl)',
-                padding: '28px 24px',
-                boxShadow: 'var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.6)',
-              }}>
-                <div style={{
-                  width: 46, height: 46, borderRadius: 'var(--radius-md)',
-                  background: f.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: 18,
-                }}>
-                  <TripIcon path={f.path} color={f.iconColor} />
+            overflow: 'hidden',
+          }}
+        >
+          {/* Ambient orbs — use CSS classes so dark mode vars apply */}
+          <div aria-hidden="true">
+            <div className="landing-orb-1" />
+            <div className="landing-orb-2" />
+            <div className="landing-orb-3" />
+          </div>
+
+          <div style={{ position: 'relative', zIndex: 1, maxWidth: 820, margin: '0 auto' }}>
+
+            {/* Eyebrow */}
+            <p style={{
+              display: 'inline-block',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'var(--terra)',
+              background: 'var(--terra-light)',
+              padding: '5px 16px',
+              borderRadius: 'var(--radius-full)',
+              marginBottom: 32,
+            }}>
+              {t.eyebrow}
+            </p>
+
+            {/* H1 */}
+            <h1 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(48px, 9vw, 112px)',
+              fontWeight: 400,
+              lineHeight: 1.03,
+              letterSpacing: '-0.025em',
+              color: 'var(--text)',
+              marginBottom: 24,
+            }}>
+              {t.h1a}
+              <br />
+              <em style={{ color: 'var(--brand)', fontStyle: 'italic' }}>{t.h1b}</em>
+            </h1>
+
+            {/* Subhead */}
+            <p style={{
+              fontSize: 'clamp(15px, 2vw, 19px)',
+              lineHeight: 1.75,
+              color: 'var(--text-2)',
+              maxWidth: 520,
+              margin: '0 auto 40px',
+            }}>
+              {t.hero}
+            </p>
+
+            {/* CTA */}
+            <LandingSignIn locale={locale} />
+
+            {/* Trust pills */}
+            <div className="landing-trust" role="list">
+              {t.trust.map(item => (
+                <span key={item} className="landing-trust-pill" role="listitem">
+                  <span className="landing-trust-dot" aria-hidden="true" />
+                  {item}
+                </span>
+              ))}
+            </div>
+
+          </div>
+        </section>
+
+        {/* ── FEATURES ── */}
+        <section
+          style={{
+            padding: 'clamp(56px, 8vh, 96px) clamp(20px, 5vw, 80px)',
+            background: 'var(--bg-alt)',
+            borderTop: '1px solid var(--border)',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+            <p style={{
+              textAlign: 'center',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.13em',
+              textTransform: 'uppercase',
+              color: 'var(--text-3)',
+              marginBottom: 48,
+            }}>
+              {t.featuresEyebrow}
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))',
+              gap: 14,
+            }}>
+              {features.map(f => (
+                <div key={f.title} className="landing-card">
+                  <div style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 'var(--radius-md)',
+                    background: f.iconBg,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: 16,
+                    flexShrink: 0,
+                  }}>
+                    <TripIcon path={f.path} color={f.iconColor} />
+                  </div>
+                  <h3 style={{
+                    fontSize: 15,
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
+                    color: 'var(--text)',
+                    marginBottom: 8,
+                    lineHeight: 1.3,
+                  }}>
+                    {f.title}
+                  </h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-2)' }}>
+                    {f.desc}
+                  </p>
                 </div>
-                <h3 style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 8 }}>
-                  {f.title}
-                </h3>
-                <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-2)' }}>
-                  {f.desc}
-                </p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── ABOUT ── */}
-      <section style={{ padding: 'clamp(60px, 8vh, 100px) clamp(20px, 5vw, 80px)' }}>
-        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+        {/* ── ABOUT ── */}
+        <section style={{ padding: 'clamp(56px, 8vh, 96px) clamp(20px, 5vw, 80px)' }}>
+          <div style={{ maxWidth: 720, margin: '0 auto' }}>
+            <p style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.13em',
+              textTransform: 'uppercase',
+              color: 'var(--terra)',
+              marginBottom: 18,
+            }}>
+              {t.about.eyebrow}
+            </p>
+            <h2 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(26px, 4vw, 46px)',
+              fontWeight: 400,
+              lineHeight: 1.15,
+              letterSpacing: '-0.02em',
+              color: 'var(--text)',
+              marginBottom: 28,
+            }}>
+              {t.about.h2}
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {[t.about.p1, t.about.p2, t.about.p3].map((text, i) => (
+                <p key={i} style={{ fontSize: 16, lineHeight: 1.8, color: 'var(--text-2)' }}>{text}</p>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FAQ ── */}
+        <section
+          style={{
+            padding: 'clamp(56px, 8vh, 96px) clamp(20px, 5vw, 80px)',
+            background: 'var(--bg-alt)',
+            borderTop: '1px solid var(--border)',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          <div style={{ maxWidth: 720, margin: '0 auto' }}>
+            <h2 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(24px, 3.5vw, 38px)',
+              fontWeight: 400,
+              letterSpacing: '-0.02em',
+              color: 'var(--text)',
+              marginBottom: 28,
+            }}>
+              {locale === 'he' ? 'שאלות נפוצות' : 'Frequently Asked Questions'}
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {faq.map(item => (
+                <div key={item.q} className="landing-card landing-card-sm">
+                  <h3 style={{
+                    fontSize: 15,
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
+                    color: 'var(--text)',
+                    marginBottom: 8,
+                  }}>
+                    {item.q}
+                  </h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--text-2)' }}>{item.a}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── TERMS & PRIVACY ── */}
+        <section id="legal" style={{ padding: 'clamp(56px, 8vh, 96px) clamp(20px, 5vw, 80px)' }}>
+          <div style={{ maxWidth: 720, margin: '0 auto' }}>
+            <p style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: 11,
+              fontWeight: 600,
+              letterSpacing: '0.13em',
+              textTransform: 'uppercase',
+              color: 'var(--terra)',
+              marginBottom: 18,
+            }}>
+              {t.legalEyebrow}
+            </p>
+            <h2 style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: 'clamp(24px, 3.5vw, 38px)',
+              fontWeight: 400,
+              letterSpacing: '-0.02em',
+              color: 'var(--text)',
+              marginBottom: 28,
+            }}>
+              {t.legalH2}
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {legal.map(item => (
+                <div
+                  key={item.title}
+                  style={{
+                    background: 'var(--bg-alt)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-lg)',
+                    padding: '18px 20px',
+                  }}
+                >
+                  <h3 style={{
+                    fontFamily: 'var(--font-mono)',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    letterSpacing: '0.10em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-3)',
+                    marginBottom: 8,
+                  }}>
+                    {item.title}
+                  </h3>
+                  <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--text-2)' }}>{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── BOTTOM CTA ── */}
+        <section
+          style={{
+            padding: 'clamp(64px, 10vh, 120px) clamp(20px, 5vw, 80px)',
+            background: 'var(--bg-alt)',
+            borderTop: '1px solid var(--border)',
+            textAlign: 'center',
+          }}
+        >
           <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-            letterSpacing: '0.13em', textTransform: 'uppercase',
-            color: 'var(--terra)', marginBottom: 20,
+            fontFamily: 'var(--font-mono)',
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase',
+            color: 'var(--terra)',
+            marginBottom: 20,
           }}>
-            {t.about.eyebrow}
+            {t.ctaEyebrow}
           </p>
           <h2 style={{
             fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(28px, 4vw, 48px)', fontWeight: 400,
-            lineHeight: 1.15, letterSpacing: '-0.02em',
-            color: 'var(--text)', marginBottom: 28,
+            fontSize: 'clamp(30px, 5vw, 58px)',
+            fontWeight: 400,
+            letterSpacing: '-0.02em',
+            color: 'var(--text)',
+            marginBottom: 14,
           }}>
-            {t.about.h2}
+            {t.ctaH2}
           </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {[t.about.p1, t.about.p2, t.about.p3].map((text, i) => (
-              <p key={i} style={{ fontSize: 16, lineHeight: 1.8, color: 'var(--text-2)' }}>{text}</p>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── FAQ ── */}
-      <section style={{
-        padding: 'clamp(60px, 8vh, 100px) clamp(20px, 5vw, 80px)',
-        background: 'var(--bg-alt)',
-        borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)',
-      }}>
-        <div style={{ maxWidth: 720, margin: '0 auto' }}>
-          <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 400,
-            letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 32,
-          }}>
-            {locale === 'he' ? 'שאלות נפוצות' : 'Frequently Asked Questions'}
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {faq.map(item => (
-              <div key={item.q} style={{
-                background: 'rgba(255,255,255,0.55)',
-                backdropFilter: 'blur(24px) saturate(1.6)',
-                WebkitBackdropFilter: 'blur(24px) saturate(1.6)',
-                border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-lg)', padding: '20px 22px',
-              }}>
-                <h3 style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 8 }}>
-                  {item.q}
-                </h3>
-                <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--text-2)' }}>{item.a}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── DIVIDER ── */}
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '0 clamp(20px, 5vw, 80px)', borderTop: '1px solid var(--border)' }} />
-
-      {/* ── TERMS & PRIVACY ── */}
-      <section id="legal" style={{ padding: 'clamp(60px, 8vh, 100px) clamp(20px, 5vw, 80px)' }}>
-        <div style={{ maxWidth: 720, margin: '0 auto' }}>
           <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 600,
-            letterSpacing: '0.13em', textTransform: 'uppercase',
-            color: 'var(--terra)', marginBottom: 20,
+            fontSize: 'clamp(14px, 1.8vw, 17px)',
+            color: 'var(--text-2)',
+            marginBottom: 36,
+            lineHeight: 1.6,
           }}>
-            {t.legalEyebrow}
+            {t.ctaBody}
           </p>
-          <h2 style={{
-            fontFamily: 'var(--font-display)',
-            fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 400,
-            letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 32,
-          }}>
-            {t.legalH2}
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-            {legal.map(item => (
-              <div key={item.title} style={{
-                background: 'var(--bg-alt)', border: '1px solid var(--border)',
-                borderRadius: 'var(--radius-lg)', padding: '20px 22px',
-              }}>
-                <h3 style={{
-                  fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  color: 'var(--text-3)', marginBottom: 8,
-                }}>
-                  {item.title}
-                </h3>
-                <p style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--text-2)' }}>{item.body}</p>
-              </div>
+          <LandingSignIn locale={locale} />
+          <div className="landing-trust" style={{ marginTop: 28 }} role="list">
+            {t.trust.map(item => (
+              <span key={item} className="landing-trust-pill" role="listitem">
+                <span className="landing-trust-dot" aria-hidden="true" />
+                {item}
+              </span>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ── BOTTOM CTA ── */}
-      <section style={{
-        padding: 'clamp(60px, 8vh, 100px) clamp(20px, 5vw, 80px)',
-        background: 'var(--bg-alt)', borderTop: '1px solid var(--border)',
-        textAlign: 'center',
-      }}>
-        <h2 style={{
-          fontFamily: 'var(--font-display)',
-          fontSize: 'clamp(32px, 5vw, 60px)', fontWeight: 400,
-          letterSpacing: '-0.02em', color: 'var(--text)', marginBottom: 16,
-        }}>
-          {t.ctaH2}
-        </h2>
-        <p style={{ fontSize: 16, color: 'var(--text-2)', marginBottom: 40 }}>{t.ctaBody}</p>
-        <LandingSignIn locale={locale} />
-      </section>
+        {/* ── FOOTER ── */}
+        <footer
+          style={{
+            padding: 'clamp(18px, 2.5vh, 28px) clamp(20px, 5vw, 80px)',
+            borderTop: '1px solid var(--border)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: 12,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <CompassMark size={18} />
+            <span style={{ fontSize: 13, color: 'var(--text-3)', letterSpacing: '-0.01em' }}>
+              © 2026 Trippy
+            </span>
+          </div>
+          <nav aria-label={locale === 'he' ? 'קישורי תחתית' : 'Footer links'} style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {t.footerLinks.map(label => (
+              <a key={label} href="#legal" className="footer-link">{label}</a>
+            ))}
+          </nav>
+        </footer>
 
-      {/* ── FOOTER ── */}
-      <footer style={{
-        padding: 'clamp(20px, 3vh, 32px) clamp(20px, 5vw, 80px)',
-        borderTop: '1px solid var(--border)',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        flexWrap: 'wrap', gap: 12,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <CompassMark size={18} />
-          <span style={{ fontSize: 13, color: 'var(--text-3)', letterSpacing: '-0.01em' }}>© 2026 Trippy</span>
-        </div>
-        <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          {t.footerLinks.map(label => (
-            <a key={label} href="#legal" className="footer-link">{label}</a>
-          ))}
-        </div>
-      </footer>
-
-    </div>
+      </div>{/* /landing-scroll */}
     </>
   );
 }
@@ -534,9 +655,17 @@ function CompassMark({ size = 28 }: { size?: number }) {
 
 function TripIcon({ path, size = 22, color = 'currentColor' }: { path: string; size?: number; color?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" dangerouslySetInnerHTML={{ __html: path }}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      dangerouslySetInnerHTML={{ __html: path }}
     />
   );
 }

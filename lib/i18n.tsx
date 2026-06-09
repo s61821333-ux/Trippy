@@ -20,7 +20,7 @@ const en = {
   numDays: 'Number of Days',
   chooseCode: 'Trip Code (min 6 chars)',
   confirmCode: 'Confirm Code',
-  createBtn: 'Start the Adventure',
+  createBtn: 'Start Planning',
   navCamp: 'Dashboard',
   navExplore: 'Explore',
   navPack: 'Pack',
@@ -307,7 +307,7 @@ const en = {
   joinPlaceholderName: 'e.g. Negev Desert Adventure',
   joinPlaceholderCode: 'Shared code',
   joinPlaceholderNick: 'e.g. Dana',
-  createPlaceholderName: 'e.g. Europe Adventure 2026',
+  createPlaceholderName: 'e.g. Europe Summer 2026',
   createPlaceholderNick: 'e.g. Alex',
   backgroundLabel: 'Theme',
   chooseCodeOptional: 'Trip Code (optional)',
@@ -418,7 +418,7 @@ const en = {
   'A charming desert farm — perfect 45-min stop for the whole group.': 'A charming desert farm — perfect 45-min stop for the whole group.',
   'Acclaimed café with Bedouin coffee and a crater-view terrace.': 'Acclaimed café with Bedouin coffee and a crater-view terrace.',
   '15-min walk to a spectacular vantage over the crater floor.': '15-min walk to a spectacular vantage over the crater floor.',
-  'Traditional tea and local bread with a Bedouin family — unforgettable.': 'Traditional tea and local bread with a Bedouin family — unforgettable.',
+  'Traditional tea and local bread with a Bedouin family — unforgettable.': 'Traditional tea and fresh bread with a Bedouin family — worth the detour.',
 
   // V2 — Budget Alerts
   budgetOverTitle: '⚠️ Over budget!',
@@ -455,7 +455,7 @@ const en = {
   v2FeatAlerts: 'Smart Budget Alerts',
 
   // Packing screen
-  adventurePrep: 'Adventure prep',
+  adventurePrep: 'Pack check',
   almostThere: 'Almost there!',
   allPacked: 'All packed! 🎉',
   packedShared: 'packed · shared with crew',
@@ -469,8 +469,8 @@ const en = {
   packCatOther: 'Other',
 
   // Crew screen
-  gatherTheTribe: 'Gather the tribe',
-  gatherSubtitle: 'Invite your people — plan together, remember together.',
+  gatherTheTribe: 'Get everyone in',
+  gatherSubtitle: 'Invite your people — plan together, travel together.',
   inviteByEmailLabel: 'Invite by email',
   sendInvitesBtn: 'Send invites',
   orMagicLink: 'or magic link',
@@ -624,7 +624,7 @@ const he: typeof en = {
   tripExportedMD: 'הטיול יוצא בהצלחה ✓',
   tripExportedPDF: 'הטיול יוצא בהצלחה ✓',
   pdfComingSoon: 'ייצוא PDF — בקרוב',
-  pdfNoEvents: 'לא תוכננו פעילויות.',
+  pdfNoEvents: 'עדיין אין פעילויות.',
   pdfStarts: 'מתחיל',
   pdfPopupBlocked: 'אפשר חלונות קופצים כדי לייצא PDF',
   eventAdded: 'הפעילות נוספה ✓',
@@ -944,7 +944,7 @@ const he: typeof en = {
   'A charming desert farm — perfect 45-min stop for the whole group.': 'חווה מדברית קסומה — עצירה מושלמת של 45 דקות לכל הקבוצה.',
   'Acclaimed café with Bedouin coffee and a crater-view terrace.': 'קפה מפורסם עם קפה בדואי ומרפסת צופה למכתש.',
   '15-min walk to a spectacular vantage over the crater floor.': 'הליכה של 15 דקות לנקודת תצפית מרהיבה על קרקעית המכתש.',
-  'Traditional tea and local bread with a Bedouin family — unforgettable.': 'תה מסורתי ולחם טרי עם משפחה בדואית — חוויה בלתי נשכחת.',
+  'Traditional tea and local bread with a Bedouin family — unforgettable.': 'תה מסורתי ולחם טרי עם משפחה בדואית — לא מפספסים את זה.',
 
   // V2 — Budget Alerts
   budgetOverTitle: '⚠️ חרגת מהתקציב!',
@@ -981,7 +981,7 @@ const he: typeof en = {
   v2FeatAlerts: 'התראות תקציב חכמות',
 
   // Packing screen
-  adventurePrep: 'הכנה להרפתקה',
+  adventurePrep: 'בדיקת ציוד',
   almostThere: 'כמעט שם!',
   allPacked: 'הכל ארוז! 🎉',
   packedShared: 'ארוזים · משותף עם הצוות',
