@@ -91,11 +91,26 @@ export async function mfaEnrollTotp(friendlyName: string) {
   }
 }
 
-export async function mfaEnrollPasskey(friendlyName: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (sb().auth.mfa as any).enroll({ factorType: 'webauthn', friendlyName })
+// ─── Passkeys (primary auth, not MFA) ────────────────────────────────────────
+
+// ─── Passkeys (primary auth, not MFA) ────────────────────────────────────────
+
+export async function passkeyRegister() {
+  // Triggers the browser's WebAuthn ceremony (Face ID / fingerprint / PIN)
+  const { data, error } = await sb().auth.registerPasskey()
   if (error) throw error
   return data
+}
+
+export async function passkeyList() {
+  const { data, error } = await sb().auth.passkey.list()
+  if (error) throw error
+  return data
+}
+
+export async function passkeyDelete(passkeyId: string) {
+  const { error } = await sb().auth.passkey.delete({ passkeyId })
+  if (error) throw error
 }
 
 export async function mfaChallengeAndVerify(factorId: string, code: string) {

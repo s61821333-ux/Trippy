@@ -34,6 +34,8 @@ const TermsModal         = dynamic(() => import('./TermsModal'));
 const WishlistSheet      = dynamic(() => import('./screens/WishlistSheet'));
 const SecuritySettings   = dynamic(() => import('./screens/SecuritySettings'));
 const MFAChallenge       = dynamic(() => import('./screens/MFAChallenge'));
+const PersonaSheet       = dynamic(() => import('./PersonaSheet'));
+const AISheetLazy        = dynamic(() => import('./Sheets_V2').then(m => ({ default: m.AISheet })));
 
 
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
@@ -133,7 +135,8 @@ function Shell() {
     }))
   );
 
-  const { trip, tripDbId, tripEntryCountries, authUser, termsAccepted, termsChecked, showTour } = useAppStore(
+  const { trip, tripDbId, tripEntryCountries, authUser, termsAccepted, termsChecked, showTour,
+          showPersona, showSuggestions, activeDay } = useAppStore(
     useShallow(s => ({
       trip:               s.trip,
       tripDbId:           s.tripDbId,
@@ -142,6 +145,9 @@ function Shell() {
       termsAccepted:      s.termsAccepted,
       termsChecked:       s.termsChecked,
       showTour:           s.showTour,
+      showPersona:        s.showPersona,
+      showSuggestions:    s.showSuggestions,
+      activeDay:          s.activeDay,
     }))
   );
 
@@ -414,7 +420,7 @@ function Shell() {
     );
   }
 
-  const showNav = !!authUser;
+  const showNav = !!authUser && screen !== 'home';
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
@@ -499,11 +505,7 @@ function Shell() {
               onLogout={() => logout()}
               onNotes={() => setScreen('notes')}
               onWishlist={() => setShowWishlist(true)}
-              onAI={() => {
-                if (!trip) return;
-                if (screen !== 'day') setScreen('day');
-                setShowPersona(true);
-              }}
+              onAI={() => { if (trip) setShowPersona(true); }}
               onCrew={() => setScreen('crew')}
               wishlistOpen={showWishlist}
             />
@@ -548,6 +550,10 @@ function Shell() {
 
           {/* Wishlist sheet */}
           {showWishlist && <WishlistSheet onClose={() => setShowWishlist(false)} />}
+
+          {/* AI persona + suggestions sheets — available from any screen */}
+          {showPersona && <PersonaSheet dayNumber={activeDay} />}
+          {showSuggestions && !showPersona && <AISheetLazy dayNumber={activeDay} />}
 
           {/* Security settings sheet */}
           {showSecurity && <SecuritySettings onClose={() => setShowSecurity(false)} />}

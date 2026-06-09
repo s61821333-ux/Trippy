@@ -29,16 +29,14 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
       .then(data => {
         const totp = data.totp?.find(f => f.status === 'verified');
         if (totp) setFactorId(totp.id);
-        else onSuccess(); // no verified factor — should not happen, skip
+        else onSuccess();
       })
       .catch(() => onSuccess())
       .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
-    if (!loading) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
+    if (!loading) setTimeout(() => inputRef.current?.focus(), 50);
   }, [loading]);
 
   const handleVerify = async () => {
@@ -110,9 +108,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
           {isHe ? 'אמת את זהותך' : 'Verify your identity'}
         </h2>
         <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: '0 0 28px', lineHeight: 1.5 }}>
-          {isHe
-            ? 'הזן את הקוד בן 6 הספרות מאפליקציית האימות שלך.'
-            : 'Enter the 6-digit code from your authenticator app.'}
+          {isHe ? 'הזן את הקוד בן 6 הספרות מאפליקציית האימות שלך.' : 'Enter the 6-digit code from your authenticator app.'}
         </p>
 
         {loading ? (

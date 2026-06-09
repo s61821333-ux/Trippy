@@ -10,9 +10,11 @@ import { useToast } from '../ui/Toast';
 import {
   mfaListFactors,
   mfaEnrollTotp,
-  mfaEnrollPasskey,
   mfaChallengeAndVerify,
   mfaUnenroll,
+  passkeyRegister,
+  passkeyList,
+  passkeyDelete,
 } from '@/lib/db';
 
 interface Factor {
@@ -20,6 +22,13 @@ interface Factor {
   friendly_name?: string;
   factor_type: string;
   status: 'verified' | 'unverified';
+}
+
+interface PasskeyItem {
+  id: string;
+  friendly_name?: string;
+  created_at: string;
+  last_used_at?: string;
 }
 
 interface EnrollData {
@@ -104,6 +113,7 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
   const isHe = locale === 'he';
 
   const [factors, setFactors] = useState<Factor[]>([]);
+  const [passkeys, setPasskeys] = useState<PasskeyItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // TOTP enrollment flow
@@ -123,13 +133,9 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
   const load = async () => {
     setLoading(true);
     try {
-      const data = await mfaListFactors();
-      const all: Factor[] = [
-        ...(data.totp ?? []),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...((data as any).webauthn ?? []),
-      ];
-      setFactors(all);
+      const [mfaData, pkData] = await Promise.all([mfaListFactors(), passkeyList()]);
+      setFactors(mfaData.totp ?? []);
+      setPasskeys(pkData ?? []);
     } catch {
       /* ignore */
     } finally {
@@ -139,8 +145,7 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
 
   useEffect(() => { load(); }, []);
 
-  const totpFactors   = factors.filter(f => f.factor_type === 'totp'     && f.status === 'verified');
-  const passkeyFactors = factors.filter(f => f.factor_type === 'webauthn' && f.status === 'verified');
+  const totpFactors = factors.filter(f => f.factor_type === 'totp' && f.status === 'verified');
 
   // ── TOTP enroll ──────────────────────────────────────────────────────────────
   const handleStartTotp = async () => {
@@ -200,7 +205,7 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
     }
     setAddingPasskey(true);
     try {
-      await mfaEnrollPasskey(isHe ? 'מפתח הגישה שלי' : 'My Passkey');
+      await passkeyRegister();
       show(isHe ? '✓ Passkey נוסף!' : '✓ Passkey added!');
       await load();
     } catch (e: unknown) {
@@ -212,6 +217,19 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
       }
     } finally {
       setAddingPasskey(false);
+    }
+  };
+
+  const handleRemovePasskey = async (id: string) => {
+    setRemovingId(id);
+    try {
+      await passkeyDelete(id);
+      show(isHe ? 'הוסר בהצלחה' : 'Removed successfully');
+      await load();
+    } catch {
+      show(isHe ? 'שגיאה בהסרה' : 'Could not remove');
+    } finally {
+      setRemovingId(null);
     }
   };
 
@@ -365,27 +383,27 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
         <m.div className="lg" style={{ padding: '4px 16px', marginBottom: 20 }}
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.07 }}>
 
-          {passkeyFactors.length > 0 ? (
+          {passkeys.length > 0 ? (
             <>
-              {passkeyFactors.map((f, i) => (
-                <React.Fragment key={f.id}>
+              {passkeys.map((p, i) => (
+                <React.Fragment key={p.id}>
                   {i > 0 && <div style={DIVIDER} />}
                   <div style={ROW_STYLE}>
                     <span className="lg-btn lg-btn-glass" style={{ width: 38, height: 38, padding: 0, flexShrink: 0 }}>
                       <Icon name="lock" size={17} color="var(--lg-sand)" />
                     </span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={LABEL_STYLE}>{f.friendly_name || (isHe ? 'מפתח גישה' : 'Passkey')}</div>
+                      <div style={LABEL_STYLE}>{p.friendly_name || (isHe ? 'מפתח גישה' : 'Passkey')}</div>
                       <div style={{ ...SUB_STYLE, color: 'var(--lg-forest)', fontWeight: 600 }}>
                         {isHe ? '● פעיל' : '● Active'}
                       </div>
                     </div>
                     <button
-                      onClick={() => handleRemove(f.id)}
-                      disabled={removingId === f.id}
+                      onClick={() => handleRemovePasskey(p.id)}
+                      disabled={removingId === p.id}
                       style={{
                         background: 'none', border: 0, cursor: 'pointer', padding: 8,
-                        opacity: removingId === f.id ? 0.4 : 0.7,
+                        opacity: removingId === p.id ? 0.4 : 0.7,
                       }}
                     >
                       <Icon name="trash" size={16} color="var(--danger)" />

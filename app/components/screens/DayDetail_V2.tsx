@@ -27,8 +27,7 @@ import CurrencyAmount from '../ui/CurrencyAmount';
 import { catStamp } from '@/lib/categoryStamp';
 import { Category, HotelStay, TripEvent } from '@/lib/types';
 import { useToast } from '../ui/Toast';
-import { AISheet } from '../Sheets_V2';
-import PersonaSheet from '../PersonaSheet';
+
 import { useI18n } from '@/lib/i18n';
 import { getCapitalCoords } from '@/lib/capitals';
 
@@ -893,7 +892,7 @@ export default function DayDetail_V2() {
   const {
     trip, activeDay, setActiveDay,
     addEvent, editEvent, deleteEvent,
-    setShowSuggestions, showSuggestions,
+    setShowSuggestions,
     showPersona, setShowPersona,
     dayEndHour, currencyByTrip, tripDbId, setScreen,
   } = useAppStore();
@@ -1230,8 +1229,7 @@ export default function DayDetail_V2() {
         />
       )}
 
-      {showPersona && <PersonaSheet dayNumber={activeDay} />}
-      {showSuggestions && <AISheet dayNumber={activeDay} />}
+      {/* PersonaSheet and AISheet are rendered globally in AppShell */}
     </div>
   );
 }

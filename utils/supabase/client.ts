@@ -11,6 +11,9 @@ export function createClient() {
         secure: process.env.NODE_ENV === 'production',
         path: '/',
       },
+      auth: {
+        experimental: { passkey: true },
+      },
     }
   )
 }
