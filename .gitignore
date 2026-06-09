@@ -54,3 +54,4 @@ supabase/
 .agents/
 .claude/skills/
 skills-lock.json
+dev-server.log
