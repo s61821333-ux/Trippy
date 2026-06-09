@@ -29,10 +29,20 @@ import { useToast } from './ui/Toast';
 // ── Category label map ────────────────────────────────────────────────────────
 
 const CAT_LABEL: Record<string, string> = {
-  food:       'Food',  cafe: 'Café',  attraction: 'Sight',
-  hotel:      'Stay',  rest: 'Rest',  transport:  'Transit',
-  flight:     'Flight', concert: 'Event', theme_park: 'Park',
-  sport:      'Sport', beach: 'Beach', other: 'Place',
+  food:         'Food',     cafe:        'Café',      attraction:  'Sight',
+  hotel:        'Stay',     rest:        'Rest',       transport:   'Transit',
+  flight:       'Flight',   concert:     'Event',      theme_park:  'Park',
+  sport:        'Sport',    beach:       'Beach',      other:       'Place',
+  museum:       'Museum',   shopping:    'Shopping',   nightlife:   'Nightlife',
+  hiking:       'Hiking',   nature_walk: 'Nature',     cycling:     'Cycling',
+  boat:         'Boat',     water_sports:'Water',      ski:         'Ski',
+  spa:          'Spa',      wellness:    'Wellness',   cultural:    'Cultural',
+  market:       'Market',   art:         'Art',        theater:     'Theater',
+  cinema:       'Cinema',   festival:    'Festival',   guided_tour: 'Tour',
+  national_park:'Park',     religious:   'Cultural',   photography: 'Photo',
+  winery:       'Winery',   cooking:     'Cooking',    picnic:      'Picnic',
+  cruise:       'Cruise',   farm:        'Farm',       safari:      'Safari',
+  aerial:       'Aerial',   golf:        'Golf',       hot_springs: 'Springs',
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -47,8 +57,8 @@ function priceDots(level: number | undefined): string {
 type AiSuggestionExtended = AiSuggestion & { source_site?: string; source_url?: string };
 
 function SuggCard({
-  s, currCode, onAdd, onDismiss,
-}: { s: AiSuggestion; currCode: string; onAdd: (s: AiSuggestion) => void; onDismiss: (s: AiSuggestion) => void }) {
+  s, currCode, onAdd, onDismiss, onAddToDay,
+}: { s: AiSuggestion; currCode: string; onAdd: (s: AiSuggestion) => void; onDismiss: (s: AiSuggestion) => void; onAddToDay?: (s: AiSuggestion) => void }) {
   const sx = s as AiSuggestionExtended;
   const { t, locale } = useI18n();
   const { key: stampKey, color } = catStamp(s.category);
@@ -247,23 +257,136 @@ function SuggCard({
       )}
 
       {/* ── Actions ── */}
-      <div style={{ display: 'flex', gap: 10 }}>
-        <Btn
-          kind="forest"
-          full
-          onClick={() => onAdd(s)}
-          style={{ height: 44, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}
-        >
-          <Icon name="star" size={15} color="#fff" />
-          {locale === 'he' ? 'הוסף ל-Wishlist' : 'Add to Wishlist'}
-        </Btn>
-        <button
-          onClick={() => onDismiss(s)}
-          className="lg-btn lg-btn-glass"
-          style={{ height: 44, padding: '0 20px', flexShrink: 0 }}
-        >
-          {locale === 'he' ? 'דחה' : 'Dismiss'}
-        </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {onAddToDay && (
+          <Btn
+            kind="terra"
+            full
+            onClick={() => onAddToDay(s)}
+            style={{ height: 44, fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}
+          >
+            <Icon name="plus" size={15} color="#fff" />
+            {locale === 'he' ? 'הוסף לתוכנית היום' : 'Add to day plan'}
+          </Btn>
+        )}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Btn
+            kind="forest"
+            full
+            onClick={() => onAdd(s)}
+            style={{ height: 40, fontSize: 12, display: 'flex', alignItems: 'center', gap: 5 }}
+          >
+            <Icon name="star" size={13} color="#fff" />
+            {locale === 'he' ? 'Wishlist' : 'Wishlist'}
+          </Btn>
+          <button
+            onClick={() => onDismiss(s)}
+            className="lg-btn lg-btn-glass"
+            style={{ height: 40, padding: '0 16px', flexShrink: 0, fontSize: 12 }}
+          >
+            {locale === 'he' ? 'דחה' : 'Dismiss'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Loading state ─────────────────────────────────────────────────────────────
+
+const LOADING_MSGS_EN = [
+  'Scanning local hotspots…',
+  "Checking what’s open nearby…",
+  'Finding hidden gems…',
+  'Asking the locals…',
+  'Almost there — curating picks…',
+  'Just a moment more…',
+];
+const LOADING_MSGS_HE = [
+  'סורקים את המקומות הכי שווים…',
+  'בודקים מה פתוח בקרבת מקום…',
+  'מוצאים אבני חן נסתרות…',
+  'שואלים את המקומיים…',
+  'כמעט שם — מסננים את הטוב ביותר…',
+  'עוד רגע קטן…',
+];
+
+function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: number; locale: string }) {
+  const isHe = locale === 'he';
+  const msgs = isHe ? LOADING_MSGS_HE : LOADING_MSGS_EN;
+  const msg  = msgs[msgIdx % msgs.length];
+
+  // Progress: fast early (0→60% in 3s), then slow (60→92% over next 6s)
+  const pct = elapsed <= 3
+    ? Math.min(60, elapsed * 20)
+    : Math.min(92, 60 + (elapsed - 3) * 5.3);
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Skeleton cards */}
+      {[1, 2, 3].map(i => (
+        <div key={i} className="skeleton" style={{
+          height: i === 1 ? 130 : i === 2 ? 110 : 100,
+          borderRadius: 18,
+          opacity: 1 - (i - 1) * 0.18,
+        }} />
+      ))}
+
+      {/* Progress card */}
+      <div className="lg" style={{ padding: '16px 18px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <m.div
+            animate={{ scale: [1, 1.3, 1], rotate: [0, 12, -12, 0] }}
+            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}
+          >✨</m.div>
+          <AnimatePresence mode="wait">
+            <m.span
+              key={msgIdx}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.3 }}
+              style={{ fontSize: 13, fontWeight: 600, color: 'var(--lg-ink)', flex: 1, lineHeight: 1.3 }}
+            >
+              {msg}
+            </m.span>
+          </AnimatePresence>
+          <span style={{
+            fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600,
+            color: elapsed >= 10 ? 'var(--danger)' : 'var(--text-3)',
+            background: elapsed >= 10 ? 'oklch(65% 0.13 25 / 12%)' : 'oklch(50% 0.02 60 / 8%)',
+            padding: '3px 7px', borderRadius: 9999,
+          }}>
+            {elapsed}s
+          </span>
+        </div>
+
+        {/* Progress bar — animated dots at the tip */}
+        <div style={{ position: 'relative', height: 6, background: 'oklch(50% 0.02 60 / 12%)', borderRadius: 3, overflow: 'hidden' }}>
+          <m.div
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            style={{
+              height: '100%',
+              background: 'linear-gradient(90deg, var(--lg-terra), var(--lg-forest))',
+              borderRadius: 3,
+            }}
+          />
+          {/* Shimmer sweep */}
+          <m.div
+            animate={{ x: ['-100%', '400%'] }}
+            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut', repeatDelay: 0.6 }}
+            style={{
+              position: 'absolute', inset: 0, width: '30%',
+              background: 'linear-gradient(90deg, transparent, oklch(100% 0 0 / 28%), transparent)',
+            }}
+          />
+        </div>
+
+        <p style={{ fontSize: 10, color: 'var(--text-3)', margin: '8px 0 0', fontFamily: 'var(--font-mono)' }}>
+          {isHe ? '⚡ מופעל על ידי Claude · ~3–5 שניות' : '⚡ Powered by Claude · ~3–5 sec'}
+        </p>
       </div>
     </div>
   );
@@ -281,7 +404,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
 
   const {
     trip, tripDbId, currencyByTrip, activeGapStart, activeGapEnd,
-    setShowSuggestions, setAiSuggestions, addWishlistItem,
+    setShowSuggestions, setAiSuggestions, addWishlistItem, addEvent,
     personaContext, setPersonaContext,
   } = useAppStore(
     useShallow(s => ({
@@ -293,6 +416,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
       setShowSuggestions: s.setShowSuggestions,
       setAiSuggestions:   s.setAiSuggestions,
       addWishlistItem:    s.addWishlistItem,
+      addEvent:           s.addEvent,
       personaContext:     s.personaContext,
       setPersonaContext:  s.setPersonaContext,
     }))
@@ -307,7 +431,9 @@ export function AISheet({ dayNumber }: AISheetProps) {
   const [dismissed,     setDismissed]     = useState<string[]>([]);
   const [elapsed,       setElapsed]       = useState(0);
   const [streamingText, setStreamingText] = useState('');
+  const [msgIdx,        setMsgIdx]        = useState(0);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const msgRef     = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const handleClose = () => {
     setShowSuggestions(false);
@@ -429,7 +555,9 @@ export function AISheet({ dayNumber }: AISheetProps) {
     setStreamingText('');
     setSuggestions([]);
     setElapsed(0);
+    setMsgIdx(0);
     elapsedRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
+    msgRef.current     = setInterval(() => setMsgIdx(i => i + 1), 2200);
 
     fetchSuggestions(exclude)
       .then(data => {
@@ -445,12 +573,16 @@ export function AISheet({ dayNumber }: AISheetProps) {
       })
       .finally(() => {
         if (elapsedRef.current) clearInterval(elapsedRef.current);
+        if (msgRef.current)     clearInterval(msgRef.current);
       });
   };
 
   useEffect(() => {
     runFetch();
-    return () => { if (elapsedRef.current) clearInterval(elapsedRef.current); };
+    return () => {
+      if (elapsedRef.current) clearInterval(elapsedRef.current);
+      if (msgRef.current)     clearInterval(msgRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dayNumber]);
 
@@ -481,6 +613,20 @@ export function AISheet({ dayNumber }: AISheetProps) {
     show(locale === 'he' ? `"${s.name}" נוסף ל-Wishlist` : `"${s.name}" added to Wishlist`);
   };
 
+  const handleAddToDay = (s: AiSuggestion) => {
+    addEvent(dayNumber, {
+      name:     s.name,
+      category: s.category,
+      time:     s.time,
+      duration: s.duration,
+      location: s.location,
+      cost:     s.cost ?? 0,
+      notes:    s.description || undefined,
+    });
+    setDismissed(d => [...d, s.id]);
+    show(locale === 'he' ? `"${s.name}" נוסף ליום ${dayNumber}` : `"${s.name}" added to Day ${dayNumber}`);
+  };
+
   const visible = suggestions.filter(s => !dismissed.includes(s.id));
 
   return (
@@ -494,43 +640,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
         {loading ? (
-          <>
-            {/* Skeleton cards */}
-            {!streamingText && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="skeleton" style={{ height: 110, borderRadius: 18 }} />
-                ))}
-              </div>
-            )}
-
-            {/* Progress bar */}
-            <div className="lg" style={{ padding: '14px 16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <m.span
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                  style={{ display: 'inline-block', fontSize: 16 }}
-                >✨</m.span>
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--lg-ink)', flex: 1 }}>
-                  {locale === 'he' ? 'מחפשים בשבילך את המקומות המדויקים!' : 'Finding your perfect spots…'}
-                </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: elapsed >= 8 ? 'var(--danger)' : 'var(--text-3)' }}>
-                  {elapsed}s
-                </span>
-              </div>
-              <div style={{ height: 4, background: 'oklch(50% 0.02 60 / 14%)', borderRadius: 2, overflow: 'hidden' }}>
-                <m.div
-                  animate={{ width: `${Math.min(95, elapsed * 10)}%` }}
-                  transition={{ duration: 0.9, ease: 'easeOut' }}
-                  style={{ height: '100%', background: 'linear-gradient(90deg, var(--lg-terra), var(--lg-forest))', borderRadius: 2 }}
-                />
-              </div>
-              <p style={{ fontSize: 11, color: 'var(--text-3)', margin: '6px 0 0' }}>
-                {locale === 'he' ? '⚡ מופעל על ידי Claude · בדרך כלל 3–8 שניות' : '⚡ Powered by Claude · Usually 3–8 sec'}
-              </p>
-            </div>
-          </>
+          <LoadingState elapsed={elapsed} msgIdx={msgIdx} locale={locale} />
         ) : error ? (
           <div className="lg" style={{ padding: '20px 16px', textAlign: 'center' }}>
             <Icon name="compass" size={32} color="var(--danger)" />
@@ -573,6 +683,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
                   currCode={currCode}
                   onAdd={handleAdd}
                   onDismiss={s => setDismissed(d => [...d, s.id])}
+                  onAddToDay={handleAddToDay}
                 />
               </m.div>
             ))}

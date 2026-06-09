@@ -224,6 +224,57 @@
 }
 
 /* ─── Dark Mode ───────────────────────────────────────────────────── */
+/* Apply dark tokens when: (a) explicitly set, or (b) OS prefers dark and not overridden */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) {
+    --compass-ring: #F4EFE8;
+    --compass-n:    #E0916B;
+    --compass-s:    #8BB39A;
+    --compass-ew:   #E6B574;
+    --compass-hub:  #F4EFE8;
+    --surface:        rgba(30, 26, 20, 0.82);
+    --surface-strong: rgba(25, 22, 16, 0.94);
+    --nav-surface:    rgba(25, 22, 16, 0.90);
+    --bg:            #0E0C0A;
+    --bg-alt:        #1C1916;
+    --bg-paper:      #0E0C0A;
+    --bg-warm:       #1C1916;
+    --surface-warm:  #252018;
+    --border:        oklch(30% 0.016 65);
+    --border-strong: oklch(40% 0.020 65);
+    --brand:              oklch(62% 0.100 155);
+    --brand-hover:        oklch(55% 0.095 155);
+    --brand-light:        oklch(62% 0.100 155 / 20%);
+    --brand-muted:        oklch(62% 0.100 155 / 16%);
+    --terra:         oklch(66% 0.118 38);
+    --terra-hover:   oklch(60% 0.110 38);
+    --terra-light:   oklch(66% 0.118 38 / 20%);
+    --terra-muted:   oklch(66% 0.118 38 / 14%);
+    --sand:          oklch(72% 0.112 72);
+    --sand-light:    oklch(72% 0.112 72 / 20%);
+    --text:          oklch(96% 0.005 80);
+    --text-1:        oklch(96% 0.005 80);
+    --text-2:        oklch(82% 0.014 65);
+    --text-3:        oklch(65% 0.012 65);
+    --text-inv:      oklch(8% 0.008 55);
+    --field-bg:              oklch(22% 0.018 65 / 95%);
+    --field-bg-focused:      oklch(26% 0.020 65 / 98%);
+    --field-border:          oklch(100% 0 0 / 18%);
+    --field-border-focused:  oklch(62% 0.100 155 / 55%);
+    --success:       oklch(68% 0.090 155);
+    --success-bg:    oklch(68% 0.090 155 / 14%);
+    --warning:       oklch(72% 0.110 68);
+    --warning-bg:    oklch(72% 0.110 68 / 14%);
+    --danger:        oklch(65% 0.128 25);
+    --danger-bg:     oklch(65% 0.128 25 / 15%);
+    --shadow-xs: 0 1px 2px oklch(0% 0 0 / 40%),  0 1px 4px oklch(0% 0 0 / 28%);
+    --shadow-sm: 0 2px 8px oklch(0% 0 0 / 48%),  0 1px 2px oklch(0% 0 0 / 30%);
+    --shadow-md: 0 4px 16px oklch(0% 0 0 / 46%), 0 2px 6px oklch(0% 0 0 / 26%);
+    --shadow-lg: 0 12px 40px oklch(0% 0 0 / 55%), 0 4px 12px oklch(0% 0 0 / 30%);
+    --shadow-xl: 0 24px 64px oklch(0% 0 0 / 62%), 0 8px 24px oklch(0% 0 0 / 36%);
+  }
+}
+
 [data-dark="true"] {
   --compass-ring: #F4EFE8;
   --compass-n:    #E0916B;

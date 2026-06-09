@@ -134,43 +134,46 @@ Day ${dayNumber} — ${regionText}${hotelLine}
 Today's schedule:
 ${eventsText}
 ${gapLine}
-Give exactly 4 activity suggestions that:
-• Are genuinely worth doing in ${destinationText} — real local gems, not generic tourist traps
-• Complement what's already planned (no time conflicts, good variety of category and vibe)
-• Are all located in or near ${destinationText} — never suggest places in other cities
-• Feel like recommendations from someone who actually knows the place${exclude.length > 0 ? `\nSkip these already-suggested ones: ${exclude.join(', ')}.` : ''}${languageInstruction}
+Give exactly 4 activity suggestions. Rules:
+• ONLY suggest real, named places that actually exist in ${destinationText} — include the exact venue name
+• All suggestions MUST be within or very close to ${destinationText} — never suggest places in other cities or regions
+• Good variety of category (mix food/cafe/attraction/etc.) and vibe
+• No time conflicts with the existing schedule above
+• Prioritize local favourites over famous tourist traps${exclude.length > 0 ? `\nDo NOT suggest any of these (already shown): ${exclude.join(', ')}.` : ''}${languageInstruction}
 
-For each description: 1–2 sentences max. Be specific and vivid — mention what makes it special, the atmosphere, or a practical tip. Sound like a knowledgeable local friend, not a tour brochure.
+Each description: 1–2 vivid sentences. Mention atmosphere, what makes it special, or one practical tip. Write like a knowledgeable local friend.
 
 Return ONLY valid JSON — array of exactly 4 objects:
 [
   {
     "id": "ai-1",
-    "name": "Activity name",
+    "name": "Exact venue name",
     "category": "attraction",
-    "description": "Specific, vivid, practical. What makes it worth going.",
+    "description": "Specific, vivid description.",
     "duration": 90,
     "time": "10:00",
-    "distance": "2.3 km away",
+    "distance": "1.5 km away",
     "open": true,
-    "cost": 150,
-    "location": "Specific address or neighborhood"
+    "cost": 0,
+    "location": "Neighbourhood or street address"
   }
 ]
 
-category: food | cafe | attraction | rest | transport | other
-time: HH:MM, avoid conflicts with existing events
-duration: minutes (integer)
-open: true/false — best guess for typical opening
-cost: estimated local currency (number, 0 if free)
-Respond with ONLY the JSON array.`;
+category must be one of: food | cafe | attraction | museum | beach | sport | shopping | nightlife | rest | other
+time: HH:MM 24h, no conflict with existing events
+duration: minutes (integer, realistic)
+open: true (Google Maps will verify)
+cost: estimated cost in local currency (0 if free)
+Respond with ONLY the JSON array, no markdown.`;
 
   const systemPrompt = locale === 'he'
-    ? 'אתה מדריך טיולים מקומי שמשיב אך ורק בעברית. חוק ברזל: שדות name ו-description חייבים להיות בעברית — אין יוצאים מן הכלל. השב עם JSON תקין בלבד, ללא markdown. כתוב בצורה חיה וספציפית — כמו חבר שמכיר את המקום, לא כמו מדריך תיירים. שמות פרטיים של מקומות ומותגים — השאר בשמם המקורי. אסור להשתמש באותיות ערביות.'
-    : 'You are a local travel expert. Respond with valid JSON only — no markdown, no preamble. Write descriptions that are specific, vivid, and practical — like a knowledgeable friend who actually knows the destination, not a generic travel guide.';
+    ? 'אתה מדריך טיולים מקומי שמשיב אך ורק בעברית. חוק ברזל: שדה "description" בעברית בלבד. שדה "name" — שמור את שמות המקומות בשמם המקורי (לטיני/אנגלי). השב עם JSON תקין בלבד, ללא markdown. כתוב בצורה חיה וספציפית — כמו חבר מקומי אמיתי. אסור להמציא מקומות שאינם קיימים. אסור להשתמש באותיות ערביות.'
+    : 'You are a local travel expert who knows real, specific places. Respond with valid JSON only — no markdown. Only suggest real venues that actually exist at the destination. Descriptions must be vivid and specific — like a knowledgeable friend, not a travel brochure. Never invent fictional places.';
 
   const validCategories: Category[] = [
     'food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other',
+    'museum', 'beach', 'sport', 'shopping', 'nightlife', 'hiking', 'nature_walk',
+    'spa', 'wellness', 'cultural', 'market', 'art', 'theater', 'festival',
   ];
 
   const encoder = new TextEncoder();
@@ -183,7 +186,7 @@ Respond with ONLY the JSON array.`;
 
         const messageStream = client.messages.stream({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 1024,
+          max_tokens: 800,
           system: systemPrompt,
           messages: [{ role: 'user', content: prompt }],
         });

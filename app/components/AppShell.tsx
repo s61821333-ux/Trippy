@@ -34,7 +34,7 @@ const TermsModal         = dynamic(() => import('./TermsModal'));
 const WishlistSheet      = dynamic(() => import('./screens/WishlistSheet'));
 const SecuritySettings   = dynamic(() => import('./screens/SecuritySettings'));
 const MFAChallenge       = dynamic(() => import('./screens/MFAChallenge'));
-const PersonaSheet       = dynamic(() => import('./PersonaSheet'));
+
 
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
 function OfflineWatcher() {
@@ -119,7 +119,7 @@ function Shell() {
   const themeMode       = useAppStore(s => s.themeMode);
 
   const { setScreen, setThemeMode, checkAuth, loadTripById, subscribeToTrip,
-          recordDemoClick, clearTripEntry, logout } = useAppStore(
+          recordDemoClick, clearTripEntry, logout, setShowPersona } = useAppStore(
     useShallow(s => ({
       setScreen:       s.setScreen,
       setThemeMode:    s.setThemeMode,
@@ -129,6 +129,7 @@ function Shell() {
       recordDemoClick: s.recordDemoClick,
       clearTripEntry:  s.clearTripEntry,
       logout:          s.logout,
+      setShowPersona:  s.setShowPersona,
     }))
   );
 
@@ -165,7 +166,6 @@ function Shell() {
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
   const [entryTripName, setEntryTripName] = useState<string | undefined>();
   const [showWishlist,    setShowWishlist]    = useState(false);
-  const [showAIFromNav,   setShowAIFromNav]   = useState(false);
   const [showSecurity,    setShowSecurity]    = useState(false);
   const [showMfaChallenge, setShowMfaChallenge] = useState(false);
   const prevScreen = React.useRef(screen);
@@ -499,7 +499,11 @@ function Shell() {
               onLogout={() => logout()}
               onNotes={() => setScreen('notes')}
               onWishlist={() => setShowWishlist(true)}
-              onAI={() => setShowAIFromNav(true)}
+              onAI={() => {
+                if (!trip) return;
+                if (screen !== 'day') setScreen('day');
+                setShowPersona(true);
+              }}
               onCrew={() => setScreen('crew')}
               wishlistOpen={showWishlist}
             />
@@ -544,11 +548,6 @@ function Shell() {
 
           {/* Wishlist sheet */}
           {showWishlist && <WishlistSheet onClose={() => setShowWishlist(false)} />}
-
-          {/* AI suggestions sheet (opened from NavBar) */}
-          {showAIFromNav && (
-            <PersonaSheet dayNumber={1} onClose={() => setShowAIFromNav(false)} />
-          )}
 
           {/* Security settings sheet */}
           {showSecurity && <SecuritySettings onClose={() => setShowSecurity(false)} />}
