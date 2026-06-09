@@ -501,6 +501,7 @@ function Shell() {
               onWishlist={() => setShowWishlist(true)}
               onAI={() => setShowAIFromNav(true)}
               onCrew={() => setScreen('crew')}
+              wishlistOpen={showWishlist}
             />
           )}
 

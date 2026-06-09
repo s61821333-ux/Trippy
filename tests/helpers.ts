@@ -47,10 +47,11 @@ export async function setupPage(page: Page, screen = 'dashboard', colorScheme: '
   }, colorScheme);
   await page.route('**supabase.co/realtime/**', route => route.abort());
 
-  // Retry goto — Next.js dev server may be briefly unavailable after a hot-reload
+  // Navigate to /app directly so AppShell always mounts (no server-side auth redirect).
+  // Retry on transient Next.js dev-server unavailability after a hot-reload.
   for (let attempt = 0; attempt < 4; attempt++) {
     try {
-      await page.goto('/', { timeout: 15_000 });
+      await page.goto('/app', { timeout: 15_000 });
       break;
     } catch {
       if (attempt === 3) throw new Error('Dev server unreachable after 4 attempts — is `npm run dev` running?');
@@ -58,13 +59,13 @@ export async function setupPage(page: Page, screen = 'dashboard', colorScheme: '
     }
   }
 
-  // Wait for AppShell to expose the hook
+  // Wait for AppShell to expose the test hook (set synchronously on first effect run)
   await page.waitForFunction(
     () => typeof (window as unknown as Record<string, unknown>).__trippySetState__ === 'function',
-    { timeout: 45_000, polling: 200 }
+    { timeout: 15_000, polling: 100 }
   );
-  // Let Splash's 1.9 s timer fire so it doesn't compete with our injection
-  await page.waitForTimeout(3_500);
+  // Let the entry animation (600 ms) and auth flow settle before injecting state
+  await page.waitForTimeout(1_200);
 
   // Inject with retry in case a redirect fires after us
   for (let i = 0; i < 3; i++) {

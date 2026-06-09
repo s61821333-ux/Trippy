@@ -5,31 +5,56 @@ import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { computeSeason } from '@/lib/season';
-import type { BudgetTier, DurationBucket, PersonaStyle, QueryContext } from '@/lib/types';
+import type { BudgetTier, DurationBucket, QueryContext } from '@/lib/types';
 import Sheet from './ui/Sheet';
 import Btn from './ui/Btn';
 import Icon from './ui/Icon';
 import PlacesInput, { PlaceResult } from './ui/PlacesInput';
 
-// ── Style options — all travel categories ─────────────────────────────────────
+// ── All event categories (mirrors DayDetail_V2 CATS_CORE + CATS_EXTENDED) ─────
 
-const STYLE_OPTIONS: { value: PersonaStyle; label: string; labelHe: string; emoji: string }[] = [
-  { value: 'food',      label: 'Food & dining',     labelHe: 'אוכל',          emoji: '🍜' },
-  { value: 'coffee',    label: 'Café & coffee',     labelHe: 'קפה',           emoji: '☕' },
-  { value: 'bars',      label: 'Bars & drinks',     labelHe: 'ברים',          emoji: '🍺' },
-  { value: 'nightlife', label: 'Nightlife',         labelHe: 'בילוי לילי',    emoji: '🎉' },
-  { value: 'culture',   label: 'Culture & local',   labelHe: 'תרבות',         emoji: '🏛' },
-  { value: 'museum',    label: 'Museums & history', labelHe: 'מוזיאונים',     emoji: '🖼' },
-  { value: 'art',       label: 'Art & galleries',   labelHe: 'אמנות',         emoji: '🎨' },
-  { value: 'nature',    label: 'Nature & parks',    labelHe: 'טבע',           emoji: '🌿' },
-  { value: 'beach',     label: 'Beach & water',     labelHe: 'חוף ים',        emoji: '🏖' },
-  { value: 'views',     label: 'Scenic views',      labelHe: 'נופים',         emoji: '🌅' },
-  { value: 'shopping',  label: 'Shopping',          labelHe: 'קניות',         emoji: '🛍' },
-  { value: 'adventure', label: 'Adventure & sport', labelHe: 'הרפתקאות',      emoji: '🧗' },
-  { value: 'wellness',  label: 'Wellness & spa',    labelHe: 'ספא ורוגע',     emoji: '🧘' },
-  { value: 'kids',      label: 'Family-friendly',   labelHe: 'משפחות וילדים', emoji: '👨‍👩‍👧' },
-  { value: 'quiet',     label: 'Quiet & calm',      labelHe: 'שקט',           emoji: '🍃' },
-  { value: 'other',     label: 'Custom',            labelHe: 'אחר',           emoji: '✏️' },
+const STYLE_OPTIONS: { value: string; label: string; labelHe: string; emoji: string }[] = [
+  // Core
+  { value: 'food',         label: 'Food',          labelHe: 'אוכל',           emoji: '🍜' },
+  { value: 'cafe',         label: 'Café',          labelHe: 'קפה',            emoji: '☕' },
+  { value: 'attraction',   label: 'Sights',        labelHe: 'אטרקציה',        emoji: '📍' },
+  { value: 'museum',       label: 'Museum',        labelHe: 'מוזיאון',        emoji: '🖼' },
+  { value: 'beach',        label: 'Beach',         labelHe: 'חוף',            emoji: '🏖' },
+  { value: 'sport',        label: 'Sport',         labelHe: 'ספורט',          emoji: '⚽' },
+  { value: 'concert',      label: 'Concert',       labelHe: 'קונצרט',         emoji: '🎵' },
+  { value: 'theme_park',   label: 'Theme Park',    labelHe: 'פארק שעשועים',   emoji: '🎢' },
+  { value: 'shopping',     label: 'Shopping',      labelHe: 'קניות',          emoji: '🛍' },
+  { value: 'nightlife',    label: 'Nightlife',     labelHe: 'בילוי לילי',     emoji: '🎉' },
+  { value: 'rest',         label: 'Rest',          labelHe: 'מנוחה',          emoji: '🏕' },
+  { value: 'other',        label: 'Other',         labelHe: 'אחר',            emoji: '✏️' },
+  // Extended
+  { value: 'hiking',       label: 'Hiking',        labelHe: 'טיול רגלי',      emoji: '🥾' },
+  { value: 'nature_walk',  label: 'Nature',        labelHe: 'טבע',            emoji: '🌿' },
+  { value: 'cycling',      label: 'Cycling',       labelHe: 'רכיבה',          emoji: '🚴' },
+  { value: 'boat',         label: 'Boat',          labelHe: 'סירה',           emoji: '⛵' },
+  { value: 'water_sports', label: 'Water Sports',  labelHe: 'ספורט מים',      emoji: '🤿' },
+  { value: 'ski',          label: 'Ski',           labelHe: 'סקי',            emoji: '⛷' },
+  { value: 'aerial',       label: 'Aerial',        labelHe: 'אוויר',          emoji: '🪂' },
+  { value: 'golf',         label: 'Golf',          labelHe: 'גולף',           emoji: '⛳' },
+  { value: 'safari',       label: 'Safari',        labelHe: 'ספארי',          emoji: '🦁' },
+  { value: 'winery',       label: 'Winery',        labelHe: 'יקב',            emoji: '🍷' },
+  { value: 'cooking',      label: 'Cooking',       labelHe: 'בישול',          emoji: '👨‍🍳' },
+  { value: 'theater',      label: 'Theater',       labelHe: 'תיאטרון',        emoji: '🎭' },
+  { value: 'cinema',       label: 'Cinema',        labelHe: 'קולנוע',         emoji: '🎬' },
+  { value: 'art',          label: 'Art',           labelHe: 'אמנות',          emoji: '🎨' },
+  { value: 'festival',     label: 'Festival',      labelHe: 'פסטיבל',         emoji: '🎪' },
+  { value: 'market',       label: 'Market',        labelHe: 'שוק',            emoji: '🥕' },
+  { value: 'spa',          label: 'Spa',           labelHe: 'ספא',            emoji: '🧖' },
+  { value: 'wellness',     label: 'Wellness',      labelHe: 'בריאות',         emoji: '🧘' },
+  { value: 'hot_springs',  label: 'Hot Springs',   labelHe: 'מעיינות חמים',   emoji: '♨️' },
+  { value: 'photography',  label: 'Photography',   labelHe: 'צילום',          emoji: '📷' },
+  { value: 'guided_tour',  label: 'Guided Tour',   labelHe: 'סיור מודרך',     emoji: '🎙' },
+  { value: 'national_park',label: 'National Park', labelHe: 'פארק לאומי',     emoji: '🏞' },
+  { value: 'cultural',     label: 'Cultural',      labelHe: 'תרבות',          emoji: '🏛' },
+  { value: 'religious',    label: 'Religious',     labelHe: 'דתי',            emoji: '🕌' },
+  { value: 'picnic',       label: 'Picnic',        labelHe: 'פיקניק',         emoji: '🧺' },
+  { value: 'cruise',       label: 'Cruise',        labelHe: 'שייט',           emoji: '🚢' },
+  { value: 'farm',         label: 'Farm',          labelHe: 'חווה',           emoji: '🌾' },
 ];
 
 const DURATION_OPTIONS: { value: DurationBucket; label: string; labelHe: string }[] = [
@@ -62,19 +87,20 @@ const TEXT_INPUT: React.CSSProperties = {
   resize: 'none' as const,
 };
 
-// ── Chip row ─────────────────────────────────────────────────────────────────
+// ── Chip row (supports single and multi-select) ───────────────────────────────
 
 function ChipRow<T extends string>({
-  options, value, onChange,
+  options, value, onChange, multi = false,
 }: {
   options: { value: T; label: string; emoji?: string }[];
-  value: T | null;
+  value: T[];
   onChange: (v: T) => void;
+  multi?: boolean;
 }) {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
       {options.map(o => {
-        const active = value === o.value;
+        const active = value.includes(o.value);
         return (
           <button
             key={o.value}
@@ -128,11 +154,11 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
     );
   }, [trip?.hotels, dayNumber]);
 
-  const defaultCity = hotel?.location ?? dayMeta?.region ?? (trip?.countries?.[0] ?? '');
-  const defaultLat  = hotel?.lat ?? dayMeta?.lat;
-  const defaultLng  = hotel?.lng ?? dayMeta?.lng;
+  const defaultCity = dayMeta?.region || hotel?.location || (trip?.countries?.[0] ?? '');
+  const defaultLat  = dayMeta?.lat ?? hotel?.lat;
+  const defaultLng  = dayMeta?.lng ?? hotel?.lng;
 
-  const [style,    setStyle]    = useState<PersonaStyle | null>(null);
+  const [styles,   setStyles]   = useState<string[]>([]);
   const [freeText, setFreeText] = useState('');
   const [cityName, setCityName] = useState(defaultCity);
   const [cityLat,  setCityLat]  = useState<number | undefined>(defaultLat);
@@ -155,10 +181,16 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
     return computeSeason(start, lat);
   }, [trip?.startDate, dayNumber, dayMeta?.lat]);
 
-  const canSubmit = style !== null && duration !== null && cityName.trim().length > 0;
+  const canSubmit = styles.length > 0 && duration !== null && cityName.trim().length > 0;
+
+  const toggleStyle = (v: string) => {
+    setStyles(prev =>
+      prev.includes(v) ? (prev.length > 1 ? prev.filter(x => x !== v) : prev) : [...prev, v]
+    );
+  };
 
   const handleSubmit = () => {
-    if (!canSubmit || !style || !duration) return;
+    if (!canSubmit || !duration) return;
 
     const ctx: QueryContext = {
       country:         trip?.countries?.[0],
@@ -168,7 +200,8 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
       lat:             cityLat ?? defaultLat,
       lng:             cityLng ?? defaultLng,
       radius_km:       5,
-      style,
+      style:           styles[0],
+      styles,
       style_detail:    freeText.trim() || undefined,
       duration_bucket: duration,
       budget_tier:     budget,
@@ -192,17 +225,18 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '4px 0 24px' }}>
 
-        {/* 1. Category */}
+        {/* 1. Category — multi-select */}
         <div>
-          <div style={SECTION_LABEL}>{t('What kind of place?', 'איזה סוג מקום?')}</div>
+          <div style={SECTION_LABEL}>{t('What kind of place? (pick one or more)', 'איזה סוג מקום? (בחר אחד או יותר)')}</div>
           <ChipRow
             options={STYLE_OPTIONS.map(o => ({
               value: o.value,
               label: isHe ? o.labelHe : o.label,
               emoji: o.emoji,
             }))}
-            value={style}
-            onChange={setStyle}
+            value={styles}
+            onChange={toggleStyle}
+            multi
           />
         </div>
 
@@ -248,8 +282,8 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
           <div style={SECTION_LABEL}>{t('How long do you have?', 'כמה זמן?')}</div>
           <ChipRow
             options={DURATION_OPTIONS.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label }))}
-            value={duration}
-            onChange={setDuration}
+            value={duration ? [duration] : []}
+            onChange={v => setDuration(v as DurationBucket)}
           />
         </div>
 
@@ -258,8 +292,8 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
           <div style={SECTION_LABEL}>{t('Budget', 'תקציב')}</div>
           <ChipRow
             options={BUDGET_OPTIONS.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label }))}
-            value={budget}
-            onChange={setBudget}
+            value={[budget]}
+            onChange={v => setBudget(v as BudgetTier)}
           />
         </div>
 

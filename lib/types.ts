@@ -169,7 +169,8 @@ export interface QueryContext {
   lat?: number;
   lng?: number;
   radius_km: number;
-  style: PersonaStyle;
+  style: string;
+  styles?: string[];
   style_detail?: string;
   duration_bucket: DurationBucket;
   budget_tier: BudgetTier;

@@ -17,6 +17,7 @@ interface NavBarV2Props {
   onWishlist?: () => void;
   onAI?: () => void;
   onCrew?: () => void;
+  wishlistOpen?: boolean;
 }
 
 type TabEntry =
@@ -59,6 +60,7 @@ const PANEL_BTN: React.CSSProperties = {
 
 export default function NavBar_V2({
   active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes, onWishlist, onAI, onCrew,
+  wishlistOpen = false,
 }: NavBarV2Props) {
   const { locale } = useI18n();
   const isHe = locale === 'he';
@@ -80,8 +82,10 @@ export default function NavBar_V2({
     menuBtnRef.current?.setAttribute('aria-expanded', expandOpen ? 'true' : 'false');
   }, [expandOpen]);
 
-  // Blob only tracks real screen tabs
-  const activeTabIdx = TABS.findIndex(tb => tb.kind === 'screen' && tb.id === active);
+  // Blob tracks screen tabs, or wishlist tab when its sheet is open
+  const activeTabIdx = wishlistOpen
+    ? TABS.findIndex(tb => tb.id === 'wishlist')
+    : TABS.findIndex(tb => tb.kind === 'screen' && tb.id === active);
   const blobX = (isHe ? -1 : 1) * Math.max(0, activeTabIdx) * TAB_W;
 
   const handleChange = (id: Screen) => {
@@ -250,7 +254,9 @@ export default function NavBar_V2({
           />
 
           {TABS.map((tab, i) => {
-            const isActive = tab.kind === 'screen' && i === activeTabIdx;
+            const isActive = wishlistOpen
+              ? tab.id === 'wishlist'
+              : (tab.kind === 'screen' && i === activeTabIdx);
             return (
               <m.button
                 key={tab.id}

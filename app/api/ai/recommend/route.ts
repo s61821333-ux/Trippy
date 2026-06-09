@@ -17,11 +17,56 @@ export const maxDuration = 30;
 
 
 const STYLE_TO_CATEGORY: Record<string, Category> = {
-  food:    'food',
-  bars:    'nightlife',
-  quiet:   'attraction',
-  relaxed: 'attraction',
-  other:   'other',
+  food:         'food',
+  cafe:         'cafe',
+  coffee:       'cafe',
+  bars:         'nightlife',
+  nightlife:    'nightlife',
+  culture:      'cultural',
+  cultural:     'cultural',
+  museum:       'museum',
+  art:          'art',
+  nature:       'attraction',
+  nature_walk:  'nature_walk',
+  beach:        'beach',
+  views:        'attraction',
+  shopping:     'shopping',
+  market:       'market',
+  adventure:    'attraction',
+  hiking:       'hiking',
+  cycling:      'cycling',
+  boat:         'boat',
+  water_sports: 'water_sports',
+  ski:          'ski',
+  aerial:       'aerial',
+  golf:         'golf',
+  safari:       'safari',
+  wellness:     'wellness',
+  spa:          'spa',
+  hot_springs:  'hot_springs',
+  kids:         'theme_park',
+  quiet:        'attraction',
+  relaxed:      'attraction',
+  photography:  'photography',
+  guided_tour:  'guided_tour',
+  national_park:'national_park',
+  religious:    'religious',
+  picnic:       'picnic',
+  cruise:       'cruise',
+  farm:         'farm',
+  festival:     'festival',
+  theater:      'theater',
+  cinema:       'cinema',
+  cooking:      'cooking',
+  winery:       'winery',
+  sport:        'sport',
+  concert:      'concert',
+  theme_park:   'theme_park',
+  transport:    'transport',
+  flight:       'flight',
+  hotel:        'hotel',
+  rest:         'rest',
+  other:        'other',
 };
 
 // ── Geo bounding-box helpers ─────────────────────────────────────────────────
@@ -168,11 +213,52 @@ function cacheToSuggestion(r: CacheRow, style: string): AiSuggestion {
 // ── Claude fallback (persona-aware, direct call — no web search) ──────────────
 
 const STYLE_LABEL: Record<string, string> = {
-  food:    'restaurant, food market, or dining experience',
-  bars:    'bar, craft cocktail spot, or local pub',
-  quiet:   'peaceful, low-key, or contemplative place',
-  relaxed: 'relaxed, casual, or leisurely spot',
-  other:   'interesting place or experience',
+  food:         'restaurant, food market, or dining experience',
+  cafe:         'café, coffee shop, or tea house',
+  coffee:       'café or coffee shop',
+  bars:         'bar, craft cocktail spot, or local pub',
+  nightlife:    'nightclub, bar, or late-night entertainment spot',
+  culture:      'cultural site, local landmark, or neighbourhood gem',
+  cultural:     'cultural site or local landmark',
+  museum:       'museum, gallery, or historical exhibit',
+  art:          'art gallery, street art site, or creative space',
+  nature:       'park, garden, or natural attraction',
+  nature_walk:  'nature walk, park, or scenic trail',
+  beach:        'beach, waterfront, or coastal spot',
+  views:        'scenic viewpoint or panoramic lookout',
+  shopping:     'shop, boutique, or local market',
+  market:       'market, bazaar, or street market',
+  adventure:    'adventure activity or outdoor experience',
+  hiking:       'hiking trail or trekking route',
+  cycling:      'cycling route or bike-friendly attraction',
+  boat:         'boat tour, water taxi, or sailing experience',
+  water_sports: 'water sports activity or aquatic experience',
+  ski:          'ski slope or snow activity',
+  aerial:       'aerial activity such as paragliding, cable car, or hot air balloon',
+  golf:         'golf course or golf experience',
+  safari:       'safari, wildlife reserve, or nature excursion',
+  wellness:     'wellness centre, yoga studio, or health retreat',
+  spa:          'spa, hammam, or relaxation treatment',
+  hot_springs:  'hot spring or thermal bath',
+  kids:         'family-friendly attraction or activity for children',
+  quiet:        'peaceful, low-key, or contemplative place',
+  relaxed:      'relaxed, casual, or leisurely spot',
+  photography:  'photogenic location or photography spot',
+  guided_tour:  'guided tour or walking tour',
+  national_park:'national park or protected nature reserve',
+  religious:    'temple, church, mosque, or sacred site',
+  picnic:       'park or garden perfect for a picnic',
+  cruise:       'cruise, river boat, or harbour tour',
+  farm:         'farm, vineyard, or agri-tourism experience',
+  festival:     'festival, fair, or seasonal event',
+  theater:      'theatre, performance venue, or live show',
+  cinema:       'cinema or film experience',
+  cooking:      'cooking class or culinary workshop',
+  winery:       'winery, distillery, or tasting room',
+  sport:        'sporting event or sports activity',
+  concert:      'concert, music venue, or live music spot',
+  theme_park:   'theme park or amusement attraction',
+  other:        'interesting place or experience',
 };
 
 const DURATION_LABEL: Record<string, string> = {
@@ -190,17 +276,26 @@ const BUDGET_LABEL: Record<string, string> = {
 
 async function searchAndEnrich(ctx: {
   city: string; area?: string; country?: string;
-  style: string; style_detail?: string;
+  style: string; styles?: string[]; style_detail?: string;
   season: string; duration_bucket: string; budget_tier: string;
   locale: string; exclude?: string[];
 }, googleKey: string): Promise<AiSuggestion[]> {
   const client = new Anthropic();
   const isHe = ctx.locale === 'he';
 
+  const allStyles = ctx.styles && ctx.styles.length > 0 ? ctx.styles : [ctx.style];
   const locationText = ctx.area ? `${ctx.area}, ${ctx.city}` : ctx.city;
-  const styleLabel = ctx.style === 'other' && ctx.style_detail
-    ? ctx.style_detail
-    : STYLE_LABEL[ctx.style] ?? 'interesting place';
+
+  let styleLabel: string;
+  if (ctx.style === 'other' && ctx.style_detail) {
+    styleLabel = ctx.style_detail;
+  } else if (allStyles.length > 1) {
+    const labels = allStyles.map(s => STYLE_LABEL[s] ?? s).join(', ');
+    styleLabel = `place matching any of these interests: ${labels}`;
+  } else {
+    styleLabel = STYLE_LABEL[allStyles[0]] ?? 'interesting place';
+  }
+
   const budgetLine = ctx.budget_tier !== 'any' ? ` that is ${BUDGET_LABEL[ctx.budget_tier]}` : '';
   const exclusionLine = ctx.exclude?.length
     ? `\nSkip these already-suggested names: ${ctx.exclude.join(', ')}.` : '';
@@ -418,7 +513,7 @@ export async function POST(request: NextRequest) {
     const searchPromise = searchAndEnrich(
           {
             city: ctx.city, area: ctx.area, country: ctx.country,
-            style: ctx.style, style_detail: ctx.style_detail,
+            style: ctx.style, styles: ctx.styles, style_detail: ctx.style_detail,
             season: ctx.season, duration_bucket: ctx.duration_bucket,
             budget_tier: ctx.budget_tier, locale: ctx.locale,
             exclude: ctx.exclude,
