@@ -518,9 +518,7 @@ function Shell() {
               >
                 <div className="w-full h-full">
                   <div className="w-full h-full">
-                    {screen === 'splash' ? (
-                      null
-                    ) : screen === 'home' || !trip ? (
+                    {screen === 'splash' || screen === 'home' || !trip ? (
                       <Home_V2 />
                     ) : screen === 'dashboard' ? (
                       <DashboardScreen />

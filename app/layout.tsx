@@ -3,6 +3,7 @@ import { DM_Sans, Instrument_Serif, JetBrains_Mono, Noto_Sans_Hebrew, Assistant 
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
 import MotionProvider from './components/MotionProvider';
+import ServiceWorkerRegistrar from './components/ServiceWorkerRegistrar';
 import './globals.css';
 
 const dmSans = DM_Sans({
@@ -110,6 +111,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <MotionProvider>
           {children}
         </MotionProvider>
+        <ServiceWorkerRegistrar />
         <Analytics />
       </body>
     </html>

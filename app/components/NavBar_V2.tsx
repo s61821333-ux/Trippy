@@ -195,6 +195,7 @@ export default function NavBar_V2({
           whileTap={{ scale: 0.92 }}
           className="lg lg-strong"
           aria-label="Menu"
+          aria-expanded={expandOpen}
           style={{
             width: 52, height: 52,
             borderRadius: 9999,

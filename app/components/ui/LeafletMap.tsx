@@ -159,8 +159,9 @@ export default function LeafletMap({ events, selectedId, onSelect, tileApiKey, h
     ...hotels.map(h => [h.lat, h.lng] as [number, number]),
   ];
 
-  const tileUrl =
-    `https://maps.geoapify.com/v1/tile/klokantech-basic/{z}/{x}/{y}.png?apiKey=${tileApiKey}`;
+  const tileUrl = tileApiKey
+    ? `https://maps.geoapify.com/v1/tile/klokantech-basic/{z}/{x}/{y}.png?apiKey=${tileApiKey}`
+    : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
   return (
     <MapContainer

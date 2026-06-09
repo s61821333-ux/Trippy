@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import LandingSignIn from './components/LandingSignIn';
 import LandingLangToggle from './components/LandingLangToggle';
+import LandingNextGuard from './components/LandingNextGuard';
 
 export const metadata = {
   title: 'Trippy — Free Group Trip Planner | Plan Together',
@@ -265,6 +266,7 @@ export default async function LandingPage() {
 
   return (
     <>
+      <LandingNextGuard />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
