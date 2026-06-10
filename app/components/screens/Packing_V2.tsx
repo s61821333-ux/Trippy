@@ -65,11 +65,12 @@ function storeToFilter(cat: string): FilterCat | null {
 
 function autoCategory(name: string): SupplyItem['category'] {
   const n = name.toLowerCase();
-  if (/passport|visa|ticket|boarding|document|id card|insurance|permit|certificate/i.test(n)) return 'Documents';
-  if (/water|bottle|hydration|filter|purif/i.test(n)) return 'Water';
-  if (/food|snack|protein|bar|nuts|bread|fruit|meal|sandwich|granola/i.test(n)) return 'Food';
-  if (/medicine|medical|first aid|bandage|pill|tablet|spray|sunscreen|cream|lotion|antiseptic|painkiller|antibiotic|plaster|syringe/i.test(n)) return 'Medical';
-  if (/tent|sleeping|backpack|jacket|coat|boot|shoe|sock|hat|glove|rope|compass|headlamp|torch|knife|lighter|matches|camera|battery|charger|cable|adapter|towel|umbrella|bag|luggage|gear/i.test(n)) return 'Gear';
+  // Hebrew equivalents listed after the pipe — no case folding needed for Hebrew
+  if (/passport|visa|ticket|boarding|document|id card|insurance|permit|certificate|דרכון|ויזה|כרטיס טיסה|ביטוח|תעודה|היתר|רישיון/i.test(n)) return 'Documents';
+  if (/water|bottle|hydration|filter|purif|מים|בקבוק|סינון|מסנן/i.test(n)) return 'Water';
+  if (/food|snack|protein|bar|nuts|bread|fruit|meal|sandwich|granola|אוכל|חטיף|פירות|לחם|ארוחה|כריך|אגוזים|פרוטאין/i.test(n)) return 'Food';
+  if (/medicine|medical|first aid|bandage|pill|tablet|spray|sunscreen|cream|lotion|antiseptic|painkiller|antibiotic|plaster|syringe|תרופה|אנטיביוטיקה|קרם|משחה|תחבושת|כדור|ספריי|משכך|חיטוי|פלסטר/i.test(n)) return 'Medical';
+  if (/tent|sleeping|backpack|jacket|coat|boot|shoe|sock|hat|glove|rope|compass|headlamp|torch|knife|lighter|matches|camera|battery|charger|cable|adapter|towel|umbrella|bag|luggage|gear|אוהל|שק שינה|תרמיל|מעיל|נעל|גרב|כובע|כפפה|חבל|מצפן|פנס|סכין|מצת|גפרורים|מצלמה|סוללה|מטען|מגבת|מטריה|תיק|ציוד/i.test(n)) return 'Gear';
   return 'Other';
 }
 
