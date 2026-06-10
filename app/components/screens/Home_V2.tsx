@@ -31,7 +31,8 @@ const THEME_STAMP: Record<string, string> = {
   mountain: 'mountain',
   lake:     'kayak',
   sunset:   'sunrise',
-  space:    'compass',
+  space:    'stargaze',
+  snow:     'mountain',
 };
 
 const THEMES: { id: TripTheme; label: string; labelHe: string; bg: string; accent: string }[] = [
@@ -42,6 +43,7 @@ const THEMES: { id: TripTheme; label: string; labelHe: string; bg: string; accen
   { id: 'mountain', label: 'Mountain', labelHe: 'הרים',  bg: '#EEF0F5', accent: '#4B5E7A' },
   { id: 'lake',     label: 'Lake',     labelHe: 'אגם',   bg: '#E5F0F5', accent: '#1B6A8A' },
   { id: 'sunset',   label: 'Sunset',   labelHe: 'שקיעה', bg: '#FFF0E5', accent: '#D4531A' },
+  { id: 'space',    label: 'Space',    labelHe: 'חלל',   bg: '#1A1A2E', accent: '#2B7A8E' },
 ];
 
 const AVC = [
@@ -78,7 +80,7 @@ function TripAvatar({ name, index = 0, size = 22 }: { name: string; index?: numb
 
 function CreateSheet({ onClose }: { onClose: () => void }) {
   const { createTrip, authUser } = useAppStore();
-  const { t, locale } = useI18n();
+  const { t, locale, isRTL } = useI18n();
   const { show } = useToast();
 
   const [loading,          setLoading]          = useState(false);
@@ -154,8 +156,12 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
             display: 'flex', gap: 10, overflowX: 'auto',
             scrollSnapType: 'x mandatory', scrollbarWidth: 'none',
             paddingInline: 2, paddingBottom: 4,
-            WebkitMaskImage: 'linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%)',
-            maskImage: 'linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%)',
+            WebkitMaskImage: isRTL
+              ? 'linear-gradient(to left, transparent 0, black 12px, black calc(100% - 12px), transparent 100%)'
+              : 'linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%)',
+            maskImage: isRTL
+              ? 'linear-gradient(to left, transparent 0, black 12px, black calc(100% - 12px), transparent 100%)'
+              : 'linear-gradient(to right, transparent 0, black 12px, black calc(100% - 12px), transparent 100%)',
           } as React.CSSProperties}>
             {THEMES.map(th => (
               <button
@@ -223,6 +229,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
               label={locale === 'he' ? 'תאריך סיום' : 'End date'}
               value={cEndDate}
               onChange={setCEndDate}
+              min={cDate}
             />
           </div>
         </div>

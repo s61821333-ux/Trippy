@@ -14,6 +14,7 @@ interface FieldProps {
   icon?: ReactNode;
   autoFocus?: boolean;
   autoComplete?: string;
+  min?: string;
   rows?: number;
   style?: CSSProperties;
   disabled?: boolean;
@@ -21,7 +22,7 @@ interface FieldProps {
 
 export default function Field({
   label, hint, error, type = 'text', placeholder, value, onChange, onKeyDown,
-  icon, autoFocus, autoComplete, rows, style = {}, disabled,
+  icon, autoFocus, autoComplete, min, rows, style = {}, disabled,
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
 
@@ -109,6 +110,7 @@ export default function Field({
             onKeyDown={onKeyDown}
             autoFocus={autoFocus}
             autoComplete={autoComplete}
+            min={min}
             inputMode={
               type === 'number' || type === 'tel' ? 'numeric'
               : type === 'email' ? 'email'
