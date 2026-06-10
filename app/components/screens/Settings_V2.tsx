@@ -9,32 +9,11 @@ import { useAppStore } from '@/lib/store';
 import { useI18n, Locale } from '@/lib/i18n';
 import { CURRENCIES } from '@/lib/currency';
 import { useToast } from '../ui/Toast';
+import { formatDateRange } from '@/lib/dates';
 import Icon from '../ui/Icon';
 import Field from '../ui/Field';
 import CountriesInput from '../ui/CountriesInput';
-
-// ── Toggle ────────────────────────────────────────────────────────────────────
-
-function Toggle({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) {
-  const { isRTL } = useI18n();
-  return (
-    <button
-      onClick={onClick} role="switch" aria-checked={on} aria-label={label}
-      style={{
-        width: 50, height: 30, borderRadius: 9999, border: 0, cursor: 'pointer', padding: 3, flexShrink: 0,
-        background: on ? 'var(--lg-forest)' : 'oklch(50% 0.02 60 / 24%)',
-        boxShadow: on ? 'var(--lg-glow-forest)' : 'none', transition: 'background .3s',
-        WebkitTapHighlightColor: 'transparent',
-      }}
-    >
-      <m.span
-        animate={{ x: on ? (isRTL ? -20 : 20) : 0 }}
-        transition={{ type: 'spring', stiffness: 500, damping: 36 }}
-        style={{ display: 'block', width: 24, height: 24, borderRadius: '50%', background: '#fff', boxShadow: 'var(--lg-shadow)' }}
-      />
-    </button>
-  );
-}
+import Toggle from '../ui/Toggle';
 
 // ── Row ───────────────────────────────────────────────────────────────────────
 
@@ -74,7 +53,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     trip, themeMode, setThemeMode,
     highContrast, toggleHighContrast,
     currencyByTrip, tripDbId,
-    deleteTrip, setCurrency, updateTripInfo, setScreen,
+    deleteTrip, setCurrency, updateTripInfo, setScreen, logout,
   } = useAppStore(useShallow(s => ({
     trip:               s.trip,
     themeMode:          s.themeMode,
@@ -87,6 +66,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     setCurrency:        s.setCurrency,
     updateTripInfo:     s.updateTripInfo,
     setScreen:          s.setScreen,
+    logout:             s.logout,
   })));
 
   const [showDeleteConfirm,  setShowDeleteConfirm]  = useState(false);
@@ -134,9 +114,9 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
 
 
   const themeOptions = [
-    { id: 'light'  as const, icon: 'sun'  as const, label: t('Light')  || 'Light'  },
-    { id: 'dark'   as const, icon: 'lock' as const, label: t('Dark')   || 'Dark'   },
-    { id: 'system' as const, icon: 'grid' as const, label: t('System') || 'System' },
+    { id: 'light'  as const, icon: 'sun'  as const, label: t('themeLight') },
+    { id: 'dark'   as const, icon: 'lock' as const, label: t('themeDark')  },
+    { id: 'system' as const, icon: 'grid' as const, label: t('themeSystem') },
   ];
 
   return (
@@ -180,7 +160,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
       </m.h1>
 
       {/* ── Trip info ── */}
-      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>Trip</p>
+      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>{t('settingsTrip')}</p>
 
       <m.div
         className="lg"
@@ -190,15 +170,8 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
       >
         <Row
           icon="tent"
-          title={trip.name}
-          sub={trip.startDate
-            ? (() => {
-                const s = new Date(trip.startDate + 'T00:00:00');
-                const e = new Date(s.getTime() + (trip.days - 1) * 86_400_000);
-                const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                return `${fmt(s)} → ${fmt(e)} · ${trip.days} days`;
-              })()
-            : `${trip.days} days`}
+          title={locale === 'he' ? 'שם הטיול' : 'Trip name'}
+          sub={`${trip.name} · ${formatDateRange(trip.startDate ?? null, trip.days, locale)} · ${trip.days} ${locale === 'he' ? 'ימים' : 'days'}`}
           right={chev}
           onClick={() => {
             setEditName(trip.name);
@@ -213,7 +186,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         />
         <Divider />
         <Row
-          icon="download"
+          icon="coins"
           title={t('currencyLabel') || 'Currency'}
           sub={currencyLabel}
           right={chev}
@@ -221,7 +194,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         />
         <Divider />
         <Row
-          icon="share"
+          icon="globe"
           title={t('languageLabel') || 'Language'}
           right={
             <div className="lg" role="group" aria-label="Language" style={{ display: 'flex', padding: 3, borderRadius: 9999, gap: 2, boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)' }}>
@@ -250,12 +223,35 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
           title={t('exportPDF') || 'Export as PDF'}
           sub={t('exportPDFSub') || 'Printable itinerary'}
           right={chev}
+          onClick={() => show(t('pdfComingSoon'))}
+        />
+        <Divider />
+        <Row
+          icon="home"
+          title={locale === 'he' ? 'בתי מלון ולינה' : 'Hotels & accommodation'}
+          sub={(() => {
+            const hotels = trip.hotels ?? [];
+            if (hotels.length === 0) return locale === 'he' ? 'לא נוספו' : 'None added';
+            return hotels.map(h => h.name).join(', ');
+          })()}
+          right={chev}
+        />
+        <Divider />
+        <Row
+          icon="users"
+          title={locale === 'he' ? 'אנשי קשר לחירום' : 'Emergency contacts'}
+          sub={(() => {
+            const contacts = trip.emergencyContacts ?? [];
+            if (contacts.length === 0) return locale === 'he' ? 'לא נוספו' : 'None added';
+            return contacts.map(c => c.name).join(', ');
+          })()}
+          right={chev}
         />
       </m.div>
 
       {/* ── Appearance ── */}
       <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
-        {t('Appearance') || 'Appearance'}
+        {t('appearanceLabel')}
       </p>
 
       <m.div
@@ -356,6 +352,23 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         }}
       >
         {locale === 'he' ? 'מחק טיול' : 'Delete trip'}
+      </m.button>
+
+      {/* ── Sign out ── */}
+      <m.button
+        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.29, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+        whileTap={{ scale: 0.97 }}
+        onClick={() => logout()}
+        className="lg-btn"
+        style={{
+          width: '100%', height: 50,
+          background: 'var(--lg-panel)', color: 'var(--text-2)',
+          boxShadow: 'var(--lg-shadow), inset 0 0 0 1px oklch(100% 0 0 / 12%)',
+          marginBottom: 20, WebkitTapHighlightColor: 'transparent',
+        }}
+      >
+        {locale === 'he' ? 'התנתק' : 'Sign out'}
       </m.button>
 
       {/* ── Version footer ── */}
