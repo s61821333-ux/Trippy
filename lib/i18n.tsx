@@ -304,6 +304,8 @@ const en = {
   leaveBlankCode: 'Leave blank for a personal trip',
   repeatCode: 'Repeat code',
   myTrips: 'My Trips',
+  noTripsTitle: 'No trips yet',
+  noTripsSub: 'Create your first trip and start planning.',
   joinPlaceholderName: 'e.g. Negev Desert Adventure',
   joinPlaceholderCode: 'Shared code',
   joinPlaceholderNick: 'e.g. Dana',
@@ -527,6 +529,53 @@ const en = {
   resumeTrip: 'Resume trip',
   errorSave: "Couldn't save right now — your last version is safe.",
   emptyTrips: 'No trips yet — time to change that.',
+
+  // Home hero
+  homeHeroTitle: 'Where to\nnext?',
+  homeHeroSub: 'All your trips, right here.',
+
+  // Offline banner
+  offlineViewing: "You're offline — viewing your saved plan",
+  offlinePendingOne: "You're offline — 1 change will sync when you're back",
+  offlinePendingMany: "You're offline — {n} changes will sync when you're back",
+
+  // Saving indicator
+  saving: 'Saving…',
+
+  // Budget alert toasts (calm tone, no emoji)
+  budgetOverAlert: 'Over budget by {amt}. Worth a look before the next expense.',
+  budgetEightyAlert: '80% of the budget is used — {amt} left.',
+
+  // NavBar aria-labels
+  navOverview: 'Overview',
+  navDayPlanner: 'Day planner',
+  navPacking: 'Packing list',
+  navWishlistTab: 'Wishlist',
+  navMenu: 'Menu',
+  navMain: 'Main navigation',
+
+  // Map search
+  mapSearchPlaceholder: 'Search activities…',
+  mapSearchClear: 'Clear search',
+
+  // Duration presets
+  durMin30: '30m',
+  durHour1: '1h',
+  durHour1Half: '1h 30m',
+  durHour2: '2h',
+  durHour3: '3h',
+  durHour4: '4h',
+  durHour6: '6h',
+  durCustom: 'Custom',
+
+  // Landing tagline
+  landingTagline: 'Together, the easy way.',
+
+  // Settings section labels
+  settingsTrip: 'Trip',
+  themeLight: 'Light',
+  themeDark: 'Dark',
+  themeSystem: 'System',
 };
 
 const he: typeof en = {
@@ -830,6 +879,8 @@ const he: typeof en = {
   leaveBlankCode: 'השאר ריק לטיול אישי',
   repeatCode: 'חזור על הקוד',
   myTrips: 'הטיולים שלי',
+  noTripsTitle: 'אין טיולים עדיין',
+  noTripsSub: 'צרו את הטיול הראשון שלכם ותתחילו לתכנן.',
   joinPlaceholderName: 'לדוגמה: הנגב — מסע במדבר',
   joinPlaceholderCode: 'קוד משותף',
   joinPlaceholderNick: 'לדוגמה: דנה',
@@ -1053,6 +1104,53 @@ const he: typeof en = {
   resumeTrip: 'המשך טיול',
   errorSave: 'לא הצלחנו לשמור עכשיו — הגרסה האחרונה שלכם בטוחה.',
   emptyTrips: 'עדיין לא תכננת טיולים — הגיע הזמן!',
+
+  // Home hero
+  homeHeroTitle: 'לאן\nנוסעים?',
+  homeHeroSub: 'כל הטיולים שלכם, במקום אחד.',
+
+  // Offline banner
+  offlineViewing: 'אתם במצב לא מקוון — צופים בתוכנית השמורה',
+  offlinePendingOne: 'אתם במצב לא מקוון — שינוי אחד יסונכרן כשתחזרו',
+  offlinePendingMany: 'אתם במצב לא מקוון — {n} שינויים יסונכרנו כשתחזרו לרשת',
+
+  // Saving indicator
+  saving: 'שומר…',
+
+  // Budget alert toasts
+  budgetOverAlert: 'חרגתם מהתקציב ב־{amt}. שווה הצצה לפני ההוצאה הבאה.',
+  budgetEightyAlert: '80% מהתקציב נוצל — נותרו {amt}.',
+
+  // NavBar aria-labels
+  navOverview: 'ראשי',
+  navDayPlanner: 'מתכנן היום',
+  navPacking: 'רשימת ציוד',
+  navWishlistTab: 'רשימת משאלות',
+  navMenu: 'תפריט',
+  navMain: 'ניווט ראשי',
+
+  // Map search
+  mapSearchPlaceholder: 'חיפוש פעילויות…',
+  mapSearchClear: 'נקה חיפוש',
+
+  // Duration presets
+  durMin30: 'דק׳ 30',
+  durHour1: 'שעה',
+  durHour1Half: 'שעה וחצי',
+  durHour2: 'שעתיים',
+  durHour3: '3 שעות',
+  durHour4: '4 שעות',
+  durHour6: '6 שעות',
+  durCustom: 'מותאם',
+
+  // Landing tagline
+  landingTagline: 'ביחד, בקלות.',
+
+  // Settings section labels
+  settingsTrip: 'טיול',
+  themeLight: 'בהיר',
+  themeDark: 'כהה',
+  themeSystem: 'אוטומטי',
 };
 
 const translations = { en, he } as const;

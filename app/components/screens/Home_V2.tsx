@@ -16,6 +16,7 @@ import Field from '../ui/Field';
 import CountriesInput from '../ui/CountriesInput';
 import { TripTheme } from '@/lib/types';
 import { CURRENCIES, getCountryCurrency } from '@/lib/currency';
+import { formatDateRange } from '@/lib/dates';
 import dynamic from 'next/dynamic';
 
 const PlanWithAISheet = dynamic(() => import('./PlanWithAISheet'));
@@ -43,20 +44,14 @@ const THEMES: { id: TripTheme; label: string; labelHe: string; bg: string; accen
   { id: 'sunset',   label: 'Sunset',   labelHe: 'שקיעה', bg: '#FFF0E5', accent: '#D4531A' },
 ];
 
-const AVC = ['#C4714A', '#C8944A', '#3B6E52', '#2B7A8E', '#A03CB4', '#1E91AF'];
+const AVC = [
+  'var(--avatar-1)', 'var(--avatar-2)', 'var(--avatar-3)',
+  'var(--avatar-4)', 'var(--avatar-5)', 'var(--avatar-6)',
+];
 
 type UserTrip = { id: string; name: string; theme: string | null; days: number; start_date: string | null };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-function formatDateRange(startDate: string | null, days: number): string {
-  if (!startDate) return `${days} days`;
-  const start = new Date(startDate);
-  const end   = new Date(startDate);
-  end.setDate(end.getDate() + days - 1);
-  const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  return `${fmt(start)} → ${fmt(end)}`;
-}
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
 
@@ -70,7 +65,7 @@ function TripAvatar({ name, index = 0, size = 22 }: { name: string; index?: numb
         background: AVC[index % AVC.length], color: '#fff',
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: size * 0.4,
-        boxShadow: '0 0 0 2px #fff, var(--lg-shadow)',
+        boxShadow: '0 0 0 2px var(--bg), var(--lg-shadow)',
         boxSizing: 'border-box',
       }}
     >
@@ -373,10 +368,10 @@ export default function Home_V2() {
               variant="ghost"
               size="sm"
               onClick={() => logout()}
-              aria-label="Sign out"
+              aria-label={t('signOut')}
               style={{ width: 34, height: 34, padding: 0, borderRadius: '50%', background: 'oklch(100% 0 0 / 14%)' }}
             >
-              <Icon name="x" size={15} color="oklch(98% 0.005 80 / 80%)" />
+              <Icon name="logout" size={15} color="oklch(98% 0.005 80 / 80%)" />
             </GlassBtn>
           </div>
         </div>
@@ -398,9 +393,9 @@ export default function Home_V2() {
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.10, duration: 0.50, ease: [0.22, 1, 0.36, 1] }}
-          style={{ fontSize: 40, color: '#fff', margin: 0, lineHeight: 1.05 }}
+          style={{ fontSize: 40, color: '#fff', margin: 0, lineHeight: 1.05, whiteSpace: 'pre-line' }}
         >
-          Where to<br />next?
+          {t('homeHeroTitle')}
         </m.h1>
 
         <m.p
@@ -412,7 +407,7 @@ export default function Home_V2() {
             marginTop: 10, fontFamily: 'var(--font-sans)', margin: '10px 0 0',
           }}
         >
-          {locale === 'he' ? 'כל הטיולים שלכם, במקום אחד.' : 'All your trips, right here.'}
+          {t('homeHeroSub')}
         </m.p>
         </div>{/* /inner centering wrapper */}
       </div>
@@ -481,7 +476,7 @@ export default function Home_V2() {
                 <StampIcon iconKey={stampKey} size={52} aria-hidden="true" />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="eyebrow-lg" style={{ color: 'var(--lg-terra)', fontSize: 9, marginBottom: 2 }}>
-                    {formatDateRange(lastTrip.start_date, lastTrip.days)} · {lastTrip.days} {locale === 'he' ? 'ימים' : 'days'}
+                    {formatDateRange(lastTrip.start_date, lastTrip.days, locale)} · {lastTrip.days} {locale === 'he' ? 'ימים' : 'days'}
                   </div>
                   <div style={{
                     fontFamily: 'var(--font-serif)', fontStyle: 'italic',
@@ -515,6 +510,26 @@ export default function Home_V2() {
             </m.div>
           );
         })()}
+
+        {/* ── Empty state ── */}
+        {!tripsLoading && trips.length === 0 && (
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '32px 0 8px', textAlign: 'center' }}
+          >
+            <StampIcon iconKey="compass" size={72} />
+            <div>
+              <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, color: 'var(--lg-ink)', margin: '0 0 6px' }}>
+                {t('noTripsTitle')}
+              </p>
+              <p style={{ fontSize: 13.5, color: 'var(--text-3)', margin: 0 }}>
+                {t('noTripsSub')}
+              </p>
+            </div>
+          </m.div>
+        )}
 
         {/* ── Trips list ── */}
         {(tripsLoading || trips.length > 0) && (
@@ -572,7 +587,7 @@ export default function Home_V2() {
                           className="eyebrow-lg"
                           style={{ color: 'var(--lg-terra)', fontSize: 9, marginBottom: 2 }}
                         >
-                          {formatDateRange(trip.start_date, trip.days)} · {trip.days} {locale === 'he' ? 'ימים' : 'days'}
+                          {formatDateRange(trip.start_date, trip.days, locale)} · {trip.days} {locale === 'he' ? 'ימים' : 'days'}
                         </div>
                         <div style={{
                           fontFamily: 'var(--font-serif)',
