@@ -379,8 +379,9 @@ export default function Map_V2() {
             type="search"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search events…"
-            aria-label="Search events"
+            placeholder={t('mapSearchPlaceholder')}
+            aria-label={t('mapSearchPlaceholder')}
+            dir="auto"
             style={{
               flex: 1, background: 'transparent', border: 'none', outline: 'none',
               fontFamily: 'var(--font-sans)', fontSize: 13,
@@ -390,7 +391,7 @@ export default function Map_V2() {
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              aria-label="Clear search"
+              aria-label={t('mapSearchClear')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-3)', padding: '2px 4px', flexShrink: 0 }}
             >
               <Icon name="x" size={14} />

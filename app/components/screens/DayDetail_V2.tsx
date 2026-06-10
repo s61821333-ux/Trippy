@@ -105,6 +105,15 @@ const DUR_MINS: Record<string, number> = {
   '30m': 30, '1h': 60, '1h 30m': 90, '2h': 120, '3h': 180, '4h': 240, '6h': 360,
 };
 
+const DUR_LABELS_HE: Record<string, string> = {
+  '30m': "30 דק׳", '1h': 'שעה', '1h 30m': 'שעה וחצי',
+  '2h': 'שעתיים', '3h': '3 שעות', '4h': '4 שעות', '6h': '6 שעות', 'Custom': 'מותאם',
+};
+
+function getDurLabel(key: string, locale: string): string {
+  return locale === 'he' ? (DUR_LABELS_HE[key] ?? key) : key;
+}
+
 function minsToPreset(m: number): string {
   return Object.entries(DUR_MINS).find(([, v]) => v === m)?.[0] ?? 'Custom';
 }
@@ -472,7 +481,7 @@ function RescheduleSheet({ event, onClose, dayLabel }: {
                   transition: 'all .25s', whiteSpace: 'nowrap',
                 }}
               >
-                {d}
+                {getDurLabel(d, locale)}
               </button>
             ))}
           </div>
@@ -613,13 +622,13 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                   transition: 'all .25s', whiteSpace: 'nowrap',
                 }}
               >
-                {d}
+                {getDurLabel(d, locale)}
               </button>
             ))}
           </div>
           {derivedDuration > 0 && (
             <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 5 }}>
-              {fmtDuration(derivedDuration)} total
+              {fmtDuration(derivedDuration)} {locale === 'he' ? 'סה"כ' : 'total'}
             </p>
           )}
         </div>
@@ -1079,6 +1088,8 @@ export default function DayDetail_V2() {
               <button
                 key={d}
                 onClick={() => setActiveDay(d)}
+                aria-label={`Day ${d}`}
+                aria-pressed={on}
                 style={{
                   flex: 'none', border: 0, cursor: 'pointer', borderRadius: 9999, padding: '8px 15px',
                   fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,

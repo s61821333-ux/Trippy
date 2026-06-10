@@ -8,7 +8,8 @@ type IconName =
   | 'wind' | 'lock' | 'pin' | 'download' | 'compass' | 'tent' | 'water'
   | 'calExport' | 'user' | 'users' | 'search' | 'filter' | 'ai' | 'clock' | 'arrow' | 'menu' | 'grid' | 'swap'
   | 'plane' | 'music' | 'film' | 'gift' | 'camera' | 'ship' | 'bike' | 'hot' | 'star'
-  | 'fork' | 'cup' | 'wave' | 'ticket' | 'tag';
+  | 'fork' | 'cup' | 'wave' | 'ticket' | 'tag'
+  | 'logout' | 'offline' | 'coins' | 'globe';
 
 interface IconProps {
   name: IconName;
@@ -66,6 +67,10 @@ const PATHS: Partial<Record<IconName, string>> = {
   wave:      `<path d="M2 12c1.5-2 3-3 5-3s3.5 2 5.5 2 3.5-2 5.5-2M2 6c1.5-2 3-3 5-3s3.5 2 5.5 2 3.5-2 5.5-2M2 18c1.5-2 3-3 5-3s3.5 2 5.5 2 3.5-2 5.5-2"/>`,
   ticket:    `<path d="M3 7h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4zM10 7v10"/>`,
   tag:       `<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><circle cx="7" cy="7" r="1.5"/>`,
+  logout:    `<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>`,
+  offline:   `<path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>`,
+  coins:     `<circle cx="8" cy="14" r="6"/><path d="M16.5 9.5A6 6 0 0 1 22 15"/><path d="M16.5 9.5A6 6 0 0 0 11 4"/>`,
+  globe:     `<circle cx="12" cy="12" r="9"/><path d="M12 3a14.5 14.5 0 0 0 0 18M12 3a14.5 14.5 0 0 1 0 18M3 12h18"/>`,
 };
 
 export default function Icon({ name, size = 20, style = {}, color }: IconProps) {

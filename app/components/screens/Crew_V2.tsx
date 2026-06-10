@@ -14,7 +14,10 @@ import { Participant } from '@/lib/types';
 
 // ── Avatar ────────────────────────────────────────────────────────────────────
 
-const AVC = ['#C4714A', '#C8944A', '#3B6E52', '#2B7A8E', '#A03CB4', '#1E91AF'];
+const AVC = [
+  'var(--avatar-1)', 'var(--avatar-2)', 'var(--avatar-3)',
+  'var(--avatar-4)', 'var(--avatar-5)', 'var(--avatar-6)',
+];
 
 function Avatar({ name, index = 0, size = 44 }: { name: string; index?: number; size?: number }) {
   const initials = (name || '?').trim().split(/\s+/).map(s => s[0]).join('').slice(0, 2).toUpperCase();

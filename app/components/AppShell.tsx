@@ -9,6 +9,7 @@ import { I18nProvider, useI18n } from '@/lib/i18n';
 import { createClient } from '@/utils/supabase/client';
 import dynamic from 'next/dynamic';
 import NavBar_V2 from './NavBar_V2';
+import Icon from './ui/Icon';
 
 import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { ToastProvider, useToast } from './ui/Toast';
@@ -41,7 +42,7 @@ const AISheetLazy        = dynamic(() => import('./Sheets_V2').then(m => ({ defa
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
 function OfflineWatcher() {
   const { show } = useToast();
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
 
   useEffect(() => {
     const goOnline = () => {
@@ -71,20 +72,23 @@ function OfflineWatcher() {
 function BudgetAlertWatcher() {
   const lastBudgetAlert = useAppStore(s => s.lastBudgetAlert);
   const { show } = useToast();
+  const { locale, t } = useI18n();
 
   useEffect(() => {
     if (!lastBudgetAlert) return;
     const { tripDbId, currencyByTrip } = useAppStore.getState();
     const currency = (tripDbId && currencyByTrip[tripDbId]) || '';
-    const fmt = (n: number) => `${currency} ${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const fmtLocale = locale === 'he' ? 'he-IL' : 'en-US';
+    const fmt = (n: number) => `${currency} ${Math.abs(n).toLocaleString(fmtLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     if (lastBudgetAlert.type === 'over') {
-      show(`⚠️ Over budget! Exceeded by ${fmt(lastBudgetAlert.remaining)}`);
+      const overBy = lastBudgetAlert.overBy ?? Math.abs(lastBudgetAlert.remaining);
+      show(t('budgetOverAlert').replace('{amt}', fmt(overBy)));
     } else {
-      show(`💛 80% of budget used — ${fmt(lastBudgetAlert.remaining)} remaining`);
+      show(t('budgetEightyAlert').replace('{amt}', fmt(lastBudgetAlert.remaining)));
     }
     useAppStore.setState({ lastBudgetAlert: null });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastBudgetAlert]);
+  }, [lastBudgetAlert, locale]);
   return null;
 }
 
@@ -167,7 +171,7 @@ function Shell() {
       flushPendingChanges: s.flushPendingChanges,
     }))
   );
-  const { isRTL } = useI18n();
+  const { isRTL, t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [authResolved, setAuthResolved] = useState(false);
   const [osDark, setOsDark] = useState(false);
@@ -462,39 +466,42 @@ function Shell() {
               gap: 6,
               zIndex: 9999,
             }}>
-              📡 You're offline{pendingChanges.length > 0
-                ? ` — ${pendingChanges.length} change${pendingChanges.length > 1 ? 's' : ''} will sync when you're back`
-                : ' — viewing your saved plan'}
+              <Icon name="offline" size={14} style={{ color: 'var(--danger)', flexShrink: 0 }} />
+              {pendingChanges.length === 0
+                ? t('offlineViewing')
+                : pendingChanges.length === 1
+                  ? t('offlinePendingOne')
+                  : t('offlinePendingMany').replace('{n}', String(pendingChanges.length))}
             </div>
           )}
 
-          {/* Saving indicator — subtle dot shown while writes are in-flight */}
+          {/* Saving indicator — subtle pill shown while writes are in-flight */}
           {!isOffline && pendingWriteCount > 0 && (
-            <div style={{
-              position: 'fixed',
-              bottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
-              insetInlineEnd: 16,
-              zIndex: 9000,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 5,
-              background: 'var(--lg-surface, rgba(30,30,30,0.85))',
-              backdropFilter: 'blur(8px)',
-              borderRadius: 20,
-              padding: '4px 10px',
-              fontSize: 11,
-              fontWeight: 600,
-              color: 'var(--text-2, #aaa)',
-              pointerEvents: 'none',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
-            }}>
+            <div
+              className="lg"
+              style={{
+                position: 'fixed',
+                bottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
+                insetInlineEnd: 16,
+                zIndex: 9000,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                borderRadius: 20,
+                padding: '4px 10px',
+                fontSize: 11,
+                fontWeight: 600,
+                color: 'var(--text-2)',
+                pointerEvents: 'none',
+              }}
+            >
               <span style={{
                 width: 6, height: 6, borderRadius: '50%',
-                background: 'var(--lg-sky, #38bdf8)',
+                background: 'var(--lg-terra)',
                 animation: 'pulse 1.2s ease-in-out infinite',
               }} />
               <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}`}</style>
-              Saving…
+              {t('saving')}
             </div>
           )}
 

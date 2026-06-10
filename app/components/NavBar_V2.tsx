@@ -4,7 +4,7 @@ import { m, AnimatePresence } from 'framer-motion';
 import React, { useLayoutEffect, useState } from 'react';
 import Icon from './ui/Icon';
 import { Screen } from '@/lib/types';
-import { useI18n } from '@/lib/i18n';
+import { useI18n, TranslationKey } from '@/lib/i18n';
 
 interface NavBarV2Props {
   active: Screen;
@@ -21,15 +21,15 @@ interface NavBarV2Props {
 }
 
 type TabEntry =
-  | { kind: 'screen'; id: Screen; icon: 'grid' | 'compass' | 'map' | 'checklist'; label: string; labelHe: string; ariaLabel: string }
-  | { kind: 'action'; id: 'wishlist'; icon: 'star'; label: string; labelHe: string; ariaLabel: string };
+  | { kind: 'screen'; id: Screen; icon: 'grid' | 'compass' | 'map' | 'checklist'; label: string; labelHe: string; ariaKey: TranslationKey }
+  | { kind: 'action'; id: 'wishlist'; icon: 'star'; label: string; labelHe: string; ariaKey: TranslationKey };
 
 const TABS: TabEntry[] = [
-  { kind: 'screen', id: 'dashboard', icon: 'grid',      label: 'Home',     labelHe: 'ראשי', ariaLabel: 'Overview' },
-  { kind: 'screen', id: 'day',       icon: 'compass',   label: 'Explore',  labelHe: 'גלה',  ariaLabel: 'Day planner' },
-  { kind: 'screen', id: 'map',       icon: 'map',       label: 'Map',      labelHe: 'מפה',  ariaLabel: 'Map' },
-  { kind: 'screen', id: 'supplies',  icon: 'checklist', label: 'Pack',     labelHe: 'ציוד', ariaLabel: 'Packing list' },
-  { kind: 'action', id: 'wishlist',  icon: 'star',      label: 'Wishlist', labelHe: 'Wishlist', ariaLabel: 'Wishlist' },
+  { kind: 'screen', id: 'dashboard', icon: 'grid',      label: 'Home',     labelHe: 'ראשי',   ariaKey: 'navOverview' },
+  { kind: 'screen', id: 'day',       icon: 'compass',   label: 'Explore',  labelHe: 'גלה',    ariaKey: 'navDayPlanner' },
+  { kind: 'screen', id: 'map',       icon: 'map',       label: 'Map',      labelHe: 'מפה',    ariaKey: 'navMap' },
+  { kind: 'screen', id: 'supplies',  icon: 'checklist', label: 'Pack',     labelHe: 'ציוד',   ariaKey: 'navPacking' },
+  { kind: 'action', id: 'wishlist',  icon: 'star',      label: 'Wishlist', labelHe: 'משאלות', ariaKey: 'navWishlistTab' },
 ];
 
 const TAB_W       = 50;
@@ -62,7 +62,7 @@ export default function NavBar_V2({
   active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes, onWishlist, onAI, onCrew,
   wishlistOpen = false,
 }: NavBarV2Props) {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const isHe = locale === 'he';
 
   const [expandOpen, setExpandOpen] = useState(false);
@@ -175,8 +175,8 @@ export default function NavBar_V2({
               className="lg-btn"
               style={{ ...PANEL_BTN, color: 'var(--danger)' }}
             >
-              <Icon name="x" size={17} style={{ color: 'var(--danger)' }} />
-              <span>{isHe ? 'התנתק' : 'Log out'}</span>
+              <Icon name="logout" size={17} style={{ color: 'var(--danger)' }} />
+              <span>{isHe ? 'התנתקות' : 'Log out'}</span>
             </button>
           </m.div>
         )}
@@ -194,7 +194,7 @@ export default function NavBar_V2({
           transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.08 }}
           whileTap={{ scale: 0.92 }}
           className="lg lg-strong"
-          aria-label="Menu"
+          aria-label={t('navMenu')}
           aria-expanded={expandOpen}
           style={{
             width: 52, height: 52,
@@ -221,7 +221,7 @@ export default function NavBar_V2({
         {/* Tab bar pill — 5 tabs (4 screens + Wishlist action) */}
         <m.nav
           role="navigation"
-          aria-label="Main navigation"
+          aria-label={t('navMain')}
           initial={{ y: 12 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.06 }}
@@ -270,7 +270,7 @@ export default function NavBar_V2({
                 }}
                 whileTap={{ scale: 0.9 }}
                 transition={ICON_SPRING}
-                aria-label={tab.ariaLabel}
+                aria-label={t(tab.ariaKey)}
                 aria-current={isActive ? 'page' : undefined}
                 style={{
                   position: 'relative',
@@ -299,13 +299,13 @@ export default function NavBar_V2({
                 </m.span>
                 <span style={{
                   fontFamily: 'var(--font-sans)',
-                  fontSize: 8,
+                  fontSize: isHe ? 11 : 10,
                   fontWeight: 600,
-                  letterSpacing: '0.04em',
+                  letterSpacing: '0.03em',
                   color: isActive ? 'rgba(255,255,255,0.9)' : 'var(--text-3)',
                   lineHeight: 1,
                   whiteSpace: 'nowrap',
-                  textTransform: 'uppercase',
+                  textTransform: isHe ? 'none' : 'uppercase',
                 }}>
                   {isHe ? tab.labelHe : tab.label}
                 </span>
@@ -342,9 +342,9 @@ export default function NavBar_V2({
             <Icon name="sparkle" size={19} style={{ color: 'var(--lg-terra)' }} />
             <span style={{
               fontFamily: 'var(--font-sans)',
-              fontSize: 7,
+              fontSize: 9,
               fontWeight: 700,
-              letterSpacing: '0.04em',
+              letterSpacing: '0.03em',
               color: 'var(--lg-terra)',
               lineHeight: 1,
               textTransform: 'uppercase',

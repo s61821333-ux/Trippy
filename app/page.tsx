@@ -5,7 +5,12 @@ import LandingSignIn from './components/LandingSignIn';
 import LandingNextGuard from './components/LandingNextGuard';
 
 export const metadata = {
-  title: 'Trippy — Volunteer Trip Planner',
+  title: 'Trippy — Plan trips with friends',
+  description: 'Plan group trips together. Add friends, build your itinerary, and travel better.',
+  openGraph: {
+    title: 'Trippy — Plan trips with friends',
+    description: 'Plan group trips together. Add friends, build your itinerary, and travel better.',
+  },
 };
 
 export default async function LandingPage() {
@@ -58,7 +63,7 @@ export default async function LandingPage() {
           Trippy<span style={{ color: 'var(--terra)' }}>.</span>
         </h1>
 
-        {/* Demo label */}
+        {/* Tagline */}
         <p style={{
           fontFamily: 'var(--font-mono)',
           fontSize: 11,
@@ -68,7 +73,7 @@ export default async function LandingPage() {
           color: 'var(--text-3)',
           margin: '0 0 40px',
         }}>
-          {locale === 'he' ? 'דמו מתנדבים' : 'Volunteering demo'}
+          {locale === 'he' ? 'ביחד, בקלות.' : 'Together, the easy way.'}
         </p>
 
         {/* Sign-in buttons */}
