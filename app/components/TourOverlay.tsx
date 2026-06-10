@@ -5,10 +5,11 @@ import { m, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { Screen } from '@/lib/types';
+import { StampIcon } from './ui/StampIcon';
 
 interface TourStep {
   id: string;
-  emoji: string;
+  stamp: string;
   title: string;
   titleHe: string;
   body: string;
@@ -22,84 +23,84 @@ interface TourStep {
 const STEPS: TourStep[] = [
   {
     id: 'welcome',
-    emoji: '👋',
+    stamp: 'compass',
     title: 'Welcome to Trippy!',
     titleHe: 'ברוכים הבאים ל-Trippy!',
     body: "Plan trips with friends, hour by hour. Let's take a 60-second tour of the key features.",
-    bodyHe: 'תכנן טיולים עם חברים, שעה-שעה. בוא נסייר ב-60 שניות בתכונות העיקריות.',
+    bodyHe: 'תכננו טיולים ביחד, שעה-שעה. בואו ניסייר ב-60 שניות בתכונות העיקריות.',
     navigateTo: 'dashboard',
   },
   {
     id: 'day-cards',
-    emoji: '🗓️',
+    stamp: 'map',
     title: 'Day-by-Day Schedule',
     titleHe: 'לוח זמנים יום-יום',
-    body: 'Each card is one trip day. Tap it to open the hour-by-hour itinerary. Yellow ⚡ badges show free time you can fill.',
-    bodyHe: 'כל כרטיס הוא יום אחד בטיול. הקש לפתיחת המסלול שעה-שעה. תגי ⚡ צהובים = זמן פנוי.',
+    body: 'Each card is one trip day. Tap it to open the hour-by-hour itinerary. The gold free-time chip shows open slots you can fill.',
+    bodyHe: 'כל כרטיס הוא יום אחד בטיול. הקישו לפתיחת המסלול שעה-שעה. הצ\'יפ הזהוב מציין פרקי זמן פנויים.',
     targetSelector: '[data-tour="day-cards"]',
     navigateTo: 'dashboard',
   },
   {
     id: 'share',
-    emoji: '🤝',
+    stamp: 'group',
     title: 'Invite Your Crew',
-    titleHe: 'הזמן את החבר׳ה',
-    body: 'Tap the share icon to invite friends by link or email. Everyone sees and edits the same trip in real time.',
-    bodyHe: 'הקש על סמל השיתוף להזמנת חברים בקישור או מייל. כולם רואים ועורכים את אותו טיול בזמן אמת.',
+    titleHe: 'הזמינו את החבר׳ה',
+    body: 'Tap the Crew button to invite friends by link or email. Everyone sees and edits the same trip in real time.',
+    bodyHe: 'הקישו על כפתור הצוות להזמנת חברים בקישור או מייל. כולם רואים ועורכים את אותו טיול בזמן אמת.',
     targetSelector: '[data-tour="share-btn"]',
     navigateTo: 'dashboard',
   },
   {
     id: 'explore',
-    emoji: '🗺️',
+    stamp: 'pin',
     title: 'Explore Tab',
     titleHe: 'לשונית חקור',
     body: 'Tap here to open the full itinerary. Swipe left/right to switch days.',
-    bodyHe: 'הקש כאן לפתיחת המסלול המלא. החלק שמאל/ימין לעבור בין ימים.',
+    bodyHe: 'הקישו כאן לפתיחת המסלול המלא. החליקו שמאל/ימין לעבור בין ימים.',
     targetSelector: '[data-tour="nav-day"]',
     navigateTo: 'day',
   },
   {
     id: 'add-event',
-    emoji: '➕',
+    stamp: 'ticket',
     title: 'Add Events',
-    titleHe: 'הוסף אירועים',
+    titleHe: 'הוסיפו אירועים',
     body: 'Tap + to add a new activity — set the name, category, and end time. Tap any event to edit or delete it.',
-    bodyHe: 'הקש + להוסיף פעילות — הגדר שם, קטגוריה ושעת סיום. הקש על אירוע לעריכה או מחיקה.',
-    hint: '🤙 New events start right after the previous one',
-    hintHe: '🤙 אירועים חדשים מתחילים מיד אחרי האירוע הקודם',
+    bodyHe: 'הקישו + להוסיף פעילות — הגדירו שם, קטגוריה ושעת סיום. הקישו על אירוע לעריכה או מחיקה.',
+    hint: 'New events start right after the previous one',
+    hintHe: 'אירועים חדשים מתחילים מיד אחרי האירוע הקודם',
     targetSelector: '[data-tour="add-event-fab"]',
     navigateTo: 'day',
   },
   {
     id: 'ai',
-    emoji: '✨',
+    stamp: 'stargaze',
     title: 'Local Ideas',
     titleHe: 'רעיונות מקומיים',
-    body: 'Tap the sparkle button to get activity ideas for any free time slot, based on your location.',
-    bodyHe: 'הקש על כפתור הניצוץ לקבלת רעיונות לכל פרק זמן פנוי, לפי מיקומך.',
-    hint: '🌐 Responds in your chosen language',
-    hintHe: '🌐 מגיב בשפה שבחרת',
+    body: 'Tap the sparkle button to get activity ideas for any free-time slot, based on your location.',
+    bodyHe: 'הקישו על כפתור הניצוץ לקבלת רעיונות לכל פרק זמן פנוי, לפי מיקומכם.',
+    hint: 'Responds in your chosen language',
+    hintHe: 'מגיב בשפה שבחרתם',
     targetSelector: '[data-tour="ai-fab"]',
     navigateTo: 'day',
   },
   {
     id: 'pack',
-    emoji: '🎒',
+    stamp: 'backpack',
     title: 'Packing List',
     titleHe: 'רשימת ציוד',
     body: 'Track everything you need to pack. Tap items to check them off. Add custom gear for your trip.',
-    bodyHe: 'עקוב אחר כל מה שצריך לארוז. הקש על פריטים לסימון. הוסף ציוד מותאם לטיול.',
+    bodyHe: 'עקבו אחר כל מה שצריך לארוז. הקישו על פריטים לסימון. הוסיפו ציוד מותאם לטיול.',
     targetSelector: '[data-tour="nav-supplies"]',
     navigateTo: 'supplies',
   },
   {
     id: 'done',
-    emoji: '🚀',
+    stamp: 'plane',
     title: "You're all set!",
-    titleHe: 'אתה מוכן!',
+    titleHe: 'אתם מוכנים!',
     body: "Start planning your real trip — create a new one from Settings, or keep exploring this demo.",
-    bodyHe: 'התחל לתכנן את הטיול האמיתי שלך — צור חדש בהגדרות, או המשך לחקור את ההדגמה.',
+    bodyHe: 'התחילו לתכנן את הטיול האמיתי שלכם — צרו חדש בהגדרות, או המשיכו לחקור את ההדגמה.',
     navigateTo: 'dashboard',
   },
 ];
@@ -246,9 +247,9 @@ export default function TourOverlay() {
             zIndex: 9002,
           }}
         >
-          {/* Emoji */}
-          <div style={{ fontSize: 40, textAlign: 'center', marginBottom: 12, lineHeight: 1 }}>
-            {step.emoji}
+          {/* Step icon */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 12 }}>
+            <StampIcon iconKey={step.stamp} size={56} />
           </div>
 
           {/* Title */}
@@ -329,7 +330,7 @@ export default function TourOverlay() {
               }}
             >
               {isLast
-                ? (isHe ? 'יאללה! 🚀' : "Let's go! 🚀")
+                ? (isHe ? 'יאללה!' : "Let's go!")
                 : (isHe ? 'הבא →' : 'Next →')}
             </m.button>
           </div>
