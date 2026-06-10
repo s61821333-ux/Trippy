@@ -5,6 +5,7 @@ import { m, AnimatePresence } from 'framer-motion';
 import Sheet from '../ui/Sheet';
 import Field from '../ui/Field';
 import Icon from '../ui/Icon';
+import { StampIcon } from '../ui/StampIcon';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
 import { useToast } from '../ui/Toast';
@@ -44,33 +45,33 @@ interface TripPlan {
 // ── Personalization options ───────────────────────────────────────────────────
 
 const TRAVELER_OPTIONS = [
-  { id: 'solo',    en: 'Solo',   he: 'לבד',      emoji: '🧳' },
-  { id: 'couple',  en: 'Couple', he: 'זוג',       emoji: '❤️' },
-  { id: 'family',  en: 'Family', he: 'משפחה',     emoji: '👨‍👩‍👧' },
-  { id: 'friends', en: 'Friends',he: 'חברים',     emoji: '👥' },
+  { id: 'solo',    en: 'Solo',    he: 'לבד',    stamp: 'avatar'   },
+  { id: 'couple',  en: 'Couple',  he: 'זוג',    stamp: 'avatar'   },
+  { id: 'family',  en: 'Family',  he: 'משפחה',  stamp: 'group'    },
+  { id: 'friends', en: 'Friends', he: 'חברים',  stamp: 'group'    },
 ];
 
 const PACE_OPTIONS = [
-  { id: 'relaxed',  en: 'Relaxed',       he: 'רגוע',      emoji: '🌴', desc: 'Few activities, lots of breathing room' },
-  { id: 'balanced', en: 'Balanced',      he: 'מאוזן',     emoji: '⚖️', desc: '3–4 activities per day'                },
-  { id: 'packed',   en: 'Action-packed', he: 'עמוס',      emoji: '⚡', desc: 'Make the most of every hour'           },
+  { id: 'relaxed',  en: 'Relaxed',       he: 'רגוע',   stamp: 'palm_tree', desc: 'Few activities, lots of breathing room' },
+  { id: 'balanced', en: 'Balanced',      he: 'מאוזן',  stamp: 'compass',   desc: '3–4 activities per day'                },
+  { id: 'packed',   en: 'Action-packed', he: 'עמוס',   stamp: 'hiking',    desc: 'Make the most of every hour'           },
 ];
 
 const INTEREST_OPTIONS = [
-  { id: 'food',      en: 'Food & dining',   he: 'אוכל',       emoji: '🍜' },
-  { id: 'culture',   en: 'Culture & local', he: 'תרבות',      emoji: '🏛' },
-  { id: 'nature',    en: 'Nature & hikes',  he: 'טבע',        emoji: '🌿' },
-  { id: 'beach',     en: 'Beach & water',   he: 'חוף ים',     emoji: '🏖' },
-  { id: 'art',       en: 'Art & museums',   he: 'אמנות',      emoji: '🎨' },
-  { id: 'nightlife', en: 'Nightlife',       he: 'לילה',       emoji: '🎉' },
-  { id: 'shopping',  en: 'Shopping',        he: 'קניות',      emoji: '🛍' },
-  { id: 'adventure', en: 'Adventure',       he: 'הרפתקאות',   emoji: '🧗' },
+  { id: 'food',      en: 'Food & dining',   he: 'אוכל',       stamp: 'noodles'  },
+  { id: 'culture',   en: 'Culture & local', he: 'תרבות',      stamp: 'museum'   },
+  { id: 'nature',    en: 'Nature & hikes',  he: 'טבע',        stamp: 'leaf'     },
+  { id: 'beach',     en: 'Beach & water',   he: 'חוף ים',     stamp: 'beach'    },
+  { id: 'art',       en: 'Art & museums',   he: 'אמנות',      stamp: 'painting' },
+  { id: 'nightlife', en: 'Nightlife',       he: 'לילה',       stamp: 'nightlife'},
+  { id: 'shopping',  en: 'Shopping',        he: 'קניות',      stamp: 'shopping' },
+  { id: 'adventure', en: 'Adventure',       he: 'הרפתקאות',   stamp: 'hiking'   },
 ];
 
 const BUDGET_OPTIONS = [
-  { id: 'budget',   en: 'Budget',    he: 'חסכוני',  emoji: '💸', desc: 'Hostels, street food, free attractions'  },
-  { id: 'mid',      en: 'Mid-range', he: 'בינוני',  emoji: '💳', desc: 'Hotels, restaurants, some paid tours'     },
-  { id: 'luxury',   en: 'Luxury',    he: 'יוקרה',   emoji: '✨', desc: 'Premium hotels, fine dining, VIP access'  },
+  { id: 'budget',   en: 'Budget',    he: 'חסכוני', stamp: 'cash',  desc: 'Hostels, street food, free attractions'  },
+  { id: 'mid',      en: 'Mid-range', he: 'בינוני', stamp: 'card',  desc: 'Hotels, restaurants, some paid tours'     },
+  { id: 'luxury',   en: 'Luxury',    he: 'יוקרה',  stamp: 'hotel', desc: 'Premium hotels, fine dining, VIP access'  },
 ];
 
 // ── Theme helper ──────────────────────────────────────────────────────────────
@@ -98,7 +99,7 @@ function ChipGroup<T extends string>({
   label, options, selected, onSelect, multi = false, isHe,
 }: {
   label: string;
-  options: { id: T; en: string; he: string; emoji: string; desc?: string }[];
+  options: { id: T; en: string; he: string; stamp: string; desc?: string }[];
   selected: T[];
   onSelect: (id: T) => void;
   multi?: boolean;
@@ -116,8 +117,8 @@ function ChipGroup<T extends string>({
               onClick={() => onSelect(opt.id)}
               style={{
                 border: 0, cursor: 'pointer', borderRadius: 9999,
-                padding: '9px 16px',
-                display: 'inline-flex', alignItems: 'center', gap: 6,
+                padding: '7px 14px 7px 8px',
+                display: 'inline-flex', alignItems: 'center', gap: 7,
                 fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
                 background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
                 color:      active ? '#fff' : 'var(--text-2)',
@@ -126,6 +127,7 @@ function ChipGroup<T extends string>({
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
+              <StampIcon iconKey={opt.stamp} size={28} />
               {isHe ? opt.he : opt.en}
             </button>
           );
