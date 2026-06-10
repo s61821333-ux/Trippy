@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { DM_Sans, Instrument_Serif, JetBrains_Mono, Noto_Sans_Hebrew, Assistant } from 'next/font/google';
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import MotionProvider from './components/MotionProvider';
 import ServiceWorkerRegistrar from './components/ServiceWorkerRegistrar';
 import './globals.css';
@@ -113,6 +114,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </MotionProvider>
         <ServiceWorkerRegistrar />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
