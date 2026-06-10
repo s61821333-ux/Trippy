@@ -16,7 +16,10 @@ import { getTimezoneForCountry } from '@/lib/countryTimezones';
 import { getCurrencySymbol } from '@/lib/currency';
 import CurrencyAmount from '../ui/CurrencyAmount';
 
-const STRIPE_COLORS = ['#C4714A', '#C8944A', '#3B6E52', '#6B5CE7', '#E05A3A', '#2B8A6E', '#B45309'];
+const STRIPE_COLORS = [
+  'var(--avatar-1)', 'var(--avatar-2)', 'var(--avatar-3)',
+  'var(--avatar-4)', 'var(--avatar-5)', 'var(--avatar-6)',
+];
 
 // ── Budget edit sheet ─────────────────────────────────────────────────────────
 
@@ -418,9 +421,18 @@ function CalendarHeatmap({ trip }: { trip: any }) {
 // ── Budget breakdown charts ───────────────────────────────────────────────────
 
 const CAT_COLORS: Record<string, string> = {
-  food: '#C4714A', cafe: '#C8944A', transport: '#3B6E52', flight: '#2B7A8E',
-  attraction: '#6B5CE7', hotel: '#E05A3A', shopping: '#A03CB4', beach: '#1B6A8A',
-  nightlife: '#D4531A', museum: '#2B8A6E', hiking: '#B45309', other: '#888',
+  food:       '#C4714A',        // terra
+  cafe:       '#C8944A',        // sand
+  transport:  '#3B6E52',        // forest
+  flight:     '#2B7A8E',        // sky
+  attraction: '#E05A3A',        // terra-bright
+  hotel:      '#B45309',        // amber
+  shopping:   '#7A8447',        // olive
+  beach:      '#1E91AF',        // sky-bright
+  nightlife:  '#D4531A',        // rust
+  museum:     '#2B8A6E',        // forest-deep
+  hiking:     '#2B5340',        // forest-dark
+  other:      '#8A8070',        // warm gray
 };
 const catColor = (c: string) => CAT_COLORS[c] ?? '#888';
 
