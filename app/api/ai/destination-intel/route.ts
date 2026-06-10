@@ -16,6 +16,13 @@ export interface DestinationIntel {
   emergency: string;
 }
 
+// Server-side cache — country facts barely change, so a warm instance can
+// answer repeats (from any user) instantly without another Claude call.
+// Note: browsers never cache POST responses, so Cache-Control alone did nothing.
+const INTEL_TTL_MS = 24 * 60 * 60 * 1000;
+const INTEL_CACHE_MAX = 500;
+const intelCache = new Map<string, { data: DestinationIntel; ts: number }>();
+
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
   const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
@@ -43,6 +50,12 @@ export async function POST(request: NextRequest) {
   const locale  = typeof body.locale  === 'string' ? body.locale : 'en';
   if (!country) return Response.json({ error: 'country required' }, { status: 400 });
 
+  const cacheKey = `${country.toLowerCase()}|${locale}`;
+  const hit = intelCache.get(cacheKey);
+  if (hit && Date.now() - hit.ts < INTEL_TTL_MS) {
+    return Response.json(hit.data, { headers: { 'X-Cache': 'HIT' } });
+  }
+
   const langNote = locale === 'he'
     ? 'ענה בעברית. שמות פרטיים, מספרים וקודים — השאר באנגלית.'
     : 'Reply in English only.';
@@ -60,16 +73,24 @@ Return ONLY minified JSON (no markdown, no explanation):
       system:     locale === 'he'
         ? 'אתה מומחה מידע לטיולים. ענה אך ורק ב-JSON מינימלי בעברית. מידע ספציפי ומדויק בלבד.'
         : 'You are a practical travel expert. Return only minified JSON. Give specific, actionable facts — not generic travel advice.',
-      messages:   [{ role: 'user', content: prompt }],
+      messages:   [
+        { role: 'user', content: prompt },
+        // Prefill so the model can't prepend prose or markdown fences
+        { role: 'assistant', content: '{' },
+      ],
     });
 
-    const raw   = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '{}';
-    const clean = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const raw   = '{' + (msg.content[0].type === 'text' ? msg.content[0].text.trim() : '}');
+    const clean = raw.replace(/\s*```$/, '').trim();
     const data  = JSON.parse(clean) as DestinationIntel;
 
-    return Response.json(data, {
-      headers: { 'Cache-Control': 'public, max-age=86400' },
-    });
+    if (intelCache.size >= INTEL_CACHE_MAX) {
+      const oldest = intelCache.keys().next().value;
+      if (oldest !== undefined) intelCache.delete(oldest);
+    }
+    intelCache.set(cacheKey, { data, ts: Date.now() });
+
+    return Response.json(data, { headers: { 'X-Cache': 'MISS' } });
   } catch (err) {
     return Response.json({ error: err instanceof Error ? err.message : 'AI error' }, { status: 500 });
   }

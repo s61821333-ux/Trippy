@@ -93,8 +93,12 @@ export async function mfaEnrollTotp(friendlyName: string) {
 
 // ─── Passkeys (primary auth, not MFA) ────────────────────────────────────────
 
-export async function signInWithPasskey() {
-  const { data, error } = await sb().auth.signInWithPasskey()
+export async function signInWithPasskey(captchaToken?: string) {
+  // The Supabase project has Auth captcha protection enabled, so the
+  // authentication-options endpoint rejects requests without a captchaToken.
+  const { data, error } = await sb().auth.signInWithPasskey(
+    captchaToken ? { options: { captchaToken } } : undefined,
+  )
   if (error) throw error
   return data
 }

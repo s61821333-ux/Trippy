@@ -14,9 +14,10 @@ function tryAdminClient() {
 export const maxDuration = 45;
 
 // ── Token budget ──────────────────────────────────────────────────────────────
-// 4 lean events/day × ~40 tokens/event = ~160/day.
-// 7 days × 160 = 1120 + overhead ≈ 1600. Cap at 2000 to leave headroom.
-const tokensForDays = (days: number) => Math.min(2000, Math.max(800, days * 230));
+// ~230 tokens/day of minified JSON (4-5 events) + packing list + tips overhead.
+// The cap must cover the longest allowed trip (21 days ≈ 4800 tokens) — a cap
+// below that truncates the JSON mid-stream and the whole plan fails to parse.
+const tokensForDays = (days: number) => Math.min(6000, Math.max(1000, days * 280));
 
 // ── Prompt: tight schema, no fluff ───────────────────────────────────────────
 
@@ -95,7 +96,11 @@ export async function POST(request: NextRequest) {
           system: locale === 'he'
             ? 'מתכנן טיולים. JSON בלבד, ללא markdown.'
             : 'Travel planner. Return only minified JSON, no markdown.',
-          messages: [{ role: 'user', content: prompt }],
+          messages: [
+            { role: 'user', content: prompt },
+            // Prefill the assistant turn so the model can't prepend prose/fences
+            { role: 'assistant', content: '{' },
+          ],
         });
 
         for await (const chunk of msgStream) {
@@ -110,7 +115,8 @@ export async function POST(request: NextRequest) {
         }
 
         try {
-          const clean  = accumulated.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+          // Re-attach the prefilled '{' and strip any stray fences
+          const clean  = ('{' + accumulated).replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
           const parsed = JSON.parse(clean);
           controller.enqueue(encoder.encode('\n__RESULT__' + JSON.stringify(parsed)));
         } catch {

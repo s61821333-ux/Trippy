@@ -4,7 +4,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import type { AiSuggestion, Category } from '@/lib/types';
-import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
+import { checkRateLimitPersistent, rateLimitResponse } from '@/lib/rateLimit';
 import { RecommendBody } from '@/lib/schemas';
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, GOOGLE_MAPS_API_KEY } from '@/lib/env';
 import { adjacentSeasons } from '@/lib/season';
@@ -308,16 +308,18 @@ async function searchAndEnrich(ctx: {
     ? 'אתה מומחה טיולים מקומי. כלל ברזל: הפלט הוא אך ורק מערך JSON תקין — ללא markdown, ללא הקדמה, ללא שום טקסט מחוץ למערך. פתח מיד עם [.'
     : 'You are a local travel expert. Iron rule: output ONLY a raw JSON array — no markdown fences, no intro sentence, no explanation. Start your response with [ and end with ].';
 
-  const userPrompt = `Recommend exactly 4 ${styleLabel}s${budgetLine} in ${locationText} during ${ctx.season}. Each should take ${DURATION_LABEL[ctx.duration_bucket] ?? '1–3 hours'} to enjoy.${exclusionLine}${langNote}
+  // Ask for 6 — Google Places enrichment then ranks them and the top 4 by
+  // rating are returned, so hallucinated or mediocre picks get filtered out.
+  const userPrompt = `Recommend exactly 6 ${styleLabel}s${budgetLine} in ${locationText} during ${ctx.season}. Each should take ${DURATION_LABEL[ctx.duration_bucket] ?? '1–3 hours'} to enjoy. Only real, well-known venues that exist today.${exclusionLine}${langNote}
 
-Output a JSON array of exactly 4 objects with keys: name, description, location.
+Output a JSON array of exactly 6 objects with keys: name, description, location.
 Example shape (replace content):
-[{"name":"...","description":"...","location":"..."},{"name":"...","description":"...","location":"..."},{"name":"...","description":"...","location":"..."},{"name":"...","description":"...","location":"..."}]`;
+[{"name":"...","description":"...","location":"..."},{"name":"...","description":"...","location":"..."}]`;
 
   // Prime the assistant turn with `[` so it can't prepend prose
   const message = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
-    max_tokens: 1024,
+    max_tokens: 1500,
     system: systemPrompt,
     messages: [
       { role: 'user', content: userPrompt },
@@ -369,9 +371,11 @@ Example shape (replace content):
     })
   );
 
+  // Rank: Google-verified, highly rated places first; unverified ones last.
   return enriched
     .filter((r): r is PromiseFulfilledResult<AiSuggestion> => r.status === 'fulfilled' && r.value !== null)
     .map(r => r.value)
+    .sort((a, b) => (b.rating ?? -1) - (a.rating ?? -1))
     .slice(0, 4);
 }
 
@@ -416,8 +420,10 @@ async function storeToCache(
     };
   });
 
-  // Upsert: if google_place_id already exists for city+style+season → increment
-  for (const row of rows) {
+  // Upsert: if google_place_id already exists for city+style+season → increment.
+  // Rows are independent — run them in parallel (this is awaited before the
+  // response is sent, so sequential round-trips added user-visible latency).
+  await Promise.all(rows.map(async (row) => {
     if (row.google_place_id) {
       const { data: existing } = await supa
         .from('rec_cache')
@@ -434,12 +440,12 @@ async function storeToCache(
           .update({ popularity_count: (existing.popularity_count ?? 0) + 1, last_served_at: row.last_served_at })
           .eq('rec_id', existing.rec_id);
         if (upErr) console.error('[rec_cache] update error:', upErr.message);
-        continue;
+        return;
       }
     }
     const { error: insErr } = await supa.from('rec_cache').insert(row);
     if (insErr) console.error('[rec_cache] insert error:', insErr.message, insErr.code, JSON.stringify(row).slice(0, 120));
-  }
+  }));
 }
 
 // ── Main handler ─────────────────────────────────────────────────────────────
@@ -458,8 +464,11 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 });
 
-  // Rate limit (shared with /api/ai/suggestions)
-  const rl = checkRateLimit(`ai:${user.id}`, 10, 60);
+  // Rate limit (shared bucket with /api/ai/suggestions) — persistent, so it
+  // survives serverless cold starts like the suggestions route already does.
+  let rlAdmin = null;
+  try { rlAdmin = serviceClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY()); } catch {}
+  const rl = await checkRateLimitPersistent(rlAdmin, `ai:${user.id}`, 10, 60);
   if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 10);
 
   // Parse body

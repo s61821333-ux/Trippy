@@ -73,11 +73,15 @@ Aim for 15–20 items. Be specific (e.g. "SPF 50 sunscreen" not just "sunscreen"
       system: locale === 'he'
         ? 'אתה מומחה אריזה לטיולים. החזר רק JSON תקין בעברית. מידע ספציפי ומעשי.'
         : 'You are an expert travel packer who knows destinations well. Return only a JSON array — no markdown, no preamble. Be specific and destination-aware.',
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        { role: 'user', content: prompt },
+        // Prefill so the model can't prepend prose or markdown fences
+        { role: 'assistant', content: '[' },
+      ],
     });
 
-    const raw  = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '[]';
-    const clean = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
+    const raw  = '[' + (msg.content[0].type === 'text' ? msg.content[0].text.trim() : ']');
+    const clean = raw.replace(/\s*```$/, '').trim();
 
     const parsed = (JSON.parse(clean) as Array<{ name?: string; category?: string }>)
       .filter(i => i.name)

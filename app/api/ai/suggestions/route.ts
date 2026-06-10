@@ -182,13 +182,19 @@ Respond with ONLY the JSON array, no markdown.`;
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        let accumulated = '';
+        // Prefill the assistant turn with '[' so the model can't prepend prose
+        // or markdown fences — faster first token and far fewer parse failures.
+        let accumulated = '[';
+        controller.enqueue(encoder.encode('['));
 
         const messageStream = client.messages.stream({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 800,
+          max_tokens: 1000,
           system: systemPrompt,
-          messages: [{ role: 'user', content: prompt }],
+          messages: [
+            { role: 'user', content: prompt },
+            { role: 'assistant', content: '[' },
+          ],
         });
 
         for await (const chunk of messageStream) {
@@ -201,13 +207,24 @@ Respond with ONLY the JSON array, no markdown.`;
         // Strip markdown fences Claude occasionally adds despite instructions
         const cleanText = accumulated.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
 
+        type RawSuggestion = {
+          id?: string; name?: string; category?: string; description?: string;
+          duration?: number; time?: string; distance?: string; open?: boolean;
+          cost?: number; location?: string;
+        };
+
         let suggestions: AiSuggestion[];
         try {
-          const rawParsed = JSON.parse(cleanText) as Array<{
-            id?: string; name?: string; category?: string; description?: string;
-            duration?: number; time?: string; distance?: string; open?: boolean;
-            cost?: number; location?: string;
-          }>;
+          let rawParsed: RawSuggestion[];
+          try {
+            rawParsed = JSON.parse(cleanText) as RawSuggestion[];
+          } catch {
+            // Truncated/malformed array — salvage every complete object inside it
+            rawParsed = [...cleanText.matchAll(/\{[^{}]*\}/g)].flatMap(m => {
+              try { return [JSON.parse(m[0]) as RawSuggestion]; } catch { return []; }
+            });
+            if (rawParsed.length === 0) throw new Error('no parseable objects');
+          }
           suggestions = rawParsed.map((s, i) => ({
             id: s.id ?? `ai-${i}`,
             name: s.name ?? 'Suggestion',

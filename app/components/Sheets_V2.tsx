@@ -430,7 +430,6 @@ export function AISheet({ dayNumber }: AISheetProps) {
   const [suggestions,   setSuggestions]   = useState<AiSuggestion[]>([]);
   const [dismissed,     setDismissed]     = useState<string[]>([]);
   const [elapsed,       setElapsed]       = useState(0);
-  const [streamingText, setStreamingText] = useState('');
   const [msgIdx,        setMsgIdx]        = useState(0);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const msgRef     = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -466,7 +465,6 @@ export function AISheet({ dayNumber }: AISheetProps) {
             reject(new Error(accumulated.slice(errorIdx + '\n__ERROR__'.length) || 'AI request failed'));
             return;
           }
-          setStreamingText(accumulated.replace(/\n__[A-Z]*$/, ''));
         }
         const clean = accumulated.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim();
         try { resolve(JSON.parse(clean) as AiSuggestion[]); }
@@ -552,7 +550,6 @@ export function AISheet({ dayNumber }: AISheetProps) {
   const runFetch = (exclude: string[] = []) => {
     setLoading(true);
     setError(null);
-    setStreamingText('');
     setSuggestions([]);
     setElapsed(0);
     setMsgIdx(0);
@@ -563,12 +560,10 @@ export function AISheet({ dayNumber }: AISheetProps) {
       .then(data => {
         setSuggestions(data);
         setAiSuggestions(data);
-        setStreamingText('');
         setLoading(false);
       })
       .catch((err: unknown) => {
         setError(err instanceof Error ? err.message : 'Unknown error');
-        setStreamingText('');
         setLoading(false);
       })
       .finally(() => {

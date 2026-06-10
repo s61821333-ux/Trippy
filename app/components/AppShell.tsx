@@ -354,18 +354,17 @@ function Shell() {
   // theme on the next page load — eliminating any theme flash without a script tag.
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.documentElement.dataset.dark = resolvedDark ? 'true' : '';
+      // Must be the literal string 'false' (not '') — the CSS dark-mode media
+      // query is keyed on :root:not([data-dark="false"]), so any other value
+      // leaves dark tokens applied when the OS prefers dark.
+      document.documentElement.dataset.dark = resolvedDark ? 'true' : 'false';
       document.body.style.background = 'var(--bg)';
       document.cookie = `trippy-dark=${resolvedDark ? 'true' : 'false'}; path=/; max-age=31536000; SameSite=Lax`;
     }
   }, [resolvedDark]);
 
-  // Service Worker registration
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {});
-    }
-  }, []);
+  // Service Worker registration lives in ServiceWorkerRegistrar (root layout) —
+  // registering here as well was redundant.
 
   // Prevent iOS Safari pull-to-refresh (the gesture causes a full page reload
   // which shows the global loader). Allow vertical panning inside scroll containers

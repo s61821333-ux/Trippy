@@ -1,7 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
 import { signInWithGoogle, signInWithPasskey } from '@/lib/db';
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 interface Props {
   compact?: boolean;
@@ -13,6 +16,7 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   useEffect(() => {
     setPasskeySupported(
@@ -35,10 +39,22 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
     setPasskeyLoading(true);
     setError('');
     try {
-      await signInWithPasskey();
+      // Auth captcha protection is enabled on the project — solve the
+      // invisible Turnstile challenge first and pass the token along.
+      let captchaToken: string | undefined;
+      if (TURNSTILE_SITE_KEY && turnstileRef.current) {
+        try {
+          turnstileRef.current.execute();
+          captchaToken = await turnstileRef.current.getResponsePromise(15000);
+        } catch {
+          captchaToken = undefined;
+        }
+      }
+      await signInWithPasskey(captchaToken);
       window.location.href = '/app';
     } catch (e: unknown) {
       setPasskeyLoading(false);
+      turnstileRef.current?.reset(); // Turnstile tokens are single-use
       const msg = e instanceof Error ? e.message : '';
       // User cancelled the browser prompt — don't show an error
       if (msg.includes('cancel') || msg.includes('abort') || msg.includes('NotAllowed')) return;
@@ -167,6 +183,15 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
         }}>
           {error}
         </p>
+      )}
+
+      {/* Invisible captcha — Supabase Auth requires a captchaToken for passkey sign-in */}
+      {passkeySupported && TURNSTILE_SITE_KEY && (
+        <Turnstile
+          ref={turnstileRef}
+          siteKey={TURNSTILE_SITE_KEY}
+          options={{ size: 'invisible', execution: 'execute' }}
+        />
       )}
     </div>
   );
