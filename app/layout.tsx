@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { DM_Sans, Instrument_Serif, JetBrains_Mono, Noto_Sans_Hebrew, Assistant } from 'next/font/google';
+import { DM_Sans, Instrument_Serif, JetBrains_Mono, Assistant } from 'next/font/google';
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
 import MotionProvider from './components/MotionProvider';
@@ -26,14 +26,9 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
+  // Used only for small eyebrow/mono labels — no need to block first paint on it.
+  preload: false,
   weight: ['400', '500', '600'],
-});
-
-const hebrewFont = Noto_Sans_Hebrew({
-  subsets: ['hebrew'],
-  variable: '--font-hebrew',
-  display: 'swap',
-  weight: ['400', '500', '600', '700'],
 });
 
 const assistant = Assistant({
@@ -105,7 +100,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
       data-dark={darkAttr}
       style={{ height: '100%' }}
-      className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${hebrewFont.variable} ${assistant.variable}`}
+      className={`${dmSans.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} ${assistant.variable}`}
     >
       <body className="grain" style={{ minHeight: '100%' }}>
         <MotionProvider>

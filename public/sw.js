@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trippy-v2';
+const CACHE_NAME = 'trippy-v3';
 
 // Cache app shell assets on install
 self.addEventListener('install', (event) => {
@@ -25,6 +25,13 @@ self.addEventListener('fetch', (event) => {
   // Never cache AI suggestions — always needs network
   if (url.pathname === '/api/ai/suggestions') return;
 
+  // Hashed build assets are immutable — serve straight from cache, no network wait.
+  // This makes repeat loads near-instant.
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(cacheForever(event.request));
+    return;
+  }
+
   // StaleWhileRevalidate for weather (TTL 1h via Cache-Control)
   if (url.pathname === '/api/weather') {
     event.respondWith(staleWhileRevalidate(event.request));
@@ -48,6 +55,19 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkWithCacheFallback(event.request));
   }
 });
+
+async function cacheForever(request) {
+  const cache = await caches.open(CACHE_NAME);
+  const cached = await cache.match(request);
+  if (cached) return cached;
+  try {
+    const res = await fetch(request);
+    if (res.ok) cache.put(request, res.clone());
+    return res;
+  } catch {
+    return new Response('Offline', { status: 503 });
+  }
+}
 
 async function staleWhileRevalidate(request) {
   const cache = await caches.open(CACHE_NAME);

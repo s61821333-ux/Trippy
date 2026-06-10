@@ -41,6 +41,7 @@ const AISheetLazy        = dynamic(() => import('./Sheets_V2').then(m => ({ defa
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
 function OfflineWatcher() {
   const { show } = useToast();
+  const { locale } = useI18n();
 
   useEffect(() => {
     const goOnline = () => {
@@ -48,7 +49,9 @@ function OfflineWatcher() {
       setIsOffline(false);
       const count = pendingChanges.length;
       flushPendingChanges().then(() => {
-        if (count > 0) show(`Back online — ${count} change${count > 1 ? 's' : ''} synced ✓ Welcome back!`);
+        if (count > 0) show(locale === 'he'
+          ? `חזרת לרשת — ${count} ${count > 1 ? 'שינויים סונכרנו' : 'שינוי סונכרן'} ✓`
+          : `Back online — ${count} change${count > 1 ? 's' : ''} synced ✓`);
       }).catch(() => {});
     };
     const goOffline = () => useAppStore.getState().setIsOffline(true);

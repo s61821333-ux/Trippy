@@ -128,6 +128,7 @@ interface CacheRow {
   duration_bucket: string;
   budget_tier: string;
   season: string;
+  locale: string;
   title: string;
   short_description?: string | null;
   source_site?: string | null;
@@ -142,7 +143,7 @@ interface CacheRow {
 async function queryCacheHits(ctx: {
   city: string; lat?: number; lng?: number; radius_km: number;
   style: string; season: string; duration_bucket: string; budget_tier: string;
-  exclude?: string[];
+  locale: string; exclude?: string[];
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }, authedSupa: SupabaseClient<any>): Promise<CacheRow[]> {
   const adjSeasons = adjacentSeasons(ctx.season as Parameters<typeof adjacentSeasons>[0]);
@@ -153,6 +154,7 @@ async function queryCacheHits(ctx: {
     .select('*')
     .ilike('city', ctx.city)
     .eq('style', ctx.style)
+    .eq('locale', ctx.locale)
     .in('season', allSeasons)
     .order('google_rating', { ascending: false, nullsFirst: false })
     .order('popularity_count', { ascending: false, nullsFirst: false })
@@ -300,21 +302,42 @@ async function searchAndEnrich(ctx: {
   const exclusionLine = ctx.exclude?.length
     ? `\nSkip these already-suggested names: ${ctx.exclude.join(', ')}.` : '';
 
-  const langNote = isHe
-    ? '\n\n🔴 שדה "description" חייב להיות בעברית. שדה "name" — השאר שמות מקומות, עסקים ומותגים בשמם המקורי (לטינית/אנגלית). אל תתרגם שמות פרטיים.'
-    : '';
-
   const systemPrompt = isHe
-    ? 'אתה מומחה טיולים מקומי. כלל ברזל: הפלט הוא אך ורק מערך JSON תקין — ללא markdown, ללא הקדמה, ללא שום טקסט מחוץ למערך. פתח מיד עם [.'
+    ? 'אתה מומחה טיולים ישראלי שמכיר את היעד מקרוב. כתוב עברית טבעית ועכשווית — כמו שחבר ישראלי באמת מדבר, לא כמו תרגום מאנגלית ולא כמו חוברת תיירות. כלל ברזל: הפלט הוא אך ורק מערך JSON תקין — ללא markdown, ללא הקדמה, ללא שום טקסט מחוץ למערך. פתח מיד עם [.'
     : 'You are a local travel expert. Iron rule: output ONLY a raw JSON array — no markdown fences, no intro sentence, no explanation. Start your response with [ and end with ].';
+
+  const BUDGET_LABEL_HE: Record<string, string> = {
+    low: 'חינמיים או זולים', mid: 'במחיר בינוני', high: 'יוקרתיים ושווים את הפינוק', any: '',
+  };
+  const DURATION_LABEL_HE: Record<string, string> = {
+    short: 'פחות משעתיים', half_day: 'חצי יום (2–5 שעות)', full_day: 'יום שלם (5+ שעות)',
+  };
+  const SEASON_HE: Record<string, string> = {
+    spring: 'האביב', summer: 'הקיץ', autumn: 'הסתיו', fall: 'הסתיו', winter: 'החורף',
+  };
+
+  const budgetLineHe = ctx.budget_tier !== 'any' ? ` — ${BUDGET_LABEL_HE[ctx.budget_tier]} —` : '';
+  const exclusionLineHe = ctx.exclude?.length
+    ? `\nדלג על שמות שכבר הוצעו: ${ctx.exclude.join(', ')}.` : '';
+
+  const hebrewPrompt = `המלץ על בדיוק 6 מקומות מהסוג הזה: ${styleLabel}${budgetLineHe} ב-${locationText}, בעונת ${SEASON_HE[ctx.season] ?? ctx.season}. כל מקום צריך להתאים לביקור של ${DURATION_LABEL_HE[ctx.duration_bucket] ?? 'שעה עד שלוש שעות'}. רק מקומות אמיתיים ומוכרים שקיימים היום.${exclusionLineHe}
+
+שדה "description": משפט אחד או שניים בעברית טבעית וזורמת — כמו חבר ישראלי שגר ביעד וממליץ לך אישית. תאר את האווירה, מה מיוחד במקום, או טיפ פרקטי אחד. אסור עברית מליצית, אסור ניסוח שנשמע כמו תרגום מילולי מאנגלית, ואסור סופרלטיבים ריקים ("מדהים", "חובה", "מושלם").
+שדה "name": שם המקום בכתב הלטיני המקורי — אל תתרגם שמות פרטיים.
+
+החזר מערך JSON של בדיוק 6 אובייקטים עם המפתחות: name, description, location.
+דוגמה לצורה (החלף את התוכן):
+[{"name":"Café de Flore","description":"בית קפה ותיק עם טרסה שנעים לשבת בה, כדאי להגיע מוקדם לפני העומס.","location":"Saint-Germain-des-Prés"}]`;
 
   // Ask for 6 — Google Places enrichment then ranks them and the top 4 by
   // rating are returned, so hallucinated or mediocre picks get filtered out.
-  const userPrompt = `Recommend exactly 6 ${styleLabel}s${budgetLine} in ${locationText} during ${ctx.season}. Each should take ${DURATION_LABEL[ctx.duration_bucket] ?? '1–3 hours'} to enjoy. Only real, well-known venues that exist today.${exclusionLine}${langNote}
+  const englishPrompt = `Recommend exactly 6 ${styleLabel}s${budgetLine} in ${locationText} during ${ctx.season}. Each should take ${DURATION_LABEL[ctx.duration_bucket] ?? '1–3 hours'} to enjoy. Only real, well-known venues that exist today.${exclusionLine}
 
 Output a JSON array of exactly 6 objects with keys: name, description, location.
 Example shape (replace content):
 [{"name":"...","description":"...","location":"..."},{"name":"...","description":"...","location":"..."}]`;
+
+  const userPrompt = isHe ? hebrewPrompt : englishPrompt;
 
   // Prime the assistant turn with `[` so it can't prepend prose
   const message = await client.messages.create({
@@ -387,7 +410,7 @@ async function storeToCache(
     city: string; area?: string; country?: string; region?: string;
     lat?: number; lng?: number;
     style: string; style_detail?: string; duration_bucket: string;
-    budget_tier: string; season: string;
+    budget_tier: string; season: string; locale: string;
   },
   supabaseUrl: string, serviceKey: string
 ): Promise<void> {
@@ -407,6 +430,7 @@ async function storeToCache(
       duration_bucket:   ctx.duration_bucket,
       budget_tier:       ctx.budget_tier,
       season:            ctx.season,
+      locale:            ctx.locale,
       title:             s.name,
       short_description: s.description,
       source_site:       ext.source_site ?? null,
@@ -432,6 +456,7 @@ async function storeToCache(
         .eq('city', row.city)
         .eq('style', row.style)
         .eq('season', row.season)
+        .eq('locale', row.locale)
         .maybeSingle();
 
       if (existing) {
@@ -482,6 +507,9 @@ export async function POST(request: NextRequest) {
   }
 
   const ctx = parsed.data;
+  // Descriptions are generated in Hebrew only for locale 'he', English for
+  // everything else — tag/filter cache rows by the same rule.
+  const cacheLocale = ctx.locale === 'he' ? 'he' : 'en';
   const supabaseUrl = SUPABASE_URL();
   const serviceKey = SUPABASE_SERVICE_ROLE_KEY();
   const googleKey = GOOGLE_MAPS_API_KEY();
@@ -490,7 +518,7 @@ export async function POST(request: NextRequest) {
   const cacheHits = await queryCacheHits(
     { city: ctx.city, lat: ctx.lat, lng: ctx.lng, radius_km: ctx.radius_km,
       style: ctx.style, season: ctx.season, duration_bucket: ctx.duration_bucket,
-      budget_tier: ctx.budget_tier, exclude: ctx.exclude },
+      budget_tier: ctx.budget_tier, locale: cacheLocale, exclude: ctx.exclude },
     supabase
   );
 
@@ -547,6 +575,7 @@ export async function POST(request: NextRequest) {
         lat: ctx.lat, lng: ctx.lng,
         style: ctx.style, style_detail: ctx.style_detail,
         duration_bucket: ctx.duration_bucket, budget_tier: ctx.budget_tier, season: ctx.season,
+        locale: cacheLocale,
       }, supabaseUrl, serviceKey).catch(e => console.error('[rec_cache] storeToCache failed:', e));
     }
 

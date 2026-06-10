@@ -100,35 +100,81 @@ export async function POST(request: NextRequest) {
   const toHHMM = (mins: number) =>
     `${String(Math.floor(mins / 60)).padStart(2, '0')}:${String(mins % 60).padStart(2, '0')}`;
 
+  const isHebrew = locale === 'he';
+
   const eventsText =
     existingEvents.length > 0
       ? existingEvents
           .map(e => `  - ${e.time} ${e.name} (${e.category}, ${e.duration}min)`)
           .join('\n')
-      : '  (no events yet)';
+      : isHebrew ? '  (אין אירועים עדיין)' : '  (no events yet)';
 
   const destinationText = countries.length > 0
     ? countries.join(', ')
-    : dayMeta?.region ?? 'the trip destination';
+    : dayMeta?.region ?? (isHebrew ? 'יעד הטיול' : 'the trip destination');
 
   const regionText = dayMeta
-    ? `Region: ${dayMeta.region}${dayMeta.desc ? ` — ${dayMeta.desc}` : ''}`
-    : `Day ${dayNumber}`;
+    ? `${isHebrew ? 'אזור' : 'Region'}: ${dayMeta.region}${dayMeta.desc ? ` — ${dayMeta.desc}` : ''}`
+    : isHebrew ? `יום ${dayNumber}` : `Day ${dayNumber}`;
 
   const gapLine = gapStart != null && gapEnd != null
-    ? `\nFree slot to fill: ${toHHMM(gapStart)} – ${toHHMM(gapEnd)} (${gapEnd - gapStart} min available). Every suggestion MUST start at or after ${toHHMM(gapStart)} and finish by ${toHHMM(gapEnd)}. Set "time" to a value within this window and keep "duration" short enough to fit.`
+    ? (isHebrew
+        ? `\nחלון פנוי למילוי: ${toHHMM(gapStart)}–${toHHMM(gapEnd)} (${gapEnd - gapStart} דקות פנויות). כל הצעה חייבת להתחיל בשעה ${toHHMM(gapStart)} או אחריה ולהסתיים עד ${toHHMM(gapEnd)}. קבע "time" בתוך החלון הזה ושמור על "duration" קצר מספיק כדי להיכנס בו.`
+        : `\nFree slot to fill: ${toHHMM(gapStart)} – ${toHHMM(gapEnd)} (${gapEnd - gapStart} min available). Every suggestion MUST start at or after ${toHHMM(gapStart)} and finish by ${toHHMM(gapEnd)}. Set "time" to a value within this window and keep "duration" short enough to fit.`)
     : '';
 
   const hotelLine = hotelLocation
-    ? `\nThe traveler is staying at: ${hotelName ? `${hotelName}, ` : ''}${hotelLocation}. Prioritize activities that are close to or easy to reach from this location. Do NOT suggest activities in a completely different city or region.`
+    ? (isHebrew
+        ? `\nהמטייל לן ב: ${hotelName ? `${hotelName}, ` : ''}${hotelLocation}. העדף פעילויות קרובות למיקום הזה או נגישות ממנו בקלות. אל תציע פעילויות בעיר או באזור אחר לגמרי.`
+        : `\nThe traveler is staying at: ${hotelName ? `${hotelName}, ` : ''}${hotelLocation}. Prioritize activities that are close to or easy to reach from this location. Do NOT suggest activities in a completely different city or region.`)
     : '';
 
-  const isHebrew = locale === 'he';
-  const languageInstruction = isHebrew
-    ? '\n\n🔴 שדה "description" חייב להיות בעברית. שדה "name" — השאר שמות מקומות, עסקים ומותגים בשמם המקורי (לטינית/אנגלית). אל תתרגם שמות פרטיים. אסור אותיות ערביות.'
+  const excludeLine = exclude.length > 0
+    ? (isHebrew
+        ? `\nאל תציע אף אחד מאלה (כבר הוצגו): ${exclude.join(', ')}.`
+        : `\nDo NOT suggest any of these (already shown): ${exclude.join(', ')}.`)
     : '';
 
-  const prompt = `${isHebrew ? 'אתה עוזר תכנון טיולים. חובה להשיב בעברית בלבד.\n\n' : ''}Trip: "${tripName}" → ${destinationText}.
+  const hebrewPrompt = `טיול: "${tripName}" → ${destinationText}.
+
+יום ${dayNumber} — ${regionText}${hotelLine}
+לוח הזמנים של היום:
+${eventsText}
+${gapLine}
+תן בדיוק 4 הצעות לפעילויות. כללים:
+• הצע אך ורק מקומות אמיתיים וקיימים ב-${destinationText} — עם שם המקום המדויק
+• כל ההצעות חייבות להיות בתוך ${destinationText} או קרוב מאוד אליו — לעולם לא בעיר או באזור אחר
+• גוון בקטגוריות (אוכל / בית קפה / אטרקציה וכו') ובאווירה
+• בלי התנגשויות זמנים עם הלו"ז הקיים למעלה
+• העדף פנינות מקומיות אהובות על פני מלכודות תיירים מפורסמות${excludeLine}
+
+שדה "description": משפט אחד או שניים בעברית טבעית וזורמת — כמו חבר ישראלי שגר ביעד וממליץ לך אישית. תאר את האווירה, מה מיוחד במקום, או טיפ פרקטי אחד. אסור עברית מליצית, אסור ניסוח שנשמע כמו תרגום מילולי מאנגלית, ואסור סופרלטיבים ריקים ("מדהים", "חובה", "מושלם").
+שדה "name": שם המקום בשפת המקור (כתב לטיני) — אל תתרגם שמות פרטיים. אסור אותיות ערביות בשום שדה.
+
+החזר אך ורק JSON תקין — מערך של בדיוק 4 אובייקטים:
+[
+  {
+    "id": "ai-1",
+    "name": "Café de Flore",
+    "category": "cafe",
+    "description": "בית קפה ותיק בלב הרובע, עם טרסה שנעים לשבת בה ולצפות בעוברים ושבים. כדאי להגיע לפני 9 בבוקר כדי לתפוס שולחן בחוץ.",
+    "duration": 90,
+    "time": "10:00",
+    "distance": "1.5 ק״מ",
+    "open": true,
+    "cost": 0,
+    "location": "שכונה או כתובת"
+  }
+]
+
+category חייב להיות אחד מ: food | cafe | attraction | museum | beach | sport | shopping | nightlife | rest | other
+time: HH:MM בפורמט 24 שעות, בלי התנגשות עם אירועים קיימים
+duration: דקות (מספר שלם, ריאלי)
+open: true (Google Maps יאמת)
+cost: עלות משוערת במטבע המקומי (0 אם חינם)
+השב עם מערך ה-JSON בלבד, בלי markdown.`;
+
+  const englishPrompt = `Trip: "${tripName}" → ${destinationText}.
 
 Day ${dayNumber} — ${regionText}${hotelLine}
 Today's schedule:
@@ -139,7 +185,7 @@ Give exactly 4 activity suggestions. Rules:
 • All suggestions MUST be within or very close to ${destinationText} — never suggest places in other cities or regions
 • Good variety of category (mix food/cafe/attraction/etc.) and vibe
 • No time conflicts with the existing schedule above
-• Prioritize local favourites over famous tourist traps${exclude.length > 0 ? `\nDo NOT suggest any of these (already shown): ${exclude.join(', ')}.` : ''}${languageInstruction}
+• Prioritize local favourites over famous tourist traps${excludeLine}
 
 Each description: 1–2 vivid sentences. Mention atmosphere, what makes it special, or one practical tip. Write like a knowledgeable local friend.
 
@@ -166,8 +212,10 @@ open: true (Google Maps will verify)
 cost: estimated cost in local currency (0 if free)
 Respond with ONLY the JSON array, no markdown.`;
 
-  const systemPrompt = locale === 'he'
-    ? 'אתה מדריך טיולים מקומי שמשיב אך ורק בעברית. חוק ברזל: שדה "description" בעברית בלבד. שדה "name" — שמור את שמות המקומות בשמם המקורי (לטיני/אנגלי). השב עם JSON תקין בלבד, ללא markdown. כתוב בצורה חיה וספציפית — כמו חבר מקומי אמיתי. אסור להמציא מקומות שאינם קיימים. אסור להשתמש באותיות ערביות.'
+  const prompt = isHebrew ? hebrewPrompt : englishPrompt;
+
+  const systemPrompt = isHebrew
+    ? 'אתה מדריך טיולים ישראלי שמכיר את היעד מקרוב. כתוב עברית טבעית ועכשווית — כמו שחבר ישראלי באמת מדבר, לא כמו תרגום מאנגלית ולא כמו חוברת תיירות. משפטים קצרים וקונקרטיים. שמות מקומות, עסקים ומותגים נשארים בכתב הלטיני המקורי. השב עם JSON תקין בלבד, ללא markdown. אסור להמציא מקומות שאינם קיימים. אסור להשתמש באותיות ערביות.'
     : 'You are a local travel expert who knows real, specific places. Respond with valid JSON only — no markdown. Only suggest real venues that actually exist at the destination. Descriptions must be vivid and specific — like a knowledgeable friend, not a travel brochure. Never invent fictional places.';
 
   const validCategories: Category[] = [

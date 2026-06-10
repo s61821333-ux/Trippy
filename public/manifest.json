@@ -1,7 +1,7 @@
 {
-  "name": "Trippy — Friendly Trip Planner",
+  "name": "Trippy — Group Trip Planner",
   "short_name": "Trippy",
-  "description": "AI-powered collaborative trip planner",
+  "description": "Free group trip planner — shared itinerary, budget, and map.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1A1410",

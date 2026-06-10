@@ -28,6 +28,16 @@ export async function proxy(request: NextRequest) {
 
   let response = NextResponse.next({ request })
 
+  // Session refresh is only needed when a Supabase auth cookie exists.
+  // Anonymous visitors (every first load) skip the network round-trip entirely,
+  // and API routes validate auth themselves via their own server client.
+  const hasAuthCookie = request.cookies
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'))
+  if (!hasAuthCookie || request.nextUrl.pathname.startsWith('/api/')) {
+    return response
+  }
+
   const supabaseUrl = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseAnonKey = process.env.SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 

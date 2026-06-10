@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 import LandingSignIn from './components/LandingSignIn';
 import LandingNextGuard from './components/LandingNextGuard';
 
@@ -8,9 +9,18 @@ export const metadata = {
 };
 
 export default async function LandingPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) redirect('/app');
+  // Only hit Supabase when an auth cookie exists — anonymous first loads
+  // (the common case) render immediately with zero network round-trips.
+  const cookieStore = await cookies();
+  const locale = cookieStore.get('trippy-locale')?.value === 'he' ? 'he' as const : 'en' as const;
+  const hasAuthCookie = cookieStore
+    .getAll()
+    .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'));
+  if (hasAuthCookie) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) redirect('/app');
+  }
 
   return (
     <>
@@ -58,11 +68,11 @@ export default async function LandingPage() {
           color: 'var(--text-3)',
           margin: '0 0 40px',
         }}>
-          Volunteering demo
+          {locale === 'he' ? 'דמו מתנדבים' : 'Volunteering demo'}
         </p>
 
         {/* Sign-in buttons */}
-        <LandingSignIn />
+        <LandingSignIn locale={locale} />
 
       </div>
     </>
