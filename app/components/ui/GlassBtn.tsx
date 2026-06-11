@@ -2,8 +2,17 @@
 
 // Usage: accent/coral/danger for actions; ghost for secondary; flat for inline list controls; default for general buttons.
 // Never use on page-scroll content that is not floating (use a plain <button> or GlassBtn variant="flat" instead).
-import { CSSProperties, ReactNode } from 'react';
+import { CSSProperties, ReactNode, useEffect, useRef } from 'react';
 import { m } from 'framer-motion';
+
+// Detect true hover capability once on mount (avoids mobile jitter from whileHover)
+function useHoverCapable() {
+  const ref = useRef(false);
+  useEffect(() => {
+    ref.current = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  }, []);
+  return ref;
+}
 
 type Variant = 'default' | 'accent' | 'coral' | 'danger' | 'ghost' | 'flat' | 'forest';
 type Size = 'sm' | 'md' | 'lg';
@@ -86,8 +95,7 @@ export default function GlassBtn({
 }: GlassBtnProps) {
   const sz = SIZES[size];
   const vs = getVariantStyles(variant);
-
-  const isDefault = variant === 'default' || variant === 'flat';
+  const hoverCapable = useHoverCapable();
 
   return (
     <m.button
@@ -95,8 +103,10 @@ export default function GlassBtn({
       onClick={onClick}
       disabled={disabled}
       whileTap={disabled ? {} : { scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
-      whileHover={disabled ? {} : { scale: 1.02, y: -4 }}
+      // Only apply hover lift on devices with a real hover pointer — prevents mobile jitter
+      whileHover={disabled || !hoverCapable.current ? {} : { scale: 1.02, y: -4 }}
       transition={{ type: 'spring', stiffness: 500, damping: 26 }}
+      aria-disabled={disabled}
       style={{
         height: sz.h,
         padding: `0 ${sz.px}px`,
@@ -105,8 +115,8 @@ export default function GlassBtn({
         fontWeight: 600,
         letterSpacing: '-0.01em',
         cursor: disabled ? 'not-allowed' : 'pointer',
+        pointerEvents: disabled ? 'none' : undefined,
         border: vs.border || 'none',
-        borderTopColor: (vs as any).borderTop ? undefined : undefined,
         borderRadius: 9999,
         color: vs.color,
         background: vs.bg,
@@ -117,10 +127,15 @@ export default function GlassBtn({
         alignItems: 'center',
         justifyContent: 'center',
         gap: 6,
+        minWidth: 44,
+        minHeight: 44,
         opacity: disabled ? 0.45 : 1,
         transition: 'background 0.18s ease, box-shadow 0.18s ease',
         WebkitTapHighlightColor: 'transparent',
         touchAction: 'manipulation',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
         ...style,
       }}
     >

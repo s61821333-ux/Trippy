@@ -23,22 +23,37 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
   const [kbH, setKbH] = useState(0);
   const titleId = useId();
   const [mounted, setMounted] = useState(false);
+  // Track the element that triggered open so we can restore focus on close
+  const openerRef = useRef<Element | null>(null);
 
-  useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    setMounted(true);
+    openerRef.current = document.activeElement;
+  }, []);
 
-  // Lock body scroll while sheet is open
+  // Lock body scroll and apply inert to background content while sheet is open
   useEffect(() => {
     const scrollY = window.scrollY;
     document.body.style.position = 'fixed';
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = '100%';
     document.body.style.overflowY = 'scroll';
+
+    // Mark background content as inert so AT can't navigate behind the sheet
+    const appRoot = document.getElementById('app-root') ?? document.querySelector('main') ?? null;
+    if (appRoot) (appRoot as HTMLElement).setAttribute('inert', '');
+
     return () => {
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
       document.body.style.overflowY = '';
       window.scrollTo(0, scrollY);
+      if (appRoot) (appRoot as HTMLElement).removeAttribute('inert');
+      // Return focus to the element that opened the sheet
+      if (openerRef.current && (openerRef.current as HTMLElement).focus) {
+        (openerRef.current as HTMLElement).focus({ preventScroll: true });
+      }
     };
   }, []);
 
@@ -196,7 +211,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           {(title || subtitle) && (
             <div style={{ marginBottom: 20 }}>
               {title && (
-                <h3
+                <h2
                   id={titleId}
                   style={{
                     fontFamily: 'var(--font-sans)',
@@ -209,7 +224,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
                   }}
                 >
                   {title}
-                </h3>
+                </h2>
               )}
               {subtitle && (
                 <p style={{ fontSize: 13, color: 'var(--text-2)' }}>{subtitle}</p>

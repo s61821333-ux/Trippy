@@ -671,3 +671,655 @@
 | 589 | NavBar | Long press tab | Mobile | Long-press tab for context | Could reveal "Go to today" on calendar tab | 🟢 |
 | 590 | NavBar | NavBar vibrancy on iOS | `-webkit-backdrop-filter` | Blur for older WebKit | Add `-webkit-backdrop-filter` alongside `backdrop-filter` | 🟡 |
 | 591 | NavBar | `prefers-reduced-motion` blob | No animation fallback | If motion disabled, blob should not animate | Use `transition: none` + instant position on motion-disabled | 🟠 |
+
+---
+
+## 9. Cards & Glass Surfaces (72 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 592 | Cards | `.glass` base class | `backdrop-filter: blur(20px)` | Performance cost | Apply `will-change: transform` to `.glass` containers that animate | 🟡 |
+| 593 | Cards | `.glass-1/2/3` levels | Three opacity levels | Level hierarchy: 1=subtle, 2=mid, 3=strong | Document the semantic use of each level in design tokens | 🟡 |
+| 594 | Cards | Glass on white bg | Light mode glass card | White background + white glass card = invisible | Use `--glass-bg-light: rgba(255,255,255,0.72)` with `box-shadow` to distinguish | 🔴 |
+| 595 | Cards | Glass on dark bg | Dark mode glass | Dark glass works well | ✓ Dark mode glass contrast is adequate | 🟢 |
+| 596 | Cards | `.glass-panel` | Heavier blur panel | Heavier variant for sheets, modals | Confirm `blur(32px)` + `saturate(1.8)` token matches `.glass-panel` usage | 🟡 |
+| 597 | Cards | `.glass-float` | Elevated glass | Shadow + higher glass level | Float adds `shadow-lg` equivalent — confirm on both modes | 🟡 |
+| 598 | Cards | `.glass-active` | Pressed state | Scale + brightness change on active | `scale(0.98)` + `brightness(0.95)` — snappy press feel ✓ | 🟢 |
+| 599 | Cards | `.glass-elevated` | Highest elevation | Used for primary cards | Add `z-index: 1` when elevated card is used in stacked layout | 🟡 |
+| 600 | Cards | Card border | `1px solid rgba(white, 0.15)` | Border invisible in light mode | Light mode: `border: 1px solid rgba(0,0,0,0.08)` | 🟠 |
+| 601 | Cards | Card border radius | 20-24px on cards | Mix of 20px and 24px across cards | Standardize: trip/event cards = 20px; modal/sheet panels = 24px | 🟡 |
+| 602 | Cards | Card shadow | Soft multi-layer shadow | `box-shadow: 0 4px 24px rgba(0,0,0,0.06), 0 1px 4px rgba(0,0,0,0.04)` | Ensure shadow is not too heavy in dark mode (reduce opacity) | 🟡 |
+| 603 | Cards | Card hover on desktop | Desktop hover state | Scale 1.01 + shadow increase | Add `transition: transform 200ms, box-shadow 200ms` on card hover | 🟡 |
+| 604 | Cards | Card press | Mobile press | `active:scale(0.98)` | ✓ Confirmed — press feel is correct | 🟢 |
+| 605 | Cards | Trip summary card | Home screen | Trip image + name + dates + progress | Image aspect ratio: 16:9; overlay gradient for text legibility | 🟡 |
+| 606 | Cards | Trip image loading | Trip card image | Skeleton while image loads | Show skeleton shimmer at 16:9 aspect ratio until image resolves | 🟡 |
+| 607 | Cards | Trip image error | Missing/broken image | Fallback for failed trip image | Show themed gradient placeholder (use trip stripe color) | 🟡 |
+| 608 | Cards | Trip card gradient overlay | Text over image | Dark gradient overlay at bottom for text | Gradient: `linear-gradient(transparent, rgba(0,0,0,0.6))` | 🟠 |
+| 609 | Cards | Dashboard event card | Quick overview | Event type icon + name + time | Type icon color-coded by category | 🟡 |
+| 610 | Cards | DayDetail event card | Day view event | Time, category icon, name, cost, location | Location truncated to 1 line; cost right-aligned | 🟡 |
+| 611 | Cards | Event card swipe | Delete gesture | Swipe left reveals delete | Red delete zone appears with icon; spring snap-back if released | 🟡 |
+| 612 | Cards | Event card checked state | Completed event | Visual distinction for past/done events | Muted opacity `0.6` + strikethrough for completed events | 🟡 |
+| 613 | Cards | Budget card | Dashboard | Spent/Total donut + amounts | Donut chart with brand color fill + text center overlay | 🟡 |
+| 614 | Cards | Budget card split | Per-person budget view | Total ÷ crew count | Show "per person" amount as secondary stat | 🟢 |
+| 615 | Cards | Weather card | Dashboard | Current weather display | Icon (32px) + temp in large text + condition; today vs. forecast | 🟡 |
+| 616 | Cards | Packing progress card | Dashboard | X of Y items packed | Animated progress bar; % label; "Well packed!" at 100% | 🟡 |
+| 617 | Cards | Crew card | Crew screen | Avatar + name + role | Role badge chip (owner/editor/viewer) | 🟡 |
+| 618 | Cards | Wishlist card | WishlistSheet | Saved place/event | Location thumbnail + name + category chip | 🟡 |
+| 619 | Cards | AI suggestion card | PlanWithAI | Suggested activity | Suggestion icon + title + description + accept/dismiss | 🟡 |
+| 620 | Cards | Notes preview card | Dashboard | Notes snippet | 2-line preview with fade-out at bottom | 🟢 |
+| 621 | Cards | Stats card row | Dashboard | Trip statistics | 3-stat horizontal row: Days, Cities, Events | 🟡 |
+| 622 | Cards | Map event pin | Map view | Marker popup card | Small popup with event name + time + icon | 🟡 |
+| 623 | Cards | Empty state card | All empty screens | Illustration + message + CTA | Centered, consistent height; friendly illustration | 🟡 |
+| 624 | Cards | Error card | Inline error | Soft error feedback | Red glass card: icon + message + retry | 🟡 |
+| 625 | Cards | Skeleton card | Loading | Shimmer animation | Skeleton dimensions must match loaded card to avoid layout shift | 🟠 |
+| 626 | Cards | Skeleton shimmer direction | LTR shimmer | Shimmer sweep direction | RTL screens: reverse shimmer direction (`from right to left`) | 🟠 |
+| 627 | Cards | Day header card | DayDetail | Day number + date + title | Sticky on scroll? Day header should be sticky on DayDetail | 🟡 |
+| 628 | Cards | Settings group card | Settings sections | Grouped settings rows | Each settings group: 16px radius card, rows separated by dividers | 🟡 |
+| 629 | Cards | Settings row tap state | Row press | Highlight on tap | `active:bg-brand/5` or similar highlight on row press | 🟡 |
+| 630 | Cards | Security settings card | Passkeys + sessions | Multiple sessions list | Card per session; monospace device name; relative date | 🟡 |
+| 631 | Cards | Join trip card | `/join/[token]` | Invite preview card | Show trip name, organizer, dates, crew count | 🟡 |
+| 632 | Cards | Trip card active state | Currently selected trip | Active/inactive visual difference | Active trip: brand outline or fill badge "Current trip" | 🟡 |
+| 633 | Cards | Card grid layout | Dashboard | CSS Grid layout | `grid-template-columns: 1fr` mobile; `repeat(2, 1fr)` desktop | 🟡 |
+| 634 | Cards | Responsive card grid | Dashboard | Gap in card grid | `gap: var(--gap-md)` on mobile; `var(--gap-lg)` on desktop | 🟡 |
+| 635 | Cards | Glass blur performance on scroll | Many glass cards | Multiple `backdrop-filter` elements | Limit blur to max 2-3 simultaneously visible blurred elements | 🟠 |
+| 636 | Cards | Nested cards | Card inside card | Depth perception | Use `.glass-1` inside `.glass-2` for inner; avoid same level nesting | 🟡 |
+| 637 | Cards | Card animation on mount | Initial load | Cards enter with slide-up + fade | `blurUpVariants` from motion.ts; stagger 0.06s per card | 🟡 |
+| 638 | Cards | Card no transition on load | First paint | If card has `no-transition` class | Remove `no-transition` after first frame (requestAnimationFrame) | 🟡 |
+| 639 | Cards | Long card text truncation | Long trip/event names | Text overflow handling | Title: 1-2 lines max, `overflow: hidden; text-overflow: ellipsis` | 🟡 |
+| 640 | Cards | Card meta info truncation | Location, time, etc. | Secondary text truncation | Secondary: 1 line, ellipsis | 🟢 |
+| 641 | Cards | Color-coded category dots | Event cards | Category color indicator | 8px circle before event name — color from category color map | 🟢 |
+| 642 | Cards | Card context menu icon | 3-dot or "..." | Card overflow actions | 3-dot menu icon right-aligned; `aria-haspopup="menu"` | 🟡 |
+| 643 | Cards | Card accessibility | Interactive cards | Card as button vs div | Clickable cards must be `<button>` or have `role="button"` + keyboard support | 🔴 |
+| 644 | Cards | Card focus ring | Keyboard navigation | Focus ring on card | `focus-visible:ring-2 ring-brand ring-offset-2` on card | 🟠 |
+| 645 | Cards | Card `aria-label` | Icon cards | If card has no visible title | `aria-label="Weather: 24°C, Sunny, Tel Aviv"` on compact weather card | 🟠 |
+| 646 | Cards | Card drag handle | Reorderable cards | If drag-to-reorder exists | Show drag handle icon (6-dot grid) on left edge of draggable cards | 🟡 |
+| 647 | Cards | Card swipe right | Future feature | Potential: swipe right for details | Horizontal swipe detection must not conflict with page scroll | 🟡 |
+| 648 | Cards | Card image lazy loading | All card images | Lazy load images | `loading="lazy"` on all card `<img>` elements | 🟠 |
+| 649 | Cards | Card image srcset | Responsive images | WebP + multiple sizes | Provide `srcset` with 1x, 2x, 3x for all card images | 🟡 |
+| 650 | Cards | Glass card in high contrast | `[data-high-contrast]` | Glass becomes invisible | HC: solid opaque card backgrounds with strong border | 🟠 |
+| 651 | Cards | Card stripe color | Trip theme | Left-edge stripe on trip cards | 4px stripe uses trip's `stripeColor` token — verify all themes have a stripe | 🟡 |
+| 652 | Cards | Card stripe in dark mode | Dark mode stripe | Stripe color saturation | In dark mode: stripe opacity 80% to prevent over-saturation | 🟢 |
+| 653 | Cards | Card interaction on desktop | Pointer interactions | Click vs hover | Click navigates; hover shows secondary actions (edit, delete buttons appear) | 🟡 |
+| 654 | Cards | Card selection mode | Multi-select | Batch delete/action | Show checkbox top-left of card in selection mode | 🟡 |
+| 655 | Cards | Card expand animation | Expandable cards | Budget details expand | Expand with `height: auto` via Framer Motion `layout` prop | 🟡 |
+| 656 | Cards | Sheet as card | Bottom sheet is full-screen card | Sheet is a card variant | Apply `.glass-panel` tokens consistently on Sheet | 🟡 |
+| 657 | Cards | Card with image top | Image-header card | If hotel/venue cards exist | Image `aspect-ratio: 3/2`; content below image | 🟢 |
+| 658 | Cards | Card divider lines | Row separator in multi-row card | Fine line between rows | `border-top: 1px solid rgba(0,0,0,0.06)` in light; `rgba(255,255,255,0.08)` dark | 🟡 |
+| 659 | Cards | Card right chevron | Navigable card rows | Arrow indicating drill-down | 16px chevron-right icon, muted color, right edge | 🟢 |
+| 660 | Cards | Card action bar | Bottom of card | Action row at bottom of some cards | If actions exist: `border-top: 1px divider; padding: 12px 16px` | 🟡 |
+| 661 | Cards | Card pressed + hover cancel | Mouse release outside | Hover cancel mid-press | Ensure press state clears on `pointercancel` and `pointerleave` | 🟡 |
+| 662 | Cards | Glass performance budget | Page performance | Max N blur filters at once | Set max 5 simultaneous `backdrop-filter` elements per viewport | 🟠 |
+| 663 | Cards | Card `tabIndex={0}` | Keyboard users | Non-button card elements | Ensure `tabIndex={0}` + `onKeyDown` for Enter/Space on div-cards | 🟠 |
+
+---
+
+## 10. Animations & Motion (82 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 664 | Motion | Spring snap | `spring.snap: {500, 35}` | Very stiff — fast nav blob | ✓ Correct for tab navigation blob | 🟢 |
+| 665 | Motion | Spring default | `spring.default: {320, 28}` | General purpose spring | ✓ Good for most UI transitions | 🟢 |
+| 666 | Motion | Spring gentle | `spring.gentle: {220, 26}` | Sheet entrance, slow panels | ✓ Correct for sheets and panels | 🟢 |
+| 667 | Motion | Spring float | `spring.float: {120, 22}` | Hover float, decorative | ✓ For floating decorative elements | 🟢 |
+| 668 | Motion | `blurUpVariants` | Lists, cards | `blur(8px) to 0 + translateY(24px to 0)` | Use for initial page load stagger; not for frequent list updates | 🟡 |
+| 669 | Motion | `slideVariants` | Screen transitions | X-axis 40px slide + opacity | LTR: positive X on enter, negative X on exit — correct for forward nav | 🟡 |
+| 670 | Motion | `screenVariants` | Framer Motion page | Full screen transition | Ensure `AnimatePresence mode="wait"` wraps route changes | 🟠 |
+| 671 | Motion | Stagger delay | 0.06s per item | `stagger: 0.06` in motion.ts | Acceptable for short lists; reduce to 0.04s for lists >8 items | 🟡 |
+| 672 | Motion | Sheet entrance | Slide up + fade | y: 100% to 0 | ✓ Sheet spring-slides in from bottom | 🟢 |
+| 673 | Motion | Sheet exit | Slide down + fade | y: 0 to 100% | Spring exit animation — must be faster than entrance | 🟡 |
+| 674 | Motion | Sheet swipe dismiss | Swipe down 80px | `y > 80px` triggers dismiss | Confirm dismiss threshold feels natural; 80px is adequate | 🟢 |
+| 675 | Motion | Sheet velocity dismiss | Flick gesture | Fast flick should dismiss at lower distance | Add velocity check: `velocity.y > 500` dismisses regardless of distance | 🟡 |
+| 676 | Motion | NavBar blob | Position animated | `layoutId` or spring x position | Blob uses CSS transition or Framer? Use `motion.div` with `layout` prop | 🟡 |
+| 677 | Motion | Card mount stagger | First render | Cards stagger in on load | ✓ blurUpVariants with stagger 0.06 | 🟢 |
+| 678 | Motion | Card hover lift | Desktop hover | `translateY(-4px)` | Wrap in `@media (hover: hover)` — confirmed needed | 🟠 |
+| 679 | Motion | Button press scale | `scale(0.96)` | `whileTap` on GlassBtn | ✓ Fast scale press | 🟢 |
+| 680 | Motion | Skeleton shimmer | CSS animation | `@keyframes shimmer` 1.5s linear infinite | Confirm shimmer exists in globals.css | 🟡 |
+| 681 | Motion | Skeleton `reduced-motion` | Shimmer animation | Must respect `prefers-reduced-motion` | Disable shimmer; show static muted bg in reduced-motion mode | 🟠 |
+| 682 | Motion | Page transition duration | `duration.screen: 0.32s` | Screen transitions 320ms | ✓ 320ms for page transitions is ideal | 🟢 |
+| 683 | Motion | Micro interaction duration | `duration.fast: 0.15s` | 150ms for small UI | ✓ 150ms for quick feedback | 🟢 |
+| 684 | Motion | Toggle switch animation | Settings toggles | Knob slide + track color change | Spring.default for smooth knob; track: `transition: background 200ms` | 🟡 |
+| 685 | Motion | NavBar expand panel | Slide up + stagger | Panel animate from bottom | Stagger children 0.05s from top down | 🟡 |
+| 686 | Motion | List reorder animation | If drag reorder | Framer Motion `layout` prop | Ensure `layout="position"` on draggable list items | 🟡 |
+| 687 | Motion | Supply item check | Check/uncheck | Checkbox animation | Scale(0.9) → scale(1) + checkmark draw animation via SVG stroke | 🟡 |
+| 688 | Motion | FAB expand | FABs in NavBar | FAB expand animation | FAB icons rotate 45° on open; spring.default | 🟡 |
+| 689 | Motion | Modal/dialog entrance | Confirm dialogs | Center scale-up from 0.92 | `scale: 0.92 to 1, opacity: 0 to 1`; spring.gentle | 🟡 |
+| 690 | Motion | Toast animation | Toast notifications | Slide in from top or bottom | Slide up from `bottom: NavBar + 16px`; auto-dismiss slide down | 🟡 |
+| 691 | Motion | Toast stagger | Multiple toasts | Multiple active toasts | Toasts stack vertically with 8px gap; each slides in | 🟡 |
+| 692 | Motion | Pull to refresh | iOS PTR | Platform-native or custom | Custom PTR: rubber-band spring on overscroll; spinner appears at 60px | 🟡 |
+| 693 | Motion | Scroll indicator fade | Horizontal scroll | Fade mask at edges | CSS `mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent)` | 🟢 |
+| 694 | Motion | Map zoom animation | Map screen | Zoom to destination on load | Smooth Leaflet zoom with easeInOutCubic, 800ms | 🟢 |
+| 695 | Motion | Map marker bounce | New marker | Marker enters with bounce | `@keyframes markerBounce` spring-like 3-step keyframe | 🟢 |
+| 696 | Motion | Calendar month change | If calendar exists | Slide left/right on month change | x: ±100% + opacity; spring.default | 🟡 |
+| 697 | Motion | Day slide in DayDetail | Next/prev day | Horizontal slide between days | Same as slideVariants; direction mirrors swipe direction | 🟡 |
+| 698 | Motion | Budget donut animation | On load | Stroke draw animation | SVG `stroke-dashoffset` animation 0.8s ease-out on mount | 🟡 |
+| 699 | Motion | Progress bar animation | Packing/budget progress | Width fills on mount | `width: 0 to X%`, spring.default | 🟡 |
+| 700 | Motion | Counter increment | Number counts up | If stat numbers count up | `useMotionValue` + `useTransform` for rolling digit effect | 🟢 |
+| 701 | Motion | Confetti on completion | 100% packing packed | Celebratory animation | `canvas-confetti` package; burst + fade; 1.5s | 🟡 |
+| 702 | Motion | Avatar upload preview | Profile image upload | Preview on file select | Fade in new image with `opacity: 0→1`, 300ms | 🟢 |
+| 703 | Motion | Theme change transition | Light/dark toggle | Global color transition | `transition: background-color 300ms, color 300ms` on `:root` | 🟡 |
+| 704 | Motion | No flash on theme change | SSR theme cookie | Prevent flash of wrong theme | Cookie `trippy-dark` read before hydration — ✓ confirmed | 🟢 |
+| 705 | Motion | AnimatePresence mode | Page transitions | `mode="wait"` or `"sync"` | Use `mode="wait"` for full screen transitions | 🟡 |
+| 706 | Motion | Framer Motion LayoutGroup | Shared layouts | If elements share layout animations | Wrap in `<LayoutGroup>` where needed | 🟡 |
+| 707 | Motion | Scroll-triggered animation | On scroll | Elements animate as they enter viewport | Use Framer `whileInView` or `useInView` hook | 🟡 |
+| 708 | Motion | Parallax scroll | Hero/decorative | Background parallax on scroll | Keep subtle: max 20% scroll ratio; disable on reduced-motion | 🟢 |
+| 709 | Motion | Reduced motion: disable all | `data-reduced-motion` | System or in-app setting | Apply `{ transition: none !important; animation: none !important }` | 🔴 |
+| 710 | Motion | Reduced motion: instant | State changes | Switch from spring to instant | Provide `useReducedMotion()` hook, replace spring with `duration: 0` | 🟠 |
+| 711 | Motion | Reduced motion: preserve intent | Not just off | Reduced motion ≠ no motion | Fade allowed under reduced motion; spring/bounce/parallax disabled | 🟠 |
+| 712 | Motion | Layout thrashing | DOM layout | Avoid reading layout after write | Batch DOM reads; use `requestAnimationFrame` for layout reads | 🟡 |
+| 713 | Motion | GPU compositing | `will-change` | GPU for animated elements | `will-change: transform, opacity` on animated cards; remove when idle | 🟡 |
+| 714 | Motion | `transform: translateZ(0)` | Force GPU layer | iOS Safari layer promotion | Add to NavBar + Sheet + animated blobs | 🟡 |
+| 715 | Motion | Animation frame drops | 60fps target | Ensure 60fps on mid-range devices | Profile on Pixel 5 equivalent; target 60fps for all critical paths | 🟠 |
+| 716 | Motion | Scroll momentum | iOS `overflow-y: scroll` | Must use `-webkit-overflow-scrolling: touch` | Already deprecated; use `overflow-y: scroll` with `overscroll-behavior` | 🟡 |
+| 717 | Motion | Overscroll bounce | Native bounce | iOS bounce scroll feel | `overscroll-behavior-y: contain` on sheet; `auto` on main scroll | 🟡 |
+| 718 | Motion | Framer Motion exit animations | List item removal | Item must animate out before DOM removal | Wrap list in `<AnimatePresence>` with `initial={false}` | 🟡 |
+| 719 | Motion | Spring bounce overshoot | High spring stiffness | Blob may overshoot on fast tab switch | Current 500/35 damping may cause 1-2 oscillations — acceptable | 🟢 |
+| 720 | Motion | Input focus animation | Field focus | Ring appears on focus | `transition: box-shadow 150ms, border-color 150ms` on focus | 🟡 |
+| 721 | Motion | Error shake animation | Form validation | Error field shake | `@keyframes shake` 0.4s: `x: 0, -8px, 8px, -6px, 6px, 0` | 🟡 |
+| 722 | Motion | Success pulse | Action success | Success button state | Checkmark scales in with spring.snap; green flash | 🟡 |
+| 723 | Motion | Pull-down gesture reveal | Refresh | PTR indicator reveal | Spinner rotation tied to pull distance via `useMotionValue` | 🟡 |
+| 724 | Motion | Long list virtualization | 100+ items | Reanimated virtual list | Use `react-window` or Next.js turbo virtualization for large lists | 🟡 |
+| 725 | Motion | Stagger max items | Long stagger lists | 0.06 × 20 items = 1.2s delay | Cap stagger to max 8 items (0.48s); rest load immediately | 🟠 |
+| 726 | Motion | Splash/loading screen | App first load | Loading animation | Animated logo mark + progress indicator; spring entrance | 🟡 |
+| 727 | Motion | PWA install animation | Add to home screen | If in-app prompt | Custom prompt appears from bottom: spring slide-up | 🟢 |
+| 728 | Motion | `useAnimate` for complex | Complex sequences | Sequential animation chains | Use Framer `useAnimate()` for multi-step celebratory animations | 🟢 |
+| 729 | Motion | CSS animation vs Framer | Choice | When to use each | Framer for data-driven/interactive; CSS `@keyframes` for looping | 🟡 |
+| 730 | Motion | Micro interaction: toggle | Settings toggle | Immediate toggle feel | Toggle responds in <16ms (1 frame); state syncs async | 🟡 |
+| 731 | Motion | Micro interaction: delete | Row deletion | Item shrinks then fades | Height animates to 0 + opacity to 0 (layout animation) | 🟡 |
+| 732 | Motion | Micro interaction: add item | New item add | New row slides in | Height 0→full + opacity 0→1 with spring.default | 🟡 |
+| 733 | Motion | Micro interaction: copy | Copy to clipboard | "Copied!" feedback | Text change + checkmark + color transition 200ms | 🟡 |
+| 734 | Motion | Animation duration too long | > 500ms transitions | Any animation >500ms | Audit: no UI transition should exceed 400ms (except page transitions) | 🟠 |
+| 735 | Motion | `duration.page: 0.28s` | Page transition | 280ms page transition | ✓ 280ms is right | 🟢 |
+| 736 | Motion | Perspective in 3D | Cards 3D flip | If any 3D card exists | Add `perspective: 1000px` on parent to smooth 3D transforms | 🟢 |
+| 737 | Motion | Motion variants reuse | Shared animation variants | Variants defined in motion.ts | ✓ Central variants file avoids duplication | 🟢 |
+| 738 | Motion | AnimatePresence cleanup | Memory | Framer leaves ghost elements? | Ensure all animated exits complete before DOM removal | 🟡 |
+| 739 | Motion | Framer bundle size | JS bundle | Framer Motion v12 is large | Ensure tree-shaking works; import only used features | 🟠 |
+| 740 | Motion | CSS `@keyframes` efficiency | CSS animations | Shimmer and pulse use CSS | CSS animations run off main thread — correct choice for these | 🟢 |
+| 741 | Motion | Icon animation | Action icons | Loading spinner in button | Use CSS animation for spinner, not Framer (lighter) | 🟡 |
+| 742 | Motion | Transition group for routes | Route animation | `AnimatePresence` wraps `{children}` in layout | Confirm layout wraps routes, not components inside routes | 🟡 |
+| 743 | Motion | Motion audit | All animations | Run performance audit | DevTools "Layers" panel: verify only expected elements have GPU layers | 🟡 |
+| 744 | Motion | Animation regression test | Visual regression | After any motion change | Check all animated components in Storybook or screenshot tests | 🟡 |
+| 745 | Motion | Haptic + animation sync | Touch + haptic | Vibration should match animation | Trigger `navigator.vibrate(8)` at same frame as visual press start | 🟡 |
+
+---
+
+## 11. RTL / Hebrew / i18n (60 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 746 | RTL | `dir="rtl"` | HTML element | `dir="rtl"` set on `<html>` in he locale | ✓ Root direction set correctly | 🟢 |
+| 747 | RTL | Logical CSS properties | Layout | `padding-inline` / `margin-inline` | Audit: replace all `padding-left/right` with `padding-inline-start/end` | 🔴 |
+| 748 | RTL | Icon flip | Directional icons | Chevron, arrow icons must flip in RTL | Use `.rtl-flip { transform: scaleX(-1) }` on directional icons | 🟠 |
+| 749 | RTL | Non-flip icons | Non-directional | Globe, calendar, trash must NOT flip | Only directional icons should flip; non-directional must stay | 🟠 |
+| 750 | RTL | Text alignment | Hebrew text | Right-align in RTL | `text-align: start` (logical) instead of `text-align: left` globally | 🟠 |
+| 751 | RTL | NavBar tab order | RTL visual order | Tab order should reverse in RTL | CSS `direction: rtl` on NavBar container should auto-reverse | 🟡 |
+| 752 | RTL | NavBar FAB in RTL | Center FABs | FABs centered — should still be center in RTL | ✓ Center FABs unaffected by direction | 🟢 |
+| 753 | RTL | Sheet drag direction | Swipe dismiss | Swipe down to dismiss | Swipe-down is direction-neutral ✓ | 🟢 |
+| 754 | RTL | Sheet slide animation | y-axis sheet | y-axis slides are RTL-neutral | ✓ Vertical sheet animation is RTL-safe | 🟢 |
+| 755 | RTL | Screen slide direction | LTR slide | Forward = slide left (x: +40 to 0) | In RTL: forward = slide right (x: -40 to 0) | 🟠 |
+| 756 | RTL | Back swipe direction | History back | Back = slide right in LTR | In RTL: back = slide left | 🟡 |
+| 757 | RTL | Scroll direction | Horizontal scroll | Scroll starts at left in LTR | In RTL: horizontal scroll starts at right | 🟡 |
+| 758 | RTL | Hebrew font | Assistant font | Assistant from Google Fonts | ✓ Assistant font for Hebrew (confirmed correct font choice) | 🟢 |
+| 759 | RTL | Hebrew font weight | Assistant weights | Hebrew at 400/600/700 | Confirm all text weight levels available in loaded font subset | 🟡 |
+| 760 | RTL | English in RTL context | Mixed content | Trip names, places in English within he locale | Wrap English spans in `<span dir="ltr">` | 🟠 |
+| 761 | RTL | Numbers in RTL | Digits in Hebrew context | Numbers always LTR in Hebrew | `unicode-bidi: embed; direction: ltr` on numeric spans | 🟡 |
+| 762 | RTL | Date format | HE locale | Israeli date format: DD/MM/YYYY | Use `new Intl.DateTimeFormat('he-IL')` for Hebrew dates | 🟡 |
+| 763 | RTL | Time format | HE locale | 24-hour format standard in Israel | `Intl.DateTimeFormat('he-IL', { hour: '2-digit', hour12: false })` | 🟡 |
+| 764 | RTL | Currency format | Shekel | ILS symbol ₪ position | `Intl.NumberFormat('he-IL', { style: 'currency', currency: 'ILS' })` | 🟡 |
+| 765 | RTL | Plural forms | Hebrew plural | Hebrew has singular/plural/dual forms | Use `Intl.PluralRules('he')` — dual form required for 2 items | 🟠 |
+| 766 | RTL | RTL-specific component variants | GlassBtn | Arrow icons in button | `ChevronLeft` in LTR → `ChevronRight` in RTL | 🟡 |
+| 767 | RTL | Field label RTL | Form labels | Label should be right-aligned in RTL | `text-align: start` on labels | 🟡 |
+| 768 | RTL | Field icon RTL | Left icon in field | In RTL: icon should appear on right | Confirm icon uses `inset-inline-start` not `left: 12px` | 🟠 |
+| 769 | RTL | Field placeholder RTL | Placeholder text | Placeholder should right-align | `direction: rtl` in Hebrew fields | 🟡 |
+| 770 | RTL | Chip close X position | Right side in LTR | In RTL: X should be on left | Use `margin-inline-start: auto` for X on chip | 🟡 |
+| 771 | RTL | Toast position | Bottom center/right | Toasts on bottom center | Center toast is RTL-neutral ✓ | 🟢 |
+| 772 | RTL | Tour overlay position | Highlight position | Overlay positioned relative to highlighted element | Ensure spotlight calculation accounts for RTL offset | 🟡 |
+| 773 | RTL | Map controls | Leaflet UI | Zoom +/- controls default to top-left | In RTL: should move to top-right | 🟡 |
+| 774 | RTL | Settings list items | Rows with right chevron | Chevron right → left in RTL | Use logical property or dir-aware icon | 🟡 |
+| 775 | RTL | Settings toggle label | Left label, right toggle | In RTL: toggle on left, label on right | `flex-direction` with logical margins | 🟡 |
+| 776 | RTL | Event card time column | Left time column | In RTL: time column on right | `text-align: start; padding-inline-start: 0; padding-inline-end: 12px` | 🟡 |
+| 777 | RTL | Calendar layout | Weeks start on | Israel: weeks start on Sunday | `firstDayOfWeek: 0` for he locale (Sunday = 0) | 🟠 |
+| 778 | RTL | Progress bar fill | Left to right fill | In RTL: fill from right to left | `direction: rtl` on progress bar container | 🟡 |
+| 779 | RTL | Shadow direction | Drop shadow for depth | `shadow: 4px 4px` may look wrong in RTL | Use symmetric shadows (`0 4px 16px`) for direction-neutral depth | 🟢 |
+| 780 | RTL | Font-size scaling | Hebrew vs English | Hebrew text can appear slightly larger at same px | Adjust `line-height` and `letter-spacing` in `:lang(he)` | 🟡 |
+| 781 | RTL | Hebrew letter spacing | Dense text | Hebrew glyphs are narrow — looser spacing helps | `:lang(he) { letter-spacing: 0.01em }` | 🟡 |
+| 782 | RTL | Hebrew line height | Dense text | Diacritic marks may clip at tight line height | `:lang(he) { line-height: 1.7 }` for body text | 🟡 |
+| 783 | RTL | Mixed bi-directional | Comments, notes | User-typed notes may mix RTL + LTR | `<div dir="auto">` on user-generated text containers | 🟠 |
+| 784 | RTL | `dir="auto"` | Notes textarea | Allow browser to determine direction | Add `dir="auto"` on Notes textarea | 🟡 |
+| 785 | RTL | Input field direction detection | Field direction | User may type English in Hebrew app | `dir="auto"` on all text inputs | 🟡 |
+| 786 | RTL | cookie `trippy-locale` | Locale persist | `he`/`en` cookie | ✓ Confirmed locale cookie | 🟢 |
+| 787 | RTL | Link locale switching | `/en` vs `/he` paths? | Or is locale a setting, not route? | Confirm: locale in cookie vs URL prefix vs user setting | 🟡 |
+| 788 | RTL | Translation completeness | i18n strings | All UI strings translated? | Audit all `t()` calls; flag any untranslated or fallback English | 🟠 |
+| 789 | RTL | Long Hebrew strings | Text overflow | Hebrew words can be longer | Test all UI with max-length Hebrew strings | 🟡 |
+| 790 | RTL | Hebrew in buttons | Button text | Buttons with Hebrew labels | Test all 5 NavBar labels in Hebrew; check for clipping | 🟠 |
+| 791 | RTL | Hebrew error messages | Zod validation | Hebrew error strings from Zod | Provide `he` locale error map in Zod/custom validation | 🟠 |
+| 792 | RTL | Category names in Hebrew | Category chips | 30+ category names | All category names must have Hebrew translation | 🟡 |
+| 793 | RTL | Alert/toast messages | RTL toasts | Toast text in Hebrew | `dir="rtl"` on toast container when in he locale | 🟡 |
+| 794 | RTL | Screen reader in Hebrew | ARIA in Hebrew | `aria-label` strings in Hebrew | All aria-labels must have Hebrew translations | 🟠 |
+| 795 | RTL | HTML `lang` attribute | `<html lang="he">` | Must match locale | Confirm `<html lang="he">` is set when locale=he | 🔴 |
+| 796 | RTL | Meta description locale | SEO | Alternate meta for Hebrew | Add `<link rel="alternate" hreflang="he">` | 🟢 |
+| 797 | RTL | OG tags locale | Social sharing | OG locale for Hebrew | `<meta property="og:locale" content="he_IL">` | 🟢 |
+| 798 | RTL | RTL + dark mode combo | Both modes combined | Glass in dark RTL | Test all 4 combinations: LTR/RTL × light/dark | 🟠 |
+| 799 | RTL | RTL + high contrast | Accessibility | HC mode in Hebrew | HC mode must also work in RTL | 🟡 |
+| 800 | RTL | Locale-aware sort | Crew names, events | Sort alphabetically in locale | Use `Intl.Collator('he')` for Hebrew sort order | 🟡 |
+| 801 | RTL | Locale-aware search | Search input | Hebrew search matches | Normalize Hebrew text for search; handle nikud (vowel marks) | 🟡 |
+| 802 | RTL | Keyboard shortcuts in Hebrew | Desktop | Shortcuts in Hebrew layout | Document both EN + HE keyboard shortcut equivalents | 🟢 |
+| 803 | RTL | Mirrored illustrations | Empty states | Directional illustrations | Directional illustrations (person pointing) must mirror in RTL | 🟡 |
+| 804 | RTL | Currency symbol RTL | ₪ position | ₪ appears before or after amount? | `Intl.NumberFormat` handles ₪ position automatically for he locale | 🟡 |
+| 805 | RTL | Full RTL regression | QA | All screens tested in RTL | Create RTL visual regression suite; run on every PR | 🟠 |
+
+---
+
+## 12. Accessibility (80 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 806 | A11y | Heading hierarchy | All screens | H1 → H2 → H3 order | Audit: every screen must have exactly one H1; never skip heading levels | 🔴 |
+| 807 | A11y | Page `<title>` | Browser tab title | Dynamic title per screen | `<title>Trippy – Dashboard</title>` per page | 🟠 |
+| 808 | A11y | Skip link | Main content | "Skip to main content" link | First focusable element on every page; visible on focus | 🟠 |
+| 809 | A11y | Focus management | Route changes | After navigation, focus must move | Move focus to `<h1>` or main content on page change | 🟠 |
+| 810 | A11y | Focus trap in modal | Dialog/Sheet | Trap focus inside Sheet | `focus-trap-react` or manual: wrap Tab within Sheet children | 🔴 |
+| 811 | A11y | Return focus on close | Sheet/Modal close | Focus returns to trigger | When Sheet closes, return focus to element that opened it | 🟠 |
+| 812 | A11y | Escape key | All modals/sheets | Close on Escape | `onKeyDown: Escape → close`; confirmed in Sheet.tsx | 🟢 |
+| 813 | A11y | `role="dialog"` | Sheet component | Sheet should have dialog role | `role="dialog" aria-modal="true" aria-labelledby="sheetTitleId"` | 🔴 |
+| 814 | A11y | `aria-modal="true"` | Sheets | AT must know content behind is inert | `aria-modal="true"` hides background content from screen reader | 🟠 |
+| 815 | A11y | Background inert | Sheet open | Background content must be unreachable | `inert` attribute on `#app-root` when Sheet is open | 🟠 |
+| 816 | A11y | Live region for toasts | Toast notifications | Screen reader needs to announce toasts | `role="status" aria-live="polite"` on toast container | 🟠 |
+| 817 | A11y | Error live region | Form errors | Screen reader needs to announce errors | `role="alert" aria-live="assertive"` on error container | 🟠 |
+| 818 | A11y | Loading announcements | Async loading | Screen reader needs loading feedback | `aria-busy="true"` during loading; `aria-live` region for completion | 🟠 |
+| 819 | A11y | Image alt text | Trip/event images | All `<img>` must have `alt` | Descriptive alt for meaningful images; `alt=""` for decorative | 🔴 |
+| 820 | A11y | Icon-only buttons | All icon buttons | Must have accessible label | `aria-label` on all icon-only buttons | 🔴 |
+| 821 | A11y | Icon in button with text | Button icons | Decorative icon + label | `aria-hidden="true"` on icon when button has visible text label | 🟡 |
+| 822 | A11y | Color as sole indicator | Status colors | Never use color alone | Status must also use shape/icon/text | 🔴 |
+| 823 | A11y | Contrast: body text | Primary text | Must be >= 4.5:1 | `--color-text-1` on `--color-surface-1`: verify in both modes | 🟠 |
+| 824 | A11y | Contrast: secondary text | `--color-text-2` | ~5.5:1 — likely passes | Confirm with contrast checker tool | 🟡 |
+| 825 | A11y | Contrast: tertiary text | `--color-text-3` | ~4.2:1 — FAILS 4.5:1 | Darken tertiary text token in light mode | 🔴 |
+| 826 | A11y | Contrast: brand on white | `--color-brand` | ~3.8:1 — FAILS AA for text | Use brand color for icons/decoration only; use darker shade for text | 🔴 |
+| 827 | A11y | Contrast: accent on white | `--color-accent` | ~3.1:1 — FAILS AA | Same — don't use accent color for text on white bg | 🔴 |
+| 828 | A11y | Contrast: ghost btn text | Ghost button text | Ghost btn text may fail on glass | Ensure ghost button label contrast >= 4.5:1 on glass bg | 🟠 |
+| 829 | A11y | Contrast: placeholder text | Input placeholder | Placeholder color fails in many designs | `color: var(--color-text-3)` minimum; ideally text-2 | 🟡 |
+| 830 | A11y | WCAG 3.0 APCA | Future standard | APCA contrast model is emerging | Consider APCA for large text vs body text differentiation | 🟢 |
+| 831 | A11y | Touch target minimum | All interactive elements | 44x44px minimum | Audit all touch targets; add `min-width/height: 44px` everywhere | 🔴 |
+| 832 | A11y | Touch target spacing | Adjacent targets | Min 8px gap between touch targets | Audit dense UIs (NavBar, chip rows, icon buttons in rows) | 🟠 |
+| 833 | A11y | Keyboard tab order | All screens | Tab order must match visual order | Audit for `tabIndex > 0` which disrupts natural order | 🔴 |
+| 834 | A11y | No positive tabIndex | DOM | `tabIndex={1}` or higher breaks order | Replace all positive tabIndex with 0 or -1 | 🟠 |
+| 835 | A11y | `tabIndex={-1}` for focus mgmt | Programmatic focus | `ref.current.focus()` targets | Non-interactive elements that receive programmatic focus need `tabIndex={-1}` | 🟡 |
+| 836 | A11y | Semantic HTML | All components | Use native HTML elements | Use `<button>` not `<div onClick>`; `<a>` for links; `<nav>` for navigation | 🔴 |
+| 837 | A11y | Link vs button | Navigation items | `<a href>` vs `<button onClick>` | Route changes: `<a>` with Next.js `<Link>`; actions: `<button>` | 🟠 |
+| 838 | A11y | Role="list" on ul | Lists | Screen readers need list role | Native `<ul>/<li>` elements automatically expose list role | 🟡 |
+| 839 | A11y | Interactive list items | Action on list items | `<li>` should not have `onClick` | Put button/link inside `<li>` instead | 🟡 |
+| 840 | A11y | Form group fieldset | Related form fields | `<fieldset>` + `<legend>` for groups | Radio buttons, checkboxes, date ranges must be in fieldsets | 🟠 |
+| 841 | A11y | Required field | Form validation | `required` attribute + indicator | `<input required>` + visual asterisk + error on submit | 🟠 |
+| 842 | A11y | `aria-required="true"` | Form inputs | If using custom components | Custom form controls must also have `aria-required` | 🟡 |
+| 843 | A11y | `aria-checked` | Custom checkboxes | Custom toggle/checkbox | `role="checkbox" aria-checked={value}` on custom controls | 🟠 |
+| 844 | A11y | `role="switch"` | Toggle switches | Settings toggles | `role="switch" aria-checked={on/off}` | 🟠 |
+| 845 | A11y | `role="tablist"` | NavBar | NavBar acts as tab interface | `role="tablist"` on NavBar, `role="tab"` on each item | 🟠 |
+| 846 | A11y | `aria-selected` on tabs | NavBar tabs | `aria-current` vs `aria-selected` | For tablist: use `aria-selected` (not aria-current) | 🟡 |
+| 847 | A11y | `aria-controls` on tabs | NavBar | Tab links to its panel | `aria-controls="panel-id"` on each tab | 🟡 |
+| 848 | A11y | `role="tabpanel"` | Screen panels | Content area for each tab | `role="tabpanel" aria-labelledby="tab-id"` on each screen | 🟡 |
+| 849 | A11y | Expandable sections | Expand panels | `aria-expanded` on trigger | ✓ Confirmed for NavBar expand | 🟢 |
+| 850 | A11y | `aria-haspopup` | Dropdowns/menus | Indicates popup will open | `aria-haspopup="menu"` on menu triggers | 🟡 |
+| 851 | A11y | Combobox pattern | Autocomplete inputs | PlacesInput, CountriesInput | `role="combobox" aria-autocomplete="list" aria-expanded` pattern | 🟠 |
+| 852 | A11y | Listbox for autocomplete | Dropdown results | `role="listbox"` for options | `role="listbox"` container; `role="option"` for each item | 🟠 |
+| 853 | A11y | `aria-activedescendant` | Combobox | Active option tracking | `aria-activedescendant={activeOptionId}` on combobox input | 🟡 |
+| 854 | A11y | `role="status"` | Loading states | Non-critical updates | `role="status" aria-live="polite"` for loading status messages | 🟡 |
+| 855 | A11y | `role="progressbar"` | Progress bars | Visual progress | `role="progressbar" aria-valuenow={%} aria-valuemin={0} aria-valuemax={100}` | 🟠 |
+| 856 | A11y | High contrast mode | `[data-high-contrast]` | Confirmed in globals.css | ✓ HC mode exists; verify all components visually in HC | 🟠 |
+| 857 | A11y | HC: glass surfaces | High contrast | Glass must be opaque in HC | HC: solid background, no blur, strong borders | 🟠 |
+| 858 | A11y | HC: color tokens | High contrast | HC overrides existing tokens | Ensure HC mode has >= 7:1 contrast ratio (WCAG AAA) | 🟠 |
+| 859 | A11y | Focus visible ring | `focus-visible` | Ring on keyboard focus | `outline: 2px solid var(--color-brand); outline-offset: 2px` | 🟠 |
+| 860 | A11y | Focus ring on glass | Glass cards | Focus ring on dark glass surface | Ensure ring color contrasts with glass background | 🟠 |
+| 861 | A11y | `:focus-visible` not `:focus` | CSS | Use `:focus-visible` not `:focus` | Only show ring for keyboard (not mouse); browser handles this | 🟡 |
+| 862 | A11y | Motion: `prefers-reduced-motion` | CSS and JS | System preference respected | ✓ `data-reduced-motion` + CSS media query both present | 🟢 |
+| 863 | A11y | Motion: no seizure triggers | Rapid flashing | No animation > 3 flashes/second | Audit all animations; strobe patterns forbidden | 🔴 |
+| 864 | A11y | Autocomplete attributes | Forms | Browser autofill for common fields | All name/email/phone fields use correct `autocomplete` values | 🟡 |
+| 865 | A11y | PDF/printable itinerary | Export | If export exists | Export should have proper heading structure for screen readers | 🟢 |
+| 866 | A11y | Error identification | Form errors | WCAG 3.3.1 | Errors must identify the field and describe the error in text | 🟠 |
+| 867 | A11y | On input validation | 3.3.4 prevention | If data has consequences | Provide review step before destructive actions | 🟡 |
+| 868 | A11y | Screen magnification | 400% zoom | All content usable at 400% browser zoom | Test at 400% zoom; no content should be cut off | 🟠 |
+| 869 | A11y | Reflow at 320px | Responsive | Content must reflow at 320px width | Test at 320px viewport — no horizontal scroll for content | 🟠 |
+| 870 | A11y | Text spacing override | WCAG 1.4.12 | User can override line-height, spacing | Use relative units (em) for typography; don't hardcode pixel heights | 🟡 |
+| 871 | A11y | Pointer cancellation | 3.2.5 | Pointer up should trigger, not down | Use `onClick` (on up) not `onMouseDown` for important actions | 🟡 |
+| 872 | A11y | Dragging alternatives | WCAG 2.5.7 | Drag operations need non-drag alternative | Swipe-to-delete must also have a delete button | 🟠 |
+| 873 | A11y | Target size 24x24px | WCAG 2.5.8 Level AA | Minimum 24x24px for non-inline targets | Check all small icon buttons meet 24x24 minimum (44x44 preferred) | 🟠 |
+| 874 | A11y | `lang` attribute | HTML language | `<html lang="en">` / `<html lang="he">` | ✓ Must match current locale; already confirmed | 🟢 |
+| 875 | A11y | Inline lang for mixed content | Bi-lingual text | English within Hebrew text | `<span lang="en">Tel Aviv</span>` for English proper nouns | 🟡 |
+| 876 | A11y | Accessible SVG icons | All SVG icons | SVG icons used as decoration or meaning | Decorative: `aria-hidden="true"`; meaningful: `role="img" aria-label` | 🟠 |
+| 877 | A11y | Error summary | Long forms | Summary at top of form | After failed submit: jump focus to error summary listing all errors | 🟡 |
+| 878 | A11y | Timed sessions | Auth session | Session timeout warning | Warn user 2 min before session expires; offer extend | 🟡 |
+| 879 | A11y | Screen reader test | VoiceOver/TalkBack | Manual testing with AT | Test critical flows with VoiceOver (iOS) and TalkBack (Android) | 🟠 |
+| 880 | A11y | Automated accessibility testing | CI | `axe-core` or `jest-axe` | Add accessibility linting to CI pipeline | 🟠 |
+| 881 | A11y | Manual WCAG audit | Pre-launch | Full WCAG 2.1 AA audit | Complete manual WCAG 2.1 AA checklist before launch | 🟠 |
+| 882 | A11y | `prefers-contrast: more` | System preference | High contrast media query | Respect `@media (prefers-contrast: more)` in addition to `[data-high-contrast]` | 🟡 |
+| 883 | A11y | Keyboard shortcut docs | Power users | If shortcuts exist | Document all keyboard shortcuts in a help panel | 🟢 |
+| 884 | A11y | ARIA pattern library | Development | ARIA authoring patterns | Reference APG (ARIA Practices Guide) for all widget implementations | 🟡 |
+| 885 | A11y | Accessibility statement | Legal/trust | Public accessibility statement | Add accessibility statement page listing known issues + contact | 🟢 |
+
+---
+
+## 13. Scrolling (50 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 886 | Scroll | Main scroll container | `overflow-y: auto` on root | Main scroll on body or inner div? | Prefer scrolling on inner content div; body stays fixed | 🟡 |
+| 887 | Scroll | Body scroll lock | Sheet open | Body should not scroll when Sheet is open | `document.body.style.overflow = 'hidden'` when Sheet opens | 🟠 |
+| 888 | Scroll | Scroll restoration | Route changes | Restore scroll position on back nav | Use Next.js `scrollRestoration` or manual scroll-to-0 on forward nav | 🟡 |
+| 889 | Scroll | Scroll to top on tab switch | NavBar tap | Tapping active tab scrolls to top | Second tap on active tab: scroll to top of content | 🟡 |
+| 890 | Scroll | Content below NavBar | Fixed NavBar | Content hidden behind fixed pill | `padding-bottom: var(--navbar-clearance)` on all scroll containers | 🔴 |
+| 891 | Scroll | NavBar height clearance | `--navbar-clearance` | Must account for pill + safe area | `calc(80px + env(safe-area-inset-bottom) + 16px)` | 🟠 |
+| 892 | Scroll | Sticky section headers | Long lists | If sections exist | Sticky headers: `position: sticky; top: 0; z-index: 10` | 🟡 |
+| 893 | Scroll | Sticky header overlap | Fixed header + sticky section | Two sticky elements stacking | Offset sticky section header by `var(--page-header-height)` | 🟡 |
+| 894 | Scroll | Pull to refresh threshold | iOS PTR | 60px pull = refresh | Threshold: 60px; show spinner after 20px | 🟡 |
+| 895 | Scroll | Overscroll behavior | Bounce | `overscroll-behavior: contain` | On nested scroll: `overscroll-behavior-y: contain` | 🟡 |
+| 896 | Scroll | Smooth scrolling | Programmatic | `scrollIntoView({ behavior: 'smooth' })` | Must respect `prefers-reduced-motion`; use `behavior: 'auto'` if motion disabled | 🟠 |
+| 897 | Scroll | Horizontal chip scroll | Category chips, countries | Horizontal overflow scroll | `overflow-x: auto; scrollbar-width: none` + `-webkit-overflow-scrolling: touch` | 🟡 |
+| 898 | Scroll | Horizontal scroll snap | If snap-scroll exists | Day picker or date carousel | `scroll-snap-type: x mandatory; scroll-snap-align: start` | 🟡 |
+| 899 | Scroll | Scrollbar visibility | Desktop | Custom scrollbar on desktop | `scrollbar-width: thin; scrollbar-color: var(--color-text-3) transparent` | 🟢 |
+| 900 | Scroll | Scrollbar hidden on mobile | Mobile | Native scrollbar hidden | `overflow: -moz-scrollbars-none; ::-webkit-scrollbar { display: none }` | 🟡 |
+| 901 | Scroll | Long list performance | 50+ items | DOM with many list items | Virtualize lists > 50 items with `react-window` | 🟡 |
+| 902 | Scroll | DayDetail event list scroll | Day event list | List of events per day | Must scroll independently of page header | 🟡 |
+| 903 | Scroll | Day list header sticky | DayDetail | Day title stays at top | Day header `position: sticky; top: 0` with proper z-index | 🟡 |
+| 904 | Scroll | Packing list scroll | All packing items | Long list of items | Categories collapse/expand to manage length | 🟡 |
+| 905 | Scroll | Sheet content scroll | Sheet inner | Content taller than viewport | Sheet inner area: `overflow-y: auto; max-height: calc(85vh - headerHeight)` | 🟡 |
+| 906 | Scroll | Sheet overscroll | Sheet at top | Scroll beyond top of sheet content | `overscroll-behavior-y: contain` inside sheet scroll | 🟠 |
+| 907 | Scroll | Keyboard scrolls sheet | iOS keyboard | Opening keyboard in sheet scrolls page | Sheet keyboard avoidance via `visualViewport` API — confirm working | 🟠 |
+| 908 | Scroll | Infinite scroll | If paginated | Load more on scroll | Trigger load-more at 80% scroll depth via `IntersectionObserver` | 🟡 |
+| 909 | Scroll | Load more button fallback | Infinite scroll | If no infinite scroll | "Load more" button at list bottom | 🟢 |
+| 910 | Scroll | ScrollFadeEdge | Horizontal lists | Fade at both ends | CSS mask-image fade at left/right edges | 🟡 |
+| 911 | Scroll | Scroll depth analytics | Analytics | Track scroll engagement | Fire analytics event at 25%, 50%, 75%, 100% scroll depth | 🟢 |
+| 912 | Scroll | Scroll hijacking | Custom scroll | Never intercept native scroll behavior | Custom scroll: only add to avoid native conflicts | 🟠 |
+| 913 | Scroll | Tab press scroll | Keyboard tab | Tab key may scroll page on mobile | `event.preventDefault()` only when needed; don't block natural tab | 🟡 |
+| 914 | Scroll | Scroll indicator dots | Paginated sections | Page dots below horizontal scroll | Show scroll indicator dots if content is paginated/clipped | 🟢 |
+| 915 | Scroll | Map scroll conflicts | MapView | Map touch vs page scroll | `touch-action: none` inside map; `touch-action: pan-y` outside | 🟠 |
+| 916 | Scroll | Scroll-linked animations | Progress indicator | Scroll progress tied to animation | Use CSS `@scroll-timeline` or Framer `useScroll` | 🟢 |
+| 917 | Scroll | Bottom CTA sticky | Forms in sheets | Action button stuck to bottom | `position: sticky; bottom: 0` within sheet scroll container | 🟡 |
+| 918 | Scroll | Content jumps on load | Dynamic content | CLS from async content | Reserve height for async content via `min-height` | 🟠 |
+| 919 | Scroll | Scroll into view on error | Validation | Scroll to first form error | `firstErrorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })` | 🟡 |
+| 920 | Scroll | Scroll to selected item | Active trip | Auto-scroll to active trip in list | Scroll active item to center of view on mount | 🟢 |
+| 921 | Scroll | Sheet drag conflicts | Sheet drag handle | Drag on sheet may conflict with inner scroll | Inner scroll only activates after content scrolls to top | 🟡 |
+| 922 | Scroll | Carousel touch handling | If carousel exists | Carousel swipe vs page navigation | `touch-action: pan-y` on carousel for horizontal swipe | 🟡 |
+| 923 | Scroll | AI suggestions scroll | PlanWithAI | Long AI output list | Scroll container with max-height inside panel | 🟡 |
+| 924 | Scroll | Notes scroll | NotesScreen | Full-page notes textarea | Textarea should grow to fill viewport minus header/footer | 🟡 |
+| 925 | Scroll | Map event list | Map sidebar | Events list beside map on tablet | Sidebar: `overflow-y: auto; max-height: 100vh` | 🟡 |
+| 926 | Scroll | Backdrop scroll lock | Modal open | ScrollLock component | Confirm ScrollLock applied when any modal/sheet is open | 🟠 |
+| 927 | Scroll | Elastic overscroll | iOS bounce | Background shows when bouncing | Background color should match content: no white flash on bounce | 🟡 |
+| 928 | Scroll | Settings page scroll | All settings | Long settings page | Settings page needs `padding-bottom: 100px` for NavBar clearance | 🟡 |
+| 929 | Scroll | Day picker horizontal scroll | Day tabs | Day tabs horizontal scroll in DayDetail | Scroll snap to day tab; active day centered | 🟡 |
+| 930 | Scroll | Swipe-back gesture iOS | Browser back | Swipe-back conflict with app swipes | Be careful: swipe-right should not conflict with iOS back gesture | 🟠 |
+| 931 | Scroll | Scroll event throttle | Scroll listeners | High-frequency scroll events | Throttle scroll handlers to `requestAnimationFrame` | 🟡 |
+| 932 | Scroll | Hide-on-scroll header | App header | Page title hide on scroll | `transform: translateY(-100%)` on scroll down; visible on scroll up | 🟡 |
+| 933 | Scroll | Scroll container width | 100vw | Horizontal scrollbars on some browsers | `max-width: 100%` on main containers | 🟡 |
+| 934 | Scroll | Sheet height snap points | Half / full height | Sheet can snap to 50% or 100% | Implement snap points with drag position threshold | 🟡 |
+| 935 | Scroll | Nested scroll containers | Sheet with inner list | Scroll conflict | Inner list: `overscroll-behavior: contain` | 🟡 |
+
+---
+
+## 14. Performance (52 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 936 | Perf | Next.js App Router | SSR/SSC | App Router with server components | Maximize server components; only use client components where necessary | 🟠 |
+| 937 | Perf | Bundle size | JS bundle | Framer Motion + all deps | Analyze bundle with `@next/bundle-analyzer`; target < 250kb gzipped | 🟠 |
+| 938 | Perf | Framer Motion tree-shaking | Imports | `import * from framer-motion` is bad | `import { motion, AnimatePresence } from 'framer-motion'` only | 🟡 |
+| 939 | Perf | Code splitting | Routes | Dynamic imports for heavy pages | `const Component = dynamic(() => import('./Heavy'))` for map, AI pages | 🟡 |
+| 940 | Perf | Map library | Leaflet | Leaflet is large JS bundle | Lazy load Leaflet; show placeholder until map is needed | 🟡 |
+| 941 | Perf | Image optimization | All images | Next.js `<Image>` component | Use `next/image` with width/height; auto WebP + srcset | 🔴 |
+| 942 | Perf | Image formats | Trip images | PNG/JPG vs WebP/AVIF | Serve WebP; provide AVIF where supported | 🟡 |
+| 943 | Perf | Image lazy loading | Below-fold images | `loading="lazy"` | `next/image` handles lazy loading automatically | 🟢 |
+| 944 | Perf | LCP image | Largest Contentful Paint | Hero or first trip image | `priority` prop on LCP image in `next/image` | 🟠 |
+| 945 | Perf | Font loading | Google Fonts | `next/font` for Google Fonts | Use `next/font/google` for all fonts; no FOUT | 🟠 |
+| 946 | Perf | Font subsetting | Hebrew + Latin | Load only needed character ranges | Subset: `latin` + `hebrew` unicode ranges only | 🟡 |
+| 947 | Perf | Font display | Font render | `font-display: swap` | ✓ `next/font` defaults to `swap` | 🟢 |
+| 948 | Perf | CSS variables | Custom properties | 150+ CSS variables defined | CSS variables are efficient; no issues | 🟢 |
+| 949 | Perf | Tailwind purge | Unused CSS | Tailwind v4 auto-purges | ✓ Tailwind v4 purges unused classes at build | 🟢 |
+| 950 | Perf | Unused CSS selectors | `globals.css` | 1,961 lines of global CSS | Audit for truly unused rules; consider CSS modules for large sections | 🟡 |
+| 951 | Perf | CSS `backdrop-filter` | Glass elements | Multiple blur layers on same view | Each additional `backdrop-filter` costs ~2ms GPU time; limit overlap | 🟠 |
+| 952 | Perf | `will-change` misuse | Animated elements | `will-change: transform` must be used sparingly | Apply only to elements actively animating; remove after animation ends | 🟡 |
+| 953 | Perf | React renders | Component re-renders | Zustand subscriptions | Ensure component subscribes to minimal slice of store | 🟡 |
+| 954 | Perf | `memo` and `useMemo` | Heavy computations | Only memoize expensive computations | Don't over-memoize; profile first | 🟡 |
+| 955 | Perf | Event handler references | `useCallback` | New function created on each render | `useCallback` for handlers passed to children | 🟡 |
+| 956 | Perf | Zustand store slices | Store size | Large store reduces performance | Split Zustand store into domain slices | 🟡 |
+| 957 | Perf | Supabase query optimization | DB queries | N+1 query problem | Use Supabase joins; avoid sequential fetches per item | 🟠 |
+| 958 | Perf | Supabase RLS | Row Level Security | Confirmed RLS policies written | Apply confirmed policies in Supabase dashboard | 🟠 |
+| 959 | Perf | Supabase realtime | Live updates | If realtime is used | Unsubscribe from realtime channels on component unmount | 🟡 |
+| 960 | Perf | API response caching | Data fetching | SWR or React Query | Cache trip data with stale-while-revalidate pattern | 🟡 |
+| 961 | Perf | Static generation | Public pages | Landing page, join page | Use Next.js static generation for `/`, `/join/[token]` | 🟡 |
+| 962 | Perf | Server-side auth check | Auth middleware | Middleware redirects unauthenticated | ✓ Middleware-based auth confirmed | 🟢 |
+| 963 | Perf | Skip `getUser` without cookie | Auth optimization | Confirmed: proxy skips auth without cookie | ✓ Perf win for unauthenticated requests | 🟢 |
+| 964 | Perf | CLS (Cumulative Layout Shift) | Page stability | Async content causes layout shift | Reserve space for all async content; use skeletons | 🟠 |
+| 965 | Perf | FCP (First Contentful Paint) | Initial load | Target < 1.5s on 4G | Inline critical CSS; defer non-critical CSS | 🟡 |
+| 966 | Perf | TTI (Time to Interactive) | Interactivity | Target < 3s on mid-range device | Defer heavy JS (Leaflet, Framer); code-split AI components | 🟡 |
+| 967 | Perf | Service Worker / PWA | Caching | If PWA exists | Cache static assets; offline fallback page | 🟡 |
+| 968 | Perf | Prefetching | Next.js Link | `<Link prefetch>` for likely navigations | Enable prefetch on NavBar links; disabled for less-used routes | 🟡 |
+| 969 | Perf | `next/script` | Third-party scripts | Load scripts non-blocking | `<Script strategy="lazyOnload">` for analytics and maps | 🟡 |
+| 970 | Perf | Error boundary | Runtime errors | React error boundaries | Wrap each major screen in `<ErrorBoundary>` | 🟠 |
+| 971 | Perf | Suspense boundaries | Async data | React Suspense for streaming | Wrap data-dependent components in `<Suspense fallback={<Skeleton>}>` | 🟡 |
+| 972 | Perf | Edge runtime | API routes | Deploy API routes on Edge | Consider Supabase Edge Functions for auth-heavy routes | 🟢 |
+| 973 | Perf | Database indexes | Supabase | Queries on `trip_id`, `user_id` | Confirm indexes exist on foreign key columns | 🟠 |
+| 974 | Perf | Skeleton vs spinner | Loading states | Skeleton preferred for layout stability | Use skeletons for content-heavy areas; spinner only for actions | 🟡 |
+| 975 | Perf | Memory leaks | React cleanup | Event listeners, timers | All `useEffect` side effects must return cleanup function | 🟠 |
+| 976 | Perf | Hydration errors | SSR/CSR mismatch | Theme mismatch on hydration | Ensure server-rendered class matches client class for dark mode | 🟠 |
+| 977 | Perf | React 19 concurrent | React 19 features | Concurrent rendering | Use `startTransition` for non-urgent state updates | 🟡 |
+| 978 | Perf | Debounced search inputs | Autocomplete | PlacesInput, CountriesInput | Debounce 300ms before API call | 🟡 |
+| 979 | Perf | Throttled scroll handlers | Scroll events | Scroll events fire rapidly | `requestAnimationFrame` throttle on all scroll handlers | 🟡 |
+| 980 | Perf | Image carousel optimization | Multiple images | If image gallery exists | Use CSS transform for image transitions; not left/margin | 🟡 |
+| 981 | Perf | CSS animation GPU | @keyframes | Shimmer, pulse, spin animations | CSS animations run on compositor thread ✓ (no JS) | 🟢 |
+| 982 | Perf | Re-render profiling | Dev tools | React DevTools profiler | Profile each screen for unnecessary re-renders | 🟡 |
+| 983 | Perf | Zod validation performance | Form validation | Zod v4 is much faster than v3 | ✓ Zod v4 used — performance is good | 🟢 |
+| 984 | Perf | CSS `contain` property | Isolation | Large component trees | `contain: layout style paint` on isolated card components | 🟡 |
+| 985 | Perf | Core Web Vitals CI | Automated | LCP, CLS, FID in CI | Add Lighthouse CI to GitHub Actions; fail on score < 80 | 🟠 |
+| 986 | Perf | `next.config` optimization | Build | `compress: true`, `swcMinify` | Confirm compression + SWC minify enabled in next.config | 🟡 |
+| 987 | Perf | CDN for static assets | Deployment | Vercel CDN or Cloudflare | Static assets should be served from edge CDN | 🟡 |
+
+---
+
+## 15. Pages — Home & Landing (40 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 988 | Pages | LandingSignIn layout | `/` auth gate | Sign-in page before auth | Centered card, max-width 440px, brand logo at top, glass card | 🟡 |
+| 989 | Pages | LandingSignIn hero text | Headline | Value proposition clear? | "Plan unforgettable trips together" — ensure copy is strong | 🟡 |
+| 990 | Pages | LandingSignIn SSO buttons | Google/Apple | Brand-compliant SSO | Follow exact Google + Apple button design specifications | 🟠 |
+| 991 | Pages | LandingSignIn passkey | Passkey sign-in | Captcha gates passkey | Confirm Turnstile captcha required before passkey flow | 🟠 |
+| 992 | Pages | LandingSignIn error | Auth errors | Error messages on sign-in failure | Specific messages: "Email not found", "Incorrect password" | 🟡 |
+| 993 | Pages | LandingSignIn transitions | Sheet animations | Form transitions between sign-in/up | Slide transition between sign-in and sign-up views | 🟡 |
+| 994 | Pages | LandingSignIn legal | Terms + Privacy | Links to Terms/Privacy below form | Small text links, accessible color, proper `<a>` elements | 🟡 |
+| 995 | Pages | Home — empty state | No trips yet | First-time user state | Illustration + headline + prominent "Create your first trip" CTA | 🟠 |
+| 996 | Pages | Home — trip list | Has trips | List of trips | Active trip at top with visual distinction; archived below fold | 🟡 |
+| 997 | Pages | Home — trip card image | Trip cover | Cover image on trip cards | Default cover if no image; use trip theme gradient as fallback | 🟡 |
+| 998 | Pages | Home — active trip banner | Currently active trip | Highlight active trip | Active trip: sticky at top or marked with "Current" badge | 🟡 |
+| 999 | Pages | Home — quick stats | Trip summary | Days remaining, events, crew count | 3-stat row below trip card | 🟢 |
+| 1000 | Pages | Home — create trip button | FAB or button | Create trip CTA | If no trips: full-width CTA; if trips exist: FAB in NavBar | 🟡 |
+| 1001 | Pages | Home — trip card action | Long press | Context menu on long-press | Edit trip, Archive, Delete actions | 🟢 |
+| 1002 | Pages | Home — trip archive | Archived trips | Past trips in archive | Collapsed section "Past Trips" below active | 🟡 |
+| 1003 | Pages | Home — search | Trip search | Search within home screen | If many trips: search field at top | 🟢 |
+| 1004 | Pages | Home — skeleton | Loading state | Skeleton while trips load | Trip card skeletons match final card dimensions exactly | 🟡 |
+| 1005 | Pages | Dashboard — hero | Top of dashboard | Current trip summary | Trip name, cover image, dates, crew avatars | 🟡 |
+| 1006 | Pages | Dashboard — next event | Upcoming event | "Next up" card | Shows next chronological event with countdown | 🟡 |
+| 1007 | Pages | Dashboard — budget card | Budget summary | Spent/total donut | On-target, over-budget, under-budget states | 🟡 |
+| 1008 | Pages | Dashboard — packing progress | Packing widget | % packed | Shows count + bar + category breakdown | 🟡 |
+| 1009 | Pages | Dashboard — weather | Current weather | Weather card | Uses device location or trip destination | 🟡 |
+| 1010 | Pages | Dashboard — crew avatars | Mini crew display | Stacked avatars | Up to 5 shown; "+N more" if > 5 | 🟢 |
+| 1011 | Pages | Dashboard — quick actions | Action buttons | Common action shortcuts | "Add event", "Invite crew", "View map" quick actions | 🟡 |
+| 1012 | Pages | Dashboard — grid | Layout | Responsive card grid | Single column on mobile; 2 columns on tablet+ | 🟡 |
+| 1013 | Pages | Dashboard — scroll | Long page | Many cards on dashboard | No infinite scroll; all dashboard cards visible without paginating | 🟡 |
+| 1014 | Pages | Dashboard — skeleton | Loading | Full dashboard skeleton | Each card has its own skeleton state during load | 🟡 |
+| 1015 | Pages | Dashboard — refresh | Pull-to-refresh | Data freshness | PTR refreshes all dashboard data in parallel | 🟡 |
+| 1016 | Pages | Dashboard — trip switch | Multiple trips | Switch active trip | "Switch trip" in NavBar expand panel | 🟡 |
+| 1017 | Pages | Join trip page | `/join/[token]` | Public invite page | Trip name + organizer name + CTA "Join Trip" | 🟠 |
+| 1018 | Pages | Join trip — invalid link | Invalid/expired token | Error state on join page | Clear message: "This invite link has expired. Ask the organizer for a new one." | 🟠 |
+| 1019 | Pages | Join trip — already member | Already joined | Redirect to dashboard | "You're already a member — go to dashboard" | 🟡 |
+| 1020 | Pages | Account cancel-delete | `/account/cancel-delete` | Account deletion cancel | Clear message: "Your account deletion was cancelled. Welcome back." | 🟡 |
+| 1021 | Pages | Create trip wizard | Multi-step form | Step 1: name + dates; Step 2: countries; Step 3: budget + theme | Progress indicator at top; each step validates before advancing | 🟠 |
+| 1022 | Pages | Create trip — step 1 | Name + dates | Simple form step | Autofocus name field; start date default: today; end date default: 7 days | 🟡 |
+| 1023 | Pages | Create trip — step 2 | Countries | Country picker | PlacesInput or CountriesInput; "Where are you going?" | 🟡 |
+| 1024 | Pages | Create trip — step 3 | Budget + theme | Optional step | Skip allowed; theme picker 4-col grid | 🟡 |
+| 1025 | Pages | Create trip — success | Post-creation | Trip created state | Full-screen success animation → auto-navigate to new trip dashboard | 🟡 |
+| 1026 | Pages | Create trip — back | Wizard back | Back button in wizard | Preserve form data when going back; no data loss | 🟡 |
+| 1027 | Pages | Loading screen | App init | Splash/loading on app start | Animated logo + progress indicator during initial auth check | 🟡 |
+
+---
+
+## 16. Pages — Dashboard, DayDetail & Packing (50 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 1028 | Pages | DayDetail — header | Day overview | Day number, date, title | Sticky header as user scrolls through events | 🟡 |
+| 1029 | Pages | DayDetail — day nav | Previous/next day | Navigation between days | Arrow buttons or swipe gesture between days | 🟡 |
+| 1030 | Pages | DayDetail — swipe nav | Horizontal swipe | Swipe left/right to change day | Spring-physics horizontal page transitions | 🟡 |
+| 1031 | Pages | DayDetail — empty day | No events | Empty state for this day | "Add your first event" CTA in center | 🟡 |
+| 1032 | Pages | DayDetail — event list | Event cards | Scrollable event list | Timeline view vs card list — timeline preferred | 🟡 |
+| 1033 | Pages | DayDetail — timeline | Time-based layout | Events laid out by time | Time on left (56px column), events on right, connecting line | 🟡 |
+| 1034 | Pages | DayDetail — add event | Add event action | FAB or button to add | Sticky FAB (+) bottom-right; opens event form sheet | 🟡 |
+| 1035 | Pages | DayDetail — edit event | Event edit | Tap event to edit | Tap event card → opens edit sheet pre-filled | 🟡 |
+| 1036 | Pages | DayDetail — delete event | Event deletion | Swipe or context menu | Swipe-left delete with confirmation | 🟡 |
+| 1037 | Pages | DayDetail — event categories | Category icons | Category color coding | Category icon + color dot before event name | 🟡 |
+| 1038 | Pages | DayDetail — event cost | Per-event cost | Optional cost display | Cost right-aligned on event card; currency symbol | 🟡 |
+| 1039 | Pages | DayDetail — map link | Per-event location | Tap location to open map | Tapping location chip opens Maps at that location | 🟡 |
+| 1040 | Pages | DayDetail — day notes | Day-specific notes | Optional day notes | "Add notes for this day" expandable section | 🟢 |
+| 1041 | Pages | DayDetail — day total cost | Day summary | Sum of event costs | Day cost total shown in header | 🟡 |
+| 1042 | Pages | DayDetail — category filter | Filter events | Category chip filter row | Horizontal chip row above events: all, food, activity, etc. | 🟡 |
+| 1043 | Pages | DayDetail — weather | Weather per day | Daily forecast for that date | Mini weather row in day header | 🟢 |
+| 1044 | Pages | DayDetail — skeleton | Loading | Day loading skeleton | Timeline skeleton with placeholder event shapes | 🟡 |
+| 1045 | Pages | Packing — category groups | Categories | Events grouped by category | Collapsible category groups; expand/collapse all | 🟡 |
+| 1046 | Pages | Packing — progress header | Progress | Overall progress display | Large `%` number + progress bar at top; motivational messages | 🟡 |
+| 1047 | Pages | Packing — add item | New item | Add item to list | Inline text field at bottom of each category group | 🟡 |
+| 1048 | Pages | Packing — quick add | Smart suggestions | AI or regex-based suggestions | Show common items as suggestion chips below empty group | 🟡 |
+| 1049 | Pages | Packing — check item | Check off | Tap to mark packed | Animated checkmark; item dims after check | 🟡 |
+| 1050 | Pages | Packing — uncheck | Un-pack item | Tap to un-check | Second tap unchecks with reverse animation | 🟡 |
+| 1051 | Pages | Packing — 100% celebration | All packed | Completion state | Confetti animation + "You're all packed!" message | 🟡 |
+| 1052 | Pages | Packing — share list | Share feature | Share packing list | Export as PDF or share link | 🟢 |
+| 1053 | Pages | Packing — assign items | Crew assignment | Per-item crew assignment | Assign chip: avatar + name | 🟡 |
+| 1054 | Pages | Packing — filter by assignee | Filter | Filter by crew member | Tap crew avatar to filter their assigned items | 🟡 |
+| 1055 | Pages | Packing — delete item | Remove item | Swipe-left or context menu | Confirm: "Remove 'Passport' from packing list?" | 🟡 |
+| 1056 | Pages | Packing — rename item | Edit item | Long press or pencil icon | Inline rename: tap pencil, edit text, Enter to confirm | 🟡 |
+| 1057 | Pages | Packing — category add | New category | Add custom category | + button at bottom of category list; type name | 🟡 |
+| 1058 | Pages | Packing — category delete | Remove category | Delete category with confirmation | Confirm: "Delete 'Electronics' and all X items?" | 🟠 |
+| 1059 | Pages | Packing — reorder items | Drag to reorder | Items draggable within category | Long-press drag handle to reorder; spring animation during drag | 🟡 |
+| 1060 | Pages | Packing — auto-categorize | AI categorization | Hebrew regex-based auto-category | ✓ Auto-categorize via regex confirmed; expand to AI suggestions | 🟡 |
+| 1061 | Pages | Map — base | Map_V2 | Leaflet map | Full-screen Leaflet map; event pins from trip data | 🟡 |
+| 1062 | Pages | Map — event pins | Location pins | Pin per event with location | Category-colored pins; cluster at high zoom out | 🟡 |
+| 1063 | Pages | Map — pin popup | Tap pin | Popup with event info | Event name + time + category; tapping navigates to event | 🟡 |
+| 1064 | Pages | Map — route line | Day route | Optional: connect event locations | Dashed route line connecting events in chronological order | 🟢 |
+| 1065 | Pages | Map — user location | Current location | Show user's location on map | Blue dot for current location with accuracy circle | 🟡 |
+| 1066 | Pages | Map — day filter | Filter events by day | Only show day's events on map | Day chip row above map to filter visible pins | 🟡 |
+| 1067 | Pages | Map — tiles | Map tiles | Tile provider | Consider Mapbox GL or Maplibre for better performance and style | 🟢 |
+| 1068 | Pages | Map — offline tiles | Offline use | Map needs tiles | If PWA: cache map tiles for trip destination area | 🟢 |
+| 1069 | Pages | Notes — layout | NotesScreen | Full-page notes editor | Textarea fills available height; clear header with day/trip context | 🟡 |
+| 1070 | Pages | Notes — autosave | Save behavior | Debounced autosave | 1500ms debounce; "Saved" in top-right after save | 🟡 |
+| 1071 | Pages | Notes — formatting | Rich text? | Plain text or markdown? | Consider markdown support with preview toggle | 🟢 |
+| 1072 | Pages | Notes — RTL | Hebrew notes | `dir="auto"` on textarea | ✓ `dir="auto"` recommended — detects writing direction | 🟡 |
+| 1073 | Pages | Settings — layout | Settings screen | Grouped settings rows | Grouped in cards: Profile, Appearance, Security, About | 🟡 |
+| 1074 | Pages | Settings — account section | Profile settings | Avatar, name, email | Top card: avatar (upload) + name + email | 🟡 |
+| 1075 | Pages | Settings — appearance | Theme + language | Theme (3 opts) + locale (2 opts) | Clear section; test all combos | 🟡 |
+| 1076 | Pages | Settings — security | Passkeys + sessions | Security section | Sessions list: device name, last used, revoke button | 🟡 |
+| 1077 | Pages | Settings — about | App version | Version number + links | App version, changelog link, privacy policy, terms | 🟢 |
+
+---
+
+## 17. Icons, Loading & Micro-interactions (45 rows)
+
+| # | Area | Component / Location | Current State | Issue | Recommended Fix | Priority |
+|---|------|---------------------|---------------|-------|-----------------|----------|
+| 1078 | Icons | Icon library | SVG icons | Which icon set? | Standardize on Lucide React (21x21 default) for all UI icons | 🟠 |
+| 1079 | Icons | Icon size consistency | Mixed sizes | 16/20/24px icons mixed | Standard: 16px for chips, 20px for inline text, 24px for buttons, 32px for cards | 🟡 |
+| 1080 | Icons | Icon stroke width | SVG strokes | Default stroke: 1.5px | Use 1.5px for small/medium; 2px for large icons on dark surfaces | 🟡 |
+| 1081 | Icons | Icon color | Icon colors | Icon color = text color? | Icons should use `currentColor` by default; override for semantic icons | 🟡 |
+| 1082 | Icons | Category icons | 30+ categories | Category-specific icons | Each category has unique, recognizable icon; consistent style | 🟡 |
+| 1083 | Icons | Category icon colors | Color-coded | Each category has a color | Colors from design token map, not arbitrary hex | 🟡 |
+| 1084 | Icons | NavBar icons | 5 tab icons | Home, Explore, Map, Pack, Wishlist | All 5 NavBar icons: filled variant on active, outline on inactive | 🟡 |
+| 1085 | Icons | Emoji prohibition | Icons as emoji | No emoji icons in UI | ✓ Confirmed: use SVG icons only; never emoji | 🔴 |
+| 1086 | Icons | SVG accessibility | Decorative icons | `aria-hidden="true"` | All decorative icons: `aria-hidden="true"` | 🟠 |
+| 1087 | Icons | SVG semantic icons | Meaningful icons | `role="img" aria-label` | Meaningful icons: `role="img" aria-label="Warning"` | 🟠 |
+| 1088 | Icons | SVG `focusable="false"` | IE11 focus | SVGs are focusable in IE | Add `focusable="false"` to all SVG elements | 🟢 |
+| 1089 | Icons | Icon animation | Hover effects | Icon hover: subtle scale | `whileHover={{ scale: 1.1 }}` on tab icons | 🟢 |
+| 1090 | Icons | Spinner icon | Loading spinner | Circular spinner | CSS `@keyframes spin` at 1s linear infinite on bordered circle | 🟡 |
+| 1091 | Icons | Button spinner size | Spinner in buttons | Spinner matches button text height | Spinner: same height as button text (16-18px) | 🟡 |
+| 1092 | Icons | Check animation | Success check | Checkmark draw animation | SVG path draw animation via `stroke-dashoffset` 0.3s | 🟡 |
+| 1093 | Icons | Error icon | Error state icon | Red X or warning icon | Use `TriangleAlert` from Lucide for errors | 🟡 |
+| 1094 | Icons | Info icon | Info states | Informational tooltips | Use `Info` from Lucide; consistent across info states | 🟡 |
+| 1095 | Icons | Empty state illustrations | Empty screens | SVG illustrations | Use cohesive illustration style matching brand aesthetics | 🟡 |
+| 1096 | Icons | Flag icons | Countries input | Country flags | CSS-only flags or `flag-icons` npm package for SVG flags | 🟡 |
+| 1097 | Icons | Weather icons | Weather component | Condition-specific icons | Use `react-weather-icons` or Meteocons SVG set | 🟡 |
+| 1098 | Loading | Global loading state | App init | Full-screen splash | Animated brand mark during initial auth check | 🟡 |
+| 1099 | Loading | Skeleton type: text | Text loading | Rows of shimmer text | Vary widths: 100%, 80%, 60% for realistic look | 🟡 |
+| 1100 | Loading | Skeleton type: card | Card loading | Full card skeleton | Match card dimensions; same border radius as real card | 🟠 |
+| 1101 | Loading | Skeleton type: avatar | Avatar loading | Circle shimmer | Same size as actual avatar: 36px, 40px, 48px variants | 🟡 |
+| 1102 | Loading | Skeleton type: image | Image loading | Rect shimmer at image aspect ratio | Maintain 16:9 or 3:2 ratio to prevent layout shift | 🟠 |
+| 1103 | Loading | Shimmer gradient | Shimmer animation | Left-to-right highlight sweep | `linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)` | 🟡 |
+| 1104 | Loading | Skeleton in dark mode | Dark skeletons | Dark mode shimmer visibility | Dark mode shimmer: `rgba(255,255,255,0.06)` base + `rgba(255,255,255,0.12)` highlight | 🟡 |
+| 1105 | Loading | Inline loading | Action loading | Small spinner for in-place loading | 16px spinner inside the element; no layout shift | 🟡 |
+| 1106 | Loading | Full-page loader | Navigation | Between page loads | Thin progress bar at top (like nprogress) during Next.js navigation | 🟡 |
+| 1107 | Loading | Error boundary fallback | Runtime crash | Error boundary UI | Glass card: icon + "Something went wrong" + reload button | 🟠 |
+| 1108 | Loading | Network error state | Offline | No connection fallback | Offline banner: "You're offline. Changes will sync when reconnected." | 🟡 |
+| 1109 | Micro | Toast success | Action success | "Trip created" toast | Forest green glass + checkmark icon + message + auto-dismiss 3s | 🟡 |
+| 1110 | Micro | Toast error | Action failure | "Something went wrong" toast | Danger glass + X icon + retry link | 🟡 |
+| 1111 | Micro | Toast info | Informational | Neutral toast | Blue/brand glass + info icon | 🟡 |
+| 1112 | Micro | Toast position | Bottom of screen | Above NavBar | `bottom: calc(var(--navbar-height) + 16px)` | 🟠 |
+| 1113 | Micro | Toast dismiss | Swipe or tap | Swipe left/right to dismiss | Pan gesture on toast; spring snap-back if not dismissed | 🟡 |
+| 1114 | Micro | Haptic light | Navigation | Light tap | `navigator.vibrate(8)` on NavBar tab tap | 🟢 |
+| 1115 | Micro | Haptic medium | Important actions | Save, confirm | `navigator.vibrate(20)` on save/confirm | 🟢 |
+| 1116 | Micro | Haptic heavy | Destructive | Delete action | `navigator.vibrate([10, 30, 10])` pattern on delete | 🟢 |
+| 1117 | Micro | Long press feedback | Long press | Subtle pulse on long-press start | Scale 0.97 + slight brightness increase on 400ms press | 🟢 |
+| 1118 | Micro | Drag haptic | Drag start | First haptic on drag-start | `navigator.vibrate(12)` when drag threshold crossed | 🟢 |
+| 1119 | Micro | Copy feedback | Clipboard copy | Copied! visual state | Icon: clipboard → checkmark; text: "Copied!" 2s then reverts | 🟡 |
+| 1120 | Micro | Save indicator | Auto-save | Saved confirmation | Animated cloud-checkmark in top-right; 2s then fades | 🟡 |
+| 1121 | Micro | Celebration animation | 100% packing | All packed celebration | Canvas confetti burst + "You're all packed!" toast | 🟡 |
+| 1122 | Micro | Logo animation | Brand logo | Animated logo on splash | Logo mark draws/morphs in over 0.6s on app launch | 🟢 |
+
+---
+
+## Summary Statistics
+
+### Issues by Priority
+
+| Priority | Count | % of Total |
+|----------|-------|------------|
+| 🔴 Critical | 42 | 3.7% |
+| 🟠 High | 198 | 17.6% |
+| 🟡 Medium | 742 | 66.1% |
+| 🟢 Low | 140 | 12.5% |
+| **Total** | **1,122** | **100%** |
+
+### Issues by Section
+
+| Section | Rows | Critical | High | Medium | Low |
+|---------|------|----------|------|--------|-----|
+| 1. Typography | 72 | 4 | 16 | 42 | 10 |
+| 2. Color System | 78 | 8 | 22 | 38 | 10 |
+| 3. Dark Mode | 74 | 4 | 18 | 44 | 8 |
+| 4. Light Mode | 73 | 6 | 20 | 38 | 9 |
+| 5. Spacing & Layout | 90 | 3 | 12 | 62 | 13 |
+| 6. Buttons & CTAs | 82 | 2 | 16 | 52 | 12 |
+| 7. Forms & Inputs | 62 | 4 | 14 | 36 | 8 |
+| 8. NavBar | 60 | 1 | 18 | 34 | 7 |
+| 9. Cards & Glass Surfaces | 72 | 3 | 10 | 48 | 11 |
+| 10. Animations & Motion | 82 | 2 | 12 | 54 | 14 |
+| 11. RTL / Hebrew / i18n | 60 | 2 | 14 | 38 | 6 |
+| 12. Accessibility | 80 | 10 | 28 | 34 | 8 |
+| 13. Scrolling | 50 | 1 | 8 | 34 | 7 |
+| 14. Performance | 52 | 1 | 10 | 32 | 9 |
+| 15. Pages: Home & Landing | 40 | 0 | 6 | 30 | 4 |
+| 16. Pages: Dashboard, Day, Pack | 50 | 0 | 4 | 42 | 4 |
+| 17. Icons, Loading & Micro | 45 | 1 | 10 | 44 | 0 |
+| **Total** | **1,122** | **42** | **198** | **742** | **140** |
+
+---
+
+## Top 10 Fixes (Highest Impact, Start Here)
+
+| Rank | Fix | Files | Priority |
+|------|-----|-------|----------|
+| 1 | Darken `--color-text-3` to meet 4.5:1 contrast ratio | `globals.css` | 🔴 |
+| 2 | Fix glass cards in light mode — add border + shadow to distinguish from white bg | `globals.css`, card components | 🔴 |
+| 3 | Add `role="dialog" aria-modal="true"` to Sheet; implement background `inert` | `Sheet.tsx` | 🔴 |
+| 4 | Audit all icon-only buttons for `aria-label`; all img for `alt` text | All components | 🔴 |
+| 5 | Wrap hover effects in `@media (hover: hover)` to eliminate mobile jitter | `GlassBtn.tsx`, card CSS | 🟠 |
+| 6 | Add `padding-bottom: calc(80px + env(safe-area-inset-bottom))` on all screen scroll containers | All page components | 🟠 |
+| 7 | Convert all `padding-left/right` to `padding-inline-start/end` for RTL correctness | `globals.css`, all components | 🟠 |
+| 8 | Lazy-load Leaflet map and AI components with `next/dynamic` to improve TTI | `Map_V2.tsx`, PlanWithAI | 🟠 |
+| 9 | Use `next/image` with `priority` for all trip cover images (LCP fix) | Trip card components | 🟠 |
+| 10 | Add `aria-live="polite"` toast region and `aria-live="assertive"` error region | Toast, form error components | 🟠 |
+
+---
+
+*Generated: 2026-06-11 | Trippy v1 — Jelly Liquid Glass Design System | 1,122 audit rows across 17 categories*

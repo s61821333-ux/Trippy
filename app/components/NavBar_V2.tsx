@@ -99,8 +99,8 @@ export default function NavBar_V2({
         position: 'fixed',
         left: 0,
         right: 0,
-        bottom: 'env(safe-area-inset-bottom, 0px)',
-        paddingBottom: 12,
+        bottom: 0, /* start from true bottom edge */
+        paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))', /* clear home indicator */
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -109,6 +109,7 @@ export default function NavBar_V2({
         pointerEvents: 'none',
         transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',
+        willChange: 'transform',
       }}
     >
       {/* ── Expand panel ─────────────────────────────────────── */}
@@ -222,6 +223,7 @@ export default function NavBar_V2({
         <m.nav
           role="navigation"
           aria-label={t('navMain')}
+          aria-labelledby={undefined}
           initial={{ y: 12 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.06 }}
@@ -261,6 +263,7 @@ export default function NavBar_V2({
             return (
               <m.button
                 key={tab.id}
+                role="tab"
                 onClick={() => {
                   if (tab.kind === 'action') {
                     onWishlist?.();
@@ -272,6 +275,7 @@ export default function NavBar_V2({
                 transition={ICON_SPRING}
                 aria-label={t(tab.ariaKey)}
                 aria-current={isActive ? 'page' : undefined}
+                aria-selected={isActive}
                 style={{
                   position: 'relative',
                   zIndex: 1,
@@ -324,6 +328,7 @@ export default function NavBar_V2({
             whileTap={{ scale: 0.92 }}
             className="lg lg-strong"
             aria-label={isHe ? 'הצעות AI' : 'AI suggestions'}
+            aria-haspopup="dialog"
             style={{
               width: 52, height: 52,
               borderRadius: 9999,
@@ -364,7 +369,8 @@ export default function NavBar_V2({
             transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.12 }}
             whileTap={{ scale: 0.92 }}
             className="lg-btn lg-btn-forest"
-            aria-label="Add"
+            aria-label={isHe ? 'הוסף פעילות' : 'Add event'}
+            aria-haspopup="dialog"
             style={{
               width: 52,
               height: 52,

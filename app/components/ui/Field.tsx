@@ -1,6 +1,6 @@
 'use client';
 
-import React, { CSSProperties, ReactNode, useState } from 'react';
+import React, { CSSProperties, ReactNode, useId, useState } from 'react';
 
 interface FieldProps {
   label?: string;
@@ -18,16 +18,33 @@ interface FieldProps {
   rows?: number;
   style?: CSSProperties;
   disabled?: boolean;
+  required?: boolean;
+  maxLength?: number;
+  id?: string;
+  name?: string;
+  inputMode?: React.InputHTMLAttributes<HTMLInputElement>['inputMode'];
+  enterKeyHint?: React.InputHTMLAttributes<HTMLInputElement>['enterKeyHint'];
 }
 
 export default function Field({
   label, hint, error, type = 'text', placeholder, value, onChange, onKeyDown,
-  icon, autoFocus, autoComplete, min, rows, style = {}, disabled,
+  icon, autoFocus, autoComplete, min, rows, style = {}, disabled, required,
+  maxLength, id: idProp, name, inputMode: inputModeProp, enterKeyHint,
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
+  const generatedId = useId();
+  const id = idProp ?? generatedId;
+  const errorId = `${id}-error`;
+  const hintId  = `${id}-hint`;
+
+  const inputMode: React.InputHTMLAttributes<HTMLInputElement>['inputMode'] =
+    inputModeProp ??
+    (type === 'number' ? 'decimal'
+    : type === 'tel'   ? 'tel'
+    : type === 'email' ? 'email'
+    : undefined);
 
   const baseStyle: CSSProperties = {
-    // 2027 glass input surface
     background: focused ? 'var(--field-bg-focused)' : 'var(--field-bg)',
     backdropFilter: 'blur(20px) saturate(1.8)',
     WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
@@ -35,12 +52,12 @@ export default function Field({
     borderRadius: 14,
     color: 'var(--text)',
     fontFamily: 'var(--font-sans)',
-    fontSize: 16,                   // never below 16px — prevents iOS auto-zoom
+    fontSize: 16, // never below 16px — prevents iOS auto-zoom
     padding: '11px 18px',
-    paddingLeft: icon ? 46 : 18,
+    paddingInlineStart: icon ? 46 : 18,
     width: '100%',
     outline: 'none',
-    minHeight: 44,                  // WCAG 2.5.5 touch target
+    minHeight: 44,
     boxSizing: 'border-box' as const,
     transition: 'background 0.2s ease, box-shadow 0.2s ease',
     boxShadow: error
@@ -52,42 +69,58 @@ export default function Field({
     ...style,
   };
 
+  const describedBy = [error ? errorId : null, hint ? hintId : null].filter(Boolean).join(' ') || undefined;
+
   const sharedProps = {
+    id,
+    name,
     onFocus: () => setFocused(true),
     onBlur:  () => setFocused(false),
     disabled,
+    'aria-invalid': error ? true : undefined,
+    'aria-describedby': describedBy,
+    'aria-required': required,
     style: baseStyle,
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {label && (
-        <label style={{
-          display: 'block',
-          fontFamily: 'var(--font-mono)',
-          fontSize: 10,
-          fontWeight: 600,
-          letterSpacing: '0.10em',
-          textTransform: 'uppercase' as const,
-          color: focused ? 'var(--brand)' : 'var(--field-label)',
-          transition: 'color 0.2s ease',
-        }}>
+        <label
+          htmlFor={id}
+          style={{
+            display: 'block',
+            fontFamily: 'var(--font-sans)', /* changed from mono to sans — less technical feel */
+            fontSize: 11,
+            fontWeight: 600,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase' as const,
+            color: focused ? 'var(--brand)' : 'var(--text-2)',
+            transition: 'color 0.2s ease',
+          }}
+        >
           {label}
+          {required && (
+            <span aria-hidden="true" style={{ color: 'var(--danger)', marginInlineStart: 3 }}>*</span>
+          )}
         </label>
       )}
 
       <div style={{ position: 'relative' }}>
         {icon && (
-          <span style={{
-            position: 'absolute',
-            insetInlineStart: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            color: focused ? 'var(--brand)' : 'var(--field-icon)',
-            display: 'flex',
-            pointerEvents: 'none',
-            transition: 'color 0.2s ease',
-          }}>
+          <span
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              insetInlineStart: 16,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: focused ? 'var(--brand)' : 'var(--field-icon)',
+              display: 'flex',
+              pointerEvents: 'none',
+              transition: 'color 0.2s ease',
+            }}
+          >
             {icon}
           </span>
         )}
@@ -98,12 +131,14 @@ export default function Field({
             placeholder={placeholder}
             value={value}
             onChange={e => onChange(e.target.value)}
+            maxLength={maxLength}
+            dir="auto"
             {...sharedProps}
-            style={{ ...baseStyle, resize: 'none', paddingLeft: 18, borderRadius: 16 }}
+            style={{ ...baseStyle, resize: 'none', paddingInlineStart: 18, borderRadius: 16 }}
           />
         ) : (
           <input
-            type={type}
+            type={type === 'number' ? 'text' : type} /* use text + inputMode for better mobile UX */
             placeholder={placeholder}
             value={value}
             onChange={e => onChange(e.target.value)}
@@ -111,24 +146,41 @@ export default function Field({
             autoFocus={autoFocus}
             autoComplete={autoComplete}
             min={min}
-            inputMode={
-              type === 'number' || type === 'tel' ? 'numeric'
-              : type === 'email' ? 'email'
-              : undefined
-            }
+            maxLength={maxLength}
+            inputMode={inputMode}
+            enterKeyHint={enterKeyHint}
             {...sharedProps}
           />
         )}
       </div>
 
-      {(hint || error) && (
-        <p style={{
-          fontSize: 12,
-          color: error ? 'var(--danger)' : 'var(--text-3)',
-          margin: 0,
-          paddingInlineStart: 4,
-        }}>
-          {error ?? hint}
+      {error && (
+        <p
+          id={errorId}
+          role="alert"
+          aria-live="assertive"
+          style={{
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            color: 'var(--danger)',
+            margin: 0,
+            paddingInlineStart: 4,
+          }}
+        >
+          {error}
+        </p>
+      )}
+      {!error && hint && (
+        <p
+          id={hintId}
+          style={{
+            fontSize: '0.8125rem',
+            color: 'var(--text-3)',
+            margin: 0,
+            paddingInlineStart: 4,
+          }}
+        >
+          {hint}
         </p>
       )}
     </div>

@@ -5,9 +5,9 @@
 /* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
   /* ── V2 Jelly Liquid Glass surfaces — pure white translucent ── */
-  --surface:        rgba(255, 255, 255, 0.45);
-  --surface-strong: rgba(255, 255, 255, 0.65);
-  --nav-surface:    rgba(255, 255, 255, 0.65);
+  --surface:        rgba(255, 255, 255, 0.72); /* increased from 0.45 — light-mode glass must be distinguishable from bg */
+  --surface-strong: rgba(255, 255, 255, 0.88);
+  --nav-surface:    rgba(255, 255, 255, 0.82);
 
   /* Glass blur */
   --glass-blur: blur(40px) saturate(1.2);
@@ -21,9 +21,9 @@
   --bg-warm:       oklch(96% 0.012 75);
   --surface-warm:  oklch(98% 0.010 75);
 
-  /* Borders */
-  --border:        oklch(89% 0.010 75);
-  --border-strong: oklch(80% 0.014 75);
+  /* Borders — stronger definition in light mode */
+  --border:        oklch(83% 0.012 75); /* darkened from 89% for better light-mode visibility */
+  --border-strong: oklch(74% 0.016 75); /* darkened from 80% for card edges + inputs */
 
   /* Brand — deep forest green (oklch perceptual) */
   --brand:              oklch(42% 0.092 155);
@@ -47,7 +47,7 @@
   --text:          oklch(13% 0.012 55);
   --text-1:        oklch(13% 0.012 55);
   --text-2:        oklch(40% 0.020 55);
-  --text-3:        oklch(60% 0.014 55);
+  --text-3:        oklch(54% 0.014 55); /* darkened from 60% → 54% to meet 4.5:1 WCAG AA */
   --text-inv:      oklch(98% 0.002 80);
   --text-inverse:  oklch(98% 0.002 80);
 
@@ -138,12 +138,14 @@
   /* Page layout */
   --page-px: 24px;
   --page-pt: 20px;
-  --nav-h:   68px;
+  --nav-h:        68px;
+  --navbar-height: 80px; /* pill height + insets — used for clearance calculations */
   --safe-left:   env(safe-area-inset-left, 0px);
   --safe-right:  env(safe-area-inset-right, 0px);
   --safe-top:    env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --nav-total-h: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 12px);
+  --navbar-clearance: calc(var(--navbar-height) + env(safe-area-inset-bottom, 0px) + 16px);
 
   /* ── Type scale ── */
   --t-display: clamp(1.9rem, 5vw, 2.8rem);
@@ -153,12 +155,13 @@
   --t-micro:   0.6875rem;
 
   /* ── Avatar palette — 6 brand-adjacent hues, no purple/magenta ── */
-  --avatar-1: oklch(62% 0.115 40);   /* terracotta */
-  --avatar-2: oklch(60% 0.100 72);   /* sand gold  */
-  --avatar-3: oklch(50% 0.100 155);  /* forest     */
-  --avatar-4: oklch(55% 0.070 200);  /* teal       */
-  --avatar-5: oklch(55% 0.090 30);   /* rust       */
-  --avatar-6: oklch(58% 0.080 130);  /* moss       */
+  --avatar-1: oklch(55% 0.115 40);   /* terracotta — darkened for white text contrast */
+  --avatar-2: oklch(48% 0.100 72);   /* sand gold  — darkened; use --avatar-2-text for initials */
+  --avatar-3: oklch(46% 0.100 155);  /* forest     — darkened for white text contrast */
+  --avatar-4: oklch(40% 0.100 195);  /* teal       — darkened for white text contrast */
+  --avatar-5: oklch(50% 0.090 30);   /* rust       — darkened for white text contrast */
+  --avatar-6: oklch(38% 0.085 130);  /* moss       — darkened for white text contrast */
+  --avatar-2-text: oklch(13% 0.012 55); /* dark text for sand-gold bg (white fails contrast) */
 
   /* ── Brand book extended tokens (oklch) ── */
   --forest:    oklch(50% 0.100 155);
@@ -466,6 +469,10 @@
 }
 
 /* ─── Base ────────────────────────────────────────────────────── */
+html {
+  color-scheme: light dark; /* enables native UI elements to theme correctly */
+}
+
 html, body {
   height: 100%;
   width: 100%;
@@ -480,6 +487,33 @@ html, body {
   color: var(--text);
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+}
+
+/* Text selection highlight uses brand tint */
+::selection {
+  background: oklch(42% 0.092 155 / 22%);
+  color: var(--text);
+}
+
+/* Eliminate tap highlight on iOS — we provide our own press feedback */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Reduced motion — comprehensive disable ──────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+[data-reduced-motion="true"] *, [data-reduced-motion="true"] *::before, [data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
 }
 
 /* Prevent pull-to-refresh on all inner scroll containers */
@@ -529,11 +563,29 @@ h4, h5, h6 {
   font-family: var(--font-friendly);
   font-weight: 600;
   letter-spacing: 0.04em;
+  text-transform: none; /* Hebrew doesn't use uppercase */
+}
+
+[dir="rtl"] .sub-label,
+:lang(he) .sub-label {
+  text-transform: none; /* disable uppercase for RTL/Hebrew */
+  letter-spacing: 0.04em;
 }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+/* Standard scrollbar API */
+* { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
+
+/* NavBar clearance utility — applies correct bottom padding to any scroll container */
+.navbar-clearance {
+  padding-bottom: var(--navbar-clearance);
+}
+
+/* Safe-area padding utilities */
+.safe-top    { padding-top:    env(safe-area-inset-top, 0px); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom, 0px); }
 
 /* ─── Mobile interaction baseline ─────────────────────────────── */
 /* Prevent iOS auto-zoom on focus (triggered when font-size < 16px) */
@@ -560,22 +612,33 @@ select {
 
 /* Base glass surface — 2027: oklch bg, layered shadows, directional border */
 .glass {
-  background: oklch(99% 0.004 80 / 52%);
+  background: oklch(99% 0.004 80 / 72%); /* increased from 52% — glass must be visible on light bg */
   backdrop-filter: blur(40px) saturate(1.25);
   -webkit-backdrop-filter: blur(40px) saturate(1.25);
   border-style: solid;
   border-width: 1px;
-  border-color: oklch(100% 0 0 / 10%);
-  border-top-color: oklch(100% 0 0 / 48%);
-  border-left-color: oklch(100% 0 0 / 28%);
-  border-bottom-color: oklch(13% 0.012 55 / 6%);
-  border-right-color: oklch(13% 0.012 55 / 4%);
+  border-color: oklch(83% 0.012 75 / 70%); /* visible border on light bg */
+  border-top-color: oklch(100% 0 0 / 60%);
+  border-left-color: oklch(100% 0 0 / 35%);
+  border-bottom-color: oklch(13% 0.012 55 / 10%);
+  border-right-color: oklch(13% 0.012 55 / 6%);
   border-radius: 32px;
-  box-shadow: var(--shadow-md), inset 0 1px 0 oklch(100% 0 0 / 60%);
+  box-shadow: var(--shadow-md), 0 1px 3px oklch(13% 0.012 55 / 8%), inset 0 1px 0 oklch(100% 0 0 / 70%);
   position: relative;
   overflow: hidden;
   transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease, backdrop-filter 0.3s ease;
 }
+
+/* High contrast: glass becomes opaque with solid border */
+[data-high-contrast="true"] .glass,
+[data-high-contrast="true"] .glass-panel,
+[data-high-contrast="true"] .glass-float {
+  background: var(--bg) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1.5px solid var(--text) !important;
+}
+[data-high-contrast="true"] .glass::before { display: none !important; }
 
 /* Specular diagonal highlight inside every glass surface — softened, no hard band */
 .glass::before {
@@ -655,23 +718,25 @@ select {
   pointer-events: none;
 }
 
-/* Liquid hover: spring scale + lift + deepen blur */
+/* Liquid hover: spring scale + lift + deepen blur — desktop pointer only */
 .liquid-hover {
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-.liquid-hover:hover {
-  transform: scale(1.02) translateY(-4px);
-  backdrop-filter: blur(60px) saturate(1.3);
-  -webkit-backdrop-filter: blur(60px) saturate(1.3);
-  box-shadow: 0 40px 80px rgba(26, 20, 16, 0.15);
+@media (hover: hover) and (pointer: fine) {
+  .liquid-hover:hover {
+    transform: scale(1.02) translateY(-4px);
+    backdrop-filter: blur(60px) saturate(1.3);
+    -webkit-backdrop-filter: blur(60px) saturate(1.3);
+    box-shadow: 0 40px 80px rgba(26, 20, 16, 0.15);
+  }
 }
 
-/* Aliases kept for backward compat */
-.glass-1 { background: rgba(255,255,255,0.35); box-shadow: 0 4px 16px rgba(26,20,16,0.05); }
-.glass-2 { background: rgba(255,255,255,0.45); }
-.glass-3 { background: rgba(255,255,255,0.55); box-shadow: 0 12px 40px rgba(26,20,16,0.08); }
-.glass-warm  { background: rgba(255,248,240,0.55) !important; }
-.glass-hero  { background: rgba(255,255,255,0.65) !important; box-shadow: 0 40px 80px rgba(26,20,16,0.15) !important; }
+/* Aliases kept for backward compat — opacities raised for light-mode visibility */
+.glass-1 { background: rgba(255,255,255,0.62); box-shadow: 0 2px 8px rgba(26,20,16,0.07), 0 1px 3px rgba(26,20,16,0.05); border: 1px solid rgba(0,0,0,0.08); }
+.glass-2 { background: rgba(255,255,255,0.72); box-shadow: 0 4px 16px rgba(26,20,16,0.08); border: 1px solid rgba(0,0,0,0.08); }
+.glass-3 { background: rgba(255,255,255,0.82); box-shadow: 0 12px 40px rgba(26,20,16,0.10); border: 1px solid rgba(0,0,0,0.09); }
+.glass-warm  { background: rgba(255,248,240,0.78) !important; }
+.glass-hero  { background: rgba(255,255,255,0.88) !important; box-shadow: 0 40px 80px rgba(26,20,16,0.15) !important; }
 .glass-teal-tint { background: rgba(59,110,82,0.08) !important; }
 
 /* ─── Typography helpers ──────────────────────────────────────── */
@@ -752,9 +817,10 @@ select {
 }
 
 /* ─── Focus indicators (WCAG AA) ─────────────────────────────── */
+/* Use brand green (not terra) — consistent with primary brand identity */
 :focus-visible {
-  outline: 2px solid var(--terra);
-  outline-offset: 2px;
+  outline: 2.5px solid var(--brand);
+  outline-offset: 3px;
   border-radius: var(--radius-1);
 }
 
