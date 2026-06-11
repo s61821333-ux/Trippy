@@ -525,6 +525,21 @@ html, body {
   background: oklch(42% 0.092 155 / 22%);
   color: var(--text);
 }
+[data-dark="true"] ::selection {
+  background: oklch(65% 0.10 155 / 30%);
+}
+
+/* Row 205: smooth theme transition when toggling dark/light */
+body {
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* Row 227: force light mode for print — dark mode wastes ink */
+@media print {
+  html, body { background: #fff !important; color: #000 !important; }
+  .lg, .glass, .glass-panel { backdrop-filter: none !important; background: #fff !important; }
+  [data-dark="true"] { filter: none !important; }
+}
 
 /* Eliminate tap highlight on iOS — we provide our own press feedback */
 * {

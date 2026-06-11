@@ -654,7 +654,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
         {showBudgetInput && (
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
             <div style={{ flex: 1 }}>
-              <Field label={`${isHe ? 'סכום תקציב' : 'Budget limit'} (${currSym})`} placeholder="0" value={budgetVal} onChange={setBudgetVal} type="number" autoFocus />
+              <Field label={`${isHe ? 'סכום תקציב' : 'Budget limit'} (${currSym})`} placeholder="0" value={budgetVal} onChange={v => setBudgetVal(v.replace(/[^0-9.]/g, ''))} type="number" min="0" inputMode="decimal" autoFocus />
             </div>
             <button
               onClick={() => {

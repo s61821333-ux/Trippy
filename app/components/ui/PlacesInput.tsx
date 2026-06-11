@@ -26,6 +26,7 @@ interface Props {
 export default function PlacesInput({ label, placeholder, value, onChange, onSelect }: Props) {
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [open, setOpen] = useState(false);
+  const [noResults, setNoResults] = useState(false);
   const [resolving, setResolving] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,20 +47,23 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (!text.trim()) {
       setPredictions([]);
+      setNoResults(false);
       setOpen(false);
       return;
     }
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(`/api/places?input=${encodeURIComponent(text)}`);
-        if (!res.ok) { setPredictions([]); return; }
+        if (!res.ok) { setPredictions([]); setNoResults(true); return; }
         const data = await res.json();
         if (Array.isArray(data)) {
           setPredictions(data);
-          setOpen(data.length > 0);
+          setNoResults(data.length === 0);
+          setOpen(true);
         }
       } catch {
         setPredictions([]);
+        setNoResults(false);
       }
     }, 300);
   };
@@ -67,6 +71,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
   const handleSelect = async (pred: Prediction) => {
     onChange(pred.description);
     setPredictions([]);
+    setNoResults(false);
     setOpen(false);
     setResolving(true);
     try {
@@ -132,6 +137,16 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
             boxSizing: 'border-box',
           }}
         />
+        {open && noResults && (
+          <div role="status" aria-live="polite" style={{
+            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000,
+            background: 'var(--surface)', border: '1px solid var(--border)',
+            borderRadius: 'var(--radius-md)', marginTop: 4, padding: '12px 14px',
+            fontSize: 14, color: 'var(--text-3)', boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
+          }}>
+            No places found
+          </div>
+        )}
         {open && predictions.length > 0 && (
           <ul id={listboxId} role="listbox" style={{
             position: 'absolute',
