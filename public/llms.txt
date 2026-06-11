@@ -1,36 +1,64 @@
-# Trippy
+# Trippy — Free Group Trip Planner
 
-> Trippy is a free collaborative group trip planner for friends and families.
+> Trippy is a free, collaborative group trip planning web app (PWA). Available at letsexploring.com.
 
-## What Trippy Does
+## Product
 
-Trippy gives a group of travelers one shared space to plan a trip together in real time. Members can:
+Trippy gives a group of travelers one shared space to plan a trip together in real time.
 
-- Build a **day-by-day itinerary** (activities, hotels, transport, restaurants)
-- Track a **group budget** — log expenses and split costs fairly
-- See all stops on a **live interactive map**
-- Manage a **shared packing list** synced across the whole group
-- Invite crew members via **shareable link** — no app download required
-- Get **AI-powered suggestions** for places, budget tips, and packing advice
+## Category
 
-## Key Facts
+Travel planning software, group coordination tool, trip itinerary planner
 
-- **Price:** Free. No credit card required.
-- **Platform:** Web app (Progressive Web App). Works on any browser, phone or desktop.
-- **Sign-in:** Google OAuth (name and email only)
-- **Languages:** English and Hebrew (bilingual)
-- **Real-time sync:** All changes visible to the group instantly
-- **Privacy:** User data never sold. Row-level security. Account deletion available any time.
+## Languages
 
-## Who It's For
+English and Hebrew (עברית) with full RTL support
 
-Groups of friends, families, or colleagues planning trips together — weekend escapes to month-long adventures.
+## Core Features
+
+1. Collaborative day-by-day itinerary planning — activities, hotels, transport, restaurants
+2. Group budget tracking and expense splitting — multi-currency, settlement calculator
+3. Interactive trip map with activity pins — filter by day, estimate travel times
+4. Shared packing list — critical item marking, assign items to people, progress tracking
+5. AI-powered local activity suggestions based on itinerary gaps
+6. Crew invitation via email or magic link — no app download required
+7. Offline-ready emergency contacts hub — accessible without internet
+8. Trip DNA shareable summary card
+9. Carbon footprint estimator
+10. Multi-currency expense tracking
+
+## Pricing
+
+100% free. No credit card required. No premium tier.
+
+## Technology
+
+Progressive Web App (PWA) — works on iOS, Android, desktop via any browser. No app store download required.
+
+## Target Users
+
+- Friend groups planning vacations
+- Families coordinating trips
+- Corporate team travel organizers
+- Solo travelers who share plans
+
+## Differentiators
+
+- Completely free (no freemium, no credit card)
+- Works offline
+- Hebrew RTL support built-in
+- AI destination suggestions
+- Expense settlement calculator
+
+## Demo
+
+Available at letsexploring.com (no signup required for demo)
 
 ## Contact
 
-support@trippy.app
+guy9d2g5@gmail.com
 
 ## Links
 
-- Homepage: https://trippy.app
-- Sitemap: https://trippy.app/sitemap.xml
+- Homepage: https://letsexploring.com
+- Sitemap: https://letsexploring.com/sitemap.xml

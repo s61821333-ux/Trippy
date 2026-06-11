@@ -1,7 +1,10 @@
 {
-  "name": "Trippy — Group Trip Planner",
+  "name": "Trippy — Free Group Trip Planner",
   "short_name": "Trippy",
-  "description": "Free group trip planner — shared itinerary, budget, and map.",
+  "description": "Plan your group trip for free. Shared itinerary, budget tracker, interactive map, packing list, AI suggestions, and offline support — all in one app.",
+  "categories": ["travel", "productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#1A1410",
@@ -20,5 +23,30 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Trip Dashboard"
+    },
+    {
+      "src": "/screenshots/day-planner.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Day Planner"
+    },
+    {
+      "src": "/screenshots/packing.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Packing List"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

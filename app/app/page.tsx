@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import AppShell from '../components/AppShell';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 // Auth guard is handled client-side by AppShell's onAuthStateChange:
 // unauthenticated users are redirected to '/' unless __trippyTestMode__ is set.

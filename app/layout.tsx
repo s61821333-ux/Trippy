@@ -39,8 +39,12 @@ const assistant = Assistant({
 });
 
 export const metadata: Metadata = {
-  title: 'Trippy — Free Group Trip Planner | Plan Together',
-  description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
+  metadataBase: new URL('https://letsexploring.com'),
+  title: {
+    default: 'Trippy — Free Group Trip Planner | Plan Together',
+    template: '%s | Trippy',
+  },
+  description: 'Plan your group trip for free — shared itinerary, interactive map, group budget, and packing list. Invite friends in seconds.',
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -56,17 +60,17 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Trippy — Free Group Trip Planner',
-    description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
-    url: 'https://trippy.app',
+    description: 'Plan your group trip for free — shared itinerary, interactive map, group budget, and packing list.',
+    url: 'https://letsexploring.com',
     siteName: 'Trippy',
     type: 'website',
-    images: [{ url: 'https://trippy.app/og-image.png', width: 1200, height: 630, alt: 'Trippy — Group Trip Planner' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Trippy — Group Trip Planner' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Trippy — Free Group Trip Planner',
-    description: 'Plan your group trip in one shared space. Live itinerary, group budget, interactive map, and packing list — all free.',
-    images: ['https://trippy.app/og-image.png'],
+    description: 'Plan your group trip for free — shared itinerary, interactive map, group budget, and packing list.',
+    images: ['/og-image.png'],
   },
 };
 
