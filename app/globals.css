@@ -14,6 +14,15 @@
   --glass-rim:  linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 50%, rgba(255,255,255,0.07) 100%);
   --glass-specular: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 50%);
 
+  /* Row 129: sRGB hex fallbacks for browsers without oklch support (pre-2023).
+     CSS uses the last understood value — oklch wins on modern browsers. */
+  --bg:            #faf8f4;
+  --text:          #1c1108;
+  --brand:         #2d6040;
+  --terra:         #b8623a;
+  --danger:        #9b2a1a;
+  --warning:       #7a5c0a;
+
   /* Backgrounds — warm paper (oklch) */
   --bg:            oklch(98% 0.010 75);
   --bg-alt:        oklch(94% 0.014 75);
@@ -26,7 +35,7 @@
   --border-strong: oklch(74% 0.016 75); /* darkened from 80% for card edges + inputs */
 
   /* Brand — deep forest green (oklch perceptual) */
-  --brand:              oklch(42% 0.092 155);
+  --brand:              oklch(42% 0.092 155); /* overrides sRGB fallback above */
   --brand-hover:        oklch(35% 0.080 155);
   --brand-light:        oklch(94% 0.032 155);
   --brand-muted:        oklch(42% 0.092 155 / 10%);
@@ -34,7 +43,7 @@
   --coral-glow:         oklch(58% 0.150 28);
 
   /* Accent — warm terracotta */
-  --terra:         oklch(62% 0.115 40);
+  --terra:         oklch(62% 0.115 40); /* overrides sRGB fallback above */
   --terra-hover:   oklch(56% 0.110 40);
   --terra-light:   oklch(95% 0.028 40);
   --terra-muted:   oklch(62% 0.115 40 / 10%);
@@ -49,7 +58,7 @@
   --sand-light:    oklch(92% 0.048 75);
 
   /* Text */
-  --text:          oklch(13% 0.012 55);
+  --text:          oklch(13% 0.012 55); /* overrides sRGB fallback above */
   --text-1:        oklch(13% 0.012 55);
   --text-2:        oklch(40% 0.020 55);
   --text-3:        oklch(54% 0.014 55); /* darkened from 60% → 54% to meet 4.5:1 WCAG AA */
@@ -67,9 +76,10 @@
   /* Semantic */
   --success:       oklch(50% 0.090 155);
   --success-bg:    oklch(94% 0.030 155);
-  --warning:       oklch(55% 0.110 68);
+  --warning:       oklch(55% 0.110 68); /* overrides sRGB fallback above */
   --warning-bg:    oklch(95% 0.040 75);
-  --danger:        oklch(48% 0.130 25);
+  --warning-text:  oklch(44% 0.110 68); /* darkened for 4.5:1 on white */
+  --danger:        oklch(48% 0.130 25); /* overrides sRGB fallback above */
   --danger-bg:     oklch(95% 0.030 25);
 
   /* Shadows — 2027: layered depth, oklch-based warm ink */
@@ -432,6 +442,18 @@
   box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 20%), inset 0 0 0 1px oklch(100% 0 0 / 14%);
 }
 
+/* Row 165: Instrument Serif strokes are thin — increase weight in dark mode for legibility */
+[data-dark="true"] h1, [data-dark="true"] h2, [data-dark="true"] h3,
+[data-dark="true"] .hero-title, [data-dark="true"] .display-xl {
+  font-weight: 500;
+}
+@media (prefers-color-scheme: dark) {
+  :not([data-dark="false"]) h1, :not([data-dark="false"]) h2, :not([data-dark="false"]) h3,
+  :not([data-dark="false"]) .hero-title, :not([data-dark="false"]) .display-xl {
+    font-weight: 500;
+  }
+}
+
 [data-dark="true"] input[type="date"],
 [data-dark="true"] input[type="time"],
 [data-dark="true"] input[type="number"],
@@ -566,6 +588,7 @@ h4, h5, h6 {
   font-family: var(--font-friendly);
   font-weight: 700;
   letter-spacing: 0;
+  line-height: 1.35; /* Hebrew has ascenders/descenders — needs more room than 1.1 */
 }
 [dir="rtl"] .section-eyebrow, [dir="rtl"] .eyebrow,
 :lang(he) .section-eyebrow, :lang(he) .eyebrow {
@@ -763,6 +786,11 @@ select {
   letter-spacing: -0.025em;
   line-height: 1.02;
   font-style: italic;
+}
+:lang(he) .hero-title,
+[dir="rtl"] .hero-title {
+  line-height: 1.15;
+  letter-spacing: 0;
 }
 
 .sub-label {

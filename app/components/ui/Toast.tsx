@@ -16,6 +16,14 @@ const VARIANT_STYLES: Record<ToastVariant, { bg: string; color: string; border: 
   info:     { bg: 'rgba(255,255,255,0.92)', color: 'oklch(52% 0.16 225)', border: 'oklch(52% 0.16 225 / 0.25)' },
 };
 
+// Row 118: icon + color + text triple redundancy
+const VARIANT_ICON: Record<ToastVariant, string | null> = {
+  default: null,
+  success: `<path d="M5 12l5 5L20 7"/>`,
+  error:   `<path d="M6 6l12 12M18 6L6 18"/>`,
+  info:    `<circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/>`,
+};
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [msg, setMsg]         = useState<string | null>(null);
   const [action, setAction]   = useState<ToastAction | null>(null);
@@ -71,6 +79,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               gap: 12,
             }}
           >
+            {VARIANT_ICON[variant] && (
+              <svg aria-hidden="true" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}
+                dangerouslySetInnerHTML={{ __html: VARIANT_ICON[variant]! }}
+              />
+            )}
             <span>{msg}</span>
             {action && (
               <button

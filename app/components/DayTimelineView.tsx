@@ -183,7 +183,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
                 backgroundColor: 'transparent',
               }}
             >
-              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning-text)', display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Icon name="sparkle" size={10} aria-hidden />
                 {gapMins}min free
               </span>

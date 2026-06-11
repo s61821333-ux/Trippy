@@ -76,8 +76,8 @@ const PATHS: Partial<Record<IconName, string>> = {
 export default function Icon({ name, size = 20, style = {}, color }: IconProps) {
   const svg = PATHS[name] ?? '';
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', color, ...style }}>
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <span aria-hidden="true" style={{ display: 'inline-flex', alignItems: 'center', color, ...style }}>
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" focusable="false">
         <g dangerouslySetInnerHTML={{ __html: svg }} />
       </svg>
     </span>
