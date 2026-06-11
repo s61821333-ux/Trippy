@@ -337,7 +337,7 @@ export default function NavBar_V2({
             animate={{ y: 0 }}
             transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
             whileTap={{ scale: 0.92 }}
-            className="lg lg-strong"
+            className="lg lg-strong ai-fab"
             aria-label={isHe ? 'הצעות AI' : 'AI suggestions'}
             aria-haspopup="dialog"
             style={{

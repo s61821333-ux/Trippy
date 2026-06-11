@@ -3654,3 +3654,99 @@ body, * {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* ── Low priority: final batch ────────────────────────────── */
+
+/* Row 48: CompassLoader label */
+.compass-loader-label {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--text-2);
+}
+
+/* Row 74: Supply item quantity labels */
+.supply-qty, .item-qty, .item-quantity {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+/* Row 127: PopIn glow at scale peak — override earlier keyframe */
+:root { --pop-glow: rgba(196, 113, 74, 0.18); }
+[data-dark="true"] { --pop-glow: rgba(150, 200, 155, 0.22); }
+@keyframes popIn {
+  0%   { opacity: 0; transform: scale(0.8) translateY(12px); box-shadow: none; }
+  60%  { transform: scale(1.04) translateY(-2px); box-shadow: 0 0 20px 4px var(--pop-glow); }
+  100% { opacity: 1; transform: scale(1) translateY(0); box-shadow: none; }
+}
+
+/* Row 159: Turnstile captcha widget — match glass surface */
+.cf-turnstile, #turnstile-widget {
+  border-radius: var(--lg-r-md, 16px) !important;
+  overflow: hidden;
+  border: 1px solid var(--border) !important;
+}
+
+/* Row 208: Gap chip dark mode */
+[data-dark="true"] .chip[data-variant="gap"],
+[data-dark="true"] .chip--gap {
+  background: rgba(0, 188, 212, 0.14);
+  color: rgba(180, 240, 250, 0.85);
+  border-color: rgba(0, 188, 212, 0.28);
+}
+
+/* Row 212: glassGlow dark — override earlier keyframe with CSS custom prop */
+:root { --glass-glow-color: rgba(196, 113, 74, 0.08); }
+[data-dark="true"] { --glass-glow-color: rgba(120, 200, 140, 0.18); }
+@keyframes glassGlow {
+  0%, 100% { box-shadow: var(--shadow-sm), 0 0 0 0 rgba(196, 113, 74, 0); }
+  50%       { box-shadow: var(--shadow-md), 0 0 28px 4px var(--glass-glow-color); }
+}
+
+/* Row 226: StampIcon circle bg opacity in dark */
+[data-dark="true"] .stamp-icon-bg,
+[data-dark="true"] [class*="av-bg"] {
+  opacity: 0.85;
+}
+
+/* Row 262: Settings row hover — light mode */
+.settings-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 12px;
+}
+
+/* Row 272: Add crew avatar placeholder */
+.crew-add-placeholder {
+  border: 2px dashed var(--border, rgba(0, 0, 0, 0.12));
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+[data-dark="true"] .crew-add-placeholder {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Row 282: Leaflet attribution text */
+.leaflet-control-attribution {
+  font-size: 10px !important;
+  opacity: 0.7;
+}
+
+/* Row 406: AI FAB sparkle pulse */
+@keyframes sparklePulse {
+  0%, 100% { transform: scale(1);    opacity: 1;    }
+  50%       { transform: scale(1.08); opacity: 0.78; }
+}
+.ai-fab .icon, .ai-fab svg {
+  animation: sparklePulse 3s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-fab .icon, .ai-fab svg { animation: none; }
+}
+
+/* Row 693: Scroll fade mask on horizontal scroll containers */
+.h-scroll-fade, .chip-scroll-row {
+  mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 16px, black calc(100% - 16px), transparent);
+}
