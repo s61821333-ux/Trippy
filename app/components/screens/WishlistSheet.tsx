@@ -291,7 +291,7 @@ function WishCard({ item, onDelete, onSchedule }: {
         <StampIcon iconKey={stampKey} size={42} style={{ flexShrink: 0 }} />
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <div className="wishlist-item-name" style={{ fontSize: 15, fontWeight: 700, color: 'var(--lg-ink)' }}>
             {item.name}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>

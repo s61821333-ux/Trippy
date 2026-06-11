@@ -2415,6 +2415,178 @@ button[aria-label="סגור"]:hover {
   animation-direction: reverse;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — Typography batch (rows 24-82)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 24: Budget totals — prominent with tabular nums */
+.budget-total,
+.stat-total {
+  font-size: var(--font-size-xl, 1.25rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Row 25: Event time labels — legible but secondary */
+.event-time {
+  font-size: max(13px, 0.8125rem);
+  color: var(--text-3);
+  font-weight: 500;
+}
+
+/* Row 27: Settings section headers */
+.settings-section-header {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  padding-block: var(--space-2, 8px);
+}
+[dir="rtl"] .settings-section-header,
+:lang(he) .settings-section-header {
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+/* Row 28: Leaflet popup typography minimum */
+.leaflet-popup-content,
+.leaflet-popup-content p {
+  font-size: 14px !important;
+  font-family: var(--font-sans) !important;
+  line-height: 1.5 !important;
+}
+
+/* Row 30: Landing hero headline — fluid sizing */
+.hero-headline,
+.landing-headline {
+  font-size: clamp(2rem, 7vw, 4.5rem);
+}
+
+/* Row 36: Alert / toast line-height */
+.toast,
+[role="alert"],
+[role="status"].toast,
+.alert-banner {
+  line-height: 1.5;
+}
+
+/* Row 38: Expense/budget amounts — tabular-nums + right align */
+.amount,
+.budget-number,
+.expense-amount,
+.financial-value {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+  text-align: right;
+}
+[dir="rtl"] .amount,
+[dir="rtl"] .budget-number,
+[dir="rtl"] .expense-amount,
+[dir="rtl"] .financial-value {
+  text-align: left; /* logical end in RTL */
+}
+
+/* Row 41: Packing category badge count — min 12px, bold, tabular */
+.cat-badge,
+.packing-badge,
+.category-count {
+  font-size: max(12px, 0.75rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+/* Row 51: Prevent font synthesis on Instrument Serif italic (Android WebKit) */
+.premium-title,
+[class*="display-"],
+.instrument-serif {
+  font-synthesis: none;
+}
+
+/* Row 53: Prose containers — limit to readable line length */
+.prose {
+  max-width: 680px;
+  margin-inline: auto;
+}
+
+/* Row 55: User-input text — graceful word wrapping */
+.user-content,
+[dir="auto"],
+.note-text,
+.trip-note {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/* Row 57: Budget / financial number inputs — aligned right */
+.budget-input,
+input[data-numeric],
+input[data-budget],
+input[inputmode="decimal"],
+input[inputmode="numeric"]:not([data-ltr]) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+[dir="rtl"] .budget-input,
+[dir="rtl"] input[data-numeric] {
+  text-align: left;
+}
+
+/* Row 61: Wishlist item titles — 2-line clamp */
+.wishlist-item-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+/* Row 67: Notes textarea — readable line-height */
+.notes-textarea {
+  line-height: 1.75;
+  font-family: var(--font-sans);
+}
+
+/* Row 70: Trip stat values — visually prominent */
+.stat-value,
+.trip-stat-value {
+  font-size: var(--font-size-2xl, 1.5rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+/* Row 80: Sheet sticky header — stays visible while content scrolls */
+.sheet-header-sticky {
+  position: sticky;
+  top: -1px; /* avoids 1px gap on fractional scroll */
+  z-index: 2;
+  padding-bottom: 12px;
+  background: inherit;
+  backdrop-filter: inherit;
+  -webkit-backdrop-filter: inherit;
+}
+
+/* Row 81: OTP / code hint text */
+.otp-hint,
+.code-hint,
+.mfa-hint {
+  color: var(--text-2);
+  font-weight: 500;
+}
+
+/* Row 82: Day pill text — minimum 12px, bold */
+.day-pill-label,
+.day-pill span {
+  font-size: max(12px, 0.75rem);
+  font-weight: 700;
+}
+
 /* ─── Medium: Scroll fade edges for horizontal lists (row 266, 910) ──────── */
 .scroll-fade-x {
   -webkit-mask-image: linear-gradient(

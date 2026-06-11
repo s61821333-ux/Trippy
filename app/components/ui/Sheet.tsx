@@ -234,7 +234,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           </div>
 
           {(title || subtitle) && (
-            <div style={{ marginBottom: 20 }}>
+            <div className="sheet-header-sticky" style={{ marginBottom: 20 }}>
               {title && (
                 <h2
                   id={titleId}
@@ -252,7 +252,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
                 </h2>
               )}
               {subtitle && (
-                <p style={{ fontSize: 13, color: 'var(--text-2)' }}>{subtitle}</p>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-2)', lineHeight: 1.4, margin: 0 }}>{subtitle}</p>
               )}
             </div>
           )}
