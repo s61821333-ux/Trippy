@@ -10,7 +10,7 @@
   --nav-surface:    rgba(255, 255, 255, 0.82);
 
   /* Glass blur */
-  --glass-blur: blur(40px) saturate(1.2);
+  --glass-blur: blur(40px) saturate(1.3);
   --glass-rim:  linear-gradient(135deg, rgba(255,255,255,0.25) 0%, transparent 50%, rgba(255,255,255,0.07) 100%);
   --glass-specular: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 50%);
 
@@ -680,8 +680,8 @@ select {
 /* Base glass surface — 2027: oklch bg, layered shadows, directional border */
 .glass {
   background: oklch(99% 0.004 80 / 72%); /* increased from 52% — glass must be visible on light bg */
-  backdrop-filter: blur(40px) saturate(1.25);
-  -webkit-backdrop-filter: blur(40px) saturate(1.25);
+  backdrop-filter: blur(40px) saturate(1.3);
+  -webkit-backdrop-filter: blur(40px) saturate(1.3);
   border-style: solid;
   border-width: 1px;
   border-color: oklch(83% 0.012 75 / 70%); /* visible border on light bg */
@@ -725,8 +725,8 @@ select {
 /* Elevated float glass — 2027: higher opacity, richer depth */
 .glass-panel, .glass-float {
   background: oklch(99% 0.004 80 / 72%);
-  backdrop-filter: blur(48px) saturate(1.25);
-  -webkit-backdrop-filter: blur(48px) saturate(1.25);
+  backdrop-filter: blur(48px) saturate(1.3);
+  -webkit-backdrop-filter: blur(48px) saturate(1.3);
   border-style: solid;
   border-width: 1px;
   border-color: oklch(100% 0 0 / 12%);
@@ -1221,12 +1221,20 @@ select {
 /* ─── Tiny Compass — tri-color gradient clipped to text ─────── */
 /* Matches the demo's gradient: terracotta → gold → forest-dk    */
 .tiny-compass {
-  background: linear-gradient(135deg, #E05A3A 0%, #E6B574 50%, #2B5340 100%);
+  background: linear-gradient(135deg, #E05A3A 0%, #E6B574 33%, #2B5340 66%, #E05A3A 100%);
+  background-size: 220% 220%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 700;
+  animation: compassFlow 7s ease-in-out infinite alternate;
 }
+/* Living brand mark — the tri-color gradient drifts through the glyph */
+@keyframes compassFlow {
+  from { background-position: 0% 50%; }
+  to   { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) { .tiny-compass { animation: none; } }
 
 /* ─── Specular highlight — radial shine on glass cards ───────── */
 .specular-highlight {
@@ -1272,7 +1280,7 @@ select {
   top: 0;
   bottom: 0;
   width: 2px;
-  background: linear-gradient(to bottom, var(--terra) 0%, var(--brand) 60%, transparent 100%);
+  background: linear-gradient(to bottom, var(--terra) 0%, var(--sand) 35%, var(--brand) 65%, transparent 100%);
   border-radius: 2px;
 }
 
@@ -1331,8 +1339,8 @@ select {
 /* Drop this class on any card div instead of repeating inline styles */
 .v2-card {
   background: oklch(97% 0.01 80 / 0.82);
-  backdrop-filter: blur(40px) saturate(1.2);
-  -webkit-backdrop-filter: blur(40px) saturate(1.2);
+  backdrop-filter: blur(40px) saturate(1.3);
+  -webkit-backdrop-filter: blur(40px) saturate(1.3);
   border-style: solid;
   border-width: 1px;
   border-color: oklch(100% 0 0 / 0.10);
@@ -1457,34 +1465,47 @@ body::before, body::after {
   pointer-events: none;
   z-index: 0;
 }
+/* Dual-hue orbs — forest melts into sky, terra melts into sand, so the
+   ambient wash reads as living color rather than a single flat tint. */
 body::before {
   top: -18vh; right: -6vw;
   width: 58vmax; height: 58vmax;
-  background: radial-gradient(circle, oklch(42% 0.092 155 / 16%) 0%, transparent 65%);
+  background:
+    radial-gradient(circle at 52% 48%, oklch(48% 0.140 155 / 22%) 0%, transparent 60%),
+    radial-gradient(circle at 66% 38%, oklch(58% 0.120 235 / 14%) 0%, transparent 56%);
   filter: blur(72px);
   animation: orbDrift1 22s ease-in-out infinite alternate;
 }
 body::after {
   bottom: -14vh; left: -6vw;
   width: 48vmax; height: 48vmax;
-  background: radial-gradient(circle, oklch(62% 0.115 40 / 13%) 0%, transparent 65%);
+  background:
+    radial-gradient(circle at 48% 52%, oklch(64% 0.160 40 / 20%) 0%, transparent 60%),
+    radial-gradient(circle at 36% 62%, oklch(74% 0.140 72 / 13%) 0%, transparent 56%);
   filter: blur(88px);
   animation: orbDrift2 28s ease-in-out infinite alternate;
 }
 [data-dark="true"] body::before {
-  background: radial-gradient(circle, oklch(62% 0.100 155 / 12%) 0%, transparent 65%);
+  background:
+    radial-gradient(circle at 52% 48%, oklch(62% 0.120 155 / 16%) 0%, transparent 60%),
+    radial-gradient(circle at 66% 38%, oklch(64% 0.110 235 / 11%) 0%, transparent 56%);
 }
 [data-dark="true"] body::after {
-  background: radial-gradient(circle, oklch(66% 0.118 38 / 10%) 0%, transparent 65%);
+  background:
+    radial-gradient(circle at 48% 52%, oklch(66% 0.140 38 / 14%) 0%, transparent 60%),
+    radial-gradient(circle at 36% 62%, oklch(74% 0.120 72 / 10%) 0%, transparent 56%);
 }
 
+/* Drift + gentle opacity breathe (opacity/transform only — compositor-cheap) */
 @keyframes orbDrift1 {
-  from { transform: translate(0,0) scale(1); }
-  to   { transform: translate(-70px,50px) scale(1.10); }
+  0%   { transform: translate(0,0) scale(1);           opacity: 0.82; }
+  50%  { transform: translate(-42px,32px) scale(1.06); opacity: 1;    }
+  100% { transform: translate(-70px,50px) scale(1.10); opacity: 0.9;  }
 }
 @keyframes orbDrift2 {
-  from { transform: translate(0,0) scale(1); }
-  to   { transform: translate(60px,-40px) scale(1.08); }
+  0%   { transform: translate(0,0) scale(1);           opacity: 0.85; }
+  50%  { transform: translate(34px,-22px) scale(1.05); opacity: 1;    }
+  100% { transform: translate(60px,-40px) scale(1.08); opacity: 0.88; }
 }
 
 /* Ensure page content layers above ambient orbs */
@@ -1830,8 +1851,8 @@ body::after {
   overflow: hidden;
   border-radius: var(--radius-lg);
   background: rgba(255,255,255,0.80);
-  backdrop-filter: blur(40px) saturate(1.2);
-  -webkit-backdrop-filter: blur(40px) saturate(1.2);
+  backdrop-filter: blur(40px) saturate(1.3);
+  -webkit-backdrop-filter: blur(40px) saturate(1.3);
   border: 1px solid rgba(255,255,255,0.85);
   box-shadow: 0 2px 12px rgba(26,20,16,0.06);
   cursor: pointer;
@@ -1868,7 +1889,7 @@ body::after {
   --hero-3: oklch(11% 0.022 60);
 
   /* Liquid-glass panel recipe */
-  --lg-blur:          blur(28px) saturate(1.25);
+  --lg-blur:          blur(28px) saturate(1.3);
   --lg-blur-strong:   blur(44px) saturate(1.3);
   --lg-panel:         oklch(99% 0.004 80 / 60%);
   --lg-panel-strong:  oklch(99% 0.004 80 / 80%);
@@ -1999,10 +2020,20 @@ body::after {
 .hero-mesh {
   background:
     radial-gradient(120% 90% at 18% 8%,  var(--hero-1) 0%, transparent 55%),
-    radial-gradient(120% 100% at 95% 30%, oklch(38% 0.09 40 / 55%) 0%, transparent 50%),
+    radial-gradient(120% 100% at 95% 30%, oklch(42% 0.110 40 / 60%) 0%, transparent 50%),
+    radial-gradient(90% 80% at 78% 88%, oklch(48% 0.090 72 / 32%) 0%, transparent 60%),
     radial-gradient(140% 120% at 50% 110%, var(--hero-3) 30%, transparent 70%),
     linear-gradient(170deg, var(--hero-2), var(--hero-3));
+  background-size: 160% 160%;
+  background-position: 0% 0%;
+  animation: heroDrift 26s ease-in-out infinite alternate;
 }
+/* Slow parallax-style wander makes the cinematic gradient feel alive */
+@keyframes heroDrift {
+  from { background-position: 0% 0%; }
+  to   { background-position: 100% 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .hero-mesh { animation: none; } }
 
 /* ── Liquid Glass pill buttons ────────────────────────────────────── */
 .lg-btn {
@@ -2215,7 +2246,9 @@ body::after {
   .an-float,
   .an-pulse,
   .an-breathe,
-  .a-float {
+  .a-float,
+  .hero-mesh,
+  .tiny-compass {
     animation: none !important;
   }
   /* Keep spin but slow it down so loaders still work */
@@ -3011,4 +3044,122 @@ button,
 /* Row 451: Enter key hint on inputs */
 input[enterkeyhint] {
   /* CSS can't set enterKeyHint — done in components */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — NavBar + Cards batch (rows 547-663)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 547: NavBar @supports fallback — solid bg when backdrop-filter unavailable */
+@supports not (backdrop-filter: blur(1px)) {
+  .nav-pill,
+  .lg,
+  .glass {
+    background: var(--surface, rgba(245, 240, 235, 0.97)) !important;
+  }
+  [data-dark="true"] .nav-pill,
+  [data-dark="true"] .lg,
+  [data-dark="true"] .glass {
+    background: rgba(15, 13, 10, 0.97) !important;
+  }
+}
+
+/* Row 548: NavBar height token + clearance utility */
+:root {
+  --navbar-height: 80px;
+  --navbar-clearance: calc(var(--navbar-height) + 16px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Row 555: NavBar pill upward shadow */
+.nav-pill {
+  box-shadow:
+    0 -8px 32px rgba(0, 0, 0, 0.08),
+    0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Row 580: Expand panel max-height on landscape phones */
+@media (max-height: 500px) {
+  .navbar-expand-panel,
+  [data-expand-panel] {
+    max-height: 60vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Row 583: NavBar container compositing */
+.navbar-root {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Row 588: Panel z-index token */
+:root {
+  --z-navbar-panel: 25;
+}
+
+/* Row 601: Card border-radius standardization */
+.trip-card,
+.event-card {
+  border-radius: 20px;
+}
+.glass-panel,
+.sheet-surface {
+  border-radius: 24px;
+}
+
+/* Row 602: Card shadow lighter in dark mode */
+[data-dark="true"] .glass-card,
+[data-dark="true"] .trip-card,
+[data-dark="true"] .event-card {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.30),
+    0 4px 16px rgba(0, 0, 0, 0.22);
+}
+
+/* Row 628: Settings group card */
+.settings-group {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface, rgba(255, 255, 255, 0.55));
+}
+.settings-group .settings-row + .settings-row {
+  border-top: 1px solid var(--border);
+}
+
+/* Row 629: Settings row tap state */
+.settings-row {
+  transition: background 0.12s ease;
+  cursor: pointer;
+}
+.settings-row:active {
+  background: rgba(0, 0, 0, 0.04);
+}
+[data-dark="true"] .settings-row:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Row 644: Card focus ring for keyboard navigation */
+.trip-card:focus-visible,
+.event-card:focus-visible,
+.glass-card:focus-visible {
+  outline: 2.5px solid var(--brand);
+  outline-offset: 2px;
+}
+
+/* Row 651: Trip card left stripe */
+.trip-card[data-stripe] {
+  border-inline-start: 4px solid var(--stripe-color, var(--brand));
+}
+
+/* Row 660: Card action bar */
+.card-action-bar {
+  border-top: 1px solid var(--border);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 8px);
+}
+[data-dark="true"] .card-action-bar {
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
