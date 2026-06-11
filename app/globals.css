@@ -975,6 +975,14 @@ select {
   margin-inline: auto;
 }
 
+/* Row 868/869: reflow at 320px (400% zoom on 1280px screen) — no horizontal scroll */
+@media (max-width: 320px) {
+  .resp-container { padding-inline: 12px; }
+  .lg, .lg-strong { border-radius: 14px !important; }
+  /* Prevent any fixed-width element from overflowing */
+  img, video, iframe, table { max-width: 100%; }
+}
+
 /* 2-column card grid on desktop, single column on mobile */
 .resp-dash-grid {
   display: flex;
@@ -1158,6 +1166,17 @@ select {
   --danger-bg:     rgba(255, 85, 85, 0.18);
 }
 
+/* Row 882: honour OS-level contrast preference (mirrors [data-high-contrast]) */
+@media (prefers-contrast: more) {
+  .lg, .glass, .glass-panel, .glass-float, .lg-strong {
+    background: var(--bg) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1.5px solid var(--text) !important;
+  }
+  .lg::before, .glass::before { display: none !important; }
+}
+
 /* ─── Tiny Compass — tri-color gradient clipped to text ─────── */
 /* Matches the demo's gradient: terracotta → gold → forest-dk    */
 .tiny-compass {
@@ -1295,6 +1314,10 @@ select {
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
+}
+/* Row 896: honour reduced-motion preference for scroll */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-container { scroll-behavior: auto; }
 }
 
 @media (pointer: coarse) {

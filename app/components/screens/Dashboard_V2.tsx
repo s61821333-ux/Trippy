@@ -308,10 +308,12 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
             </span>
           )}
         </div>
-        {loading
-          ? <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite', flexShrink: 0 }} />
-          : <span style={{ fontSize: 14, transform: arrowRotate, transition: 'transform .25s', color: 'var(--text-3)', flexShrink: 0, display: 'inline-block' }}>{arrowChar}</span>
-        }
+        <span style={{ minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {loading
+            ? <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite', display: 'block' }} />
+            : <span style={{ fontSize: 14, transform: arrowRotate, transition: 'transform .25s', color: 'var(--text-3)', display: 'inline-block' }}>{arrowChar}</span>
+          }
+        </span>
       </button>
 
       {expanded && intel && (

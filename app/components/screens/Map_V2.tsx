@@ -353,7 +353,7 @@ export default function Map_V2() {
         {t('mapTitle')}
       </h1>
       {/* ── Real Leaflet map (full bleed) ── */}
-      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0, touchAction: 'none' }}>
         <LeafletMap
           events={visibleEvents}
           selectedId={selectedId}
