@@ -2620,3 +2620,180 @@ input[inputmode="numeric"]:not([data-ltr]) {
     transparent 100%
   );
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — Color + Dark Mode batch (rows 91-213)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 91: Dark surface border — ensure visible card edges */
+[data-dark="true"] .glass,
+[data-dark="true"] .lg,
+[data-dark="true"] .v2-card {
+  border-color: rgba(255, 255, 255, 0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .glass,
+  :root:not([data-dark="false"]) .lg,
+  :root:not([data-dark="false"]) .v2-card {
+    border-color: rgba(255, 255, 255, 0.10);
+  }
+}
+
+/* Row 98: Skeleton shimmer colors — light vs dark */
+.shimmer,
+.skeleton,
+[class*="skeleton-"],
+[class*="shimmer-"] {
+  background: linear-gradient(
+    90deg,
+    var(--border) 25%,
+    rgba(0, 0, 0, 0.06) 50%,
+    var(--border) 75%
+  );
+  background-size: 200% 100%;
+}
+[data-dark="true"] .shimmer,
+[data-dark="true"] .skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 25%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.04) 75%
+  );
+  background-size: 200% 100%;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .shimmer,
+  :root:not([data-dark="false"]) .skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 25%,
+      rgba(255, 255, 255, 0.12) 50%,
+      rgba(255, 255, 255, 0.04) 75%
+    );
+    background-size: 200% 100%;
+  }
+}
+
+/* Row 99: Success color token */
+:root {
+  --color-success: oklch(42% 0.13 155);
+}
+
+/* Row 101: Placeholder text color */
+::placeholder {
+  color: var(--text-3);
+  opacity: 0.45;
+}
+
+/* Row 126: Section dividers */
+.section-divider,
+hr.divider,
+.settings-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-block: var(--space-3, 12px);
+}
+[data-dark="true"] .section-divider,
+[data-dark="true"] hr.divider,
+[data-dark="true"] .settings-divider {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Row 132: Progress bar semantic fill colors */
+.progress-bar-fill[data-type="budget"] {
+  background: linear-gradient(
+    to right,
+    var(--brand),
+    oklch(62% 0.15 75)
+  );
+}
+.progress-bar-fill[data-type="over"] {
+  background: linear-gradient(
+    to right,
+    oklch(62% 0.15 75),
+    var(--danger)
+  );
+}
+
+/* Row 142: High-contrast mode — hide specular sweeps */
+[data-high-contrast="true"] .glass::before,
+[data-high-contrast="true"] .lg::before {
+  display: none;
+}
+[data-high-contrast="true"] .glass,
+[data-high-contrast="true"] .lg {
+  border: 1.5px solid currentColor !important;
+}
+
+/* Row 158: Smooth color-scheme transitions */
+html,
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Row 161: Active trip card indicator */
+.trip-card[data-active="true"],
+.trip-card--active {
+  box-shadow: inset 4px 0 0 var(--brand), var(--shadow-md);
+}
+
+/* Row 168: Border visibility in dark */
+[data-dark="true"] {
+  --border: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.16);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) {
+    --border: rgba(255, 255, 255, 0.10);
+    --border-strong: rgba(255, 255, 255, 0.16);
+  }
+}
+
+/* Row 172: NavBar dark glass */
+[data-dark="true"] .nav-pill,
+[data-dark="true"] .lg.nav-pill {
+  background: rgba(15, 13, 10, 0.80) !important;
+  backdrop-filter: blur(32px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(1.4) !important;
+}
+
+/* Row 177: Skeleton shimmer dark — already covered in row 98 above */
+
+/* Row 189: Section dividers dark */
+[data-dark="true"] .card-divider,
+[data-dark="true"] [role="separator"] {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Row 199: Settings rows dark — hover + divider */
+[data-dark="true"] .settings-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+}
+[data-dark="true"] .settings-row + .settings-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Row 205: Smooth dark mode toggle transition */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 0.15s;
+  transition-timing-function: ease;
+}
+/* Reset for elements that should not transition (animations, transforms) */
+[class*="an-"],
+[class*="a-rise"],
+[class*="a-pop"],
+[class*="a-fade"],
+.shimmer, .skeleton {
+  transition: none;
+}
+
+/* Row 213: AsyncError dark */
+[data-dark="true"] .async-error,
+[data-dark="true"] .error-card {
+  color: oklch(65% 0.20 25);
+  background: rgba(220, 50, 40, 0.08);
+  border: 1px solid rgba(220, 50, 40, 0.20);
+}
