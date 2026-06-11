@@ -280,7 +280,7 @@ export default function Crew_V2() {
                   <span style={{
                     fontFamily: 'var(--font-mono)', fontSize: 9,
                     letterSpacing: '0.1em', textTransform: 'uppercase',
-                    color: 'var(--lg-terra)',
+                    color: 'var(--terra-text)',
                     background: 'oklch(60% 0.155 38 / 12%)',
                     padding: '4px 10px', borderRadius: 9999,
                     flexShrink: 0,
@@ -322,13 +322,13 @@ export default function Crew_V2() {
                   <div style={{ display: 'flex', gap: 7, flexShrink: 0 }}>
                     <button
                       onClick={() => acceptInvitation(inv.id).then(() => show(locale === 'he' ? 'הצטרפת לטיול' : 'Joined trip')).catch(() => show('Could not accept'))}
-                      style={{ height: 34, padding: '0 12px', border: 0, borderRadius: 9999, background: 'var(--lg-forest)', color: '#fff', fontWeight: 600, fontSize: 12, cursor: 'pointer', boxShadow: 'var(--lg-glow-forest)' }}
+                      style={{ height: 44, padding: '0 12px', border: 0, borderRadius: 9999, background: 'var(--lg-forest)', color: '#fff', fontWeight: 600, fontSize: 12, cursor: 'pointer', boxShadow: 'var(--lg-glow-forest)' }}
                     >
                       {locale === 'he' ? 'הצטרף' : 'Join'}
                     </button>
                     <button
                       onClick={() => rejectInvitation(inv.id).catch(() => {})}
-                      style={{ height: 34, padding: '0 12px', border: 0, borderRadius: 9999, background: 'var(--lg-panel)', color: 'var(--text-3)', fontWeight: 600, fontSize: 12, cursor: 'pointer', boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)' }}
+                      style={{ height: 44, padding: '0 12px', border: 0, borderRadius: 9999, background: 'var(--lg-panel)', color: 'var(--text-3)', fontWeight: 600, fontSize: 12, cursor: 'pointer', boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)' }}
                     >
                       {locale === 'he' ? 'דחה' : 'Decline'}
                     </button>

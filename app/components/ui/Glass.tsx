@@ -2,7 +2,7 @@
 
 // Usage: floating surfaces only — sheets, modals, NavBar, toasts, FABs.
 // Do NOT use for inline page-scroll content (section cards, list items). Use plain <div> with var(--surface) + var(--border) instead.
-import React, { CSSProperties, ReactNode } from 'react';
+import React, { CSSProperties, KeyboardEvent, ReactNode } from 'react';
 
 interface GlassProps {
   children: ReactNode;
@@ -10,19 +10,32 @@ interface GlassProps {
   style?: CSSProperties;
   className?: string;
   onClick?: () => void;
+  /** Accessible label required when card is clickable and has no visible text label */
+  ariaLabel?: string;
 }
 
-export default function Glass({ children, level = 2, style = {}, className = '', onClick }: GlassProps) {
+export default function Glass({ children, level = 2, style = {}, className = '', onClick, ariaLabel }: GlassProps) {
+  const isInteractive = !!onClick;
+
+  // Row 643: clickable cards must be keyboard-accessible
+  const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (isInteractive && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      onClick?.();
+    }
+  };
+
   return (
     <div
       onClick={onClick}
+      onKeyDown={isInteractive ? handleKeyDown : undefined}
+      role={isInteractive ? 'button' : undefined}
+      tabIndex={isInteractive ? 0 : undefined}
+      aria-label={ariaLabel}
       className={`glass glass-${level} ${className}`}
       style={{
-        // .glass in globals.css owns background, backdrop-filter, border (directional),
-        // box-shadow (rim + depth), and ::before specular sheen.
-        // Only override cursor and radius here; consumers use the style prop for the rest.
         borderRadius: 'var(--radius-lg)',
-        cursor: onClick ? 'pointer' : undefined,
+        cursor: isInteractive ? 'pointer' : undefined,
         ...style,
       }}
     >

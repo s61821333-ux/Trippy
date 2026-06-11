@@ -43,8 +43,9 @@ function getVariantStyles(variant: Variant) {
         shadow: 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 25%)',
       };
     case 'accent':
+      // Row 85: use darkened --terra-btn tokens so white label meets 4.5:1 WCAG AA
       return {
-        bg: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
+        bg: 'linear-gradient(180deg, var(--terra-btn-bright, oklch(54% 0.130 38)), var(--terra-btn, oklch(48% 0.120 40)))',
         color: 'white',
         border: 'none',
         shadow: 'var(--lg-glow-terra), inset 0 1px 0 oklch(100% 0 0 / 30%)',

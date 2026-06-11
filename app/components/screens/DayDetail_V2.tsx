@@ -270,7 +270,7 @@ function QuickAction({ icon, label, onClick, color }: { icon: string; label: str
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       style={{
-        height: 38, padding: '0 12px', gap: 6, flexShrink: 0,
+        height: 44, padding: '0 12px', gap: 6, flexShrink: 0,
         display: 'flex', alignItems: 'center',
         background: 'var(--lg-panel-strong)',
         color: 'var(--lg-ink)', border: 'none', borderRadius: 9999, cursor: 'pointer',
@@ -1003,7 +1003,7 @@ export default function DayDetail_V2() {
           <Icon name={locale === 'he' ? 'chevR' : 'chevL'} size={12} color="var(--text-3)" />
           {locale === 'he' ? 'לוח בקרה' : 'Dashboard'}
         </button>
-        <p className="eyebrow-lg" style={{ color: 'var(--lg-terra)', marginBottom: 2 }}>{eyebrow}</p>
+        <p className="eyebrow-lg" style={{ color: 'var(--terra-text)', marginBottom: 2 }}>{eyebrow}</p>
 
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
           <h1 className="display-xl" style={{ fontSize: 38, color: 'var(--lg-ink)', margin: 0, whiteSpace: 'nowrap' }}>
@@ -1015,10 +1015,10 @@ export default function DayDetail_V2() {
               onClick={() => setShowPersona(true)}
               className="lg-btn"
               style={{
-                height: 38, padding: '0 14px', gap: 6, display: 'flex', alignItems: 'center',
+                height: 44, padding: '0 14px', gap: 6, display: 'flex', alignItems: 'center',
                 background: 'var(--lg-panel)', border: 0, cursor: 'pointer',
                 fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
-                color: 'var(--lg-terra)',
+                color: 'var(--terra-text)',
                 boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
               }}
             >
@@ -1036,7 +1036,7 @@ export default function DayDetail_V2() {
                   rel="noopener noreferrer"
                   className="lg-btn"
                   style={{
-                    height: 38, padding: '0 14px', gap: 6, display: 'flex', alignItems: 'center',
+                    height: 44, padding: '0 14px', gap: 6, display: 'flex', alignItems: 'center',
                     background: 'var(--lg-panel)', border: 0, cursor: 'pointer',
                     fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
                     color: '#1a73e8', textDecoration: 'none',

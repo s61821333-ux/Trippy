@@ -161,7 +161,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
                 <span style={{ fontWeight: 600 }}>
                   {pred.structured_formatting?.main_text ?? pred.description.split(',')[0]}
                 </span>
-                <span style={{ fontSize: 12, color: 'var(--text-3)', marginLeft: 4 }}>
+                <span style={{ fontSize: 12, color: 'var(--text-3)', marginInlineStart: 4 }}>
                   {pred.description.split(',').slice(1).join(',').trim()}
                 </span>
               </li>

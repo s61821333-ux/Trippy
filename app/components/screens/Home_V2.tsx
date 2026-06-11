@@ -338,7 +338,7 @@ export default function Home_V2() {
   return (
     <div
       className="lg-scroll"
-      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}
+      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', paddingBottom: 'var(--navbar-clearance)' }}
     >
       <LoaderStyles />
       {/* ── Dark hero header ── */}
@@ -419,7 +419,7 @@ export default function Home_V2() {
         </div>{/* /inner centering wrapper */}
       </div>
 
-      <div style={{ padding: '20px 20px 30px', marginTop: -16, position: 'relative', maxWidth: 960, marginLeft: 'auto', marginRight: 'auto' }}>
+      <div style={{ padding: '20px 20px 30px', marginTop: -16, position: 'relative', maxWidth: 960, marginInline: 'auto' }}>
 
         {/* ── Action stack ── */}
         <m.button
@@ -482,7 +482,7 @@ export default function Home_V2() {
               >
                 <StampIcon iconKey={stampKey} size={52} aria-hidden="true" />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div className="eyebrow-lg" style={{ color: 'var(--lg-terra)', fontSize: 9, marginBottom: 2 }}>
+                  <div className="eyebrow-lg" style={{ color: 'var(--terra-text)', fontSize: 9, marginBottom: 2 }}>
                     {formatDateRange(lastTrip.start_date, lastTrip.days, locale)} · {lastTrip.days} {locale === 'he' ? 'ימים' : 'days'}
                   </div>
                   <div style={{

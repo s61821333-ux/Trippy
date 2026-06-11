@@ -259,7 +259,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
               >
                 <span style={{ fontSize: 20 }}>{flag}</span>
                 <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{en}</span>
-                <span style={{ fontSize: 12, color: 'var(--text-2)', marginRight: 'auto' }}>{he}</span>
+                <span style={{ fontSize: 12, color: 'var(--text-2)', marginInlineEnd: 'auto' }}>{he}</span>
               </button>
             ))}
           </m.div>

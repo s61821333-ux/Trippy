@@ -38,6 +38,11 @@
   --terra-hover:   oklch(56% 0.110 40);
   --terra-light:   oklch(95% 0.028 40);
   --terra-muted:   oklch(62% 0.115 40 / 10%);
+  /* Row 84: darkened variant for text on light bg — oklch(62%) fails 4.5:1 on white */
+  --terra-text:    oklch(48% 0.120 40);
+  /* Row 85: darkened gradient stops for white-text CTA buttons — meets 4.5:1 with white */
+  --terra-btn:         oklch(48% 0.120 40);
+  --terra-btn-bright:  oklch(54% 0.130 38);
 
   /* Sand */
   --sand:          oklch(68% 0.108 75);
@@ -253,14 +258,16 @@
     --surface-warm:  #252018;
     --border:        oklch(30% 0.016 65);
     --border-strong: oklch(40% 0.020 65);
-    --brand:              oklch(62% 0.100 155);
-    --brand-hover:        oklch(55% 0.095 155);
-    --brand-light:        oklch(62% 0.100 155 / 20%);
-    --brand-muted:        oklch(62% 0.100 155 / 16%);
-    --terra:         oklch(66% 0.118 38);
-    --terra-hover:   oklch(60% 0.110 38);
-    --terra-light:   oklch(66% 0.118 38 / 20%);
-    --terra-muted:   oklch(66% 0.118 38 / 14%);
+    /* Row 108/166: lightened for ≥4.5:1 contrast on dark glass surfaces */
+    --brand:              oklch(65% 0.100 155);
+    --brand-hover:        oklch(58% 0.095 155);
+    --brand-light:        oklch(65% 0.100 155 / 20%);
+    --brand-muted:        oklch(65% 0.100 155 / 16%);
+    /* Row 167: lightened terra for dark mode text readability */
+    --terra:         oklch(70% 0.118 38);
+    --terra-hover:   oklch(64% 0.110 38);
+    --terra-light:   oklch(70% 0.118 38 / 20%);
+    --terra-muted:   oklch(70% 0.118 38 / 14%);
     --sand:          oklch(72% 0.112 72);
     --sand-light:    oklch(72% 0.112 72 / 20%);
     --text:          oklch(96% 0.005 80);
@@ -308,17 +315,19 @@
   --border:        oklch(30% 0.016 65);
   --border-strong: oklch(40% 0.020 65);
 
-  --brand:              oklch(62% 0.100 155);
-  --brand-hover:        oklch(55% 0.095 155);
-  --brand-light:        oklch(62% 0.100 155 / 20%);
-  --brand-muted:        oklch(62% 0.100 155 / 16%);
-  --primary-container:  oklch(55% 0.100 155);
+  /* Row 108: dark-mode brand lightened to 65% for ≥4.5:1 contrast on dark glass */
+  --brand:              oklch(65% 0.100 155);
+  --brand-hover:        oklch(58% 0.095 155);
+  --brand-light:        oklch(65% 0.100 155 / 20%);
+  --brand-muted:        oklch(65% 0.100 155 / 16%);
+  --primary-container:  oklch(58% 0.100 155);
   --coral-glow:         oklch(64% 0.138 30);
 
-  --terra:         oklch(66% 0.118 38);
-  --terra-hover:   oklch(60% 0.110 38);
-  --terra-light:   oklch(66% 0.118 38 / 20%);
-  --terra-muted:   oklch(66% 0.118 38 / 14%);
+  /* Row 167: dark-mode terra lightened to 70% for readable text on dark surfaces */
+  --terra:         oklch(70% 0.118 38);
+  --terra-hover:   oklch(64% 0.110 38);
+  --terra-light:   oklch(70% 0.118 38 / 20%);
+  --terra-muted:   oklch(70% 0.118 38 / 14%);
 
   --sand:          oklch(72% 0.112 72);
   --sand-light:    oklch(72% 0.112 72 / 20%);
@@ -918,7 +927,8 @@ select {
 /* ─── Responsive ─────────────────────────────────────────────── */
 
 /* ─── DayScreen itinerary bottom padding — clears 2 mobile FABs ── */
-.day-list-pb { padding-bottom: 136px; }
+/* Row 302: include env(safe-area-inset-bottom) so last item clears the home indicator */
+.day-list-pb { padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 768px) { .day-list-pb { padding-bottom: 24px; } }
 
 /* ─── Responsive layout helpers ─────────────────────────────── */
@@ -927,8 +937,7 @@ select {
 .resp-container {
   width: 100%;
   max-width: 1200px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline: auto;
 }
 
 /* 2-column card grid on desktop, single column on mobile */

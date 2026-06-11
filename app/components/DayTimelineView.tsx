@@ -179,7 +179,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
                 display: 'flex',
                 alignItems: 'center',
                 gap: 8,
-                paddingLeft: 10,
+                paddingInlineStart: 10,
                 backgroundColor: 'transparent',
               }}
             >
@@ -202,6 +202,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
               <m.button
                 whileTap={{ scale: 0.9 }}
                 onClick={() => onAdd(toTimeStr(gap.startMins))}
+                aria-label="Add event"
                 style={{
                   background: 'var(--brand-muted)',
                   border: '1px solid rgba(59,110,82,0.25)',
@@ -210,7 +211,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
                   cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 3,
                 }}
               >
-                <Icon name="plus" size={10} />
+                <Icon name="plus" size={10} aria-hidden />
               </m.button>
             </m.div>
           );
@@ -242,6 +243,10 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
               animate={{ opacity: 1, scale: 1 }}
               transition={{ type: 'spring', stiffness: 380, damping: 32 }}
               onClick={() => onFocus(ev)}
+              role="button"
+              tabIndex={0}
+              aria-label={ev.name}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onFocus(ev); } }}
               style={{
                 position: 'absolute',
                 top,

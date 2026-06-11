@@ -32,6 +32,11 @@ export default function Field({
   maxLength, id: idProp, name, inputMode: inputModeProp, enterKeyHint,
 }: FieldProps) {
   const [focused, setFocused] = useState(false);
+
+  // Row 476: placeholder must never substitute for a visible label
+  if (process.env.NODE_ENV === 'development' && !label && placeholder) {
+    console.warn('[Field] Missing `label` prop — placeholder alone is not accessible. Add a label.');
+  }
   const generatedId = useId();
   const id = idProp ?? generatedId;
   const errorId = `${id}-error`;

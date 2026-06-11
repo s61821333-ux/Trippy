@@ -82,6 +82,26 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
     if (panelRef.current) panelRef.current.scrollTop = 0;
   }, []);
 
+  // Row 810: focus trap — cycle Tab/Shift+Tab within the sheet
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Tab') return;
+    const panel = panelRef.current;
+    if (!panel) return;
+    const focusable = Array.from(
+      panel.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter(el => !el.closest('[inert]'));
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+    } else {
+      if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  };
+
   // Auto-focus: after animation, focus the first INPUT (not a button which would fight with field autoFocus on mobile)
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -155,6 +175,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onFocusCapture={handleFocusCapture}
+          onKeyDown={handleKeyDown}
           style={{
             width: full ? '100%' : '100%',
             height: full ? '100%' : undefined,
@@ -197,7 +218,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
                 className="lg-btn lg-btn-glass"
                 style={{
                   position: 'absolute', insetInlineEnd: 0,
-                  width: 36, height: 36,
+                  width: 44, height: 44,
                   cursor: 'pointer',
                   WebkitTapHighlightColor: 'transparent',
                   touchAction: 'manipulation',

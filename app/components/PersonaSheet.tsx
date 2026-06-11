@@ -108,7 +108,7 @@ function ChipRow<T extends string>({
             onClick={() => onChange(o.value)}
             className="lg-btn"
             style={{
-              height: 36, padding: '0 12px', fontSize: 13, fontWeight: active ? 700 : 500,
+              height: 44, padding: '0 12px', fontSize: 13, fontWeight: active ? 700 : 500,
               background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
               color: active ? '#fff' : 'var(--lg-ink)',
               boxShadow: active

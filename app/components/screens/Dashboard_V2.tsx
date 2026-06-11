@@ -210,7 +210,7 @@ function WeatherAlerts({ trip, weather, onGoToDay }: {
             <p style={{ flex: 1, fontSize: 13, color, fontWeight: 500, margin: 0, lineHeight: 1.45 }}>{msg}</p>
             <button
               onClick={() => onGoToDay(day)}
-              style={{ flexShrink: 0, height: 34, padding: '0 12px', border: 0, borderRadius: 9999, cursor: 'pointer', background: color, color: '#fff', fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 12 }}
+              style={{ flexShrink: 0, height: 44, padding: '0 12px', border: 0, borderRadius: 9999, cursor: 'pointer', background: color, color: '#fff', fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 12 }}
             >
               {isHe ? `יום ${day}` : `Day ${day}`}
             </button>
@@ -334,7 +334,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
           {fetchErr ? (
             <button
               onClick={e => { e.stopPropagation(); setFetchErr(false); fetchIntel(); }}
-              style={{ fontSize: 12, color: 'var(--lg-terra)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, touchAction: 'manipulation' }}
+              style={{ fontSize: 12, color: 'var(--terra-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, touchAction: 'manipulation' }}
             >
               {isHe ? '⟳ נסה שוב' : '⟳ Tap to retry'}
             </button>
@@ -629,7 +629,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
                 ? <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--text-2)' }}>{currSym}{trip.budget.toLocaleString()}</span>
                 : <button
                     onClick={() => setShowBudgetInput(true)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--lg-terra)', padding: 0 }}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 700, color: 'var(--terra-text)', padding: 0 }}
                   >
                     + {isHe ? 'הגדר' : 'Set'}
                   </button>
@@ -682,7 +682,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
             <button
               onClick={() => fileRef.current?.click()}
               disabled={scanning}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 0, cursor: scanning ? 'wait' : 'pointer', color: 'var(--lg-terra)', fontWeight: 600, fontSize: 12, padding: '3px 6px', borderRadius: 8, opacity: scanning ? 0.5 : 1 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'none', border: 0, cursor: scanning ? 'wait' : 'pointer', color: 'var(--terra-text)', fontWeight: 600, fontSize: 12, padding: '3px 6px', borderRadius: 8, opacity: scanning ? 0.5 : 1 }}
               title={isHe ? 'סרוק קבלה' : 'Scan receipt'}
             >
               {scanning
@@ -938,7 +938,7 @@ export default function DashboardScreenV2() {
 
   return (
     <div
-      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}
+      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', paddingBottom: 'var(--navbar-clearance)' }}
       className="lg-scroll"
     >
       {/* ══ Cinematic hero ══════════════════════════════════════════════ */}
@@ -979,7 +979,7 @@ export default function DashboardScreenV2() {
             <button
               onClick={() => setScreen('settings')}
               className="lg-dark"
-              style={{ width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent' }}
+              style={{ width: 44, height: 44, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent' }}
               aria-label="Settings"
             >
               <Icon name="settings" size={16} color="#fff" />

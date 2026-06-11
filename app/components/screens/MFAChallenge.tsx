@@ -101,12 +101,12 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
           <Icon name="lock" size={24} color="var(--lg-terra-bright, #E89260)" />
         </div>
 
-        <h2 style={{
+        <h1 style={{
           fontFamily: 'var(--font-sans)', fontSize: 22, fontWeight: 700,
           color: '#fff', margin: '0 0 6px', letterSpacing: '-0.02em',
         }}>
           {isHe ? 'אמת את זהותך' : 'Verify your identity'}
-        </h2>
+        </h1>
         <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.55)', margin: '0 0 28px', lineHeight: 1.5 }}>
           {isHe ? 'הזן את הקוד בן 6 הספרות מאפליקציית האימות שלך.' : 'Enter the 6-digit code from your authenticator app.'}
         </p>
