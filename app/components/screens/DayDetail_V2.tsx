@@ -126,10 +126,10 @@ function dayDateStr(startDate: string | undefined, dayNum: number, locale: strin
   return dt.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-function dayPillLabel(startDate: string | undefined, dayNum: number): string {
+function dayPillLabel(startDate: string | undefined, dayNum: number, locale = 'en'): string {
   if (!startDate) return `Day ${dayNum}`;
   const dt = new Date(new Date(startDate + 'T00:00:00').getTime() + (dayNum - 1) * 86_400_000);
-  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return dt.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' });
 }
 
 // ── HotelAnchor ───────────────────────────────────────────────────────────────
@@ -265,7 +265,7 @@ function HotelSheet({ dayNum, existing, onClose }: {
 // ── QuickAction ───────────────────────────────────────────────────────────────
 
 function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger }: { icon: string; label: string; onClick: () => void; color: string; ariaLabel?: string; isDanger?: boolean }) {
-  const [hovered, setHovered] = React.useState(false);
+  const [hovered, setHovered] = useState(false);
   return (
     <m.button
       whileTap={{ scale: 0.94 }}
@@ -1078,7 +1078,9 @@ export default function DayDetail_V2() {
         </div>
 
         <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: '4px 0 12px' }}>
-          {weekdayLabel}
+          <time dateTime={trip.startDate ? new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (activeDay - 1) * 86_400_000).toISOString().split('T')[0] : undefined}>
+            {weekdayLabel}
+          </time>
           {' · '}
           {evs.length} {locale === 'he' ? 'אירועים' : evs.length === 1 ? 'event' : 'events'}
           {' · '}
@@ -1106,7 +1108,7 @@ export default function DayDetail_V2() {
                   transition: 'all .3s', whiteSpace: 'nowrap',
                 }}
               >
-                {dayPillLabel(trip.startDate, d)}
+                {dayPillLabel(trip.startDate, d, locale)}
               </button>
             );
           })}

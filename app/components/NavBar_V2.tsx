@@ -221,13 +221,12 @@ export default function NavBar_V2({
 
         {/* Tab bar pill — 5 tabs (4 screens + Wishlist action) */}
         <m.nav
-          role="navigation"
           aria-label={t('navMain')}
-          aria-labelledby={undefined}
           initial={{ y: 12 }}
           animate={{ y: 0 }}
           transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.06 }}
           className="lg lg-strong nav-pill"
+          role="tablist"
           style={{
             position: 'relative',
             display: 'flex',
