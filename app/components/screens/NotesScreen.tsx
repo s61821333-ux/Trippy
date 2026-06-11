@@ -106,7 +106,7 @@ export default function NotesScreen() {
                 <m.button
                   whileTap={{ scale: 0.88 }}
                   onClick={() => { deleteTripNote(i); show(t('itemRemoved')); }}
-                  aria-label="Delete note"
+                  aria-label={locale === 'he' ? 'מחק הערה' : 'Delete note'}
                   style={{
                     background: 'var(--danger-bg)', border: '1px solid oklch(48% 0.130 25 / 18%)',
                     borderRadius: 10, cursor: 'pointer', color: 'var(--danger)',

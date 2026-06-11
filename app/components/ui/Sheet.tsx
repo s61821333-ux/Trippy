@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { m, AnimatePresence } from 'framer-motion';
 import { spring } from '@/lib/motion';
 import Icon from './Icon';
+import { useI18n } from '@/lib/i18n';
 
 interface SheetProps {
   children: ReactNode;
@@ -17,6 +18,7 @@ interface SheetProps {
 }
 
 export default function Sheet({ children, onClose, title, subtitle, isDismissable = true, full = false }: SheetProps) {
+  const { locale } = useI18n();
   const startY = useRef(0);
   const panelRef = useRef<HTMLDivElement>(null);
   const scrollAtStart = useRef(0);
@@ -214,7 +216,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
             {isDismissable && (
               <button
                 onClick={onClose}
-                aria-label="Close"
+                aria-label={locale === 'he' ? 'סגור' : 'Close'}
                 className="lg-btn lg-btn-glass"
                 style={{
                   position: 'absolute', insetInlineEnd: 0,

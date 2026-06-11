@@ -322,7 +322,7 @@ function WishCard({ item, onDelete, onSchedule }: {
         {/* Delete button */}
         <button
           onClick={onDelete}
-          aria-label="Remove from Wishlist"
+          aria-label={locale === 'he' ? 'הסר מרשימת המשאלות' : 'Remove from Wishlist'}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, color: 'var(--text-3)', opacity: 0.6, flexShrink: 0 }}
         >
           <Icon name="trash" size={15} color="currentColor" />

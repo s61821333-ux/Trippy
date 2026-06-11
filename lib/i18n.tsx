@@ -3,6 +3,14 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 export type Locale = 'en' | 'he';
 
+// Row 765: Hebrew plural forms — one/two(dual)/many via Intl.PluralRules
+export function hebrewPlural(n: number, one: string, two: string, many: string): string {
+  const rule = new Intl.PluralRules('he').select(n);
+  if (rule === 'one') return `${n} ${one}`;
+  if (rule === 'two') return two; // dual form already includes the number concept
+  return `${n} ${many}`;
+}
+
 const en = {
   appName: 'Trippy',
   appTagline: 'Your trip, your story.',

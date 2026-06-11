@@ -366,7 +366,7 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
         <div style={{ position: 'relative', height: 6, background: 'oklch(50% 0.02 60 / 12%)', borderRadius: 3, overflow: 'hidden' }}>
           <m.div
             animate={{ width: `${pct}%` }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
+            transition={{ duration: 0.38, ease: 'easeOut' }}
             style={{
               height: '100%',
               background: 'linear-gradient(90deg, var(--lg-terra), var(--lg-forest))',

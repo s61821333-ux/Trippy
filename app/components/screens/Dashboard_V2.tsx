@@ -8,7 +8,7 @@ import Sheet from '../ui/Sheet';
 import Field from '../ui/Field';
 import { useAppStore } from '@/lib/store';
 import { useToast } from '../ui/Toast';
-import { useI18n } from '@/lib/i18n';
+import { useI18n, hebrewPlural } from '@/lib/i18n';
 import { fmtDate, getNextEvent, CAT_FALLBACK, fmtDuration, toMins, getDayBudget } from '@/lib/utils';
 import { fetchWeatherForTrip, WeatherDay, WeatherResult } from '@/lib/weather';
 import { getCapitalCoords } from '@/lib/capitals';
@@ -100,7 +100,7 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: 
   const lines: string[] = [];
 
   if (isHe) {
-    lines.push(`${trip.days} ימים · ${totalEvents} פעילויות מתוכננות.`);
+    lines.push(`${hebrewPlural(trip.days, 'יום', 'יומיים', 'ימים')} · ${totalEvents} פעילויות מתוכננות.`);
 
     if (emptyDays.length > 0 && emptyDays.length <= 3) {
       const labels = emptyDays.map(d => {
@@ -110,7 +110,7 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: 
       });
       lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'עדיין ריק' : 'עדיין ריקים'} — מה לגבי להוסיף משהו?`);
     } else if (emptyDays.length > 3) {
-      lines.push(`${emptyDays.length} ימים פנויים — הרבה מקום להרפתקאות!`);
+      lines.push(`${hebrewPlural(emptyDays.length, 'יום פנוי', 'יומיים פנויים', 'ימים פנויים')} — הרבה מקום להרפתקאות!`);
     }
 
     if (budgetPct !== null) {

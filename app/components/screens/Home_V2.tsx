@@ -399,7 +399,7 @@ export default function Home_V2() {
           className="display-xl"
           initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.10, duration: 0.50, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ delay: 0.10, duration: 0.40, ease: [0.22, 1, 0.36, 1] }}
           style={{ fontSize: 40, color: '#fff', margin: 0, lineHeight: 1.05, whiteSpace: 'pre-line' }}
         >
           {t('homeHeroTitle')}

@@ -79,7 +79,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
       <m.div
         initial={{ opacity: 0, y: 32, scale: 0.94 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.5, ease: [0.25, 0, 0, 1], delay: 0.1 }}
+        transition={{ duration: 0.38, ease: [0.25, 0, 0, 1], delay: 0.1 }}
         style={{
           position: 'relative', zIndex: 1,
           width: '100%', maxWidth: 380,

@@ -171,7 +171,7 @@ function Shell() {
       flushPendingChanges: s.flushPendingChanges,
     }))
   );
-  const { isRTL, t } = useI18n();
+  const { isRTL, locale, t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [authResolved, setAuthResolved] = useState(false);
   const [osDark, setOsDark] = useState(false);
@@ -428,6 +428,28 @@ function Shell() {
 
   const showNav = !!authUser && screen !== 'home';
 
+  // Row 807: dynamic page title per screen
+  useEffect(() => {
+    const SCREEN_TITLES: Record<string, string> = {
+      home: 'Trippy — Your Trips',
+      dashboard: trip ? `${trip.name} — Trippy` : 'Dashboard — Trippy',
+      day: 'Day Planner — Trippy',
+      map: 'Map — Trippy',
+      supplies: 'Packing — Trippy',
+      settings: 'Settings — Trippy',
+    };
+    document.title = SCREEN_TITLES[screen] ?? 'Trippy';
+  }, [screen, trip?.name]);
+
+  // Row 809: move focus to main content h1 after screen navigation
+  useEffect(() => {
+    const h1 = document.querySelector<HTMLElement>('#main-content h1');
+    if (h1) {
+      if (!h1.hasAttribute('tabindex')) h1.setAttribute('tabindex', '-1');
+      h1.focus({ preventScroll: true });
+    }
+  }, [screen]);
+
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
 
@@ -452,6 +474,27 @@ function Shell() {
             touchAction: 'pan-x pan-y',
           }}
         >
+          {/* Row 808: skip link — visible on focus for keyboard users */}
+          <a
+            href="#main-content"
+            style={{
+              position: 'absolute',
+              top: -999, left: 0, zIndex: 99999,
+              padding: '8px 16px',
+              background: 'var(--bg)',
+              color: 'var(--brand)',
+              fontWeight: 700,
+              fontSize: 14,
+              borderRadius: '0 0 8px 0',
+              textDecoration: 'none',
+              border: '2px solid var(--brand)',
+            }}
+            onFocus={e => { e.currentTarget.style.top = '0'; }}
+            onBlur={e => { e.currentTarget.style.top = '-999px'; }}
+          >
+            {locale === 'he' ? 'דלג לתוכן הראשי' : 'Skip to main content'}
+          </a>
+
           {/* Offline banner — shown above nav and content */}
           {isOffline && (
             <div style={{
@@ -520,7 +563,7 @@ function Shell() {
             />
           )}
 
-          <main className="flex-1 flex flex-col relative overflow-hidden w-full">
+          <main id="main-content" className="flex-1 flex flex-col relative overflow-hidden w-full">
             <AnimatePresence mode="wait" initial={false}>
               <m.div
                 key={screen}
