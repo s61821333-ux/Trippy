@@ -113,6 +113,14 @@ export default function NavBar_V2({
       }}
     >
       {/* ── Expand panel ─────────────────────────────────────── */}
+      {/* Row 556/577: tap-outside backdrop closes expand panel */}
+      {expandOpen && (
+        <div
+          aria-hidden="true"
+          onClick={() => setExpandOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 39 }}
+        />
+      )}
       <AnimatePresence>
         {expandOpen && (
           <m.div
