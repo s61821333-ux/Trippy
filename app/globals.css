@@ -3294,3 +3294,135 @@ textarea[aria-invalid="true"].shake {
 .glass-card {
   contain: layout style;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — Icons + Loading + Micro-interactions (1079-1121)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 1079: Icon size consistency utilities */
+.icon-xs  { width: 12px; height: 12px; }
+.icon-sm  { width: 16px; height: 16px; }
+.icon-md  { width: 20px; height: 20px; }
+.icon-lg  { width: 24px; height: 24px; }
+.icon-xl  { width: 32px; height: 32px; }
+
+/* Row 1081: Icon color — currentColor by default */
+svg[aria-hidden="true"] {
+  fill: none;
+  stroke: currentColor;
+}
+
+/* Row 1090: Spinner CSS animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.spinner-sm { width: 14px; height: 14px; }
+.spinner-lg { width: 24px; height: 24px; }
+
+/* Row 1099: Skeleton text width utilities */
+.skeleton-w-full  { width: 100%; }
+.skeleton-w-80    { width: 80%; }
+.skeleton-w-60    { width: 60%; }
+.skeleton-w-40    { width: 40%; }
+.skeleton-title   { height: 20px; width: 70%; border-radius: 6px; }
+.skeleton-body    { height: 14px; width: 95%; border-radius: 4px; }
+.skeleton-sub     { height: 14px; width: 50%; border-radius: 4px; }
+.skeleton-avatar  { border-radius: 50%; flex-shrink: 0; }
+
+/* Row 1103: Shimmer gradient utility */
+.shimmer-sweep {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.40) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+
+/* Row 1119: Copy feedback state */
+.copy-btn[data-copied="true"] {
+  color: var(--brand);
+  transition: color 0.2s ease;
+}
+.copy-btn[data-copied="true"] .copy-icon { display: none; }
+.copy-btn:not([data-copied="true"]) .copy-check { display: none; }
+
+/* Row 1120: Auto-save indicator */
+.save-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--brand);
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.save-indicator[data-visible="true"] { opacity: 1; }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   REMAINING MEDIUM FIXES — RTL, Color, misc
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 156 (Color): ::selection — brand tint */
+::selection {
+  background: oklch(42% 0.092 155 / 0.25);
+  color: inherit;
+}
+[data-dark="true"] ::selection {
+  background: oklch(65% 0.10 155 / 0.35);
+}
+
+/* Row 157: Scrollbar colors on desktop */
+@media (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-3, oklch(60% 0.014 55)) transparent;
+  }
+  *::-webkit-scrollbar { width: 6px; height: 6px; }
+  *::-webkit-scrollbar-thumb {
+    background: var(--text-3, oklch(60% 0.014 55));
+    border-radius: 3px;
+  }
+  *::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* Row 793 (RTL): Toast direction in RTL/Hebrew */
+[dir="rtl"] .toast,
+:lang(he) .toast,
+[dir="rtl"] [role="status"],
+[dir="rtl"] [role="alert"] {
+  direction: rtl;
+  text-align: start;
+}
+
+/* Row 773 (RTL): Leaflet map controls mirror in RTL */
+[dir="rtl"] .leaflet-left  { left: unset; right: 10px; }
+[dir="rtl"] .leaflet-right { right: unset; left: 10px; }
+
+/* Row 927 (Scroll): Elastic overscroll — html bg matches content to avoid white flash */
+html {
+  background-color: var(--bg, oklch(98% 0.010 75));
+}
+[data-dark="true"] html,
+html[data-dark="true"] {
+  background-color: oklch(9% 0.010 55);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) {
+    background-color: oklch(9% 0.010 55);
+  }
+}
