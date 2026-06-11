@@ -322,7 +322,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
               <StampIcon iconKey={stampKey} size={28} style={{ flexShrink: 0 }} />
               <div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8.5, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', fontWeight: 600, display: 'block', marginBottom: 2 }}>{label}</span>
-                <span style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5 }}>{intel[key]}</span>
+                <span style={{ fontSize: 15, color: 'var(--text-2)', lineHeight: 1.5 }}>{intel[key]}</span>
               </div>
             </div>
           ))}
@@ -1446,7 +1446,7 @@ export default function DashboardScreenV2() {
             <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', margin: '12px 0 6px' }}>
               {t('noActivitiesYet')}
             </p>
-            <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 18px' }}>
+            <p style={{ fontSize: 15, color: 'var(--text-3)', margin: '0 0 18px' }}>
               {t('startPlanningCta')}
             </p>
             <button
