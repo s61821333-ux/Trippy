@@ -3163,3 +3163,134 @@ input[enterkeyhint] {
 [data-dark="true"] .card-action-bar {
   border-top-color: rgba(255, 255, 255, 0.08);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — Motion + A11y + Scroll + Perf (rows 713-984)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 713: GPU compositing on animated glass elements */
+.glass-card[data-animated],
+.trip-card[data-animated],
+.event-card[data-animated] {
+  will-change: transform, opacity;
+}
+
+/* Row 714: Force GPU layer on NavBar + Sheet for compositing */
+/* (applied to component className in component files) */
+.sheet-panel-gpu {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+/* Row 717: Overscroll behavior — contain bounce on nested scrollers */
+.sheet-scroll,
+[role="dialog"] > * {
+  overscroll-behavior-y: contain;
+}
+
+/* Row 720: Input focus smooth transition */
+input, textarea, select {
+  transition: box-shadow 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+/* Row 721: Error shake animation for invalid form fields */
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-8px); }
+  40%       { transform: translateX(8px); }
+  60%       { transform: translateX(-6px); }
+  80%       { transform: translateX(6px); }
+}
+.field-shake,
+input[aria-invalid="true"].shake,
+textarea[aria-invalid="true"].shake {
+  animation: errorShake 0.4s ease;
+}
+
+/* Row 808 (A11y): Skip to main content link */
+.skip-link {
+  position: fixed;
+  inset-block-start: -100%;
+  inset-inline-start: 0;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  border-radius: 0 0 8px 0;
+  transition: inset-block-start 0.15s ease;
+}
+.skip-link:focus {
+  inset-block-start: 0;
+}
+
+/* Row 859 (A11y): Focus visible ring — global */
+:focus-visible {
+  outline: 2.5px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Row 882 (A11y): prefers-contrast: more — high contrast media support */
+@media (prefers-contrast: more) {
+  .glass,
+  .lg,
+  .v2-card,
+  .glass-card {
+    background: var(--surface, rgba(245, 240, 235, 0.97)) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: 1.5px solid currentColor !important;
+  }
+  input, textarea, select {
+    border: 1.5px solid currentColor !important;
+  }
+}
+
+/* Row 892 (Scroll): Sticky section headers in long lists */
+.list-section-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg, oklch(98% 0.010 75));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding-block: var(--space-2, 8px);
+  padding-inline: var(--page-px, 24px);
+}
+[data-dark="true"] .list-section-header {
+  background: oklch(9% 0.010 55 / 0.88);
+}
+
+/* Row 895/935 (Scroll): Overscroll contain on nested scrollers */
+.nested-scroll,
+.sheet-inner-scroll,
+.event-list,
+.supply-list {
+  overscroll-behavior: contain;
+}
+
+/* Row 897 (Scroll): Horizontal chip row — auto scroll */
+.chip-scroll-row {
+  display: flex;
+  gap: var(--space-2, 8px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-inline: var(--page-px, 24px);
+  scroll-snap-type: x proximity;
+}
+.chip-scroll-row::-webkit-scrollbar { display: none; }
+.chip-scroll-row > * { scroll-snap-align: start; flex-shrink: 0; }
+
+/* Row 900 (Scroll): Hidden scrollbar on mobile */
+.scroll-container::-webkit-scrollbar { display: none; }
+.scroll-container { scrollbar-width: none; }
+
+/* Row 984 (Perf): CSS contain on isolated card components */
+.trip-card,
+.event-card,
+.glass-card {
+  contain: layout style;
+}
