@@ -23,6 +23,8 @@ interface GlassBtnProps {
   size?: Size;
   onClick?: () => void;
   disabled?: boolean;
+  loading?: boolean;
+  loadingLabel?: string;
   style?: CSSProperties;
   type?: 'button' | 'submit' | 'reset';
 }
@@ -92,22 +94,26 @@ function getVariantStyles(variant: Variant) {
 
 export default function GlassBtn({
   children, variant = 'default', size = 'md',
-  onClick, disabled = false, style = {}, type = 'button',
+  onClick, disabled = false, loading = false, loadingLabel = 'Saving…',
+  style = {}, type = 'button',
 }: GlassBtnProps) {
   const sz = SIZES[size];
   const vs = getVariantStyles(variant);
   const hoverCapable = useHoverCapable();
+  const isDisabled = disabled || loading;
 
   return (
     <m.button
       type={type}
       onClick={onClick}
-      disabled={disabled}
-      whileTap={disabled ? {} : { scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
+      disabled={isDisabled}
+      whileTap={isDisabled ? {} : { scale: 0.96, transition: { type: 'spring', stiffness: 500, damping: 20 } }}
       // Only apply hover lift on devices with a real hover pointer — prevents mobile jitter
-      whileHover={disabled || !hoverCapable.current ? {} : { scale: 1.02, y: -4 }}
+      whileHover={isDisabled || !hoverCapable.current ? {} : { scale: 1.02, y: -4 }}
       transition={{ type: 'spring', stiffness: 500, damping: 26 }}
-      aria-disabled={disabled}
+      aria-disabled={isDisabled}
+      aria-busy={loading || undefined}
+      aria-label={loading ? loadingLabel : undefined}
       style={{
         height: sz.h,
         padding: `0 ${sz.px}px`,
@@ -115,8 +121,8 @@ export default function GlassBtn({
         fontFamily: 'var(--font-sans)',
         fontWeight: 600,
         letterSpacing: '-0.01em',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        pointerEvents: disabled ? 'none' : undefined,
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        pointerEvents: isDisabled ? 'none' : undefined,
         border: vs.border || 'none',
         borderRadius: 9999,
         color: vs.color,
@@ -130,7 +136,7 @@ export default function GlassBtn({
         gap: 6,
         minWidth: 44,
         minHeight: 44,
-        opacity: disabled ? 0.45 : 1,
+        opacity: isDisabled ? 0.45 : 1,
         transition: 'background 0.18s ease, box-shadow 0.18s ease',
         WebkitTapHighlightColor: 'transparent',
         touchAction: 'manipulation',
@@ -140,7 +146,23 @@ export default function GlassBtn({
         ...style,
       }}
     >
-      {children}
+      {loading ? (
+        <>
+          <span
+            className="an-spin"
+            aria-hidden="true"
+            style={{
+              width: sz.fs, height: sz.fs,
+              border: `2px solid currentColor`,
+              borderTopColor: 'transparent',
+              borderRadius: '50%',
+              display: 'inline-block',
+              flexShrink: 0,
+            }}
+          />
+          {loadingLabel}
+        </>
+      ) : children}
     </m.button>
   );
 }

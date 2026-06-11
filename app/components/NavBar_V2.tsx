@@ -29,7 +29,7 @@ const TABS: TabEntry[] = [
   { kind: 'screen', id: 'day',       icon: 'compass',   label: 'Explore',  labelHe: 'גלה',    ariaKey: 'navDayPlanner' },
   { kind: 'screen', id: 'map',       icon: 'map',       label: 'Map',      labelHe: 'מפה',    ariaKey: 'navMap' },
   { kind: 'screen', id: 'supplies',  icon: 'checklist', label: 'Pack',     labelHe: 'ציוד',   ariaKey: 'navPacking' },
-  { kind: 'action', id: 'wishlist',  icon: 'star',      label: 'Wishlist', labelHe: 'משאלות', ariaKey: 'navWishlistTab' },
+  { kind: 'action', id: 'wishlist',  icon: 'star',      label: 'Wishlist', labelHe: 'כוכב',   ariaKey: 'navWishlistTab' },
 ];
 
 const TAB_W       = 50;
@@ -310,6 +310,9 @@ export default function NavBar_V2({
                   lineHeight: 1,
                   whiteSpace: 'nowrap',
                   textTransform: isHe ? 'none' : 'uppercase',
+                  maxWidth: TAB_W - 4,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}>
                   {isHe ? tab.labelHe : tab.label}
                 </span>

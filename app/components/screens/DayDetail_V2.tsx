@@ -264,21 +264,27 @@ function HotelSheet({ dayNum, existing, onClose }: {
 
 // ── QuickAction ───────────────────────────────────────────────────────────────
 
-function QuickAction({ icon, label, onClick, color }: { icon: string; label: string; onClick: () => void; color: string }) {
+function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger }: { icon: string; label: string; onClick: () => void; color: string; ariaLabel?: string; isDanger?: boolean }) {
+  const [hovered, setHovered] = React.useState(false);
   return (
     <m.button
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
+      aria-label={ariaLabel}
+      onMouseEnter={() => isDanger && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       style={{
         height: 44, padding: '0 12px', gap: 6, flexShrink: 0,
         display: 'flex', alignItems: 'center',
-        background: 'var(--lg-panel-strong)',
-        color: 'var(--lg-ink)', border: 'none', borderRadius: 9999, cursor: 'pointer',
+        background: isDanger && hovered ? 'var(--danger-bg)' : 'var(--lg-panel-strong)',
+        color: isDanger && hovered ? 'var(--danger)' : 'var(--lg-ink)',
+        border: 'none', borderRadius: 9999, cursor: 'pointer',
         boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
         fontFamily: 'var(--font-sans)',
+        transition: 'background .2s, color .2s',
       }}
     >
-      <Icon name={icon as any} size={15} color={color} />
+      <Icon name={icon as any} size={15} color={isDanger && hovered ? 'var(--danger)' : color} />
       <span style={{ fontSize: 12, fontWeight: 600 }}>{label}</span>
     </m.button>
   );
@@ -359,7 +365,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
             <QuickAction icon="edit"    label={locale === 'he' ? 'עריכה'    : 'Edit'}       color="var(--lg-forest)" onClick={() => { setOpen(false); onEdit(event); }} />
             <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onReschedule(event); }} />
             <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'Suggest'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
-            <QuickAction icon="trash"   label={locale === 'he' ? 'מחק'      : 'Delete'}     color="var(--danger)"    onClick={() => { setOpen(false); onDelete(event.id); }} />
+            <QuickAction icon="trash"   label={locale === 'he' ? 'מחק'      : 'Delete'}     color="var(--danger)"    onClick={() => { setOpen(false); onDelete(event.id); }} ariaLabel={locale === 'he' ? 'מחק אירוע' : 'Delete event'} isDanger />
           </div>
         </div>
       </div>

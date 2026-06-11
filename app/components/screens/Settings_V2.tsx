@@ -197,12 +197,13 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
           icon="globe"
           title={t('languageLabel') || 'Language'}
           right={
-            <div className="lg" role="group" aria-label="Language" style={{ display: 'flex', padding: 3, borderRadius: 9999, gap: 2, boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)' }}>
+            <div className="lg" role="radiogroup" aria-label="Language" style={{ display: 'flex', padding: 3, borderRadius: 9999, gap: 2, boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)' }}>
               {(['en', 'he'] as Locale[]).map(l => (
                 <button
                   key={l}
                   onClick={() => setLocale(l)}
-                  aria-pressed={locale === l}
+                  role="radio"
+                  aria-checked={locale === l}
                   style={{
                     borderRadius: 9999, padding: '5px 11px', border: 0, cursor: 'pointer',
                     fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 12,
@@ -260,12 +261,13 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         transition={{ delay: 0.17, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         style={{ padding: 16, marginBottom: 16 }}
       >
-        <div style={{ display: 'flex', gap: 8 }} role="group" aria-label="Theme">
+        <div style={{ display: 'flex', gap: 8 }} role="radiogroup" aria-label="Theme">
           {themeOptions.map(opt => (
             <button
               key={opt.id}
               onClick={() => setThemeMode(opt.id)}
-              aria-pressed={themeMode === opt.id}
+              role="radio"
+              aria-checked={themeMode === opt.id}
               style={{
                 flex: 1, border: 0, cursor: 'pointer', borderRadius: 14, padding: '14px 0',
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
@@ -349,8 +351,10 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
           background: 'var(--danger-bg)', color: 'var(--danger)',
           boxShadow: 'inset 0 0 0 1px oklch(48% 0.130 25 / 18%)',
           marginBottom: 20, WebkitTapHighlightColor: 'transparent',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
         }}
       >
+        <Icon name="trash" size={16} color="var(--danger)" />
         {locale === 'he' ? 'מחק טיול' : 'Delete trip'}
       </m.button>
 
@@ -545,8 +549,9 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                     }
                   }}
                   className="lg-btn"
-                  style={{ flex: 1, height: 52, background: 'var(--danger-bg)', color: 'var(--danger)', boxShadow: 'none' }}
+                  style={{ flex: 1, height: 52, background: 'var(--danger-bg)', color: 'var(--danger)', boxShadow: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                 >
+                  <Icon name="trash" size={16} color="var(--danger)" />
                   {locale === 'he' ? 'מחק' : 'Delete'}
                 </button>
               </div>
