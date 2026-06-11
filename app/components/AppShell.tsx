@@ -81,7 +81,7 @@ function BudgetAlertWatcher() {
     const fmtLocale = locale === 'he' ? 'he-IL' : 'en-US';
     const fmt = (n: number) => `${currency} ${Math.abs(n).toLocaleString(fmtLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     if (lastBudgetAlert.type === 'over') {
-      const overBy = lastBudgetAlert.overBy ?? Math.abs(lastBudgetAlert.remaining);
+      const overBy = Math.abs(lastBudgetAlert.remaining);
       show(t('budgetOverAlert').replace('{amt}', fmt(overBy)));
     } else {
       show(t('budgetEightyAlert').replace('{amt}', fmt(lastBudgetAlert.remaining)));
