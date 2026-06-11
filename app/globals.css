@@ -247,6 +247,9 @@
   --route-badge-border: rgba(59,126,212,0.22);
   --hotel-route-bg:     rgba(59,126,212,0.05);
   --hotel-route-border: rgba(59,126,212,0.18);
+
+  /* Row 176: Sheet backdrop — warm dark overlay */
+  --sheet-backdrop: rgba(26, 20, 16, 0.55);
 }
 
 /* ─── Dark Mode ───────────────────────────────────────────────────── */
@@ -300,6 +303,7 @@
     --shadow-md: 0 4px 16px oklch(0% 0 0 / 46%), 0 2px 6px oklch(0% 0 0 / 26%);
     --shadow-lg: 0 12px 40px oklch(0% 0 0 / 55%), 0 4px 12px oklch(0% 0 0 / 30%);
     --shadow-xl: 0 24px 64px oklch(0% 0 0 / 62%), 0 8px 24px oklch(0% 0 0 / 36%);
+    --sheet-backdrop: rgba(0, 0, 0, 0.65);
   }
 }
 
@@ -399,6 +403,9 @@
   --route-badge-border: rgba(59,126,212,0.38);
   --hotel-route-bg:     rgba(59,126,212,0.07);
   --hotel-route-border: rgba(59,126,212,0.20);
+
+  /* Row 176: Sheet backdrop darkened for dark mode — 35% black on dark bg barely darkens */
+  --sheet-backdrop: rgba(0, 0, 0, 0.65);
 }
 
 /* data-theme="dark" alias — ds.css uses this selector */
@@ -2083,6 +2090,71 @@ body::after {
 
 /* RTL font redirection is handled in the base RTL block above — Assistant covers both scripts */
 
+/* ── RTL medium: typography adjustments (rows 780-782) ─────────── */
+[dir="rtl"] body, [dir="rtl"] p, [dir="rtl"] li,
+:lang(he) body, :lang(he) p, :lang(he) li {
+  letter-spacing: 0.01em;    /* Row 781: Hebrew glyphs are narrow — slight loosening */
+  line-height: 1.7;           /* Row 782: diacritics may clip at tight line-height */
+}
+/* Row 780: Hebrew text renders visually larger at same px — slight reduction keeps parity */
+:lang(he), [dir="rtl"] {
+  font-size: 0.975em;
+}
+:lang(he) input, :lang(he) textarea, :lang(he) button,
+[dir="rtl"] input, [dir="rtl"] textarea, [dir="rtl"] button {
+  font-size: 1em; /* reset — 0.975em on root is enough; don't double-apply */
+  letter-spacing: 0.01em;
+}
+
+/* ── RTL medium: form label alignment (row 767) ──────────────────── */
+[dir="rtl"] label, :lang(he) label {
+  text-align: start;
+}
+
+/* ── RTL medium: placeholder direction (row 769) ─────────────────── */
+[dir="rtl"] input::placeholder,
+[dir="rtl"] textarea::placeholder,
+:lang(he) input::placeholder,
+:lang(he) textarea::placeholder {
+  direction: rtl;
+  unicode-bidi: embed;
+}
+
+/* ── RTL medium: numbers always LTR (row 761) ───────────────────── */
+.num-ltr {
+  direction: ltr;
+  unicode-bidi: embed;
+  display: inline-block;
+}
+
+/* ── RTL medium: chip close X on left in RTL (row 770) ──────────── */
+[dir="rtl"] .chip-close,
+:lang(he) .chip-close {
+  margin-inline-start: auto;
+  margin-inline-end: 0;
+}
+
+/* ── RTL medium: progress bar fills from right in RTL (row 778) ──── */
+[dir="rtl"] [role="progressbar"] > *,
+[dir="rtl"] .progress-fill {
+  margin-inline-start: auto;
+}
+[dir="rtl"] progress { direction: rtl; }
+
+/* ── RTL medium: settings toggle label order (row 775) ──────────── */
+[dir="rtl"] .settings-row,
+:lang(he) .settings-row {
+  flex-direction: row-reverse;
+}
+
+/* ── RTL medium: event card time column (row 776) ───────────────── */
+[dir="rtl"] .event-time,
+:lang(he) .event-time {
+  text-align: start;
+  padding-inline-start: 0;
+  padding-inline-end: 12px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .a-rise, .a-pop, .a-fade, .a-float {
     animation-duration: 0.001ms !important;
@@ -2146,4 +2218,102 @@ body::after {
   }
   /* Keep spin but slow it down so loaders still work */
   .an-spin { animation-duration: 1.5s !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — batched from UI/UX audit rows 100–203
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 100: Disabled state — clear visual indication */
+:disabled,
+[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+button:disabled, a[aria-disabled="true"] {
+  pointer-events: none;
+}
+
+/* Row 131: Form field focus glow consistently uses brand green */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 1.5px var(--field-border-focused),
+              0 0 0 3px var(--brand-muted);
+}
+
+/* Row 171: Dark placeholder opacity — more visible without competing with input text */
+[data-dark="true"] ::placeholder {
+  color: oklch(100% 0 0 / 35%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) ::placeholder {
+    color: oklch(100% 0 0 / 35%);
+  }
+}
+
+/* Row 175: Toast dark background — glass surface */
+[data-dark="true"] .toast,
+[data-dark="true"] [role="status"].toast {
+  background: rgba(18, 16, 12, 0.88);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Row 183: Toggle "off" state visible against dark glass (row 183) */
+[data-dark="true"] .toggle-off,
+[data-dark="true"] [role="switch"][aria-checked="false"] {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Row 185: Ring/donut progress track dark — must be visible on dark bg */
+[data-dark="true"] .ring-track {
+  stroke: oklch(100% 0 0 / 10%);
+}
+
+/* Row 187: Category / packing pills in dark mode */
+[data-dark="true"] .category-pill,
+[data-dark="true"] .filter-pill {
+  background: rgba(255, 255, 255, 0.08);
+  color: oklch(82% 0.014 65);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Row 190: Eyebrow labels in dark mode — use text-2 not text-3 for readability */
+[data-dark="true"] .eyebrow,
+[data-dark="true"] .section-eyebrow,
+[data-dark="true"] .eyebrow-lg {
+  color: var(--text-2);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .eyebrow,
+  :root:not([data-dark="false"]) .section-eyebrow,
+  :root:not([data-dark="false"]) .eyebrow-lg {
+    color: var(--text-2);
+  }
+}
+
+/* Row 192: Form error dark — soften red to avoid harshness on dark surface */
+[data-dark="true"] .field-error,
+[data-dark="true"] [role="alert"] {
+  color: var(--danger);
+}
+[data-dark="true"] input[aria-invalid="true"],
+[data-dark="true"] textarea[aria-invalid="true"] {
+  box-shadow: inset 0 0 0 1.5px rgba(220, 60, 40, 0.6) !important;
+}
+
+/* Row 203: Notes textarea dark — plain bg needs subtle glass treatment */
+[data-dark="true"] .notes-textarea {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .notes-textarea {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 14px;
+  }
 }

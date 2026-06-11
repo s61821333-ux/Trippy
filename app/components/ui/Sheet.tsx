@@ -148,6 +148,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
     <AnimatePresence>
       <m.div
         key="sheet-backdrop"
+        className="sheet-backdrop-overlay"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -155,7 +156,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
         onClick={isDismissable ? onClose : undefined}
         style={{
           position: 'fixed', inset: 0, zIndex: 200,
-          background: 'rgba(26, 20, 16, 0.55)',
+          background: 'var(--sheet-backdrop, rgba(26, 20, 16, 0.55))',
           display: 'flex',
           alignItems: full ? 'stretch' : 'flex-end',
           justifyContent: full ? 'flex-end' : undefined,

@@ -154,6 +154,7 @@ export default function Field({
             maxLength={maxLength}
             inputMode={inputMode}
             enterKeyHint={enterKeyHint}
+            dir="auto"
             {...sharedProps}
           />
         )}

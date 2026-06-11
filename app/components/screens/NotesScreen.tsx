@@ -55,6 +55,8 @@ export default function NotesScreen() {
             onChange={e => setNewNote(e.target.value)}
             placeholder={t('notePlaceholder') as string || 'Write a note…'}
             rows={3}
+            dir="auto"
+            className="notes-textarea"
             onKeyDown={e => { if (e.key === 'Enter' && e.metaKey) handleAdd(); }}
             style={{
               width: '100%', boxSizing: 'border-box', padding: '12px 16px',
