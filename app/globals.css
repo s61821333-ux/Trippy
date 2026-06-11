@@ -2797,3 +2797,218 @@ body {
   background: rgba(220, 50, 40, 0.08);
   border: 1px solid rgba(220, 50, 40, 0.20);
 }
+
+/* Row 225: Gradient text — increase lightness in dark mode */
+[data-dark="true"] .gradient-text {
+  filter: brightness(1.35);
+}
+
+/* Row 229: GlassBtn ghost in dark mode */
+[data-dark="true"] .lg-btn-ghost,
+[data-dark="true"] button.ghost {
+  color: rgba(255, 255, 255, 0.80) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Row 232: Journey scroll horizontal fade in dark */
+[data-dark="true"] .scroll-fade-x {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 32px,
+    black calc(100% - 32px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 32px,
+    black calc(100% - 32px),
+    transparent 100%
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — Light Mode batch (rows 239-297)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 239: Card shadow — two-layer for better depth on light bg */
+.glass-card,
+.trip-card,
+.v2-card {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.10),
+    0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* Row 242: Glass border in light mode — subtle but visible */
+.glass,
+.lg {
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Row 247: Sheet backdrop — slightly stronger in light mode */
+:root {
+  --sheet-backdrop: rgba(26, 20, 16, 0.45);
+}
+
+/* Row 248: Input field light mode styling */
+input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  background: rgba(255, 255, 255, 0.60);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Row 252: Skeleton shimmer light (Skeleton.module.css uses own animation) */
+/* Handled per row 98 above */
+
+/* Row 258: Toggle off state in light — defined border */
+[role="switch"][aria-checked="false"],
+.toggle-off {
+  background: oklch(80% 0.010 55) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — Spacing batch (rows 298-387)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 298: Page padding — padding-inline token */
+.page-content,
+.resp-content {
+  padding-inline: var(--page-px, 24px);
+}
+
+/* Row 311: Primary button minimum width */
+.lg-btn-forest,
+.lg-btn-accent,
+button[data-primary] {
+  min-width: 120px;
+}
+
+/* Row 316: Field label gap */
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+
+/* Row 319: Settings section spacing */
+.settings-section {
+  margin-block: var(--space-6, 24px);
+}
+
+/* Row 336: Toast above NavBar */
+.toast-container,
+[role="status"].toast,
+[role="alert"].toast {
+  bottom: calc(var(--navbar-height, 80px) + 16px) !important;
+}
+
+/* Row 338: Z-index scale documentation as tokens */
+:root {
+  --z-content:  1;
+  --z-card:     10;
+  --z-sheet:    20;
+  --z-modal:    30;
+  --z-toast:    50;
+  --z-tour:     100;
+}
+
+/* Row 352: Notes textarea padding */
+.notes-textarea {
+  padding: var(--space-4, 16px);
+}
+
+/* Row 368: Offline banner */
+.offline-banner,
+.sync-error-bar {
+  min-height: 44px;
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 12px);
+}
+
+/* Row 374: Chip wrap */
+.chip-row,
+.filter-chips,
+.category-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+/* Row 376: Horizontal scroll container padding */
+.h-scroll,
+.scroll-x-container {
+  padding-inline-start: var(--page-px, 24px);
+  padding-inline-end: var(--page-px, 24px);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+.h-scroll > *,
+.scroll-x-container > * {
+  scroll-snap-align: start;
+}
+
+/* Row 379: Section title bottom spacing */
+.section-title,
+.section-label {
+  margin-block-end: var(--space-3, 12px);
+}
+
+/* Row 385: Page title to content gap */
+.page-header {
+  margin-block-end: var(--space-5, 20px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   MEDIUM PRIORITY FIXES — Buttons batch (rows 388-469)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 404: Full-width button */
+.btn-full,
+button[data-full] {
+  width: 100%;
+}
+
+/* Row 408: NavBar FAB gap */
+.navbar-fabs {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Row 413: Edit button hover */
+.btn-edit:hover,
+button[aria-label*="Edit"]:hover,
+button[aria-label*="ערוך"]:hover {
+  color: var(--brand);
+}
+
+/* Row 415: Save button sticky in sheets */
+.sheet-cta {
+  position: sticky;
+  bottom: 0;
+  padding: 16px 0;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  background: inherit;
+  backdrop-filter: inherit;
+  -webkit-backdrop-filter: inherit;
+}
+
+/* Row 453: Button label — no wrap, clip */
+button,
+.lg-btn,
+[role="button"] {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Row 451: Enter key hint on inputs */
+input[enterkeyhint] {
+  /* CSS can't set enterKeyHint — done in components */
+}
