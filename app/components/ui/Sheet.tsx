@@ -207,6 +207,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', margin: '12px 0 20px' }}>
             <div
               aria-hidden="true"
+              className="sheet-handle"
               style={{
                 width: 40, height: 4,
                 background: 'var(--border-strong)',

@@ -37,6 +37,8 @@
   /* Brand — deep forest green (oklch perceptual) */
   --brand:              oklch(42% 0.092 155); /* overrides sRGB fallback above */
   --brand-hover:        oklch(35% 0.080 155);
+  /* Row 83: vivid brand for hover states in light mode where base may look muted */
+  --brand-vivid:        oklch(38% 0.110 155);
   --brand-light:        oklch(94% 0.032 155);
   --brand-muted:        oklch(42% 0.092 155 / 10%);
   --primary-container:  oklch(50% 0.100 155);
@@ -2316,4 +2318,133 @@ select:focus-visible {
     border: 1px solid rgba(255, 255, 255, 0.10);
     border-radius: 14px;
   }
+}
+
+/* ─── Medium: Glass specular reduced opacity in dark mode (row 211) ─────── */
+/* .lg::before already has a custom dark background — only reduce .glass::before */
+[data-dark="true"] .glass::before {
+  opacity: 0.3;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .glass::before {
+    opacity: 0.3;
+  }
+}
+
+/* ─── Medium: Sheet drag handle visible in dark (row 217) ───────────────── */
+[data-dark="true"] .sheet-handle,
+[data-dark="true"] [data-sheet-handle] {
+  background: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* ─── Medium: Empty state vertical centering (row 335) ─────────────────── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  text-align: center;
+  gap: var(--space-4, 16px);
+  padding: var(--space-6, 24px);
+}
+
+/* ─── Medium: Ghost button border visible (row 393) ────────────────────── */
+.lg-btn-ghost,
+button.ghost {
+  border: 1.5px solid rgba(0, 0, 0, 0.18) !important;
+}
+[data-dark="true"] .lg-btn-ghost,
+[data-dark="true"] button.ghost {
+  border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+/* ─── Medium: Close button hover circle (row 411) ──────────────────────── */
+.btn-close:hover,
+button[aria-label="Close"]:hover,
+button[aria-label="סגור"]:hover {
+  background: rgba(0, 0, 0, 0.07);
+  border-radius: 50%;
+}
+[data-dark="true"] .btn-close:hover,
+[data-dark="true"] button[aria-label="Close"]:hover,
+[data-dark="true"] button[aria-label="סגור"]:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Medium: Progress bar thickness (row 369) ─────────────────────────── */
+.progress-bar {
+  height: 8px;
+  border-radius: var(--radius-full, 9999px);
+  overflow: hidden;
+  background: var(--border);
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--brand);
+  transition: width 0.5s ease;
+}
+
+/* ─── Medium: Card hover transition (row 603) ──────────────────────────── */
+.glass-card,
+.trip-card,
+.event-card {
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .glass-card:hover,
+  .trip-card:hover,
+  .event-card:hover {
+    transform: scale(1.01) translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+/* ─── Medium: Card divider lines (row 658) ──────────────────────────────── */
+.card-divider {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+[data-dark="true"] .card-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ─── Medium: Skeleton shimmer RTL direction (row 626) ─────────────────── */
+[dir="rtl"] .shimmer,
+[dir="rtl"] .skeleton {
+  animation-direction: reverse;
+}
+
+/* ─── Medium: Scroll fade edges for horizontal lists (row 266, 910) ──────── */
+.scroll-fade-x {
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 32px,
+    black calc(100% - 32px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 32px,
+    black calc(100% - 32px),
+    transparent 100%
+  );
+}
+[dir="rtl"] .scroll-fade-x {
+  -webkit-mask-image: linear-gradient(
+    to left,
+    transparent 0%,
+    black 32px,
+    black calc(100% - 32px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to left,
+    transparent 0%,
+    black 32px,
+    black calc(100% - 32px),
+    transparent 100%
+  );
 }

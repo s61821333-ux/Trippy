@@ -197,6 +197,7 @@ export default function NavBar_V2({
           className="lg lg-strong"
           aria-label={t('navMenu')}
           aria-expanded={expandOpen}
+          aria-haspopup="menu"
           style={{
             width: 52, height: 52,
             borderRadius: 9999,

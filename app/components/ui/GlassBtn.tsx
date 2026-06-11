@@ -70,7 +70,7 @@ function getVariantStyles(variant: Variant) {
       return {
         bg: 'transparent',
         color: 'var(--text-2)',
-        border: 'none',
+        border: '1.5px solid oklch(13% 0.012 55 / 18%)',
         shadow: 'none',
       };
     case 'flat':
