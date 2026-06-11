@@ -385,7 +385,7 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
         </div>
 
         <p style={{ fontSize: 10, color: 'var(--text-3)', margin: '8px 0 0', fontFamily: 'var(--font-mono)' }}>
-          {isHe ? '⚡ מופעל על ידי Claude · ~3–5 שניות' : '⚡ Powered by Claude · ~3–5 sec'}
+          {isHe ? 'מופעל על ידי Claude · ~3–5 שניות' : 'Powered by Claude · ~3–5 sec'}
         </p>
       </div>
     </div>

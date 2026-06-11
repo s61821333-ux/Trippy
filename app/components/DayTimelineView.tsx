@@ -184,7 +184,8 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
               }}
             >
               <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: 4 }}>
-                ⚡ {gapMins}min free
+                <Icon name="sparkle" size={10} aria-hidden />
+                {gapMins}min free
               </span>
               <m.button
                 whileTap={{ scale: 0.9 }}

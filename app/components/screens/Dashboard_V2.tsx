@@ -336,7 +336,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
               onClick={e => { e.stopPropagation(); setFetchErr(false); fetchIntel(); }}
               style={{ fontSize: 12, color: 'var(--terra-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, touchAction: 'manipulation' }}
             >
-              {isHe ? '⟳ נסה שוב' : '⟳ Tap to retry'}
+              {isHe ? 'נסה שוב' : 'Tap to retry'}
             </button>
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>

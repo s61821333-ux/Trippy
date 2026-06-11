@@ -95,7 +95,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
           color: 'var(--text-3)', display: 'flex', pointerEvents: 'none',
         }}>
           {resolving ? (
-            <span style={{ fontSize: 12, animation: 'spin 1s linear infinite' }}>⟳</span>
+            <span style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--brand)', animation: 'spin 0.8s linear infinite', display: 'block' }} aria-hidden />
           ) : (
             <Icon name="pin" size={14} />
           )}
