@@ -3426,3 +3426,231 @@ html[data-dark="true"] {
     background-color: oklch(9% 0.010 55);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   LOW PRIORITY FIXES — 🟢 batch (selected CSS-only rows)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Row 18: WorldClock time digits — tabular nums */
+.world-clock-time,
+.world-clock .time {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Row 19: Ring center text — tabular nums */
+.ring-center-text {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Row 29: Crew name truncation */
+.crew-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80px;
+}
+
+/* Row 42: Weather temp — tabular nums */
+.weather-temp {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-2xl, 1.5rem);
+}
+
+/* Row 52: Optical sizing for DM Sans */
+body, * {
+  font-optical-sizing: auto;
+}
+
+/* Row 54: will-change: transform (not contents) for entry animations */
+.a-rise, .a-pop, .a-fade, .a-float {
+  will-change: transform, opacity;
+}
+
+/* Row 60: Grain pseudo-element — pointer-events: none */
+.grain::before,
+.grain::after {
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Row 153: Print styles — hide chrome, show content */
+@media print {
+  .nav-pill,
+  .navbar-root,
+  [role="navigation"],
+  .sheet-backdrop-overlay,
+  .toast-container {
+    display: none !important;
+  }
+  html, body {
+    background: white !important;
+    color: black !important;
+    filter: none !important;
+  }
+  .glass, .lg {
+    background: white !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+/* Row 163: Dark bg very subtle warm overlay */
+[data-dark="true"] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at top,
+    oklch(18% 0.02 55 / 0.03) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Row 169: Inner glow on dark cards for elevation feel */
+[data-dark="true"] .glass-card,
+[data-dark="true"] .trip-card,
+[data-dark="true"] .event-card {
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.30),
+    0 4px 16px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Row 174: Active nav blob in dark — slightly more luminous */
+[data-dark="true"] .nav-pill .blob,
+[data-dark="true"] [data-nav-blob] {
+  filter: saturate(1.1);
+}
+
+/* Row 180: Grain opacity in dark — reduce noise */
+[data-dark="true"] body::after,
+[data-dark="true"] .grain::before {
+  opacity: 0.035;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .grain::before {
+    opacity: 0.035;
+  }
+}
+
+/* Row 194: Trip theme stripe opacity in dark */
+[data-dark="true"] .trip-card[data-stripe] {
+  opacity: 0.80;
+}
+
+/* Row 206: Scroll indicator dots — dark mode */
+[data-dark="true"] .scroll-dot {
+  background: rgba(255, 255, 255, 0.25);
+}
+[data-dark="true"] .scroll-dot[aria-current="true"],
+[data-dark="true"] .scroll-dot--active {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* Row 214: Assignment chip dark */
+[data-dark="true"] .assignment-chip {
+  background: rgba(196, 113, 74, 0.15);
+  color: rgba(255, 255, 255, 0.80);
+}
+
+/* Row 215: Timeline track dark */
+[data-dark="true"] .timeline-track {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Row 233: Print pure white bg note — warm off-white confirmed ✓ */
+
+/* Row 269: Chip 'open' variant — min contrast */
+.chip[data-variant="open"],
+.chip--open {
+  background: oklch(42% 0.13 155 / 0.15);
+  color: oklch(32% 0.10 155);
+  border: 1px solid oklch(42% 0.13 155 / 0.30);
+}
+[data-dark="true"] .chip[data-variant="open"],
+[data-dark="true"] .chip--open {
+  background: oklch(65% 0.10 155 / 0.20);
+  color: oklch(78% 0.08 155);
+}
+
+/* Row 270: Supply category header in light */
+.supply-category-header {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  padding-block-end: var(--space-2, 8px);
+  border-bottom: 1px solid var(--border);
+  padding-inline: 0;
+}
+[dir="rtl"] .supply-category-header,
+:lang(he) .supply-category-header {
+  text-transform: none;
+}
+
+/* Row 283: Packing checkbox unchecked state */
+.packing-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-strong);
+  border-radius: 50%;
+  background: white;
+  flex-shrink: 0;
+}
+
+/* Row 285: Empty state — muted warm colors */
+.empty-state-icon {
+  color: var(--text-3);
+  opacity: 0.55;
+}
+
+/* Row 308: Card grid gap on mobile */
+.resp-dash-grid {
+  gap: var(--gap-md, 16px);
+}
+@media (min-width: 768px) {
+  .resp-dash-grid {
+    gap: var(--gap-lg, 20px);
+  }
+}
+
+/* Row 325: Chip padding — slightly more breathing room */
+.chip {
+  padding: 4px 10px;
+}
+
+/* Row 347: Between stats in dashboard */
+.stat-unit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1, 4px);
+  align-items: center;
+}
+
+/* Row 373: Stacked form buttons */
+.form-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3, 12px);
+}
+
+/* Row 450: Scroll-to-top button */
+.scroll-to-top {
+  position: fixed;
+  inset-block-end: calc(var(--navbar-clearance) + 16px);
+  inset-inline-end: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: var(--z-toast, 50);
+}
+.scroll-to-top[data-visible="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
