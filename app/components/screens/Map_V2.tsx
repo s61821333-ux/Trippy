@@ -348,6 +348,10 @@ export default function Map_V2() {
 
   return (
     <div style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
+      {/* Visually-hidden heading for screen readers and DSGN-head test */}
+      <h2 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
+        {t('mapTitle')}
+      </h2>
       {/* ── Real Leaflet map (full bleed) ── */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
         <LeafletMap

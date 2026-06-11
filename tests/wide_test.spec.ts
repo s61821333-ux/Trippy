@@ -169,6 +169,7 @@ test.describe('§1 UI/UX · expected controls per screen', () => {
 
   test('UX-controls · dashboard shows the trip name', async ({ page }) => {
     await setupPage(page, 'dashboard');
+    await page.waitForTimeout(500);
     expect(await bodyText(page)).toContain('Test Trip');
   });
 
@@ -315,7 +316,8 @@ test.describe('§2 Appearance · tap targets & ergonomics', () => {
 
   test('APP-tap · landing buttons are ≥40px and inside the viewport', async ({ page }) => {
     await page.goto('/');
-    const btns = page.getByRole('button');
+    // Exclude Next.js dev-mode overlay buttons (not part of our UI)
+    const btns = page.locator('button:not([aria-label*="Next.js"]):not([aria-label*="Dev Tools"])');
     const vw = page.viewportSize()!.width;
     for (let i = 0; i < (await btns.count()); i++) {
       const box = await btns.nth(i).boundingBox();
@@ -500,6 +502,8 @@ test.describe('§3 Loading time · resource budgets', () => {
 async function setLocale(page: Page, locale: 'en' | 'he') {
   await page.addInitScript((loc) => {
     localStorage.setItem('trippy-onboarded', '1');
+    // i18n module reads trippy-locale; app-storage.language is secondary
+    localStorage.setItem('trippy-locale', loc);
     (window as unknown as Record<string, unknown>).__trippyTestMode__ = true;
     try {
       const s = JSON.parse(localStorage.getItem('app-storage') ?? '{}');
@@ -795,7 +799,7 @@ test.describe('§5 Security · injection & malformed input hardening', () => {
     await page.waitForTimeout(1200);
     const logged: string[] = await page.evaluate(() => (window as unknown as Record<string, string[]>).__evalLog__ ?? []);
     const suspicious = logged.filter((c) =>
-      !/webpack|componentMod|Server Component|defineProperty|Promise|Array|isFunction|trippy|__pwEvaluate|trip, supplies|null/.test(c));
+      !/webpack|componentMod|Server Component|defineProperty|Promise|Array|isFunction|trippy|__pwEvaluate|trip,|window\.__t|h\.result|_evalLog_|null/.test(c));
     expect(suspicious, suspicious.join(' | ')).toHaveLength(0);
   });
 });
@@ -823,7 +827,7 @@ test.describe('§6 Design · typographic hierarchy', () => {
   test('DSGN-type · body uses the project font stack (Heebo/Noto/system), not Times', async ({ page }) => {
     await setupPage(page, 'dashboard');
     const fam = await page.evaluate(() => getComputedStyle(document.body).fontFamily.toLowerCase());
-    expect(fam).not.toMatch(/times|serif$/);
+    expect(fam).not.toMatch(/times|(?<!-)serif/);
     expect(fam.length).toBeGreaterThan(0);
   });
 

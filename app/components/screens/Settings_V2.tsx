@@ -211,7 +211,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                     transition: 'all .25s', WebkitTapHighlightColor: 'transparent',
                   }}
                 >
-                  {l === 'en' ? 'EN' : 'עב'}
+                  {l === 'en' ? 'EN' : locale === 'he' ? 'עב' : 'HE'}
                 </button>
               ))}
             </div>

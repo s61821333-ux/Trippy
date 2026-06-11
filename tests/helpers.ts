@@ -87,9 +87,20 @@ export async function setupPage(page: Page, screen = 'dashboard', colorScheme: '
     await page.waitForTimeout(500);
   }
 
-  // Wait for NavBar (appears on all protected screens)
-  await page.locator('[role="navigation"][aria-label="Main navigation"]')
-    .waitFor({ state: 'visible', timeout: 12_000 });
+  // 'home' screen shows the trip list, not a trip view — no NavBar
+  if (screen !== 'home') {
+    await page.locator('[role="navigation"][aria-label="Main navigation"]')
+      .waitFor({ state: 'visible', timeout: 12_000 });
+    // Wait for the dynamic screen component to finish loading (chunks compile lazily in dev)
+    await page.waitForFunction(
+      () => {
+        const main = document.querySelector('main');
+        if (!main) return false;
+        return (main.innerText?.trim()?.length ?? 0) > 5;
+      },
+      { timeout: 12_000, polling: 200 }
+    ).catch(() => {});
+  }
   await page.waitForTimeout(400);
 }
 
