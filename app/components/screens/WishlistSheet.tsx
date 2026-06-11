@@ -313,7 +313,7 @@ function WishCard({ item, onDelete, onSchedule }: {
             )}
           </div>
           {item.notes && (
-            <p style={{ fontSize: 12, color: 'var(--text-3)', margin: '6px 0 0', lineHeight: 1.5 }}>
+            <p dir="auto" style={{ fontSize: 12, color: 'var(--text-3)', margin: '6px 0 0', lineHeight: 1.5 }}>
               {item.notes}
             </p>
           )}

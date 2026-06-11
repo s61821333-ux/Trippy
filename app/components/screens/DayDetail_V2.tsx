@@ -311,7 +311,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
   return (
     <div
       className="lg a-rise"
-      style={{ animationDelay: `${index * 0.05}s`, borderInlineStart: `3px solid ${color}`, margin: '0 20px' }}
+      style={{ animationDelay: `${Math.min(index, 7) * 0.05}s`, borderInlineStart: `3px solid ${color}`, margin: '0 20px' }}
     >
       <button
         onClick={() => setOpen(o => !o)}
@@ -325,7 +325,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
         </div>
         <StampIcon iconKey={stampKey} size={42} style={{ flexShrink: 0 }} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15.5, fontWeight: 600, color: 'var(--lg-ink)', letterSpacing: '-0.01em', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+          <div dir="auto" style={{ fontSize: 15.5, fontWeight: 600, color: 'var(--lg-ink)', letterSpacing: '-0.01em', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
             {event.name}
           </div>
           {event.location && (
@@ -360,7 +360,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
               </div>
             )}
           </div>
-          {event.notes && <p style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--text-2)', margin: '0 0 14px' }}>{event.notes}</p>}
+          {event.notes && <p dir="auto" style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--text-2)', margin: '0 0 14px' }}>{event.notes}</p>}
           <div className="lg-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
             <QuickAction icon="edit"    label={locale === 'he' ? 'עריכה'    : 'Edit'}       color="var(--lg-forest)" onClick={() => { setOpen(false); onEdit(event); }} />
             <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onReschedule(event); }} />
@@ -392,7 +392,7 @@ function TimelineView({ events }: { events: TripEvent[] }) {
         const top    = (toMins(ev.time) / 60 / 2) * TICK_H;
         const height = Math.max((ev.duration / 60 / 2) * TICK_H, 28);
         return (
-          <m.div key={ev.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 32, delay: i * 0.07 }}
+          <m.div key={ev.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 32, delay: Math.min(i, 7) * 0.07 }}
             style={{ position: 'absolute', insetInlineStart: 46, insetInlineEnd: 20, top, height, borderRadius: 12, padding: '4px 8px', background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff', boxShadow: `0 6px 18px ${color}55`, overflow: 'hidden' }}
           >
             <div style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.05, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.name}</div>

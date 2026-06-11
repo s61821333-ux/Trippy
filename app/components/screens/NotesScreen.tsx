@@ -96,11 +96,11 @@ export default function NotesScreen() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: 40, transition: { duration: 0.16 } }}
-                transition={{ delay: i * 0.04 }}
+                transition={{ delay: Math.min(i, 7) * 0.04 }}
                 style={{ padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}
               >
                 <Icon name="edit" size={18} color="var(--lg-terra)" style={{ flexShrink: 0, marginTop: 2 }} />
-                <span style={{ flex: 1, fontSize: 14, color: 'var(--lg-ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                <span dir="auto" style={{ flex: 1, fontSize: 14, color: 'var(--lg-ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                   {note}
                 </span>
                 <m.button

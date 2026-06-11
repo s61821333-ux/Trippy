@@ -670,7 +670,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                transition={{ ...spring.snap, delay: i * 0.06 }}
+                transition={{ ...spring.snap, delay: Math.min(i, 7) * 0.06 }}
                 layout
               >
                 <SuggCard

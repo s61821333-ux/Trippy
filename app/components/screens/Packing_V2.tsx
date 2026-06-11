@@ -152,7 +152,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
           position: 'relative',
           display: 'flex', alignItems: 'center',
           padding: 0,
-          textAlign: isRTL ? 'right' : 'left',
+          textAlign: 'start',
           width: '100%',
           WebkitTapHighlightColor: 'transparent',
           touchAction: 'pan-y',

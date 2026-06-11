@@ -256,7 +256,7 @@ export default function Crew_V2() {
                 className="lg"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.18 + i * 0.06, duration: 0.40, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ delay: 0.18 + Math.min(i, 7) * 0.06, duration: 0.40, ease: [0.22, 1, 0.36, 1] }}
                 style={{ display: 'flex', alignItems: 'center', gap: 13, padding: 13 }}
               >
                 <Avatar name={p.name} index={i} size={44} />
@@ -308,7 +308,7 @@ export default function Crew_V2() {
                   className="lg"
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ delay: 0.1 + Math.min(i, 7) * 0.06, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                   style={{ display: 'flex', alignItems: 'center', gap: 13, padding: 13 }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>

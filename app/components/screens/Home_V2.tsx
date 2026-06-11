@@ -470,7 +470,7 @@ export default function Home_V2() {
                 className="lg"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 15,
-                  padding: 18, textAlign: locale === 'he' ? 'right' : 'left',
+                  padding: 18, textAlign: 'start',
                   border: '2px solid var(--lg-terra)', width: '100%',
                   cursor: loadingTripId && !isLoading ? 'default' : 'pointer',
                   opacity: loadingTripId && !isLoading ? 0.48 : 1,
@@ -566,7 +566,7 @@ export default function Home_V2() {
                       role="listitem"
                       initial={{ opacity: 0, y: 14 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.10 + i * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                      transition={{ delay: 0.10 + Math.min(i, 7) * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
                       whileTap={{ scale: 0.97 }}
                       onClick={() => handleOpen(trip.id)}
                       disabled={loadingTripId !== null}
@@ -575,7 +575,7 @@ export default function Home_V2() {
                       className="lg"
                       style={{
                         display: 'flex', alignItems: 'center', gap: 15,
-                        padding: 15, textAlign: locale === 'he' ? 'right' : 'left',
+                        padding: 15, textAlign: 'start',
                         border: 0,
                         cursor: loadingTripId && !isLoading ? 'default' : 'pointer',
                         opacity: loadingTripId && !isLoading ? 0.48 : 1,

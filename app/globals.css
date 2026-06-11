@@ -569,6 +569,10 @@ h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
+/* Row 748: flip directional icons in RTL — only chevrons/arrows use this class.
+   Non-directional icons (trash, star, settings, globe, etc.) must NOT use it. */
+[dir="rtl"] .rtl-flip { transform: scaleX(-1); }
+
 /* ── RTL / Hebrew: redirect ALL UI font vars to Assistant (friendly bilingual) ──
    Assistant covers both Hebrew and Latin scripts warmly.
    Using both [dir="rtl"] and :lang(he) for coverage before and after hydration. */
@@ -664,13 +668,16 @@ select {
 /* High contrast: glass becomes opaque with solid border */
 [data-high-contrast="true"] .glass,
 [data-high-contrast="true"] .glass-panel,
-[data-high-contrast="true"] .glass-float {
+[data-high-contrast="true"] .glass-float,
+[data-high-contrast="true"] .lg,
+[data-high-contrast="true"] .lg-strong {
   background: var(--bg) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border: 1.5px solid var(--text) !important;
 }
-[data-high-contrast="true"] .glass::before { display: none !important; }
+[data-high-contrast="true"] .glass::before,
+[data-high-contrast="true"] .lg::before { display: none !important; }
 
 /* Specular diagonal highlight inside every glass surface — softened, no hard band */
 .glass::before {
@@ -1482,6 +1489,7 @@ body::after {
     --hero-3: oklch(9% 0.018 60);
     --lg-panel:         oklch(26% 0.022 65 / 92%);
     --lg-panel-strong:  oklch(30% 0.024 65 / 98%);
+    --lg-card-border:   transparent;
     --lg-shadow:     0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
     --lg-shadow-lg:  0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
     --lg-glow-terra: 0 10px 34px oklch(66% 0.135 36 / 26%);
@@ -1800,6 +1808,7 @@ body::after {
   --lg-r-card: 26px;
   --lg-r-lg:   34px;
   --lg-r-pill: 9999px;
+  --lg-card-border: rgba(0,0,0,0.08); /* Row 600: visible card border in light mode */
 
   /* Vivid shadows with brand tint */
   --lg-shadow:     0 8px 30px oklch(20% 0.03 60 / 14%), 0 2px 8px oklch(20% 0.03 60 / 8%);
@@ -1826,6 +1835,7 @@ body::after {
      distinct from the #0E0C0A page background (was 55% / 80%) */
   --lg-panel:         oklch(26% 0.022 65 / 92%);
   --lg-panel-strong:  oklch(30% 0.024 65 / 98%);
+  --lg-card-border:   transparent; /* dark mode: border replaces by inset shadow */
 
   --lg-shadow:     0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
   --lg-shadow-lg:  0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
@@ -1842,6 +1852,7 @@ body::after {
   backdrop-filter: var(--lg-blur);
   -webkit-backdrop-filter: var(--lg-blur);
   border-radius: var(--lg-r-card);
+  border: 1px solid var(--lg-card-border, rgba(0,0,0,0.08));
   box-shadow:
     var(--lg-shadow),
     inset 0 1px 0 oklch(100% 0 0 / 42%),
@@ -1860,6 +1871,12 @@ body::after {
   z-index: 0;
 }
 .lg > * { position: relative; z-index: 1; }
+/* Row 644: focus ring on interactive cards (role="button" / tabIndex="0") */
+.lg[role="button"]:focus-visible,
+.lg[tabindex="0"]:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
 
 /* NavBar pill — solid enough to contrast against any background */
 @media (max-width: 767px) {

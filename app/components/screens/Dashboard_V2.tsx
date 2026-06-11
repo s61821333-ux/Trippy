@@ -1033,6 +1033,7 @@ export default function DashboardScreenV2() {
           )}
           <h1
             className="display-xl a-rise d1"
+            dir="auto"
             style={{ fontSize: 'clamp(2.4rem, 10vw, 3.2rem)', color: '#fff', margin: 0 }}
           >
             {trip.name}
@@ -1218,7 +1219,7 @@ export default function DashboardScreenV2() {
             {isEstimatedWeather && (
               <p style={{
                 margin: '4px 0 0', fontSize: 11, color: 'var(--text-3)',
-                textAlign: isRTL ? 'right' : 'left',
+                textAlign: 'start',
               }}>
                 {locale === 'he'
                   ? 'מזג אוויר משוער — נתונים היסטוריים מאותה עונה בשנה שעברה'
