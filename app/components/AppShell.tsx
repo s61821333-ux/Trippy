@@ -496,6 +496,24 @@ function Shell() {
             {locale === 'he' ? 'דלג לתוכן הראשי' : 'Skip to main content'}
           </a>
 
+          {/* Row 578: live region announces navigation for screen readers */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
+          >
+            {screen === 'home' ? (locale === 'he' ? 'ראשי' : 'Home')
+              : screen === 'dashboard' ? (locale === 'he' ? 'לוח בקרה' : 'Dashboard')
+              : screen === 'day' ? (locale === 'he' ? 'תכנון יום' : 'Day planner')
+              : screen === 'map' ? (locale === 'he' ? 'מפה' : 'Map')
+              : screen === 'supplies' ? (locale === 'he' ? 'ציוד' : 'Packing')
+              : screen === 'settings' ? (locale === 'he' ? 'הגדרות' : 'Settings')
+              : screen === 'notes' ? (locale === 'he' ? 'הערות' : 'Notes')
+              : screen === 'crew' ? (locale === 'he' ? 'צוות' : 'Crew')
+              : ''}
+          </div>
+
           {/* Offline banner — shown above nav and content */}
           {isOffline && (
             <div style={{
