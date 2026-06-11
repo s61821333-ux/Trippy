@@ -404,6 +404,30 @@ function Shell() {
     };
   }, []);
 
+  // Row 807: dynamic page title per screen (before early return — Rules of Hooks)
+  useEffect(() => {
+    if (!mounted || !authResolved) return;
+    const SCREEN_TITLES: Record<string, string> = {
+      home: 'Trippy — Your Trips',
+      dashboard: trip ? `${trip.name} — Trippy` : 'Dashboard — Trippy',
+      day: 'Day Planner — Trippy',
+      map: 'Map — Trippy',
+      supplies: 'Packing — Trippy',
+      settings: 'Settings — Trippy',
+    };
+    document.title = SCREEN_TITLES[screen] ?? 'Trippy';
+  }, [mounted, authResolved, screen, trip?.name]);
+
+  // Row 809: move focus to main content h1 after screen navigation (before early return)
+  useEffect(() => {
+    if (!mounted || !authResolved) return;
+    const h1 = document.querySelector<HTMLElement>('#main-content h1');
+    if (h1) {
+      if (!h1.hasAttribute('tabindex')) h1.setAttribute('tabindex', '-1');
+      h1.focus({ preventScroll: true });
+    }
+  }, [mounted, authResolved, screen]);
+
   if (!mounted || !authResolved) {
     return (
       <div style={{
@@ -428,28 +452,6 @@ function Shell() {
   }
 
   const showNav = !!authUser && screen !== 'home';
-
-  // Row 807: dynamic page title per screen
-  useEffect(() => {
-    const SCREEN_TITLES: Record<string, string> = {
-      home: 'Trippy — Your Trips',
-      dashboard: trip ? `${trip.name} — Trippy` : 'Dashboard — Trippy',
-      day: 'Day Planner — Trippy',
-      map: 'Map — Trippy',
-      supplies: 'Packing — Trippy',
-      settings: 'Settings — Trippy',
-    };
-    document.title = SCREEN_TITLES[screen] ?? 'Trippy';
-  }, [screen, trip?.name]);
-
-  // Row 809: move focus to main content h1 after screen navigation
-  useEffect(() => {
-    const h1 = document.querySelector<HTMLElement>('#main-content h1');
-    if (h1) {
-      if (!h1.hasAttribute('tabindex')) h1.setAttribute('tabindex', '-1');
-      h1.focus({ preventScroll: true });
-    }
-  }, [screen]);
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
