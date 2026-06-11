@@ -10,6 +10,7 @@ import { createClient } from '@/utils/supabase/client';
 import dynamic from 'next/dynamic';
 import NavBar_V2 from './NavBar_V2';
 import Icon from './ui/Icon';
+import ErrorBoundary from './ui/ErrorBoundary';
 
 import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
 import { ToastProvider, useToast } from './ui/Toast';
@@ -576,23 +577,25 @@ function Shell() {
               >
                 <div className="w-full h-full">
                   <div className="w-full h-full">
-                    {screen === 'splash' || screen === 'home' || !trip ? (
-                      <Home_V2 />
-                    ) : screen === 'dashboard' ? (
-                      <DashboardScreen />
-                    ) : screen === 'day' ? (
-                      <DayScreen />
-                    ) : screen === 'map' ? (
-                      <MapScreen />
-                    ) : screen === 'crew' ? (
-                      <CrewScreen />
-                    ) : screen === 'supplies' ? (
-                      <SuppliesScreen />
-                    ) : screen === 'settings' ? (
-                      <SettingsScreen onSecurity={() => setShowSecurity(true)} />
-                    ) : screen === 'notes' ? (
-                      <NotesScreen />
-                    ) : null}
+                    <ErrorBoundary>
+                      {screen === 'splash' || screen === 'home' || !trip ? (
+                        <Home_V2 />
+                      ) : screen === 'dashboard' ? (
+                        <DashboardScreen />
+                      ) : screen === 'day' ? (
+                        <DayScreen />
+                      ) : screen === 'map' ? (
+                        <MapScreen />
+                      ) : screen === 'crew' ? (
+                        <CrewScreen />
+                      ) : screen === 'supplies' ? (
+                        <SuppliesScreen />
+                      ) : screen === 'settings' ? (
+                        <SettingsScreen onSecurity={() => setShowSecurity(true)} />
+                      ) : screen === 'notes' ? (
+                        <NotesScreen />
+                      ) : null}
+                    </ErrorBoundary>
                   </div>
                 </div>
               </m.div>
