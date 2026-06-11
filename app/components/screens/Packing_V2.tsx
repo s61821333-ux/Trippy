@@ -659,7 +659,7 @@ export default function Packing_V2() {
           }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '18px 16px', position: 'relative' }}>
-            <Ring pct={pct} size={76} stroke={6} color={pct === 100 ? 'var(--lg-forest)' : 'var(--lg-terra)'}>
+            <Ring pct={pct} size={76} stroke={6} color={pct === 100 ? 'var(--lg-forest)' : 'var(--lg-terra)'} aria-label={locale === 'he' ? 'התקדמות אריזה' : 'Packing progress'}>
               <span style={{ fontSize: 14, fontWeight: 700 }}>{pct}%</span>
             </Ring>
 

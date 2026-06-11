@@ -1877,6 +1877,12 @@ body::after {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
+/* Row 860: glass button focus ring with box-shadow fallback for better contrast on translucent surfaces */
+.lg-btn:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--brand-muted);
+}
 
 /* NavBar pill — solid enough to contrast against any background */
 @media (max-width: 767px) {

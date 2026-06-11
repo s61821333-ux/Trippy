@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useId } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 
 // Full list: [English name, Hebrew name, flag emoji]
@@ -126,6 +126,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
   const [open, setOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
 
   const filtered = query.trim().length === 0
     ? []
@@ -214,6 +215,11 @@ export default function CountriesInput({ value, onChange, label }: Props) {
         {/* Text input */}
         <input
           ref={inputRef}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={open && filtered.length > 0}
+          aria-controls={listboxId}
+          aria-haspopup="listbox"
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true); }}
           onFocus={() => setOpen(true)}
@@ -230,6 +236,8 @@ export default function CountriesInput({ value, onChange, label }: Props) {
       <AnimatePresence>
         {open && filtered.length > 0 && (
           <m.div
+            id={listboxId}
+            role="listbox"
             initial={{ opacity: 0, y: -6, scaleY: 0.92 }}
             animate={{ opacity: 1, y: 0, scaleY: 1 }}
             exit={{ opacity: 0, y: -6, scaleY: 0.92 }}
@@ -245,6 +253,8 @@ export default function CountriesInput({ value, onChange, label }: Props) {
             {filtered.map(([en, he, flag]) => (
               <button
                 key={en}
+                role="option"
+                aria-selected={false}
                 onMouseDown={e => { e.preventDefault(); add(en); }}
                 onTouchEnd={e => { e.preventDefault(); add(en); }}
                 style={{

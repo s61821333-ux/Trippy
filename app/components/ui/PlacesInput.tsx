@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import Icon from './Icon';
 
 export interface PlaceResult {
@@ -29,6 +29,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
   const [resolving, setResolving] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const listboxId = useId();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -90,7 +91,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
       )}
       <div style={{ position: 'relative' }}>
         <span style={{
-          position: 'absolute', left: 12, top: '50%',
+          position: 'absolute', insetInlineStart: 12, top: '50%',
           transform: 'translateY(-50%)',
           color: 'var(--text-3)', display: 'flex', pointerEvents: 'none',
         }}>
@@ -102,6 +103,11 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
         </span>
         <input
           type="search"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={open}
+          aria-controls={listboxId}
+          aria-haspopup="listbox"
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="none"
@@ -127,7 +133,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
           }}
         />
         {open && predictions.length > 0 && (
-          <ul style={{
+          <ul id={listboxId} role="listbox" style={{
             position: 'absolute',
             top: '100%',
             left: 0,
@@ -145,6 +151,8 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
             {predictions.map((pred, i) => (
               <li
                 key={pred.place_id}
+                role="option"
+                aria-selected={false}
                 onMouseDown={() => handleSelect(pred)}
                 onTouchEnd={e => { e.preventDefault(); handleSelect(pred); }}
                 style={{

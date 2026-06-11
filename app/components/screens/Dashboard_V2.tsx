@@ -1307,7 +1307,14 @@ export default function DashboardScreenV2() {
                   <CurrencyAmount amount={Math.abs(budgetRemaining!)} base={currency} />
                 </span>
                 {/* Thin progress bar */}
-                <div style={{ height: 4, borderRadius: 2, background: 'oklch(50% 0.02 60 / 14%)', overflow: 'hidden' }}>
+                <div
+                  role="progressbar"
+                  aria-valuenow={Math.round(budgetPct * 100)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  aria-label={locale === 'he' ? 'שימוש בתקציב' : 'Budget usage'}
+                  style={{ height: 4, borderRadius: 2, background: 'oklch(50% 0.02 60 / 14%)', overflow: 'hidden' }}
+                >
                   <div style={{
                     width: `${Math.round(budgetPct * 100)}%`,
                     height: '100%',

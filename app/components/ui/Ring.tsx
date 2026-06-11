@@ -8,13 +8,21 @@ interface RingProps {
   stroke?: number;
   color?: string;
   children?: React.ReactNode;
+  'aria-label'?: string;
 }
 
-export default function Ring({ pct = 0, size = 56, stroke = 5, color = 'var(--lg-terra)', children }: RingProps) {
+export default function Ring({ pct = 0, size = 56, stroke = 5, color = 'var(--lg-terra)', children, 'aria-label': ariaLabel }: RingProps) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   return (
-    <span style={{ position: 'relative', width: size, height: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+    <span
+      role="progressbar"
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label={ariaLabel}
+      style={{ position: 'relative', width: size, height: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+    >
       <svg width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="oklch(20% 0.03 60 / 12%)" strokeWidth={stroke} />
         <circle
