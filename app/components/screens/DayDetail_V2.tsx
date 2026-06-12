@@ -364,6 +364,20 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
           <div className="lg-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
             <QuickAction icon="edit"    label={locale === 'he' ? 'עריכה'    : 'Edit'}       color="var(--lg-forest)" onClick={() => { setOpen(false); onEdit(event); }} />
             <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onReschedule(event); }} />
+            {(event.location || (event.lat != null && event.lng != null)) && (
+              <QuickAction
+                icon="map"
+                label={locale === 'he' ? 'מפה' : 'Maps'}
+                color="var(--lg-forest)"
+                ariaLabel={locale === 'he' ? 'פתח ב-Google Maps' : 'Open in Google Maps'}
+                onClick={() => {
+                  const query = (event.lat != null && event.lng != null)
+                    ? `${event.lat},${event.lng}`
+                    : encodeURIComponent(event.location!);
+                  window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank', 'noopener,noreferrer');
+                }}
+              />
+            )}
             <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'Suggest'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
             <QuickAction icon="trash"   label={locale === 'he' ? 'מחק'      : 'Delete'}     color="var(--danger)"    onClick={() => { setOpen(false); onDelete(event.id); }} ariaLabel={locale === 'he' ? 'מחק אירוע' : 'Delete event'} isDanger />
           </div>
@@ -1009,29 +1023,25 @@ export default function DayDetail_V2() {
           <Icon name={locale === 'he' ? 'chevR' : 'chevL'} size={12} color="var(--text-3)" />
           {locale === 'he' ? 'לוח בקרה' : 'Dashboard'}
         </button>
-        <p className="eyebrow-lg" style={{ color: 'var(--terra-text)', marginBottom: 2 }}>{eyebrow}</p>
-
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
-          <h1 className="display-xl" style={{ fontSize: 38, color: 'var(--lg-ink)', margin: 0, whiteSpace: 'nowrap' }}>
-            {locale === 'he' ? 'יום' : 'Day'} {activeDay}
-          </h1>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {/* AI suggestions button */}
-            <button
-              onClick={() => setShowPersona(true)}
-              className="lg-btn"
-              style={{
-                height: 44, padding: '0 14px', gap: 6, display: 'flex', alignItems: 'center',
-                background: 'var(--lg-panel)', border: 0, cursor: 'pointer',
-                fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
-                color: 'var(--terra-text)',
-                boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
-              }}
-            >
-              <Icon name="sparkle" size={14} color="var(--lg-terra)" />
-              Suggest
-            </button>
-            {/* Google Maps route link */}
+        {/* One compact bar: title block on the lead side, a single actions cluster
+            on the trailing side. "Suggest" was removed — the global AI FAB already
+            opens the same per-day suggestions sheet, so it was redundant here. */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <div style={{ minWidth: 0 }}>
+            <p className="eyebrow-lg" style={{ color: 'var(--terra-text)', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{eyebrow}</p>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, minWidth: 0 }}>
+              <h1 className="display-xl" style={{ fontSize: 30, color: 'var(--lg-ink)', margin: 0, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                {locale === 'he' ? 'יום' : 'Day'} {activeDay}
+              </h1>
+              {meta?.region && (
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {meta.region}
+                </span>
+              )}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+            {/* Google Maps route — icon-only neutral chip */}
             {(() => {
               const url = buildGoogleMapsUrl(evs);
               if (!url) return null;
@@ -1041,18 +1051,16 @@ export default function DayDetail_V2() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="lg-btn"
+                  aria-label={locale === 'he' ? 'פתח מסלול במפות גוגל' : 'Open route in Google Maps'}
                   style={{
-                    height: 44, padding: '0 14px', gap: 6, display: 'flex', alignItems: 'center',
+                    width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: 'var(--lg-panel)', border: 0, cursor: 'pointer',
-                    fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
-                    color: '#1a73e8', textDecoration: 'none',
                     boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
                   }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#1a73e8" style={{ flexShrink: 0 }}>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="#1a73e8" style={{ flexShrink: 0 }}>
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                   </svg>
-                  Maps
                 </a>
               );
             })()}
@@ -1077,7 +1085,7 @@ export default function DayDetail_V2() {
           </div>
         </div>
 
-        <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: '4px 0 12px' }}>
+        <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: '8px 0 12px' }}>
           <time dateTime={trip.startDate ? new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (activeDay - 1) * 86_400_000).toISOString().split('T')[0] : undefined}>
             {weekdayLabel}
           </time>

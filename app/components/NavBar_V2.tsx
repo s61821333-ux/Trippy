@@ -16,7 +16,6 @@ interface NavBarV2Props {
   onNotes?: () => void;
   onWishlist?: () => void;
   onAI?: () => void;
-  onCrew?: () => void;
   wishlistOpen?: boolean;
 }
 
@@ -59,7 +58,7 @@ const PANEL_BTN: React.CSSProperties = {
 };
 
 export default function NavBar_V2({
-  active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes, onWishlist, onAI, onCrew,
+  active, onChange, onSettings, onSwitch, onAdd, onLogout, onNotes, onWishlist, onAI,
   wishlistOpen = false,
 }: NavBarV2Props) {
   const { locale, t } = useI18n();
@@ -156,15 +155,6 @@ export default function NavBar_V2({
             >
               <Icon name="edit" size={17} style={{ color: 'var(--lg-forest)' }} />
               <span>{isHe ? 'הערות' : 'Notes'}</span>
-            </button>
-
-            <button
-              onClick={() => { setExpandOpen(false); onCrew?.(); }}
-              className="lg-btn"
-              style={{ ...PANEL_BTN }}
-            >
-              <Icon name="users" size={17} style={{ color: 'var(--lg-forest)' }} />
-              <span>{isHe ? 'צוות' : 'Crew'}</span>
             </button>
 
             <button

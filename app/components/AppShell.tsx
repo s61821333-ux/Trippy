@@ -12,7 +12,7 @@ import NavBar_V2 from './NavBar_V2';
 import Icon from './ui/Icon';
 import ErrorBoundary from './ui/ErrorBoundary';
 
-import { CompassLoader, LoaderStyles, BRAND_THEME } from './ui/TripLoaders';
+import { CompassLoader, LoaderStyles, BRAND_THEME, DashboardSkeleton } from './ui/TripLoaders';
 import { ToastProvider, useToast } from './ui/Toast';
 
 const ScreenFallback = () => (
@@ -29,7 +29,6 @@ const SuppliesScreen    = dynamic(() => import('./screens/Packing_V2'),     { lo
 const SettingsScreen    = dynamic(() => import('./screens/Settings_V2'),    { loading: ScreenFallback });
 const NotesScreen       = dynamic(() => import('./screens/NotesScreen'),    { loading: ScreenFallback });
 const MapScreen         = dynamic(() => import('./screens/Map_V2'),         { loading: ScreenFallback });
-const CrewScreen        = dynamic(() => import('./screens/Crew_V2'),        { loading: ScreenFallback });
 const TourOverlay        = dynamic(() => import('./TourOverlay'));
 const TripEntryAnimation = dynamic(() => import('./TripEntryAnimation'));
 const TermsModal         = dynamic(() => import('./TermsModal'));
@@ -318,7 +317,9 @@ function Shell() {
     }
     if (lastLoadedTripRef.current === tripDbId) return;
     lastLoadedTripRef.current = tripDbId;
-    loadTripById(tripDbId, { showLoader: true, showEntry: false }).catch(() => {
+    // Silent load — the branded DashboardSkeleton covers this wait, so we don't
+    // stack a full-screen compass overlay on top of it.
+    loadTripById(tripDbId, { showLoader: false, showEntry: false }).catch(() => {
       lastLoadedTripRef.current = null;
     });
   }, [authUser, tripDbId, trip, loadTripById]);
@@ -429,6 +430,17 @@ function Shell() {
   }, [mounted, authResolved, screen]);
 
   if (!mounted || !authResolved) {
+    // Returning user (a trip id is persisted): paint the branded dashboard
+    // skeleton immediately so the app feels present while auth + trip resolve,
+    // instead of a blank full-screen spinner. New/logged-out users (no trip id)
+    // still get the compass mark before landing on home/welcome.
+    if (tripDbId) {
+      return (
+        <div style={{ position: 'fixed', inset: 0, background: 'var(--bg)' }}>
+          <DashboardSkeleton />
+        </div>
+      );
+    }
     return (
       <div style={{
         position: 'fixed', inset: 0,
@@ -512,7 +524,6 @@ function Shell() {
               : screen === 'supplies' ? (locale === 'he' ? 'ציוד' : 'Packing')
               : screen === 'settings' ? (locale === 'he' ? 'הגדרות' : 'Settings')
               : screen === 'notes' ? (locale === 'he' ? 'הערות' : 'Notes')
-              : screen === 'crew' ? (locale === 'he' ? 'צוות' : 'Crew')
               : ''}
           </div>
 
@@ -579,7 +590,6 @@ function Shell() {
               onNotes={() => setScreen('notes')}
               onWishlist={() => setShowWishlist(true)}
               onAI={() => { if (trip) setShowPersona(true); }}
-              onCrew={() => setScreen('crew')}
               wishlistOpen={showWishlist}
             />
           )}
@@ -598,7 +608,11 @@ function Shell() {
                 <div className="w-full h-full">
                   <div className="w-full h-full">
                     <ErrorBoundary>
-                      {screen === 'splash' || screen === 'home' || !trip ? (
+                      {!trip && tripDbId && screen !== 'home' ? (
+                        /* Returning user: persisted trip is still loading — show the
+                           branded skeleton instead of flashing the trip-picker. */
+                        <DashboardSkeleton />
+                      ) : screen === 'splash' || screen === 'home' || !trip ? (
                         <Home_V2 />
                       ) : screen === 'dashboard' ? (
                         <DashboardScreen />
@@ -606,8 +620,6 @@ function Shell() {
                         <DayScreen />
                       ) : screen === 'map' ? (
                         <MapScreen />
-                      ) : screen === 'crew' ? (
-                        <CrewScreen />
                       ) : screen === 'supplies' ? (
                         <SuppliesScreen />
                       ) : screen === 'settings' ? (

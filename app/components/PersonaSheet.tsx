@@ -70,6 +70,24 @@ const BUDGET_OPTIONS: { value: BudgetTier; label: string; labelHe: string }[] = 
   { value: 'any',  label: 'Any',           labelHe: 'כל תקציב'     },
 ];
 
+// ── High-level "moods" — the friendly entry point. Picking a mood reveals only
+// its relevant subtypes (drawn from STYLE_OPTIONS) instead of a 38-chip wall. ──
+type IntentId = 'eat' | 'see' | 'do' | 'relax' | 'night';
+const INTENTS: { id: IntentId; label: string; labelHe: string; icon: string; subs: string[] }[] = [
+  { id: 'eat',   label: 'Eat & Drink',     labelHe: 'אוכל ושתייה', icon: 'fork',
+    subs: ['food', 'cafe', 'market', 'winery', 'cooking'] },
+  { id: 'see',   label: 'Sights & Culture', labelHe: 'אתרים ותרבות', icon: 'compass',
+    subs: ['attraction', 'museum', 'art', 'cultural', 'religious', 'photography', 'national_park', 'guided_tour'] },
+  { id: 'do',    label: 'Active & Outdoors', labelHe: 'פעילות וטבע', icon: 'sun',
+    subs: ['hiking', 'nature_walk', 'cycling', 'boat', 'water_sports', 'ski', 'aerial', 'golf', 'safari', 'sport', 'cruise', 'farm', 'picnic', 'theme_park'] },
+  { id: 'relax', label: 'Relax',           labelHe: 'רגיעה', icon: 'tent',
+    subs: ['beach', 'rest', 'spa', 'wellness', 'hot_springs'] },
+  { id: 'night', label: 'Nightlife & Fun', labelHe: 'בילוי', icon: 'music',
+    subs: ['nightlife', 'concert', 'theater', 'cinema', 'festival', 'shopping'] },
+];
+
+const STYLE_BY_VALUE = new Map(STYLE_OPTIONS.map(o => [o.value, o]));
+
 // ── Shared styles ─────────────────────────────────────────────────────────────
 
 const SECTION_LABEL: React.CSSProperties = {
@@ -164,6 +182,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
   const defaultLat  = dayMeta?.lat ?? hotel?.lat;
   const defaultLng  = dayMeta?.lng ?? hotel?.lng;
 
+  const [selectedIntents, setSelectedIntents] = useState<IntentId[]>([]);
   const [styles,      setStyles]      = useState<string[]>([]);
   const [freeText,    setFreeText]    = useState('');
   const [cityName,    setCityName]    = useState(defaultCity);
@@ -190,10 +209,33 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
 
   const canSubmit = styles.length > 0 && duration !== null && cityName.trim().length > 0;
 
+  // Subtypes shown = those belonging to the moods the user picked (ordered).
+  const visibleSubs = useMemo(() => {
+    if (selectedIntents.length === 0) return [];
+    const wanted = new Set(INTENTS.filter(i => selectedIntents.includes(i.id)).flatMap(i => i.subs));
+    return STYLE_OPTIONS.filter(o => wanted.has(o.value));
+  }, [selectedIntents]);
+
   const toggleStyle = (v: string) => {
-    setStyles(prev =>
-      prev.includes(v) ? (prev.length > 1 ? prev.filter(x => x !== v) : prev) : [...prev, v]
-    );
+    setStyles(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
+  };
+
+  const toggleIntent = (id: IntentId) => {
+    const intent = INTENTS.find(i => i.id === id);
+    if (!intent) return;
+    setSelectedIntents(prev => {
+      const on = prev.includes(id);
+      if (on) {
+        // Deselecting a mood drops any of its subtypes from the selection.
+        const subs = new Set(intent.subs);
+        setStyles(s => s.filter(v => !subs.has(v)));
+        return prev.filter(x => x !== id);
+      }
+      // Selecting a mood auto-picks its primary subtype so the user can submit
+      // right away, then refine in the revealed chip row.
+      setStyles(s => (s.includes(intent.subs[0]) ? s : [...s, intent.subs[0]]));
+      return [...prev, id];
+    });
   };
 
   const handleSubmit = () => {
@@ -233,36 +275,59 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '4px 0 24px' }}>
 
-        {/* 1. Category — multi-select */}
+        {/* 1. Mood — the friendly entry point (5 choices, not 38) */}
         <div>
-          <div style={SECTION_LABEL}>{t('What kind of place? (pick one or more)', 'איזה סוג מקום? (בחר אחד או יותר)')}</div>
-          <ChipRow
-            options={STYLE_OPTIONS.map(o => ({
-              value: o.value,
-              label: isHe ? o.labelHe : o.label,
-              icon: o.icon,
-            }))}
-            value={styles}
-            onChange={toggleStyle}
-            multi
-          />
+          <div style={SECTION_LABEL}>{t('What are you in the mood for?', 'מה בא לכם?')}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+            {INTENTS.map(intent => {
+              const active = selectedIntents.includes(intent.id);
+              return (
+                <button
+                  key={intent.id}
+                  type="button"
+                  onClick={() => toggleIntent(intent.id)}
+                  className="lg-btn"
+                  aria-pressed={active}
+                  style={{
+                    height: 46, padding: '0 16px', fontSize: 14, fontWeight: active ? 700 : 600,
+                    background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                    color: active ? '#fff' : 'var(--lg-ink)',
+                    boxShadow: active ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                    transition: 'all 160ms ease',
+                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                  }}
+                >
+                  <Icon name={intent.icon as Parameters<typeof Icon>[0]['name']} size={16} color={active ? '#fff' : 'var(--lg-forest)'} />
+                  {isHe ? intent.labelHe : intent.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* 2. Free-text — always visible */}
-        <div>
-          <div style={SECTION_LABEL}>{t('Anything specific? (optional)', 'משהו ספציפי? (אופציונלי)')}</div>
-          <textarea
-            rows={2}
-            value={freeText}
-            onChange={e => setFreeText(e.target.value)}
-            placeholder={t(
-              'e.g. rooftop terrace, dog-friendly, authentic local, hidden gem…',
-              'למשל: גג עם נוף, פט-פרנדלי, מקומי ואותנטי, מקום נסתר…',
-            )}
-            maxLength={300}
-            style={{ ...TEXT_INPUT, lineHeight: 1.5 }}
-          />
-        </div>
+        {/* 2. Refine — only the subtypes for the chosen moods + optional detail */}
+        {visibleSubs.length > 0 && (
+          <div>
+            <div style={SECTION_LABEL}>{t('Refine the vibe', 'דייקו את הסגנון')}</div>
+            <ChipRow
+              options={visibleSubs.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label, icon: o.icon }))}
+              value={styles}
+              onChange={toggleStyle}
+              multi
+            />
+            <textarea
+              rows={2}
+              value={freeText}
+              onChange={e => setFreeText(e.target.value)}
+              placeholder={t(
+                'Anything specific? e.g. rooftop terrace, hidden gem… (optional)',
+                'משהו ספציפי? למשל גג עם נוף, מקום נסתר… (אופציונלי)',
+              )}
+              maxLength={300}
+              style={{ ...TEXT_INPUT, lineHeight: 1.5, marginTop: 12 }}
+            />
+          </div>
+        )}
 
         {/* 3. Location — required */}
         <div>

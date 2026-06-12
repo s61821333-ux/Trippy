@@ -981,7 +981,7 @@ export default function DashboardScreenV2() {
             <button
               onClick={() => setScreen('settings')}
               className="lg-dark"
-              style={{ width: 44, height: 44, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent' }}
+              style={{ width: 38, height: 38, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent' }}
               aria-label="Settings"
             >
               <Icon name="settings" size={16} color="#fff" />
@@ -998,7 +998,7 @@ export default function DashboardScreenV2() {
                 } catch { show(t('couldNotCreateInvite')); }
                 finally { setSharingLink(false); }
               }}
-              style={{ width: 34, height: 34, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent', opacity: sharingLink ? 0.6 : 1 }}
+              style={{ width: 38, height: 38, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent', opacity: sharingLink ? 0.6 : 1 }}
               aria-label="Share trip"
             >
               <Icon name="share" size={16} color="#fff" />

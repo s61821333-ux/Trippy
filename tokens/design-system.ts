@@ -1,41 +1,44 @@
 // tokens/design-system.ts
-// THE SINGLE SOURCE OF TRUTH — all components consume from here
-// Brand: Trippy "Jelly Liquid Glass" — warm paper + forest green + terracotta + sand gold
-// 2027-era: oklch throughout, physics-based motion, layered depth
+// DOCUMENTED SOURCE OF TRUTH for the palette + motion language.
+// NOTE: runtime colors live as CSS custom properties in app/globals.css :root
+// (e.g. --brand, --terra, --sand); the --lg-* "liquid glass" tokens are now
+// aliases of those, so there is ONE palette. Keep the values below in sync with
+// globals.css. Brand: warm paper + forest green + terracotta + sand gold.
+// Vivid pass (2026): chroma lifted for life; glass saturate raised to ~1.8.
 
 export const tokens = {
 
   // ─── COLORS (oklch — perceptually uniform, wide-gamut P3-ready) ───────────
   colors: {
-    // Forest green — primary brand
+    // Forest green — primary brand (vivid: chroma lifted, hue 152)
     brand: {
-      50:  'oklch(97% 0.018 155)',
-      100: 'oklch(93% 0.040 155)',
-      200: 'oklch(86% 0.072 155)',
-      300: 'oklch(76% 0.095 155)',
-      400: 'oklch(62% 0.100 155)',
-      500: 'oklch(50% 0.100 155)',   // primary — forest
-      600: 'oklch(42% 0.092 155)',   // brand CSS var
-      700: 'oklch(35% 0.080 155)',
-      800: 'oklch(27% 0.060 155)',
-      900: 'oklch(18% 0.038 155)',
+      50:  'oklch(97% 0.020 152)',
+      100: 'oklch(93% 0.044 152)',
+      200: 'oklch(86% 0.078 152)',
+      300: 'oklch(76% 0.105 152)',
+      400: 'oklch(62% 0.130 152)',
+      500: 'oklch(52% 0.158 152)',   // --primary-container
+      600: 'oklch(45% 0.150 152)',   // --brand CSS var
+      700: 'oklch(38% 0.138 152)',   // --brand-hover
+      800: 'oklch(30% 0.090 158)',   // --brand-deep
+      900: 'oklch(18% 0.040 158)',
     },
 
-    // Terracotta — CTA / accent
+    // Terracotta — CTA / accent (vivid: hotter, hue 38)
     accent: {
-      50:  'oklch(97% 0.012 40)',
-      100: 'oklch(92% 0.038 40)',
-      300: 'oklch(78% 0.085 40)',
-      500: 'oklch(62% 0.115 40)',    // terra
-      600: 'oklch(56% 0.110 40)',    // terra-hover
-      700: 'oklch(48% 0.100 40)',
+      50:  'oklch(97% 0.014 38)',
+      100: 'oklch(92% 0.042 38)',
+      300: 'oklch(78% 0.110 38)',
+      500: 'oklch(63% 0.170 38)',    // --terra
+      600: 'oklch(57% 0.162 38)',    // --terra-hover
+      700: 'oklch(48% 0.128 38)',    // --terra-text / --terra-btn (text-safe)
     },
 
-    // Sand gold — secondary accent
+    // Sand gold — secondary accent (vivid)
     sand: {
-      300: 'oklch(82% 0.090 75)',
-      500: 'oklch(68% 0.108 75)',    // sand
-      600: 'oklch(60% 0.100 75)',
+      300: 'oklch(82% 0.100 73)',
+      500: 'oklch(72% 0.162 73)',    // --sand
+      600: 'oklch(60% 0.120 73)',
     },
 
     // Warm paper surfaces (light mode)

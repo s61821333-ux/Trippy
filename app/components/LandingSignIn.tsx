@@ -16,6 +16,9 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
+  // Captured the moment the invisible Turnstile auto-solves on render, so the
+  // token is ready before the user clicks (no blocking wait at sign-in time).
+  const [captchaToken, setCaptchaToken] = useState('');
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
   useEffect(() => {
@@ -39,26 +42,44 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
     setPasskeyLoading(true);
     setError('');
     try {
-      // Auth captcha protection is enabled on the project — solve the
-      // invisible Turnstile challenge first and pass the token along.
-      let captchaToken: string | undefined;
-      if (TURNSTILE_SITE_KEY && turnstileRef.current) {
+      // Auth captcha protection is enabled on the project, so signInWithPasskey
+      // needs a Turnstile token. The invisible widget normally auto-solves on
+      // render (captured in `captchaToken`); if it hasn't yet, give it a short
+      // window rather than blocking on the full default timeout.
+      let token: string | undefined = captchaToken || undefined;
+      if (TURNSTILE_SITE_KEY && !token && turnstileRef.current) {
         try {
           turnstileRef.current.execute();
-          captchaToken = await turnstileRef.current.getResponsePromise(15000);
+          token = await turnstileRef.current.getResponsePromise(8000);
         } catch {
-          captchaToken = undefined;
+          token = undefined;
         }
       }
-      await signInWithPasskey(captchaToken);
+
+      // Captcha is required but no token could be obtained — fail fast with a
+      // clear message instead of making a request the server will reject.
+      if (TURNSTILE_SITE_KEY && !token) {
+        setPasskeyLoading(false);
+        turnstileRef.current?.reset();
+        setError(locale === 'he'
+          ? 'אימות האבטחה לא נטען — רעננו את הדף ונסו שוב'
+          : 'Security check didn’t load — refresh the page and try again');
+        return;
+      }
+
+      await signInWithPasskey(token);
       window.location.href = '/app';
     } catch (e: unknown) {
       setPasskeyLoading(false);
-      turnstileRef.current?.reset(); // Turnstile tokens are single-use
+      setCaptchaToken('');         // single-use — drop the consumed token
+      turnstileRef.current?.reset();
       const msg = e instanceof Error ? e.message : '';
       // User cancelled the browser prompt — don't show an error
       if (msg.includes('cancel') || msg.includes('abort') || msg.includes('NotAllowed')) return;
-      setError(locale === 'he' ? 'כניסה עם Passkey נכשלה' : 'Passkey sign-in failed — make sure you have one registered');
+      // Surface the real reason so genuine config/registration issues are visible.
+      const base = locale === 'he' ? 'כניסה עם Passkey נכשלה' : 'Passkey sign-in failed';
+      const hint = locale === 'he' ? ' — ודאו שרשום Passkey במכשיר' : ' — make sure you have one registered';
+      setError(msg ? `${base} — ${msg}` : `${base}${hint}`);
     }
   };
 
@@ -185,12 +206,17 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
         </p>
       )}
 
-      {/* Invisible captcha — Supabase Auth requires a captchaToken for passkey sign-in */}
+      {/* Invisible captcha — Supabase Auth requires a captchaToken for passkey sign-in.
+          Default execution ('render') auto-solves on mount, so the token is ready
+          before the user clicks instead of being fetched on demand. */}
       {passkeySupported && TURNSTILE_SITE_KEY && (
         <Turnstile
           ref={turnstileRef}
           siteKey={TURNSTILE_SITE_KEY}
-          options={{ size: 'invisible', execution: 'execute' }}
+          onSuccess={(token) => setCaptchaToken(token)}
+          onError={() => setCaptchaToken('')}
+          onExpire={() => setCaptchaToken('')}
+          options={{ size: 'invisible' }}
         />
       )}
     </div>

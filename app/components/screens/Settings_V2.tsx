@@ -112,6 +112,100 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     setShowTripEdit(false);
   };
 
+  // ── Export itinerary as a printable PDF ─────────────────────────────────────
+  // Opens a clean, print-styled document in a new window and triggers the
+  // browser's print dialog, where the user can choose "Save as PDF".
+  const handleExportPDF = () => {
+    if (!trip) return;
+    const win = window.open('', '_blank');
+    if (!win) {
+      show(locale === 'he' ? 'אפשרו חלונות קופצים כדי לייצא' : 'Allow pop-ups to export the PDF');
+      return;
+    }
+
+    const esc = (s: unknown) =>
+      String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c] || c));
+
+    const dayDate = (dayNum: number) => {
+      if (!trip.startDate) return '';
+      const d = new Date(trip.startDate + 'T00:00:00');
+      d.setDate(d.getDate() + dayNum - 1);
+      return d.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', {
+        weekday: 'long', month: 'long', day: 'numeric',
+      });
+    };
+
+    const daysHtml = Array.from({ length: trip.days }, (_, i) => {
+      const dayNum = i + 1;
+      const meta = trip.dayMeta?.[i];
+      const evs = (trip.events?.[dayNum] ?? []).slice().sort((a, b) => a.time.localeCompare(b.time));
+      const rows = evs.length
+        ? evs.map(ev => `
+            <tr>
+              <td class="t">${esc(ev.time)}</td>
+              <td class="n">
+                <div class="nm">${esc(ev.name)}</div>
+                ${ev.location ? `<div class="loc">${esc(ev.location)}</div>` : ''}
+                ${ev.notes ? `<div class="note">${esc(ev.notes)}</div>` : ''}
+              </td>
+            </tr>`).join('')
+        : `<tr><td class="t">—</td><td class="n"><div class="empty">${esc(locale === 'he' ? 'אין פעילויות' : 'No activities planned')}</div></td></tr>`;
+      return `
+        <section class="day">
+          <h2>${esc(locale === 'he' ? `יום ${dayNum}` : `Day ${dayNum}`)}${meta?.emoji ? ` ${esc(meta.emoji)}` : ''}
+            ${meta?.region ? `<span class="region">${esc(meta.region)}</span>` : ''}
+          </h2>
+          <div class="date">${esc(dayDate(dayNum))}</div>
+          <table>${rows}</table>
+        </section>`;
+    }).join('');
+
+    const dir = isRTL ? 'rtl' : 'ltr';
+    const title = esc(trip.name);
+    const sub = esc(`${formatDateRange(trip.startDate ?? null, trip.days, locale)} · ${trip.days} ${locale === 'he' ? 'ימים' : 'days'}`);
+
+    win.document.write(`<!doctype html>
+<html lang="${locale}" dir="${dir}">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>${title}</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #1c1b1a; margin: 0; padding: 40px; }
+  header { border-bottom: 3px solid #c2603f; padding-bottom: 16px; margin-bottom: 28px; }
+  h1 { font-size: 30px; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .sub { font-size: 13px; color: #6b6660; }
+  .day { margin-bottom: 26px; break-inside: avoid; page-break-inside: avoid; }
+  h2 { font-size: 17px; margin: 0 0 2px; display: flex; align-items: baseline; gap: 8px; }
+  .region { font-size: 12px; font-weight: 500; color: #8a8378; }
+  .date { font-size: 12px; color: #8a8378; margin-bottom: 8px; }
+  table { width: 100%; border-collapse: collapse; }
+  td { padding: 7px 0; border-top: 1px solid #ece8e1; vertical-align: top; }
+  td.t { width: 58px; font-variant-numeric: tabular-nums; font-weight: 700; font-size: 13px; color: #2f6b4f; white-space: nowrap; }
+  .nm { font-size: 14px; font-weight: 600; }
+  .loc { font-size: 12px; color: #6b6660; margin-top: 1px; }
+  .note { font-size: 12px; color: #8a8378; margin-top: 2px; }
+  .empty { font-size: 13px; color: #b3aca2; font-style: italic; }
+  footer { margin-top: 30px; padding-top: 12px; border-top: 1px solid #ece8e1; font-size: 11px; color: #b3aca2; text-align: center; }
+  @media print { body { padding: 0; } @page { margin: 18mm; } }
+</style>
+</head>
+<body>
+  <header>
+    <h1>${title}</h1>
+    <div class="sub">${sub}</div>
+  </header>
+  ${daysHtml}
+  <footer>Trippy · ${esc(new Date().toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US'))}</footer>
+</body>
+</html>`);
+    win.document.close();
+    win.focus();
+    // Give the new document a beat to lay out before invoking print.
+    setTimeout(() => { try { win.print(); } catch { /* user can print manually */ } }, 450);
+  };
+
 
   const themeOptions = [
     { id: 'light'  as const, icon: 'sun'  as const, label: t('themeLight') },
@@ -224,29 +318,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
           title={t('exportPDF') || 'Export as PDF'}
           sub={t('exportPDFSub') || 'Printable itinerary'}
           right={chev}
-          onClick={() => show(t('pdfComingSoon'))}
-        />
-        <Divider />
-        <Row
-          icon="home"
-          title={locale === 'he' ? 'בתי מלון ולינה' : 'Hotels & accommodation'}
-          sub={(() => {
-            const hotels = trip.hotels ?? [];
-            if (hotels.length === 0) return locale === 'he' ? 'לא נוספו' : 'None added';
-            return hotels.map(h => h.name).join(', ');
-          })()}
-          right={chev}
-        />
-        <Divider />
-        <Row
-          icon="users"
-          title={locale === 'he' ? 'אנשי קשר לחירום' : 'Emergency contacts'}
-          sub={(() => {
-            const contacts = trip.emergencyContacts ?? [];
-            if (contacts.length === 0) return locale === 'he' ? 'לא נוספו' : 'None added';
-            return contacts.map(c => c.name).join(', ');
-          })()}
-          right={chev}
+          onClick={handleExportPDF}
         />
       </m.div>
 

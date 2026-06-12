@@ -92,6 +92,51 @@ export function CompassLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: Lo
   );
 }
 
+// ─── Dashboard boot skeleton — branded perceived-performance placeholder ─────
+// Shown while a returning user's trip loads, instead of a blank full-screen
+// spinner. Mirrors the real Dashboard layout (cinematic hero + glass cards) so
+// the app feels present immediately.
+export function DashboardSkeleton() {
+  const heroBlock = (w: number | string, h: number, r: number, mt = 0, op = 0.14) => (
+    <div style={{ width: w, height: h, borderRadius: r, marginTop: mt, background: `oklch(100% 0 0 / ${op})`, flexShrink: 0 }} />
+  );
+  return (
+    <div style={{ height: '100%', overflow: 'hidden', background: 'var(--bg)' }} aria-hidden="true">
+      <div className="hero-mesh" style={{
+        padding: 'calc(env(safe-area-inset-top, 0px) + 52px) 22px 26px',
+        borderRadius: '0 0 34px 34px', marginBottom: 18,
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {heroBlock(90, 12, 6, 0, 0.18)}
+          <div style={{ display: 'flex', gap: 8 }}>
+            {heroBlock(38, 38, 19)}
+            {heroBlock(34, 34, 17)}
+          </div>
+        </div>
+        <div style={{ marginTop: 28 }}>
+          {heroBlock(110, 12, 6, 0, 0.18)}
+          {heroBlock('70%', 40, 14, 12, 0.22)}
+          <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+            {[66, 74, 58].map((w, i) => <React.Fragment key={i}>{heroBlock(w, 28, 99)}</React.Fragment>)}
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
+            {[0, 1, 2, 3, 4].map(i => <React.Fragment key={i}>{heroBlock(54, 62, 16, 0, 0.12)}</React.Fragment>)}
+          </div>
+        </div>
+      </div>
+      <div style={{ padding: '0 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {[140, 96, 96].map((h, i) => (
+          <div key={i} className="lg" style={{ height: h, padding: 18, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center' }}>
+            <div className="skeleton" style={{ width: '40%', height: 12, borderRadius: 6 }} />
+            <div className="skeleton" style={{ width: '78%', height: 16, borderRadius: 8 }} />
+            {h > 120 && <div className="skeleton" style={{ width: '58%', height: 12, borderRadius: 6 }} />}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── 2 · Route — drawing a path between two pins ─────────────────────────────
 const ROUTE_PATH = 'M26 86 C 60 30, 96 124, 130 70 S 178 26, 190 34';
 
