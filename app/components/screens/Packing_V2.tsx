@@ -13,6 +13,7 @@ import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
 import Field from '../ui/Field';
 import GlassBtn from '../ui/GlassBtn';
+import Eyebrow from '../ui/Eyebrow';
 import { useToast } from '../ui/Toast';
 import { SupplyItem } from '@/lib/types';
 
@@ -455,7 +456,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
             <m.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}>
               <Icon name="compass" size={48} color="var(--lg-terra)" />
             </m.div>
-            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 17, color: 'var(--lg-ink)', margin: 0 }}>
+            <p style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 16, color: 'var(--lg-ink)', margin: 0 }}>
               {isHe ? 'מכין רשימת ציוד…' : 'Building your packing list…'}
             </p>
           </div>
@@ -632,10 +633,10 @@ export default function Packing_V2() {
           transition={{ delay: 0.04, duration: 0.44, ease: [0.22, 1, 0.36, 1] }}
           style={{ marginBottom: 14 }}
         >
-          <p className="eyebrow-lg" style={{ color: 'var(--lg-terra)', marginBottom: 3 }}>
+          <Eyebrow tone="terra" style={{ marginBottom: 6 }}>
             {locale === 'he' ? 'הכנה להרפתקה' : 'Adventure prep'}
-          </p>
-          <h1 className="display-xl" style={{ fontSize: 36, color: 'var(--lg-ink)', margin: 0 }}>
+          </Eyebrow>
+          <h1 className="text-display-sm" style={{ margin: 0 }}>
             {t('suppliesLabel') || (locale === 'he' ? 'ציוד' : 'Packing')}
           </h1>
         </m.div>
@@ -665,8 +666,8 @@ export default function Packing_V2() {
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontFamily: 'var(--font-serif)', fontStyle: 'italic',
-                fontSize: 20, color: 'var(--lg-ink)', lineHeight: 1.2,
+                fontFamily: 'var(--font-sans)', fontWeight: 800, letterSpacing: '-0.03em',
+                fontSize: 19, color: 'var(--lg-ink)', lineHeight: 1.15,
                 display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap',
               }}>
                 {total === 0
@@ -830,7 +831,7 @@ export default function Packing_V2() {
               <div style={{ marginBottom: 18, display: 'flex', justifyContent: 'center' }}>
                 <StampIcon iconKey="backpack" size={80} />
               </div>
-              <p style={{ margin: '0 0 8px', fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', fontWeight: 400 }}>
+              <p className="text-display-sm" style={{ margin: '0 0 8px' }}>
                 {locale === 'he' ? 'הרשימה ריקה' : 'Your packing list is empty'}
               </p>
               <p style={{ margin: '0 0 24px', fontSize: 13, color: 'var(--text-3)' }}>

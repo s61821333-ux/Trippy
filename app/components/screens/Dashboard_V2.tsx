@@ -15,11 +15,10 @@ import { getCapitalCoords } from '@/lib/capitals';
 import { getTimezoneForCountry } from '@/lib/countryTimezones';
 import { getCurrencySymbol } from '@/lib/currency';
 import CurrencyAmount from '../ui/CurrencyAmount';
-
-const STRIPE_COLORS = [
-  'var(--avatar-1)', 'var(--avatar-2)', 'var(--avatar-3)',
-  'var(--avatar-4)', 'var(--avatar-5)', 'var(--avatar-6)',
-];
+import Gauge from '../ui/Gauge';
+import StatTriplet from '../ui/StatTriplet';
+import Eyebrow from '../ui/Eyebrow';
+import AvatarStack from '../ui/AvatarStack';
 
 // ── Budget edit sheet ─────────────────────────────────────────────────────────
 
@@ -907,6 +906,26 @@ export default function DashboardScreenV2() {
 
   const daysLeft = currentTripDay != null ? trip.days - currentTripDay : null;
 
+  // ── Gauge + stat-triplet derivations (HANDOFF dashboard) ─────────────
+  const totalEvents = Object.values(trip.events).reduce((s, evs) => s + evs.length, 0);
+  const plannedDays = Array.from({ length: trip.days }, (_, i) => i + 1)
+    .filter(d => (trip.events[d]?.length ?? 0) > 0).length;
+  const plannedPct = trip.days > 0 ? Math.round((plannedDays / trip.days) * 100) : 0;
+
+  const beforeTrip  = daysUntil !== null && daysUntil > 0;
+  const gaugeNumber = beforeTrip ? daysUntil : (currentTripDay ?? trip.days);
+  const gaugeLabel  = beforeTrip
+    ? t('daysToGo')
+    : currentTripDay !== null
+      ? `${t('day')} ${t('ofDays')} ${trip.days}`
+      : t('days');
+  const gaugePct = beforeTrip
+    ? plannedPct
+    : currentTripDay !== null
+      ? Math.round((currentTripDay / Math.max(1, trip.days)) * 100)
+      : 100;
+  const gaugeArc = beforeTrip ? 'var(--terra)' : 'var(--brand)';
+
   // ── AI Budget Coach ──────────────────────────────────────────────────
   const fetchCoachAdvice = useCallback(async () => {
     setCoachLoading(true);
@@ -943,51 +962,30 @@ export default function DashboardScreenV2() {
       style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', paddingBottom: 'var(--navbar-clearance)' }}
       className="lg-scroll"
     >
-      {/* ══ Cinematic hero ══════════════════════════════════════════════ */}
-      <div
-        className="hero-mesh"
-        style={{
-          padding: 'calc(env(safe-area-inset-top, 0px) + 52px) 22px 22px',
-          borderRadius: '0 0 34px 34px',
-          position: 'relative',
-          overflow: 'hidden',
-          marginBottom: 18,
-        }}
-      >
-        {/* Soft terra radial glow */}
-        <div
-          aria-hidden
-          style={{
-            position: 'absolute', top: -40, insetInlineEnd: -30,
-            width: 'clamp(140px, 35vw, 220px)', height: 'clamp(140px, 35vw, 220px)', borderRadius: '50%',
-            background: 'radial-gradient(circle, oklch(62% 0.17 40 / 45%), transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
+      {/* ══ Editorial hero — gauge replaces the cinematic mesh (HANDOFF) ══ */}
+      <div className="resp-container" style={{ padding: 'calc(env(safe-area-inset-top, 0px) + 18px) 20px 16px' }}>
 
-        {/* Inner centering wrapper */}
-        <div className="resp-container">
-        {/* Top row: eyebrow · settings · share · crew avatars */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-          <span className="eyebrow-lg" style={{ color: 'oklch(98% 0.005 80 / 72%)' }}>
-            {currentTripDay !== null
-              ? `${t('day').toUpperCase()} ${currentTripDay}`
-              : daysUntil !== null && daysUntil > 0
-                ? (isRTL ? `בעוד ${daysUntil} ${t('days')}` : `IN ${daysUntil} ${t('days').toUpperCase()}`)
-                : t('activeTrip').toUpperCase()}
-          </span>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Header: country eyebrow + bold title + glass icon buttons */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            {(trip.countries?.length ?? 0) > 0 && (
+              <Eyebrow style={{ marginBottom: 6 }}>{(trip.countries ?? []).join(' · ')}</Eyebrow>
+            )}
+            <h1 className="text-display-sm" dir="auto" style={{ margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {trip.name}
+            </h1>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <button
               onClick={() => setScreen('settings')}
-              className="lg-dark"
-              style={{ width: 38, height: 38, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent' }}
-              aria-label="Settings"
+              className="lg"
+              style={{ width: 36, height: 36, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent' }}
+              aria-label={t('settings')}
             >
-              <Icon name="settings" size={16} color="#fff" />
+              <Icon name="settings" size={16} color="var(--text-2)" />
             </button>
             <button
-              className="lg-dark"
+              className="lg"
               disabled={sharingLink}
               onClick={async () => {
                 setSharingLink(true);
@@ -998,97 +996,67 @@ export default function DashboardScreenV2() {
                 } catch { show(t('couldNotCreateInvite')); }
                 finally { setSharingLink(false); }
               }}
-              style={{ width: 38, height: 38, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent', opacity: sharingLink ? 0.6 : 1 }}
-              aria-label="Share trip"
+              style={{ width: 36, height: 36, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent', opacity: sharingLink ? 0.6 : 1 }}
+              aria-label={t('shareTrip')}
             >
-              <Icon name="share" size={16} color="#fff" />
+              <Icon name="share" size={16} color="var(--text-2)" />
             </button>
-            <div role="list" aria-label="Crew" style={{ display: 'flex', alignItems: 'center' }}>
-              {trip.participants.slice(0, 4).map((p, i) => (
-                <div
-                  key={p.id}
-                  role="listitem"
-                  title={p.initials}
-                  style={{
-                    width: 32, height: 32, borderRadius: '50%',
-                    background: p.color ?? STRIPE_COLORS[i % STRIPE_COLORS.length],
-                    color: 'white', fontSize: 11, fontWeight: 700,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    border: '2px solid oklch(20% 0.03 60)',
-                    marginInlineStart: i > 0 ? -8 : 0,
-                    boxShadow: 'var(--lg-shadow)', letterSpacing: '-0.02em', flexShrink: 0,
-                  }}
-                >
-                  {p.initials}
-                </div>
-              ))}
-            </div>
           </div>
         </div>
 
-        {/* Trip name */}
-        <div style={{ marginTop: 24, position: 'relative' }}>
-          {(trip.countries?.length ?? 0) > 0 && (
-            <p className="eyebrow-lg a-rise" style={{ color: 'var(--lg-sand)', margin: '0 0 4px' }}>
-              {(trip.countries ?? []).join(' · ')}
-            </p>
+        {/* Crew + live context line */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
+          {trip.participants.length > 0 && (
+            <AvatarStack names={trip.participants.map(p => p.initials)} size={26} max={5} />
           )}
-          <h1
-            className="display-xl a-rise d1"
-            dir="auto"
-            style={{ fontSize: 'clamp(2.4rem, 10vw, 3.2rem)', color: '#fff', margin: 0 }}
-          >
-            {trip.name}
-          </h1>
-
-          {/* Status chips */}
-          <div className="a-rise d2" style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-            {daysUntil !== null && daysUntil > 0 && (
-              <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
-                <span aria-hidden style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }} />
-                {daysUntil} {t('days')}
-              </span>
-            )}
-            {currentTripDay !== null && (
-              <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
-                <span aria-hidden style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lg-terra-bright)', boxShadow: '0 0 8px var(--lg-terra-bright)', flexShrink: 0 }} />
-                {t('day')} {currentTripDay} {t('ofDays')} {trip.days}
-              </span>
-            )}
-            {todayWeather && (
-              <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13 }}>
-                <Icon name="sun" size={14} color="var(--lg-sand)" />
-                {todayWeather.tempMax}° · {destCity}
-                {isEstimatedWeather && (
-                  <span style={{
-                    fontSize: 9, fontWeight: 500, letterSpacing: '0.04em',
-                    color: 'oklch(98% 0.005 80 / 55%)',
-                    background: 'oklch(98% 0.005 80 / 10%)',
-                    borderRadius: 99, padding: '1px 5px',
-                  }}>
-                    {locale === 'he' ? 'הערכה' : 'est.'}
-                  </span>
-                )}
-              </span>
-            )}
-            {localTime && (
-              <span className="lg-dark" style={{ padding: '6px 13px', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'var(--font-mono)', fontWeight: 500, fontSize: 12 }}>
-                <Icon name="clock" size={12} color="oklch(98% 0.005 80 / 72%)" />
-                {localTime}
-              </span>
-            )}
-          </div>
+          {(todayWeather || localTime) && (
+            <Eyebrow style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              {todayWeather && (
+                <>
+                  <Icon name={weatherIconName(todayWeather.label)} size={12} color="var(--sand)" />
+                  {todayWeather.tempMax}°{destCity ? ` · ${destCity}` : ''}
+                  {isEstimatedWeather ? (locale === 'he' ? ' · הערכה' : ' · est.') : ''}
+                </>
+              )}
+              {todayWeather && localTime ? ' · ' : ''}
+              {localTime}
+            </Eyebrow>
+          )}
         </div>
 
-        {/* Day journey scroller — shows real dates (Aug 23, Aug 24…) */}
+        {/* Gauge — countdown / progress (replaces cinematic imagery) */}
+        <div className="a-rise" style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
+          <Gauge
+            pct={gaugePct}
+            size={212}
+            arc={gaugeArc}
+            number={gaugeNumber}
+            label={gaugeLabel}
+            status={`${plannedPct}% ${t('plannedLabel')}`}
+            statusColor="var(--brand)"
+            aria-label={typeof gaugeLabel === 'string' ? `${gaugeNumber} ${gaugeLabel}` : undefined}
+          />
+        </div>
+
+        {/* Stat triplet */}
+        <StatTriplet
+          style={{ marginBottom: 18 }}
+          stats={[
+            { label: t('daysLabel'),     value: trip.days },
+            { label: t('eventsLabel'),   value: totalEvents },
+            { label: t('suppliesLabel'), value: `${packedPct}%`, tone: packedPct === 100 ? 'forest' : 'default' },
+          ]}
+        />
+
+        {/* Day scroller — real dates (Aug 23, Aug 24…) */}
         <div
           className="lg-scroll a-rise d3"
           role="list"
           aria-label="Trip days"
-          style={{ display: 'flex', gap: 8, marginTop: 20, overflowX: 'auto', paddingBottom: 2 }}
+          style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}
         >
           {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
-            const dayNum  = i + 1;
+            const dayNum   = i + 1;
             const isActive = dayNum === currentDisplayDay;
             const { top, bottom } = dayDateLabel(trip.startDate, dayNum);
             const dayWeather = weather[i];
@@ -1100,27 +1068,25 @@ export default function DashboardScreenV2() {
                 aria-label={`${top} ${bottom}`}
                 aria-pressed={isActive}
                 style={{
-                  flexShrink: 0, width: 54, height: dayWeather ? 74 : 62, borderRadius: 16, border: 0, cursor: 'pointer',
-                  background: isActive
-                    ? 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))'
-                    : 'oklch(100% 0 0 / 12%)',
-                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'inset 0 0 0 1px oklch(100% 0 0 / 14%)',
-                  color: '#fff',
+                  flexShrink: 0, width: 54, height: dayWeather ? 74 : 62, borderRadius: 16, cursor: 'pointer',
+                  border: isActive ? '1px solid var(--terra)' : '1px solid var(--border)',
+                  background: isActive ? 'var(--terra)' : 'var(--surface-warm)',
+                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'none',
+                  color: isActive ? '#fff' : 'var(--text-2)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  gap: 1, backdropFilter: 'blur(10px)',
+                  gap: 1, padding: '4px 0',
                   WebkitTapHighlightColor: 'transparent',
-                  padding: '4px 0',
                 }}
               >
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, opacity: 0.8, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, opacity: 0.85, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
                   {top}
                 </span>
-                <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, lineHeight: 1 }}>
+                <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, fontSize: 19, lineHeight: 1, letterSpacing: '-0.02em' }}>
                   {bottom}
                 </span>
                 {dayWeather && (
                   <span style={{ fontSize: 9, opacity: 0.85, marginTop: 1, display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-                    <Icon name={weatherIconName(dayWeather.label)} size={9} color="#fff" />
+                    <Icon name={weatherIconName(dayWeather.label)} size={9} color={isActive ? '#fff' : 'var(--text-3)'} />
                     {dayWeather.tempMax}°
                   </span>
                 )}
@@ -1128,7 +1094,6 @@ export default function DashboardScreenV2() {
             );
           })}
         </div>
-        </div>{/* /resp-container */}
       </div>
 
       {/* ══ Main content ════════════════════════════════════════════════ */}
@@ -1252,7 +1217,7 @@ export default function DashboardScreenV2() {
                     ? ` → ${Math.floor((toMins(nextEvent.event.time) + nextEvent.event.duration) / 60).toString().padStart(2, '0')}:${String((toMins(nextEvent.event.time) + nextEvent.event.duration) % 60).padStart(2, '0')}`
                     : ''}
                 </div>
-                <div style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)', lineHeight: 1.05, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, fontSize: 18, letterSpacing: '-0.03em', color: 'var(--lg-ink)', lineHeight: 1.15, marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {t(nextEvent.event.name as any)}
                 </div>
                 {nextEvent.event.location && (
@@ -1305,7 +1270,7 @@ export default function DashboardScreenV2() {
             {trip.budget ? (
               <>
                 {/* Hero: remaining (or overage) */}
-                <span style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: budgetStatusColor, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, letterSpacing: '-0.02em', fontSize: 21, color: budgetStatusColor, lineHeight: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
                   <CurrencyAmount amount={Math.abs(budgetRemaining!)} base={currency} />
                 </span>
                 {/* Thin progress bar */}
@@ -1331,7 +1296,7 @@ export default function DashboardScreenV2() {
               </>
             ) : (
               <>
-                <span style={{ fontFamily: 'var(--font-serif)', fontSize: 22, color: 'var(--lg-ink)', lineHeight: 1 }}>
+                <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, letterSpacing: '-0.02em', fontSize: 21, color: 'var(--lg-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                   <CurrencyAmount amount={totalSpent} base={currency} />
                 </span>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--lg-terra)', fontWeight: 700 }}>
@@ -1453,7 +1418,7 @@ export default function DashboardScreenV2() {
             style={{ padding: '28px 20px', textAlign: 'center', borderRadius: 'var(--lg-r-card)' }}
           >
             <Icon name="compass" size={40} color="var(--text-3)" />
-            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', margin: '12px 0 6px' }}>
+            <p className="text-display-sm" style={{ margin: '12px 0 6px' }}>
               {t('noActivitiesYet')}
             </p>
             <p style={{ fontSize: 15, color: 'var(--text-3)', margin: '0 0 18px' }}>

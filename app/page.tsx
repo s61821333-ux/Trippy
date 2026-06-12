@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import LandingSignIn from './components/LandingSignIn';
 import LandingNextGuard from './components/LandingNextGuard';
 import { LandingSchema } from './components/SchemaMarkup';
+import StatementHeading from './components/ui/StatementHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -184,38 +185,50 @@ export default async function LandingPage() {
         gap: 0,
       }}>
 
-        {/* Logo */}
-        <svg width="52" height="52" viewBox="0 0 240 240" fill="none" aria-hidden="true" style={{ marginBottom: 20 }}>
-          <path d="M120 36 L138 120 L120 124 L102 120 Z" fill="var(--terra)" />
-          <path d="M120 204 L102 120 L120 116 L138 120 Z" fill="var(--brand)" />
-          <path d="M204 120 L120 102 L116 120 L120 138 Z" fill="var(--sand)" opacity="0.75" />
-          <path d="M36 120 L120 138 L124 120 L120 102 Z" fill="var(--sand)" opacity="0.75" />
-          <circle cx="120" cy="120" r="6" fill="var(--text)" />
-        </svg>
+        {/* Compass mark in a warm-white circle (HANDOFF sign-in) */}
+        <div style={{
+          width: 76, height: 76, borderRadius: '50%',
+          background: 'var(--paper-pill-bg)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: 'var(--shadow-md), inset 0 1px 0 oklch(100% 0 0 / 60%)',
+          marginBottom: 22,
+        }}>
+          <svg width="42" height="42" viewBox="0 0 240 240" fill="none" aria-hidden="true">
+            <path d="M120 36 L138 120 L120 124 L102 120 Z" fill="var(--terra)" />
+            <path d="M120 204 L102 120 L120 116 L138 120 Z" fill="var(--brand)" />
+            <path d="M204 120 L120 102 L116 120 L120 138 Z" fill="var(--sand)" opacity="0.75" />
+            <path d="M36 120 L120 138 L124 120 L120 102 Z" fill="var(--sand)" opacity="0.75" />
+            <circle cx="120" cy="120" r="6" fill="var(--text)" />
+          </svg>
+        </div>
 
-        {/* Wordmark — decorative, not the SEO heading */}
+        {/* Wordmark — serif (the one place serif remains) */}
         <div style={{
           fontFamily: 'var(--font-display)',
-          fontSize: 42,
+          fontSize: 32,
           fontWeight: 400,
           letterSpacing: '-0.03em',
           color: 'var(--text)',
           lineHeight: 1,
-          margin: '0 0 10px',
+          margin: '0 0 16px',
         }} aria-hidden="true">
           Trippy<span style={{ color: 'var(--terra)' }}>.</span>
         </div>
 
-        {/* SEO H1 — keyword-optimised, visually styled as subtitle */}
-        <h1 style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 11,
-          fontWeight: 600,
-          letterSpacing: '0.13em',
-          textTransform: 'uppercase',
-          color: 'var(--text-3)',
-          margin: '0 0 40px',
-        }}>
+        {/* Two-tone statement — bold DM Sans hero (visual, not the SEO h1) */}
+        <StatementHeading
+          as="p"
+          size="base"
+          animate={false}
+          lines={[
+            isHe ? 'מתכננים יחד.' : 'Plan together.',
+            isHe ? 'בקלות, ישר מהדפדפן.' : 'The easy way, from your browser.',
+          ]}
+          style={{ textAlign: 'center', marginBottom: 14 }}
+        />
+
+        {/* SEO H1 — keyword-optimised, styled as a mono eyebrow */}
+        <h1 className="mono-eyebrow" style={{ margin: '0 0 40px', textAlign: 'center' }}>
           {isHe ? 'מתכנן טיולים קבוצתי חינמי' : 'Free Group Trip Planner'}
         </h1>
 

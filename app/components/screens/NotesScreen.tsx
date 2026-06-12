@@ -43,7 +43,7 @@ export default function NotesScreen() {
       <p className="eyebrow-lg a-rise" style={{ color: 'var(--lg-terra)', marginBottom: 2 }}>
         {trip.name}
       </p>
-      <h1 className="display-xl a-rise d1" style={{ fontSize: 38, color: 'var(--lg-ink)', margin: '0 0 18px' }}>
+      <h1 className="text-display-sm a-rise d1" style={{ margin: '0 0 18px' }}>
         {t('travelNotes') as string || 'Notes'}
       </h1>
 

@@ -393,7 +393,9 @@ export default function WishlistSheet({ onClose }: WishlistSheetProps) {
             animate={{ opacity: 1, y: 0 }}
             style={{ textAlign: 'center', padding: '32px 16px', color: 'var(--text-3)' }}
           >
-            <div style={{ fontSize: 36, marginBottom: 10 }}>✨</div>
+            <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
+              <StampIcon iconKey="compass" size={64} />
+            </div>
             <p style={{ fontSize: 14, lineHeight: 1.55, margin: 0 }}>
               {locale === 'he'
                 ? 'עדיין ריק — הוסף מקומות שאתה רוצה לבקר ותקבל המלצה מתי לשלב אותם.'

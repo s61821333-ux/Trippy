@@ -79,13 +79,18 @@ export const tokens = {
   },
 
   // ─── TYPOGRAPHY — 2027 variable font stack ──────────────────────────────
+  // 2026 redesign: bold DM Sans (700/800) carries hero moments via the
+  // .text-display* classes in globals.css; Instrument Serif is now reserved for
+  // the `Trippy.` wordmark + editorial captions only. Hebrew uses Assistant
+  // (the live `--font-friendly`/`--font-hebrew` value), not Noto Sans Hebrew.
   typography: {
-    // DM Sans Variable (body) + Instrument Serif (display) — from layout.tsx
+    // DM Sans Variable (body + bold display) + Instrument Serif (wordmark/editorial)
     body:    '"DM Sans Variable", "DM Sans", -apple-system, system-ui, sans-serif',
-    display: '"Instrument Serif", Georgia, serif',
+    display: '"DM Sans Variable", "DM Sans", system-ui, sans-serif', // bold 700/800 heroes
+    editorial: '"Instrument Serif", Georgia, serif', // wordmark + editorial captions only
     serif:   '"Instrument Serif", Georgia, serif',
     mono:    '"JetBrains Mono", ui-monospace, monospace',
-    hebrew:  '"Noto Sans Hebrew", "DM Sans", sans-serif',
+    hebrew:  '"Assistant", "DM Sans", sans-serif',
 
     // clamp() fluid scale — micro → display
     sizes: {
@@ -137,7 +142,15 @@ export const tokens = {
     lg:   '24px',
     xl:   '32px',
     '2xl':'40px',
+    screen: '48px', // device frame (2026 redesign)
     full: '9999px',
+  },
+
+  // ─── 2026 redesign — paper pill on dark canvas + onboarding canvas ───────
+  redesign: {
+    paperPillBg:   '#F7F3EC',
+    paperPillText: '#1C1713',
+    canvas:        '#0E0C0A',
   },
 
   // ─── SHADOWS — 2027: layered depth, oklch-based, never pure black ────────

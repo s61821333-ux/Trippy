@@ -14,33 +14,39 @@ import Icon from '../ui/Icon';
 import Field from '../ui/Field';
 import CountriesInput from '../ui/CountriesInput';
 import Toggle from '../ui/Toggle';
+import Eyebrow from '../ui/Eyebrow';
 
 // ── Row ───────────────────────────────────────────────────────────────────────
 
+// Hairline settings row (HANDOFF B10 — rows over cards)
 function Row({ icon, title, sub, right, onClick }: {
   icon?: string; title: string; sub?: string; right?: React.ReactNode; onClick?: () => void;
 }) {
   return (
     <div
       onClick={onClick}
-      style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '13px 0', cursor: onClick ? 'pointer' : 'default' }}
+      className="hairline-row"
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
       {icon && (
-        <span className="lg-btn lg-btn-glass" style={{ width: 38, height: 38, padding: 0, flexShrink: 0 }} aria-hidden="true">
-          <Icon name={icon as 'settings'} size={17} color="var(--lg-forest)" />
+        <span
+          aria-hidden="true"
+          style={{
+            width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            background: 'var(--surface-warm)', boxShadow: 'inset 0 0 0 1px var(--rule)',
+          }}
+        >
+          <Icon name={icon as 'settings'} size={17} color="var(--brand)" />
         </span>
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--lg-ink)' }}>{title}</div>
-        {sub && <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 1 }}>{sub}</div>}
+        <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--text)' }}>{title}</div>
+        {sub && <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</div>}
       </div>
       {right}
     </div>
   );
-}
-
-function Divider() {
-  return <div aria-hidden="true" style={{ height: 1, background: 'oklch(50% 0.02 60 / 10%)' }} />;
 }
 
 // ── Main Settings_V2 ─────────────────────────────────────────────────────────
@@ -52,7 +58,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
   const {
     trip, themeMode, setThemeMode,
     highContrast, toggleHighContrast,
-    currencyByTrip, tripDbId,
+    currencyByTrip, tripDbId, authUser,
     deleteTrip, setCurrency, updateTripInfo, setScreen, logout,
   } = useAppStore(useShallow(s => ({
     trip:               s.trip,
@@ -62,6 +68,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     toggleHighContrast: s.toggleHighContrast,
     currencyByTrip:     s.currencyByTrip,
     tripDbId:           s.tripDbId,
+    authUser:           s.authUser,
     deleteTrip:         s.deleteTrip,
     setCurrency:        s.setCurrency,
     updateTripInfo:     s.updateTripInfo,
@@ -234,33 +241,38 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         {locale === 'he' ? 'לוח בקרה' : 'Dashboard'}
       </button>
 
-      {/* ── Header ── */}
-      <m.p
-        className="eyebrow-lg"
-        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.04, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-        style={{ color: 'var(--lg-terra)', marginBottom: 2 }}
+      {/* ── Header — flat bold title + avatar (HANDOFF B10) ── */}
+      <m.div
+        initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, margin: '4px 0 24px' }}
       >
-        {t('setupSub') || 'Trip & preferences'}
-      </m.p>
-
-      <m.h1
-        className="display-xl"
-        initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.09, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{ fontSize: 38, color: 'var(--lg-ink)', margin: '0 0 18px' }}
-      >
-        {t('setupTitle') || 'Settings'}
-      </m.h1>
+        <h1 className="text-display-sm" style={{ margin: 0 }}>
+          {t('setupTitle') || 'Settings'}
+        </h1>
+        {authUser && (
+          <span
+            aria-hidden="true"
+            style={{
+              width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+              background: 'var(--brand)', color: '#fff',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--font-sans)', fontWeight: 800, fontSize: 16,
+              boxShadow: 'var(--lg-glow-forest)',
+            }}
+          >
+            {(authUser.username ?? '?').split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase()}
+          </span>
+        )}
+      </m.div>
 
       {/* ── Trip info ── */}
-      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>{t('settingsTrip')}</p>
+      <Eyebrow style={{ marginBottom: 4 }}>{t('settingsTrip')}</Eyebrow>
 
       <m.div
-        className="lg"
         initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.12, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{ padding: '4px 16px', marginBottom: 16 }}
+        style={{ marginBottom: 24 }}
       >
         <Row
           icon="tent"
@@ -278,7 +290,6 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
             setShowTripEdit(true);
           }}
         />
-        <Divider />
         <Row
           icon="coins"
           title={t('currencyLabel') || 'Currency'}
@@ -286,7 +297,6 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
           right={chev}
           onClick={() => setShowCurrencyPicker(true)}
         />
-        <Divider />
         <Row
           icon="globe"
           title={t('languageLabel') || 'Language'}
@@ -312,7 +322,6 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
             </div>
           }
         />
-        <Divider />
         <Row
           icon="calExport"
           title={t('exportPDF') || 'Export as PDF'}
@@ -323,15 +332,12 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
       </m.div>
 
       {/* ── Appearance ── */}
-      <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
-        {t('appearanceLabel')}
-      </p>
+      <Eyebrow style={{ marginBottom: 10 }}>{t('appearanceLabel')}</Eyebrow>
 
       <m.div
-        className="lg"
         initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.17, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{ padding: 16, marginBottom: 16 }}
+        style={{ marginBottom: 24 }}
       >
         <div style={{ display: 'flex', gap: 8 }} role="radiogroup" aria-label="Theme">
           {themeOptions.map(opt => (
@@ -358,10 +364,9 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
 
       {/* ── Accessibility ── */}
       <m.div
-        className="lg"
         initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.22, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        style={{ padding: '4px 16px', marginBottom: 16 }}
+        style={{ marginBottom: 24 }}
       >
         <Row
           icon="sparkle"
@@ -374,14 +379,11 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
       {/* ── Security ── */}
       {onSecurity && (
         <>
-          <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 10 }}>
-            {locale === 'he' ? 'אבטחה' : 'Security'}
-          </p>
+          <Eyebrow style={{ marginBottom: 10 }}>{locale === 'he' ? 'אבטחה' : 'Security'}</Eyebrow>
           <m.div
-            className="lg"
             initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.23, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            style={{ padding: '4px 16px', marginBottom: 16 }}
+            style={{ marginBottom: 24 }}
           >
             <Row
               icon="lock"
@@ -430,18 +432,16 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         {locale === 'he' ? 'מחק טיול' : 'Delete trip'}
       </m.button>
 
-      {/* ── Sign out ── */}
+      {/* ── Sign out — quiet red text link (HANDOFF B10) ── */}
       <m.button
-        initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.29, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-        whileTap={{ scale: 0.97 }}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+        transition={{ delay: 0.29, duration: 0.42 }}
         onClick={() => logout()}
-        className="lg-btn"
         style={{
-          width: '100%', height: 50,
-          background: 'var(--lg-panel)', color: 'var(--text-2)',
-          boxShadow: 'var(--lg-shadow), inset 0 0 0 1px oklch(100% 0 0 / 12%)',
-          marginBottom: 20, WebkitTapHighlightColor: 'transparent',
+          display: 'block', margin: '2px auto 20px',
+          background: 'none', border: 0, cursor: 'pointer', padding: '6px 12px',
+          fontFamily: 'var(--font-sans)', fontSize: 14, fontWeight: 600,
+          color: 'var(--danger)', WebkitTapHighlightColor: 'transparent',
         }}
       >
         {locale === 'he' ? 'התנתק' : 'Sign out'}

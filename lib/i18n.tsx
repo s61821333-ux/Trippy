@@ -155,6 +155,8 @@ const en = {
   editingLabel: 'Editing',
   nextEvent: 'Next Up',
   comingUp: 'Coming Up',
+  daysToGo: 'days to go',
+  plannedLabel: 'planned',
   tripInsights: 'Trip Insights',
   quickAdd: 'Quick Add',
   noUpcomingEvents: 'Nothing scheduled — soak it up.',
@@ -541,6 +543,9 @@ const en = {
   // Home hero
   homeHeroTitle: 'Where to\nnext?',
   homeHeroSub: 'All your trips, right here.',
+  homeStatementEmpty: 'Let’s plan the first.',
+  homeStatementOne: 'One trip in motion.',
+  homeStatementMany: '{n} trips in motion.',
 
   // Offline banner
   offlineViewing: "You're offline — viewing your saved plan",
@@ -730,6 +735,8 @@ const he: typeof en = {
   editingLabel: 'עורך',
   nextEvent: 'הפעילות הבאה',
   comingUp: 'בקרוב',
+  daysToGo: 'ימים לטיול',
+  plannedLabel: 'מתוכנן',
   tripInsights: 'תובנות הטיול',
   quickAdd: 'הוספה מהירה',
   noUpcomingEvents: 'אין פעילויות עכשיו — תיהנה!',
@@ -1116,6 +1123,9 @@ const he: typeof en = {
   // Home hero
   homeHeroTitle: 'לאן\nנוסעים?',
   homeHeroSub: 'כל הטיולים שלכם, במקום אחד.',
+  homeStatementEmpty: 'בואו נתכנן את הראשון.',
+  homeStatementOne: 'טיול אחד בתנועה.',
+  homeStatementMany: '{n} טיולים בתנועה.',
 
   // Offline banner
   offlineViewing: 'אתם במצב לא מקוון — צופים בתוכנית השמורה',

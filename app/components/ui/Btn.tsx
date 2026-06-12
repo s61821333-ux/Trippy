@@ -2,7 +2,9 @@
 
 import React from 'react';
 
-type BtnKind = 'terra' | 'forest' | 'glass';
+// 2026 redesign: `ink` (var(--text) bg / var(--bg) text, inverts per theme) and
+// `paper` (warm-white pill for dark canvases) added per HANDOFF PillButton spec.
+type BtnKind = 'terra' | 'forest' | 'glass' | 'ink' | 'paper';
 
 interface BtnProps {
   children: React.ReactNode;
@@ -23,7 +25,7 @@ export default function Btn({ children, kind = 'terra', onClick, style, full, di
       disabled={disabled}
       aria-label={ariaLabel}
       className={`lg-btn lg-btn-${kind}`}
-      style={{ height: 52, padding: '0 24px', fontSize: 15, width: full ? '100%' : undefined, ...style }}
+      style={{ height: 54, padding: '0 24px', fontSize: 15, width: full ? '100%' : undefined, ...style }}
     >
       {children}
     </button>

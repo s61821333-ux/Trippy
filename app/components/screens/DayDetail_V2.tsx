@@ -24,6 +24,9 @@ import { useAppStore } from '@/lib/store';
 import { CAT_META, CAT_FALLBACK, fmtDuration, toMins, toTime, getDayBudget } from '@/lib/utils';
 import { getCurrencySymbol } from '@/lib/currency';
 import CurrencyAmount from '../ui/CurrencyAmount';
+import Eyebrow from '../ui/Eyebrow';
+import SegmentedPill from '../ui/SegmentedPill';
+import DayPill from '../ui/DayPill';
 import { catStamp } from '@/lib/categoryStamp';
 import { Category, HotelStay, TripEvent } from '@/lib/types';
 import { useToast } from '../ui/Toast';
@@ -124,12 +127,6 @@ function dayDateStr(startDate: string | undefined, dayNum: number, locale: strin
   if (!startDate) return `Day ${dayNum}`;
   const dt = new Date(new Date(startDate + 'T00:00:00').getTime() + (dayNum - 1) * 86_400_000);
   return dt.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-}
-
-function dayPillLabel(startDate: string | undefined, dayNum: number, locale = 'en'): string {
-  if (!startDate) return `Day ${dayNum}`;
-  const dt = new Date(new Date(startDate + 'T00:00:00').getTime() + (dayNum - 1) * 86_400_000);
-  return dt.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', { month: 'short', day: 'numeric' });
 }
 
 // ── HotelAnchor ───────────────────────────────────────────────────────────────
@@ -1028,17 +1025,15 @@ export default function DayDetail_V2() {
             opens the same per-day suggestions sheet, so it was redundant here. */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div style={{ minWidth: 0 }}>
-            <p className="eyebrow-lg" style={{ color: 'var(--terra-text)', marginBottom: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{eyebrow}</p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, minWidth: 0 }}>
-              <h1 className="display-xl" style={{ fontSize: 30, color: 'var(--lg-ink)', margin: 0, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                {locale === 'he' ? 'יום' : 'Day'} {activeDay}
-              </h1>
-              {meta?.region && (
-                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {meta.region}
-                </span>
-              )}
-            </div>
+            <Eyebrow tone="terra" style={{ marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{eyebrow}</Eyebrow>
+            <h1 className="text-display-sm" style={{ margin: 0, whiteSpace: 'nowrap' }}>
+              {locale === 'he' ? 'יום' : 'Day'} {activeDay}{meta?.region ? '.' : ''}
+            </h1>
+            {meta?.region && (
+              <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>
+                {meta.region}
+              </span>
+            )}
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
             {/* Google Maps route — icon-only neutral chip */}
@@ -1064,24 +1059,16 @@ export default function DayDetail_V2() {
                 </a>
               );
             })()}
-            {/* List / Map toggle */}
-            <div className="lg" style={{ display: 'flex', padding: 4, borderRadius: 9999, gap: 2 }}>
-              {(['list', 'map'] as const).map(m => (
-                <button
-                  key={m}
-                  onClick={() => setViewMode(m)}
-                  style={{
-                    border: 0, cursor: 'pointer', borderRadius: 9999, padding: '7px 13px',
-                    fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', fontWeight: 600,
-                    background: viewMode === m ? 'var(--lg-terra)' : 'transparent',
-                    color: viewMode === m ? '#fff' : 'var(--text-3)',
-                    transition: 'all .3s',
-                  }}
-                >
-                  {m === 'list' ? (locale === 'he' ? 'רשימה' : 'List') : (locale === 'he' ? 'מפה' : 'Map')}
-                </button>
-              ))}
-            </div>
+            {/* List / Map toggle — segmented pill */}
+            <SegmentedPill
+              aria-label={locale === 'he' ? 'תצוגה' : 'View'}
+              value={viewMode}
+              onChange={(v) => setViewMode(v as 'list' | 'map')}
+              options={[
+                { value: 'list', label: locale === 'he' ? 'רשימה' : 'List' },
+                { value: 'map',  label: locale === 'he' ? 'מפה' : 'Map' },
+              ]}
+            />
           </div>
         </div>
 
@@ -1095,29 +1082,23 @@ export default function DayDetail_V2() {
           {fmtDuration(freeTimeMins)} {locale === 'he' ? 'פנוי' : 'free'}
         </p>
 
-        {/* Day pill rail — shows real dates */}
-        <div className="lg-scroll" style={{ display: 'flex', gap: 7, overflowX: 'auto' }}>
+        {/* Day pill rail — 48×60 mono-date pills, active terra (HANDOFF) */}
+        <div className="lg-scroll days-container" style={{ display: 'flex', gap: 7, overflowX: 'auto' }}>
           {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
             const d  = i + 1;
             const on = d === activeDay;
+            const dt = trip.startDate ? new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000) : null;
+            const top = dt ? dt.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', { month: 'short' }) : (locale === 'he' ? 'יום' : 'Day');
+            const num = dt ? dt.getDate() : d;
             return (
-              <button
+              <DayPill
                 key={d}
+                label={top}
+                num={num}
+                active={on}
                 onClick={() => setActiveDay(d)}
-                aria-label={`Day ${d}`}
-                aria-pressed={on}
-                style={{
-                  flex: 'none', border: 0, cursor: 'pointer', borderRadius: 9999, padding: '8px 15px',
-                  fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
-                  background: on ? 'var(--lg-forest)' : 'var(--lg-panel)',
-                  backdropFilter: 'var(--lg-blur)', WebkitBackdropFilter: 'var(--lg-blur)',
-                  color: on ? '#fff' : 'var(--text-2)',
-                  boxShadow: on ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
-                  transition: 'all .3s', whiteSpace: 'nowrap',
-                }}
-              >
-                {dayPillLabel(trip.startDate, d, locale)}
-              </button>
+                aria-label={`${top} ${num}`}
+              />
             );
           })}
         </div>
@@ -1184,7 +1165,7 @@ export default function DayDetail_V2() {
               /* Empty day state */
               <div style={{ margin: '20px 20px 0', padding: '32px 20px', textAlign: 'center', borderRadius: 20, background: 'var(--lg-panel)', boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 10%)' }}>
                 <Icon name="compass" size={36} color="var(--text-3)" />
-                <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, color: 'var(--lg-ink)', margin: '12px 0 6px' }}>
+                <p className="text-display-sm" style={{ margin: '12px 0 6px' }}>
                   {locale === 'he' ? 'יום ריק' : 'Nothing planned yet.'}
                 </p>
                 <p style={{ fontSize: 13, color: 'var(--text-3)', margin: '0 0 16px' }}>
@@ -1212,11 +1193,11 @@ export default function DayDetail_V2() {
             {evs.length > 0 && (
               <button
                 onClick={() => openAdd()}
-                className="lg-btn lg-btn-glass"
-                style={{ height: 48, margin: '4px 20px 0', gap: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 'calc(100% - 40px)' }}
+                className="add-slot"
+                style={{ margin: '4px 20px 0', width: 'calc(100% - 40px)' }}
               >
-                <Icon name="plus" size={17} color="var(--lg-forest)" />
-                {locale === 'he' ? 'הוסף אירוע' : 'Add an event'}
+                <Icon name="plus" size={16} color="var(--text-3)" />
+                {locale === 'he' ? `הוסף ליום ${activeDay}` : `Add to Day ${activeDay}`}
               </button>
             )}
           </div>

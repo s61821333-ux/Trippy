@@ -13,6 +13,10 @@ import Sheet from '../ui/Sheet';
 import { StampIcon } from '../ui/StampIcon';
 import { CompassLoader, LoaderStyles, BRAND_THEME } from '../ui/TripLoaders';
 import Field from '../ui/Field';
+import StatementHeading from '../ui/StatementHeading';
+import HairlineRow from '../ui/HairlineRow';
+import AvatarStack from '../ui/AvatarStack';
+import Eyebrow from '../ui/Eyebrow';
 import CountriesInput from '../ui/CountriesInput';
 import { TripTheme } from '@/lib/types';
 import { CURRENCIES, getCountryCurrency } from '@/lib/currency';
@@ -46,34 +50,16 @@ const THEMES: { id: TripTheme; label: string; labelHe: string; bg: string; accen
   { id: 'space',    label: 'Space',    labelHe: 'חלל',   bg: '#1A1A2E', accent: '#2B7A8E' },
 ];
 
-const AVC = [
-  'var(--avatar-1)', 'var(--avatar-2)', 'var(--avatar-3)',
-  'var(--avatar-4)', 'var(--avatar-5)', 'var(--avatar-6)',
-];
-
 type UserTrip = { id: string; name: string; theme: string | null; days: number; start_date: string | null };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-// ── Avatar ────────────────────────────────────────────────────────────────────
-
-function TripAvatar({ name, index = 0, size = 22 }: { name: string; index?: number; size?: number }) {
-  const initials = name.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
-  return (
-    <span
-      aria-label={name}
-      style={{
-        width: size, height: size, borderRadius: '50%', flexShrink: 0,
-        background: AVC[index % AVC.length], color: '#fff',
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-        fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: size * 0.4,
-        boxShadow: '0 0 0 2px var(--bg), var(--lg-shadow)',
-        boxSizing: 'border-box',
-      }}
-    >
-      {initials}
-    </span>
-  );
+/** Whole days from today until a trip's start date (null if no date / past). */
+function daysUntil(start: string | null): number | null {
+  if (!start) return null;
+  const ms = new Date(start + 'T00:00:00').getTime() - new Date().setHours(0, 0, 0, 0);
+  const d = Math.ceil(ms / 86_400_000);
+  return d >= 0 ? d : null;
 }
 
 // ── CreateSheet ───────────────────────────────────────────────────────────────
@@ -341,32 +327,23 @@ export default function Home_V2() {
       style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', paddingBottom: 'var(--navbar-clearance)' }}
     >
       <LoaderStyles />
-      {/* ── Dark hero header ── */}
-      <div
-        className="hero-mesh"
-        style={{
-          padding: '52px 22px 30px',
-          borderRadius: '0 0 32px 32px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
-      >
-        {/* Inner centering wrapper */}
-        <div style={{ maxWidth: 960, margin: '0 auto' }}>
-        {/* Wordmark + avatar + logout row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 26 }}>
-          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 19, fontWeight: 700, letterSpacing: '-0.04em', color: '#fff' }}>
-            Trippy<span style={{ color: 'var(--lg-sand)' }}>.</span>
+      {/* ── Editorial header (dark hero removed — HANDOFF Home) ── */}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px 0' }}>
+
+        {/* Wordmark + avatar + sign-out */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 'env(safe-area-inset-top, 0px)', marginBottom: 30 }}>
+          <span className="wm" style={{ fontSize: 20, color: 'var(--text)' }}>
+            Trippy<span className="dot">.</span>
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div
               aria-label={authUser?.username}
               style={{
-                width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
-                background: 'oklch(100% 0 0 / 16%)',
-                border: '2px solid oklch(100% 0 0 / 30%)',
+                width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                background: 'var(--brand)', color: '#fff',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13, color: '#fff',
+                fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
+                boxShadow: 'var(--lg-glow-forest)',
               }}
             >
               {initials}
@@ -376,73 +353,47 @@ export default function Home_V2() {
               size="sm"
               onClick={() => logout()}
               aria-label={t('signOut')}
-              style={{ width: 34, height: 34, padding: 0, borderRadius: '50%', background: 'oklch(100% 0 0 / 14%)' }}
+              style={{ width: 36, height: 36, padding: 0, borderRadius: '50%' }}
             >
-              <Icon name="logout" size={15} color="oklch(98% 0.005 80 / 80%)" />
+              <Icon name="logout" size={15} />
             </GlassBtn>
           </div>
         </div>
 
-        {/* Eyebrow greeting */}
-        <m.p
-          className="eyebrow-lg"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          style={{ color: 'var(--lg-sand)', marginBottom: 6 }}
-        >
-          {t('hi')}, {authUser?.username}
-        </m.p>
+        {/* Greeting eyebrow + two-tone statement headline */}
+        <m.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+          <Eyebrow tone="terra" style={{ marginBottom: 12 }}>{t('hi')}, {authUser?.username}</Eyebrow>
+        </m.div>
+        <StatementHeading
+          size="lg"
+          lines={[
+            t('homeHeroTitle').replace(/\n/g, ' '),
+            tripsLoading ? ' '
+              : trips.length === 0 ? t('homeStatementEmpty')
+              : trips.length === 1 ? t('homeStatementOne')
+              : t('homeStatementMany').replace('{n}', String(trips.length)),
+          ]}
+          style={{ marginBottom: 24 }}
+        />
 
-        {/* Title */}
-        <m.h1
-          className="display-xl"
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.10, duration: 0.40, ease: [0.22, 1, 0.36, 1] }}
-          style={{ fontSize: 40, color: '#fff', margin: 0, lineHeight: 1.05, whiteSpace: 'pre-line' }}
-        >
-          {t('homeHeroTitle')}
-        </m.h1>
-
-        <m.p
+        {/* Primary action — one forest pill */}
+        <m.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.18, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            color: 'oklch(98% 0.005 80 / 75%)', fontSize: 14,
-            marginTop: 10, fontFamily: 'var(--font-sans)', margin: '10px 0 0',
-          }}
+          transition={{ delay: 0.12, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          style={{ marginBottom: 30 }}
         >
-          {t('homeHeroSub')}
-        </m.p>
-        </div>{/* /inner centering wrapper */}
-      </div>
-
-      <div style={{ padding: '20px 20px 30px', marginTop: -16, position: 'relative', maxWidth: 960, marginInline: 'auto' }}>
-
-        {/* ── Action stack ── */}
-        <m.button
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => setShowCreate(true)}
-          className="lg-btn lg-btn-forest"
-          aria-label={t('createNewTrip')}
-          style={{
-            width: '100%', height: 60,
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '0 24px', marginBottom: 26,
-            fontSize: 16, fontFamily: 'var(--font-sans)',
-          }}
-        >
-          <span style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
-            <Icon name="plus" size={20} color="#fff" />
+          <Btn
+            kind="forest"
+            full
+            onClick={() => setShowCreate(true)}
+            aria-label={t('createNewTrip')}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
+          >
+            <Icon name="plus" size={19} color="#fff" />
             {t('createNewTrip')}
-          </span>
-          <Icon name="arrow" size={18} color="#fff" />
-        </m.button>
+          </Btn>
+        </m.div>
 
         {/* Plan with AI — full itinerary generator (hidden for now) */}
 
@@ -486,8 +437,9 @@ export default function Home_V2() {
                     {formatDateRange(lastTrip.start_date, lastTrip.days, locale)} · {lastTrip.days} {locale === 'he' ? 'ימים' : 'days'}
                   </div>
                   <div style={{
-                    fontFamily: 'var(--font-serif)', fontStyle: 'italic',
-                    fontSize: 23, color: 'var(--lg-ink)', lineHeight: 1.05,
+                    fontFamily: 'var(--font-sans)', fontWeight: 800,
+                    fontSize: 20, letterSpacing: '-0.03em',
+                    color: 'var(--lg-ink)', lineHeight: 1.1,
                     marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
                     {lastTrip.name}
@@ -528,7 +480,7 @@ export default function Home_V2() {
           >
             <StampIcon iconKey="compass" size={72} />
             <div>
-              <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 22, color: 'var(--lg-ink)', margin: '0 0 6px' }}>
+              <p className="text-display-sm" style={{ margin: '0 0 6px' }}>
                 {t('noTripsTitle')}
               </p>
               <p style={{ fontSize: 13.5, color: 'var(--text-3)', margin: 0 }}>
@@ -538,100 +490,71 @@ export default function Home_V2() {
           </m.div>
         )}
 
-        {/* ── Trips list ── */}
+        {/* ── Trips list — hairline rows (HANDOFF rule 4) ── */}
         {(tripsLoading || trips.length > 0) && (
           <>
-            <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 12 }}>
-              {t('myTrips')}
-            </p>
+            <Eyebrow style={{ marginBottom: 4 }}>{t('myTrips')}</Eyebrow>
 
             {tripsLoading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
                 <CompassLoader theme={BRAND_THEME} size={56} />
               </div>
             ) : (
-              <div
-                role="list"
-                aria-label={t('myTrips')}
-                className="trips-grid"
-                style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 13 }}
-              >
+              <div role="list" aria-label={t('myTrips')}>
                 {trips.map((trip, i) => {
                   const stampKey = THEME_STAMP[trip.theme ?? ''] ?? 'cactus';
                   const isLoading = loadingTripId === trip.id;
+                  const dleft = daysUntil(trip.start_date);
+                  const soon = dleft !== null && dleft < 90;
 
                   return (
-                    <m.button
+                    <m.div
                       key={trip.id}
                       role="listitem"
-                      initial={{ opacity: 0, y: 14 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.10 + Math.min(i, 7) * 0.07, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => handleOpen(trip.id)}
-                      disabled={loadingTripId !== null}
-                      aria-label={`Open ${trip.name}`}
-                      aria-busy={isLoading}
-                      className="lg"
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 15,
-                        padding: 15, textAlign: 'start',
-                        border: 0,
-                        cursor: loadingTripId && !isLoading ? 'default' : 'pointer',
-                        opacity: loadingTripId && !isLoading ? 0.48 : 1,
-                        width: '100%',
-                        transition: 'opacity 0.18s',
-                        WebkitTapHighlightColor: 'transparent',
-                        touchAction: 'manipulation',
-                      }}
+                      initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
+                      animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                      transition={{ delay: 0.06 + Math.min(i, 8) * 0.05, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                     >
-                      {/* Stamp */}
-                      <StampIcon iconKey={stampKey} size={52} aria-hidden="true" />
-
-                      {/* Info */}
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div
-                          className="eyebrow-lg"
-                          style={{ color: 'var(--lg-terra)', fontSize: 9, marginBottom: 2 }}
-                        >
-                          {formatDateRange(trip.start_date, trip.days, locale)} · {trip.days} {locale === 'he' ? 'ימים' : 'days'}
-                        </div>
+                      <HairlineRow
+                        onClick={() => handleOpen(trip.id)}
+                        disabled={loadingTripId !== null}
+                        aria-label={`Open ${trip.name}`}
+                        style={{ opacity: loadingTripId && !isLoading ? 0.48 : 1, transition: 'opacity 0.18s' }}
+                        leading={<StampIcon iconKey={stampKey} size={46} aria-hidden="true" />}
+                        trailing={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            {dleft !== null && (
+                              <Eyebrow tone={soon ? 'terra' : 'muted'}>
+                                {dleft} {locale === 'he' ? 'ימים' : 'days'}
+                              </Eyebrow>
+                            )}
+                            {isLoading
+                              ? <CompassLoader theme={BRAND_THEME} size={20} />
+                              : (
+                                <span className="rtl-flip" style={{ display: 'flex' }} aria-hidden="true">
+                                  <Icon name="chevR" size={18} color="var(--text-3)" />
+                                </span>
+                              )}
+                          </div>
+                        }
+                      >
+                        <Eyebrow style={{ marginBottom: 3 }}>
+                          {formatDateRange(trip.start_date, trip.days, locale)}
+                        </Eyebrow>
                         <div style={{
-                          fontFamily: 'var(--font-serif)',
-                          fontStyle: 'italic',
-                          fontSize: 23,
-                          color: 'var(--lg-ink)',
-                          lineHeight: 1.05,
-                          marginTop: 2,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap',
+                          fontFamily: 'var(--font-sans)', fontWeight: 800, fontSize: 18,
+                          letterSpacing: '-0.03em', color: 'var(--text)', lineHeight: 1.15,
+                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>
                           {trip.name}
                         </div>
                         {authUser && (
-                          <div style={{ display: 'flex', marginTop: 8 }}>
-                            <TripAvatar name={authUser.username} index={0} size={22} />
+                          <div style={{ marginTop: 7 }}>
+                            <AvatarStack names={[authUser.username]} size={20} />
                           </div>
                         )}
-                      </div>
-
-                      {/* Forest circular arrow / loader */}
-                      <span
-                        className="lg-btn lg-btn-forest"
-                        aria-hidden="true"
-                        style={{
-                          width: 40, height: 40, padding: 0, flexShrink: 0,
-                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          borderRadius: 9999,
-                        }}
-                      >
-                        {isLoading
-                          ? <CompassLoader theme={BRAND_THEME} size={22} />
-                          : <Icon name="arrow" size={17} color="#fff" />
-                        }
-                      </span>
-                    </m.button>
+                      </HairlineRow>
+                    </m.div>
                   );
                 })}
               </div>

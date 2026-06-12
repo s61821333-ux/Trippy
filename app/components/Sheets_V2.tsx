@@ -655,7 +655,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
         ) : visible.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '32px 0' }}>
             <Icon name="sparkle" size={36} color="var(--lg-sand)" />
-            <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, color: 'var(--lg-ink)', margin: '12px 0 6px' }}>
+            <p className="text-display-sm" style={{ margin: '12px 0 6px' }}>
               {locale === 'he' ? 'אין עוד הצעות' : 'All caught up!'}
             </p>
             <p style={{ fontSize: 13, color: 'var(--text-3)' }}>

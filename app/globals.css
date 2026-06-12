@@ -100,6 +100,12 @@
   --radius-lg:   24px;
   --radius-xl:   32px;
   --radius-full: 9999px;
+  --radius-screen: 48px; /* device frame (2026 redesign) */
+
+  /* 2026 redesign — paper pill on dark canvas + onboarding canvas base */
+  --paper-pill-bg:   #F7F3EC;
+  --paper-pill-text: #1C1713;
+  --canvas:          #0E0C0A;
 
   /* V2 numbered radius scale */
   --radius-1: 16px;
@@ -2068,6 +2074,231 @@ body::after {
   display: block;
 }
 [dir="rtl"] .eyebrow-lg { letter-spacing: 0.04em; }
+
+/* ═══════════════════════════════════════════════════════════════════
+   2026 Redesign — Editorial structure layer (HANDOFF.md)
+   Bold DM Sans heroes · two-tone statements · hairline rows · mono eyebrows.
+   Palette, stamps, icons, compass mark and the jelly-glass recipe are
+   intentionally untouched — this layer only adds structure/hierarchy/type.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Rule 1 — Bold DM Sans display (replaces serif for hero moments) — v2 */
+.text-display, .text-display-lg, .text-display-sm {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.08;
+  color: var(--text);
+}
+.text-display    { font-size: clamp(1.9rem, 8vw, 2.5rem); }
+.text-display-lg { font-size: clamp(2.2rem, 9vw, 3rem); }
+.text-display-sm { font-size: clamp(1.3rem, 5.5vw, 1.7rem); }
+/* Win over the dark-mode serif-thinning rule (which targets h1..h3, weight 500) */
+[data-dark="true"] .text-display,
+[data-dark="true"] .text-display-lg,
+[data-dark="true"] .text-display-sm { font-weight: 800; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .text-display,
+  :root:not([data-dark="false"]) .text-display-lg,
+  :root:not([data-dark="false"]) .text-display-sm { font-weight: 800; }
+}
+/* Hebrew → Assistant carries the bold; serif tracking doesn't apply */
+[dir="rtl"] .text-display,    :lang(he) .text-display,
+[dir="rtl"] .text-display-lg, :lang(he) .text-display-lg,
+[dir="rtl"] .text-display-sm, :lang(he) .text-display-sm {
+  font-family: var(--font-friendly);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
+/* Rule 2 — Two-tone statement headline (bright fact / muted promise) */
+.statement .line-1 { color: var(--text);   display: block; }
+.statement .line-2 { color: var(--text-3); display: block; }
+
+/* Rule 5 — Mono eyebrow carrying metadata; terra when active/urgent */
+.mono-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  display: block;
+  font-variant-numeric: tabular-nums;
+}
+.mono-eyebrow.is-terra { color: var(--terra-text); }
+[data-dark="true"] .mono-eyebrow.is-terra { color: var(--terra); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .mono-eyebrow.is-terra { color: var(--terra); }
+}
+[dir="rtl"] .mono-eyebrow, :lang(he) .mono-eyebrow {
+  font-family: var(--font-friendly);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  font-weight: 700;
+}
+
+/* Rule 4 — Hairline row (rows over cards for dense lists) */
+.hairline-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 15px 0;
+  border: 0;
+  border-bottom: 1px solid var(--rule);
+  background: transparent;
+  text-align: start;
+  -webkit-tap-highlight-color: transparent;
+}
+.hairline-row.no-rule { border-bottom: 0; }
+
+/* Tap-pill — the vote/claim affordance (the only colored pills in a list) */
+.tap-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 14px; border-radius: 9999px;
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  letter-spacing: -0.01em; border: 0; cursor: pointer; white-space: nowrap;
+  background: var(--terra-muted); color: var(--terra-text);
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+[data-dark="true"] .tap-pill { color: var(--terra); }
+.tap-pill.is-pending {
+  background: linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra));
+  color: #fff; box-shadow: var(--lg-glow-terra);
+}
+.tap-pill.is-settled { background: var(--bg-alt); color: var(--text-3); }
+.tap-pill:active { transform: scale(0.94); }
+
+/* Segmented control — glass track, active label sits over a moving blob */
+.segmented {
+  position: relative;
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 3px; border-radius: 9999px; background: var(--lg-panel);
+  backdrop-filter: var(--lg-blur); -webkit-backdrop-filter: var(--lg-blur);
+  border: 1px solid var(--lg-card-border, rgba(0,0,0,0.08));
+}
+.segmented > button {
+  position: relative; z-index: 1;
+  border: 0; background: transparent; cursor: pointer;
+  height: 34px; padding: 0 16px; border-radius: 9999px;
+  font-family: var(--font-sans); font-size: 12px; font-weight: 600;
+  letter-spacing: 0.02em; color: var(--text-3); white-space: nowrap;
+  transition: color 0.2s; -webkit-tap-highlight-color: transparent;
+}
+.segmented > button.is-active { color: #fff; }
+/* blob renders inside the active <button>; inset:0 fills that button */
+.segmented .seg-blob {
+  position: absolute; z-index: 0; inset: 0;
+  border-radius: 9999px;
+  background: linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra));
+  box-shadow: var(--lg-glow-terra);
+}
+.segmented.is-forest .seg-blob { background: linear-gradient(180deg, var(--lg-forest), var(--lg-forest-deep)); box-shadow: var(--lg-glow-forest); }
+.segmented.is-ink .seg-blob { background: var(--text); box-shadow: var(--lg-shadow); }
+.segmented.is-ink > button.is-active { color: var(--bg); }
+
+/* Thin progress bar */
+.progress-thin { height: 6px; border-radius: 9999px; background: var(--rule); overflow: hidden; }
+.progress-thin > span {
+  display: block; height: 100%; border-radius: 9999px; background: var(--terra);
+  transition: width 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+.progress-thin.is-gradient > span { background: linear-gradient(90deg, var(--terra), var(--sand)); }
+.progress-thin.is-forest > span  { background: var(--brand); }
+
+/* Stat triplet — borderless, mono label over bold value */
+.stat-triplet { display: flex; align-items: stretch; }
+.stat-triplet > .cell {
+  flex: 1; display: flex; flex-direction: column; gap: 4px;
+  align-items: center; text-align: center; min-width: 0;
+}
+.stat-triplet > .sep { width: 1px; align-self: center; height: 30px; background: var(--rule); flex-shrink: 0; }
+.stat-triplet .val {
+  font-family: var(--font-sans); font-weight: 700; font-size: 18px;
+  color: var(--text); font-variant-numeric: tabular-nums; line-height: 1;
+}
+.stat-triplet .val.is-forest { color: var(--brand); }
+.stat-triplet .val.is-terra  { color: var(--terra-text); }
+[data-dark="true"] .stat-triplet .val.is-terra { color: var(--terra); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-dark="false"]) .stat-triplet .val.is-terra { color: var(--terra); }
+}
+
+/* Day pill — itinerary day scroller */
+.day-pill {
+  flex-shrink: 0; width: 48px; height: 60px; border-radius: 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  border: 1px solid var(--border); background: var(--surface-warm); cursor: pointer;
+  font-family: var(--font-sans); color: var(--text-2);
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), background 0.18s, border-color 0.18s, color 0.18s;
+  -webkit-tap-highlight-color: transparent;
+}
+.day-pill.is-active { background: var(--terra); border-color: var(--terra); color: #fff; box-shadow: var(--lg-glow-terra); }
+.day-pill:active { transform: scale(0.95); }
+.day-pill .d-label { font-family: var(--font-mono); font-size: 8px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.85; }
+.day-pill .d-num { font-size: 19px; font-weight: 800; line-height: 1; }
+[dir="rtl"] .day-pill .d-label, :lang(he) .day-pill .d-label { font-family: var(--font-friendly); text-transform: none; letter-spacing: 0; }
+
+/* Chat bubble — onboarding only (glass over dark canvas) */
+.chat-bubble {
+  background: oklch(100% 0 0 / 10%);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border: 1px solid oklch(100% 0 0 / 14%);
+  border-radius: 20px; padding: 13px 16px;
+  color: oklch(98% 0.005 80 / 92%); font-size: 14px; font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Code circle — invite-code slots */
+.code-circle {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--border-strong); background: transparent;
+  font-family: var(--font-sans); font-size: 22px; font-weight: 700; color: var(--text);
+  transition: border-color 0.18s;
+}
+.code-circle.is-active, .code-circle.is-filled { border-color: var(--terra); }
+
+/* Dashed add slot (itinerary) */
+.add-slot {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 14px; border-radius: var(--radius-lg);
+  border: 1.5px dashed var(--border-strong); background: transparent;
+  color: var(--text-3); font-family: var(--font-sans); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: border-color 0.18s, color 0.18s;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) { .add-slot:hover { border-color: var(--terra); color: var(--terra-text); } }
+
+/* Gauge dotted track (consumed by Gauge.tsx) */
+.gauge-track { stroke-dasharray: 2 9; }
+
+/* Paper + ink pill button variants (extend .lg-btn) */
+.lg-btn-paper {
+  background: var(--paper-pill-bg); color: var(--paper-pill-text);
+  box-shadow: 0 8px 24px oklch(0% 0 0 / 18%), inset 0 1px 0 oklch(100% 0 0 / 60%);
+}
+.lg-btn-ink {
+  background: var(--text); color: var(--bg);
+  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 12%);
+}
+
+/* Dark onboarding/auth canvas — low-chroma forest+terra wash, bottom-anchored */
+.canvas-dark {
+  background:
+    radial-gradient(120% 80% at 50% 0%,   oklch(24% 0.06 40 / 45%) 0%, transparent 55%),
+    radial-gradient(130% 95% at 50% 105%, oklch(22% 0.05 158 / 55%) 0%, transparent 62%),
+    var(--canvas);
+  color: oklch(98% 0.005 80);
+}
+.canvas-dark .text-display,
+.canvas-dark .text-display-lg,
+.canvas-dark .statement .line-1 { color: oklch(98% 0.005 80); }
+.canvas-dark .statement .line-2 { color: oklch(98% 0.005 80 / 52%); }
 
 /* ── Liquid Glass animation system ───────────────────────────────── */
 @keyframes lgRise  { from { transform: translateY(18px); } to { transform: none; } }
