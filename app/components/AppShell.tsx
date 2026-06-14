@@ -429,17 +429,6 @@ function Shell() {
   }, [mounted, authResolved, screen]);
 
   if (!mounted || !authResolved) {
-    // Returning user (a trip id is persisted): paint the branded dashboard
-    // skeleton immediately so the app feels present while auth + trip resolve,
-    // instead of a blank full-screen spinner. New/logged-out users (no trip id)
-    // still get the compass mark before landing on home/welcome.
-    if (tripDbId) {
-      return (
-        <div style={{ position: 'fixed', inset: 0, background: 'var(--bg)' }}>
-          <DashboardSkeleton />
-        </div>
-      );
-    }
     return (
       <div style={{
         position: 'fixed', inset: 0,

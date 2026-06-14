@@ -291,7 +291,11 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
 // ── Home_V2 ───────────────────────────────────────────────────────────────────
 
 export default function Home_V2() {
-  const { authUser, tripDbId, loadTripById, logout } = useAppStore();
+  const authUser     = useAppStore(s => s.authUser);
+  const tripDbId     = useAppStore(s => s.tripDbId);
+  const loadTripById = useAppStore(s => s.loadTripById);
+  const logout       = useAppStore(s => s.logout);
+  const setScreen    = useAppStore(s => s.setScreen);
   const { t, locale } = useI18n();
   const { show } = useToast();
 
@@ -315,6 +319,12 @@ export default function Home_V2() {
 
   const handleOpen = async (tripId: string) => {
     if (loadingTripId) return;
+    // Trip already loaded in memory from boot → instant navigation, no DB round-trip
+    const { trip } = useAppStore.getState();
+    if (tripDbId === tripId && trip) {
+      setScreen('dashboard');
+      return;
+    }
     setLoadingTripId(tripId);
     try { await loadTripById(tripId, { showLoader: true, showEntry: true }); }
     catch { show(t('tripNotFound')); }

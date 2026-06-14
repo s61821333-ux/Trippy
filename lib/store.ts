@@ -62,7 +62,7 @@ interface AppState {
   clearTripEntry: () => void;
   recordDemoClick: () => void;
   loadDemoTrip: () => void;
-  loadTripById: (tripId: string, opts?: { showLoader?: boolean; showEntry?: boolean }) => Promise<void>;
+  loadTripById: (tripId: string, opts?: { showLoader?: boolean; showEntry?: boolean; navigate?: boolean }) => Promise<void>;
   createTrip: (name: string, days: number, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[], currency?: string) => Promise<void>;
   loadInvitations: () => Promise<void>;
   acceptInvitation: (invitationId: string) => Promise<void>;
@@ -281,7 +281,7 @@ export const useAppStore = create<AppState>()(
           // Run silently (showLoader: false) so the splash screen covers this wait;
           // the global overlay is only shown for explicit user-triggered navigations.
           (!sessionExpired && persistedTripDbId)
-            ? get().loadTripById(persistedTripDbId, { showLoader: false })
+            ? get().loadTripById(persistedTripDbId, { showLoader: false, navigate: false })
             : Promise.resolve(),
         ]);
       },
@@ -347,7 +347,7 @@ export const useAppStore = create<AppState>()(
       })),
 
 
-      loadTripById: async (tripId, { showLoader = true, showEntry = false } = {}) => {
+      loadTripById: async (tripId, { showLoader = true, showEntry = false, navigate = true } = {}) => {
         const { authUser, trip: localTrip, tripDbId: localTripDbId, nickname: storedNickname } = get();
         // Preserve any custom nickname the user already set; only fall back to authUser.username on first load
         const nickname = storedNickname || (authUser?.username ?? 'Traveler');
@@ -379,13 +379,14 @@ export const useAppStore = create<AppState>()(
             trip = { ...trip, events: filteredEvents };
           }
           const { screen: currentScreen } = get();
-          // Preserve the active screen/day only when the user is already inside the app.
-          // Always navigate to dashboard when coming from any auth or landing screen so the
-          // user is never stranded on splash/welcome/home after a trip loads.
+          // When navigate=false (silent boot load), keep the current screen unchanged.
+          // Otherwise navigate to dashboard unless already inside the app on a non-auth screen.
           const AUTH_SCREENS: string[] = ['home', 'splash', 'welcome'];
-          const navUpdate = isSameTrip && !AUTH_SCREENS.includes(currentScreen)
-            ? {}  // preserve current screen/activeDay when refreshing an already-open trip
-            : { screen: 'dashboard' as const, activeDay: 1 };
+          const navUpdate = !navigate
+            ? {}
+            : isSameTrip && !AUTH_SCREENS.includes(currentScreen)
+              ? {}  // preserve current screen/activeDay when refreshing an already-open trip
+              : { screen: 'dashboard' as const, activeDay: 1 };
           set({
             userId,
             tripDbId: data.id,
@@ -393,7 +394,7 @@ export const useAppStore = create<AppState>()(
             supplies,
             nickname,
             ...navUpdate,
-            tripEntryCountries: (showEntry || !isSameTrip) && trip.countries?.length ? trip.countries : null,
+            tripEntryCountries: navigate && (showEntry || !isSameTrip) && trip.countries?.length ? trip.countries : null,
             isGlobalLoading: false,
           });
           // Flush any writes that failed in a previous session for this trip.
