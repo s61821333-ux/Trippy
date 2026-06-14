@@ -56,6 +56,18 @@ function priceDots(level: number | undefined): string {
 
 type AiSuggestionExtended = AiSuggestion & { source_site?: string; source_url?: string };
 
+// GetYourGuide: surface a quick "Tickets" link for bookable experience types.
+const GYG_BOOKABLE = new Set<string>([
+  'attraction', 'museum', 'theme_park', 'guided_tour', 'concert', 'festival',
+  'theater', 'safari', 'cruise', 'boat', 'winery', 'cooking', 'water_sports',
+  'aerial', 'sport', 'art', 'cultural', 'national_park', 'spa', 'wellness', 'cinema',
+]);
+function gygSearchUrl(name: string, place?: string): string {
+  const partner = process.env.NEXT_PUBLIC_GYG_PARTNER_ID;
+  const q = [name, place].filter(Boolean).join(' ');
+  return `https://www.getyourguide.com/s/?q=${encodeURIComponent(q)}${partner ? `&partner_id=${encodeURIComponent(partner)}` : ''}`;
+}
+
 function SuggCard({
   s, currCode, onAdd, onDismiss, onAddToDay,
 }: { s: AiSuggestion; currCode: string; onAdd: (s: AiSuggestion) => void; onDismiss: (s: AiSuggestion) => void; onAddToDay?: (s: AiSuggestion) => void }) {
@@ -221,6 +233,27 @@ function SuggCard({
             </div>
           </a>
         )}
+
+        {/* GetYourGuide tickets — bookable experiences only */}
+        {GYG_BOOKABLE.has(s.category) && (
+          <a
+            href={gygSearchUrl(s.name, s.location)} target="_blank" rel="noopener noreferrer"
+            style={{ textDecoration: 'none' }}
+            aria-label={locale === 'he' ? 'הזמן כרטיסים ב-GetYourGuide' : 'Book tickets on GetYourGuide'}
+          >
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              background: 'oklch(62% 0.2 28 / 10%)', borderRadius: 9999, padding: '5px 10px',
+              boxShadow: 'inset 0 0 0 1px oklch(62% 0.2 28 / 22%)',
+              cursor: 'pointer',
+            }}>
+              <Icon name="ticket" size={11} color="#FF5533" />
+              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#FF5533', fontWeight: 600 }}>
+                {locale === 'he' ? 'כרטיסים' : 'Tickets'}
+              </span>
+            </div>
+          </a>
+        )}
       </div>
 
       {/* ── Description ── */}
@@ -311,6 +344,17 @@ const LOADING_MSGS_HE = [
   'עוד רגע קטן…',
 ];
 
+// Trusted sources surfaced during a search — sequential pulse gives the
+// "scanning the web in real time" feel and signals breadth (incl. GetYourGuide).
+const SEARCH_SOURCES: { name: string; color: string }[] = [
+  { name: 'Google',        color: '#4285F4' },
+  { name: 'Tripadvisor',   color: '#34E0A1' },
+  { name: 'GetYourGuide',  color: '#FF5533' },
+  { name: 'Reddit',        color: '#FF4500' },
+  { name: 'Lonely Planet', color: '#1BBC9B' },
+  { name: 'Local blogs',   color: 'var(--lg-forest)' },
+];
+
 function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: number; locale: string }) {
   const isHe = locale === 'he';
   const msgs = isHe ? LOADING_MSGS_HE : LOADING_MSGS_EN;
@@ -384,7 +428,30 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
           />
         </div>
 
-        <p style={{ fontSize: 10, color: 'var(--text-3)', margin: '8px 0 0', fontFamily: 'var(--font-mono)' }}>
+        {/* Searching across trusted sources — staggered pulse = "real-time" feel */}
+        <div style={{ marginTop: 14 }}>
+          <p style={{ fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-3)', margin: '0 0 8px', fontFamily: 'var(--font-mono)' }}>
+            {isHe ? 'מחפש במקורות מובילים' : 'Searching trusted sources'}
+          </p>
+          <style>{`@keyframes srcPulse{0%,100%{opacity:.45;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}`}</style>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {SEARCH_SOURCES.map((src, i) => (
+              <span key={src.name} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '4px 9px', borderRadius: 9999,
+                background: 'oklch(50% 0.02 60 / 7%)',
+                boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                fontSize: 11, fontWeight: 600, color: 'var(--text-2)',
+                animation: `srcPulse 1.6s ${(i * 0.22).toFixed(2)}s ease-in-out infinite`,
+              }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: src.color, flexShrink: 0 }} />
+                {src.name}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <p style={{ fontSize: 10, color: 'var(--text-3)', margin: '12px 0 0', fontFamily: 'var(--font-mono)' }}>
           {isHe ? 'מופעל על ידי Claude · ~3–5 שניות' : 'Powered by Claude · ~3–5 sec'}
         </p>
       </div>
