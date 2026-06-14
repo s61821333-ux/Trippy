@@ -129,7 +129,7 @@ function EventCard({
           style={{
             flexShrink: 0, width: 40, height: 40, borderRadius: 12,
             background: 'var(--lg-panel)',
-            boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+            boxShadow: 'var(--shadow-xs)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             textDecoration: 'none',
           }}

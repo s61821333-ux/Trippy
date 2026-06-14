@@ -309,7 +309,7 @@ function HotelSheet({ dayNum, existing, onClose }: {
                     fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12.5,
                     background: checkOut === d ? 'var(--lg-forest)' : 'var(--lg-panel)',
                     color: checkOut === d ? '#fff' : 'var(--text-2)',
-                    boxShadow: checkOut === d ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                    boxShadow: checkOut === d ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
                     transition: 'all .25s',
                   }}
                 >
@@ -370,7 +370,7 @@ function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger, isBrand
         color: textColor,
         border: isBrand ? `1px solid ${color}33` : 'none',
         borderRadius: 9999, cursor: 'pointer',
-        boxShadow: isBrand ? `0 2px 8px ${color}22` : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+        boxShadow: isBrand ? `0 2px 8px ${color}22` : 'var(--shadow-xs)',
         fontFamily: 'var(--font-sans)',
         transition: 'background .2s, color .2s, box-shadow .2s',
       }}
@@ -606,7 +606,7 @@ function RescheduleSheet({ event, onClose, dayLabel }: {
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
                   background: durPreset === d ? 'var(--lg-terra)' : 'var(--lg-panel)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
-                  boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                  boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'var(--shadow-xs)',
                   transition: 'all .25s', whiteSpace: 'nowrap',
                 }}
               >
@@ -747,7 +747,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
                   background: durPreset === d ? 'var(--lg-terra)' : 'var(--lg-panel)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
-                  boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                  boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'var(--shadow-xs)',
                   transition: 'all .25s', whiteSpace: 'nowrap',
                 }}
               >
@@ -786,7 +786,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12.5,
                   background: cat === c ? 'var(--lg-forest)' : 'var(--lg-panel)',
                   color: cat === c ? '#fff' : 'var(--text-2)',
-                  boxShadow: cat === c ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                  boxShadow: cat === c ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
                   transition: 'all .25s',
                 }}
               >
@@ -1174,7 +1174,7 @@ export default function DayDetail_V2() {
                   style={{
                     width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     background: 'var(--lg-panel)', border: 0, cursor: 'pointer',
-                    boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                    boxShadow: 'var(--shadow-xs)',
                   }}
                 >
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="#1a73e8" style={{ flexShrink: 0 }}>
@@ -1288,7 +1288,7 @@ export default function DayDetail_V2() {
               </Reorder.Group>
             ) : (
               /* Empty day state */
-              <div style={{ margin: '20px 20px 0', padding: '32px 20px', textAlign: 'center', borderRadius: 20, background: 'var(--lg-panel)', boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 10%)' }}>
+              <div style={{ margin: '20px 20px 0', padding: '32px 20px', textAlign: 'center', borderRadius: 20, background: 'var(--lg-panel)', boxShadow: 'var(--shadow-sm)' }}>
                 <Icon name="compass" size={36} color="var(--text-3)" />
                 <p className="text-display-sm" style={{ margin: '12px 0 6px' }}>
                   {locale === 'he' ? 'יום ריק' : 'Nothing planned yet.'}

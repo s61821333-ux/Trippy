@@ -1909,7 +1909,7 @@ body::after {
   --lg-r-card: 26px;
   --lg-r-lg:   34px;
   --lg-r-pill: 9999px;
-  --lg-card-border: rgba(0,0,0,0.08); /* Row 600: visible card border in light mode */
+  --lg-card-border: transparent; /* borderless in light mode - shadow provides separation */
 
   /* Vivid shadows with brand tint */
   --lg-shadow:     0 8px 30px oklch(20% 0.03 60 / 14%), 0 2px 8px oklch(20% 0.03 60 / 8%);
@@ -2815,15 +2815,9 @@ input[inputmode="numeric"]:not([data-ltr]) {
   line-height: 1.1;
 }
 
-/* Row 80: Sheet sticky header - stays visible while content scrolls */
+/* Row 80: Sheet header - title sits at top of sheet, scrolls with content */
 .sheet-header-sticky {
-  position: sticky;
-  top: -1px; /* avoids 1px gap on fractional scroll */
-  z-index: 2;
   padding-bottom: 12px;
-  background: inherit;
-  /* No backdrop-filter here - the sheet panel already applies it.
-     Adding it on the child compounds the blur and creates a visible dark band. */
 }
 
 /* Row 81: OTP / code hint text */
@@ -3095,11 +3089,7 @@ body {
     0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-/* Row 242: Glass border in light mode - subtle but visible */
-.glass,
-.lg {
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
+/* Row 242: Light mode glass border removed - shadow/specular provide separation */
 
 /* Row 247: Sheet backdrop - slightly stronger in light mode */
 :root {

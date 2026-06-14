@@ -173,7 +173,7 @@ function SuggCard({
         <div style={{
           display: 'inline-flex', alignItems: 'center', gap: 5,
           background: 'var(--lg-panel-strong)', borderRadius: 9999, padding: '5px 10px',
-          boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+          boxShadow: 'var(--shadow-xs)',
         }}>
           <Icon name="clock" size={11} color="var(--lg-terra)" />
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--lg-ink)' }}>
@@ -188,7 +188,7 @@ function SuggCard({
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
             background: 'var(--lg-panel-strong)', borderRadius: 9999, padding: '5px 10px',
-            boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+            boxShadow: 'var(--shadow-xs)',
           }}>
             <Icon name="download" size={11} color="var(--lg-sand)" />
             <CurrencyAmount
@@ -204,7 +204,7 @@ function SuggCard({
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 5,
             background: 'var(--lg-panel-strong)', borderRadius: 9999, padding: '5px 10px',
-            boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+            boxShadow: 'var(--shadow-xs)',
             maxWidth: 200, overflow: 'hidden',
           }}>
             <Icon name="home" size={11} color="var(--text-3)" />
@@ -440,7 +440,7 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
                 display: 'inline-flex', alignItems: 'center', gap: 5,
                 padding: '4px 9px', borderRadius: 9999,
                 background: 'oklch(50% 0.02 60 / 7%)',
-                boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                boxShadow: 'var(--shadow-xs)',
                 fontSize: 11, fontWeight: 600, color: 'var(--text-2)',
                 animation: `srcPulse 1.6s ${(i * 0.22).toFixed(2)}s ease-in-out infinite`,
               }}>

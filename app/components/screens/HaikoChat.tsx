@@ -161,7 +161,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
                     color: isUser ? '#fff' : 'var(--lg-ink)',
                     boxShadow: isUser
                       ? 'var(--lg-glow-terra), 0 2px 8px oklch(0% 0 0 / 12%)'
-                      : 'inset 0 0 0 1px oklch(50% 0.02 60 / 16%), 0 2px 8px oklch(0% 0 0 / 6%)',
+                      : '0 2px 8px oklch(0% 0 0 / 6%)',
                     fontSize: 14.5,
                     lineHeight: 1.55,
                     whiteSpace: 'pre-wrap',
@@ -183,7 +183,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
                 display: 'flex', alignItems: 'center', gap: 5,
                 padding: '14px 18px', borderRadius: 20, borderBottomLeftRadius: 5,
                 background: 'var(--lg-panel)',
-                boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 16%)',
+                boxShadow: 'var(--shadow-xs)',
               }}>
                 {[0, 1, 2].map(d => (
                   <span
@@ -279,7 +279,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
                 : 'var(--lg-panel)',
               boxShadow: canSend
                 ? 'var(--lg-glow-terra)'
-                : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                : 'var(--shadow-xs)',
               cursor: canSend ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'background .2s, box-shadow .2s, filter .15s',

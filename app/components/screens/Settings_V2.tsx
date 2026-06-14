@@ -301,7 +301,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
           icon="globe"
           title={t('languageLabel') || 'Language'}
           right={
-            <div className="lg" role="radiogroup" aria-label="Language" style={{ display: 'flex', padding: 3, borderRadius: 9999, gap: 2, boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)' }}>
+            <div className="lg" role="radiogroup" aria-label="Language" style={{ display: 'flex', padding: 3, borderRadius: 9999, gap: 2 }}>
               {(['en', 'he'] as Locale[]).map(l => (
                 <button
                   key={l}
@@ -351,7 +351,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
                 background: themeMode === opt.id ? 'var(--lg-forest)' : 'var(--lg-panel-strong)',
                 color:      themeMode === opt.id ? '#fff' : 'var(--text-2)',
-                boxShadow:  themeMode === opt.id ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                boxShadow:  themeMode === opt.id ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
                 transition: 'all .25s', WebkitTapHighlightColor: 'transparent',
               }}
             >

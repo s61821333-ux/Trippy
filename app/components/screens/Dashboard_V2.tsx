@@ -80,7 +80,7 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
               flex: 1, height: 52, border: 0, borderRadius: 'var(--lg-r-btn)',
               background: 'var(--lg-panel)', color: 'var(--text-2)',
               fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 15, cursor: 'pointer',
-              boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+              boxShadow: 'var(--shadow-xs)',
             }}
           >
             {t('cancel')}
@@ -1060,9 +1060,11 @@ export default function DashboardScreenV2() {
                 aria-pressed={isActive}
                 style={{
                   flexShrink: 0, width: 54, height: dayWeather ? 74 : 62, borderRadius: 16, cursor: 'pointer',
-                  border: isActive ? '1px solid var(--terra)' : '1px solid var(--border)',
-                  background: isActive ? 'var(--terra)' : 'var(--surface-warm)',
-                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'none',
+                  border: isActive ? '1px solid var(--terra)' : '1px solid transparent',
+                  background: isActive ? 'var(--terra)' : 'var(--lg-panel)',
+                  backdropFilter: isActive ? undefined : 'blur(12px) saturate(1.5)',
+                  WebkitBackdropFilter: isActive ? undefined : 'blur(12px) saturate(1.5)',
+                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 50%)',
                   color: isActive ? '#fff' : 'var(--text-2)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: 1, padding: '4px 0',

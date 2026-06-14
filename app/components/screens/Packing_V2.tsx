@@ -162,8 +162,8 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
           backdropFilter: 'blur(14px) saturate(1.7)',
           WebkitBackdropFilter: 'blur(14px) saturate(1.7)',
           boxShadow: item.checked
-            ? 'inset 0 0 0 1px oklch(50% 0.02 60 / 10%)'
-            : 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 22%), inset 0 0 0 1px oklch(100% 0 0 / 12%)',
+            ? 'none'
+            : 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 22%)',
           transition: 'box-shadow 0.25s',
           overflow: 'hidden',
           cursor: 'pointer',
@@ -494,7 +494,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
                         display: 'flex', alignItems: 'center', gap: 12,
                         padding: '10px 14px', border: 0, borderRadius: 14, cursor: 'pointer', textAlign: 'start',
                         background: item.selected ? 'var(--lg-panel)' : 'transparent',
-                        boxShadow: item.selected ? 'inset 0 0 0 1.5px var(--lg-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                        boxShadow: item.selected ? 'inset 0 0 0 1.5px var(--lg-forest)' : 'var(--shadow-xs)',
                         transition: 'all .18s',
                       }}
                     >
@@ -534,7 +534,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
                   flex: 0, width: 50, height: 50, border: 0, borderRadius: 'var(--lg-r-btn)', cursor: 'pointer',
                   background: 'var(--lg-panel)', color: 'var(--text-2)',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
-                  boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                  boxShadow: 'var(--shadow-xs)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
                 aria-label="Refresh"
@@ -760,7 +760,7 @@ export default function Packing_V2() {
                   color:      isActive ? '#fff' : 'var(--text-2)',
                   boxShadow:  isActive
                     ? 'var(--lg-glow-forest)'
-                    : 'var(--lg-shadow), inset 0 0 0 1px oklch(50% 0.02 60 / 12%)',
+                    : 'var(--lg-shadow)',
                   transition: 'all .25s', whiteSpace: 'nowrap',
                   WebkitTapHighlightColor: 'transparent',
                   display: 'flex', alignItems: 'center', gap: 6,

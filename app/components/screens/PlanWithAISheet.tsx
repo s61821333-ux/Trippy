@@ -122,7 +122,7 @@ function ChipGroup<T extends string>({
                 fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
                 background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
                 color:      active ? '#fff' : 'var(--text-2)',
-                boxShadow:  active ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                boxShadow:  active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
                 transition: 'all .2s',
                 WebkitTapHighlightColor: 'transparent',
               }}

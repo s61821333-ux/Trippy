@@ -131,7 +131,7 @@ function ChipRow<T extends string>({
               color: active ? '#fff' : 'var(--lg-ink)',
               boxShadow: active
                 ? '0 0 0 2px var(--lg-forest)'
-                : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                : 'var(--shadow-xs)',
               transition: 'all 160ms ease',
               display: 'inline-flex', alignItems: 'center', gap: 6,
             }}
@@ -292,7 +292,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                     height: 46, padding: '0 16px', fontSize: 14, fontWeight: active ? 700 : 600,
                     background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
                     color: active ? '#fff' : 'var(--lg-ink)',
-                    boxShadow: active ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+                    boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
                     transition: 'all 160ms ease',
                     display: 'inline-flex', alignItems: 'center', gap: 8,
                   }}
