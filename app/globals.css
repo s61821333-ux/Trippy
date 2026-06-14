@@ -347,11 +347,11 @@
   --primary-container:  oklch(58% 0.100 155);
   --coral-glow:         oklch(64% 0.138 30);
 
-  /* Row 167: dark-mode terra lightened to 70% for readable text on dark surfaces */
-  --terra:         oklch(70% 0.118 38);
-  --terra-hover:   oklch(64% 0.110 38);
-  --terra-light:   oklch(70% 0.118 38 / 20%);
-  --terra-muted:   oklch(70% 0.118 38 / 14%);
+  /* Row 167: dark-mode terra — boosted chroma to match the Batch-1 vivid update */
+  --terra:         oklch(70% 0.165 38);
+  --terra-hover:   oklch(64% 0.155 38);
+  --terra-light:   oklch(70% 0.165 38 / 20%);
+  --terra-muted:   oklch(70% 0.165 38 / 14%);
 
   --sand:          oklch(72% 0.112 72);
   --sand-light:    oklch(72% 0.112 72 / 20%);
@@ -442,8 +442,8 @@
   --hero-1: oklch(34% 0.09 158);
   --hero-2: oklch(15% 0.035 162);
   --hero-3: oklch(9% 0.018 60);
-  --lg-panel:        oklch(26% 0.022 65 / 92%);
-  --lg-panel-strong: oklch(30% 0.024 65 / 98%);
+  --lg-panel:        oklch(18% 0.006 60 / 84%);
+  --lg-panel-strong: oklch(22% 0.006 60 / 92%);
   --lg-shadow:    0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
   --lg-shadow-lg: 0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
   --compass-ring: #F4EFE8; --compass-n: #E0916B; --compass-s: #8BB39A; --compass-ew: #E6B574; --compass-hub: #F4EFE8;
@@ -1545,10 +1545,10 @@ body::after {
     --brand-light:        oklch(62% 0.100 155 / 20%);
     --brand-muted:        oklch(62% 0.100 155 / 16%);
     --primary-container:  oklch(55% 0.100 155);
-    --terra:         oklch(66% 0.118 38);
-    --terra-hover:   oklch(60% 0.110 38);
-    --terra-light:   oklch(66% 0.118 38 / 20%);
-    --terra-muted:   oklch(66% 0.118 38 / 14%);
+    --terra:         oklch(70% 0.165 38);
+    --terra-hover:   oklch(64% 0.155 38);
+    --terra-light:   oklch(70% 0.165 38 / 20%);
+    --terra-muted:   oklch(70% 0.165 38 / 14%);
     --sand:          oklch(72% 0.112 72);
     --sand-light:    oklch(72% 0.112 72 / 20%);
     --text:          oklch(96% 0.005 80);
@@ -1577,8 +1577,8 @@ body::after {
     --hero-1: oklch(34% 0.090 152);
     --hero-2: oklch(15% 0.035 160);
     --hero-3: oklch(9% 0.018 58);
-    --lg-panel:         oklch(26% 0.022 65 / 92%);
-    --lg-panel-strong:  oklch(30% 0.024 65 / 98%);
+    --lg-panel:         oklch(18% 0.006 60 / 84%);
+    --lg-panel-strong:  oklch(22% 0.006 60 / 92%);
     --lg-card-border:   transparent;
     --lg-shadow:     0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
     --lg-shadow-lg:  0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
@@ -1929,10 +1929,9 @@ body::after {
   --hero-2: oklch(15% 0.035 160);
   --hero-3: oklch(9% 0.018 58);
 
-  /* Panels: significantly more opaque so card surfaces are clearly
-     distinct from the #0E0C0A page background (was 55% / 80%) */
-  --lg-panel:         oklch(26% 0.022 65 / 92%);
-  --lg-panel-strong:  oklch(30% 0.024 65 / 98%);
+  /* Panels: near-neutral dark glass — low chroma so no brownish cast */
+  --lg-panel:         oklch(18% 0.006 60 / 84%);
+  --lg-panel-strong:  oklch(22% 0.006 60 / 92%);
   --lg-card-border:   transparent; /* dark mode: border replaces by inset shadow */
 
   --lg-shadow:     0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
