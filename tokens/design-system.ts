@@ -29,8 +29,8 @@ export const tokens = {
       50:  'oklch(97% 0.014 38)',
       100: 'oklch(92% 0.042 38)',
       300: 'oklch(78% 0.110 38)',
-      500: 'oklch(63% 0.170 38)',    // --terra
-      600: 'oklch(57% 0.162 38)',    // --terra-hover
+      500: 'oklch(65% 0.198 42)',    // --terra (glossy/vivid pass)
+      600: 'oklch(58% 0.186 42)',    // --terra-hover
       700: 'oklch(48% 0.128 38)',    // --terra-text / --terra-btn (text-safe)
     },
 

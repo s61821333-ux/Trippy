@@ -223,7 +223,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
   return (
     <div
       className="lg-scroll"
-      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}
+      style={{ height: '100%', overflowY: 'auto', background: 'transparent' }}
     >
       <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
       {/* ── Back button ── */}

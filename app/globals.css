@@ -46,9 +46,9 @@
   --coral-glow:         oklch(60% 0.162 30);
 
   /* Accent — warm terracotta. Vivid pass: hotter, more saturated. */
-  --terra:         oklch(63% 0.170 38); /* hotter terracotta */
-  --terra-hover:   oklch(57% 0.162 38);
-  --terra-bright:  oklch(67% 0.180 36); /* bright stop for gradients (was --lg-terra-bright) */
+  --terra:         oklch(65% 0.198 42); /* glossy living terracotta — chroma lifted for life */
+  --terra-hover:   oklch(58% 0.186 42);
+  --terra-bright:  oklch(72% 0.208 40); /* bright glossy top stop for gradients (was --lg-terra-bright) */
   --terra-light:   oklch(94% 0.050 38);
   --terra-muted:   oklch(63% 0.170 38 / 12%);
   /* Row 84: darkened variant for text on light bg — oklch(62%) fails 4.5:1 on white */
@@ -1315,6 +1315,26 @@ select {
   pointer-events: none;
 }
 
+/* ─── App ambient — soft brand-tinted glow behind every in-app screen ───
+   One fixed layer rendered once in AppShell so all screens share the same
+   alive, depth-y background instead of a flat paper fill. */
+.app-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 46% at 10% 4%,  oklch(72% 0.162 73 / 0.12), transparent 70%),
+    radial-gradient(54% 44% at 96% 2%,  oklch(65% 0.198 42 / 0.10), transparent 70%),
+    radial-gradient(72% 58% at 50% 104%, oklch(45% 0.150 152 / 0.08), transparent 75%);
+}
+[data-dark="true"] .app-ambient {
+  background:
+    radial-gradient(58% 46% at 10% 4%,  oklch(72% 0.112 73 / 0.10), transparent 70%),
+    radial-gradient(54% 44% at 96% 2%,  oklch(70% 0.140 42 / 0.12), transparent 70%),
+    radial-gradient(72% 58% at 50% 104%, oklch(60% 0.110 152 / 0.12), transparent 75%);
+}
+
 /* Paper ring (day number badge in dashboard) */
 .paper-ring {
   position: relative;
@@ -1560,7 +1580,7 @@ body::after {
     --lg-card-border:   transparent;
     --lg-shadow:     0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
     --lg-shadow-lg:  0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
-    --lg-glow-terra: 0 10px 34px oklch(70% 0.150 36 / 30%);
+    --lg-glow-terra: 0 12px 40px oklch(72% 0.172 40 / 38%);
     --lg-glow-forest:0 10px 34px oklch(62% 0.130 152 / 26%);
     --insight-gap-bg:       rgba(240,170,30,0.14);
     --insight-gap-border:   rgba(240,170,30,0.32);
@@ -1892,7 +1912,7 @@ body::after {
   /* Vivid shadows with brand tint */
   --lg-shadow:     0 8px 30px oklch(20% 0.03 60 / 14%), 0 2px 8px oklch(20% 0.03 60 / 8%);
   --lg-shadow-lg:  0 20px 60px oklch(20% 0.03 60 / 20%), 0 6px 18px oklch(20% 0.03 60 / 10%);
-  --lg-glow-terra: 0 10px 34px oklch(63% 0.170 38 / 26%);
+  --lg-glow-terra: 0 12px 40px oklch(66% 0.198 42 / 36%);
   --lg-glow-forest:0 10px 34px oklch(45% 0.150 152 / 22%);
 }
 
@@ -1915,7 +1935,7 @@ body::after {
 
   --lg-shadow:     0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
   --lg-shadow-lg:  0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
-  --lg-glow-terra: 0 10px 34px oklch(70% 0.150 36 / 30%);
+  --lg-glow-terra: 0 12px 40px oklch(72% 0.172 40 / 38%);
   --lg-glow-forest:0 10px 34px oklch(62% 0.130 152 / 26%);
 }
 

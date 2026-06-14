@@ -23,7 +23,7 @@ export default function NotesScreen() {
   };
 
   return (
-    <div className="lg-scroll" style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)' }}>
+    <div className="lg-scroll" style={{ height: '100%', overflowY: 'auto', background: 'transparent' }}>
       <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
       {/* Back button */}
       <button

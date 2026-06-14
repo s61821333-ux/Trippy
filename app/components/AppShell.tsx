@@ -489,6 +489,9 @@ function Shell() {
             touchAction: 'pan-x pan-y',
           }}
         >
+          {/* Soft brand-tinted ambient background — shared by every screen */}
+          <div className="app-ambient" aria-hidden="true" />
+
           {/* Row 808: skip link — visible on focus for keyboard users */}
           <a
             href="#main-content"

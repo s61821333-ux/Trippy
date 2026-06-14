@@ -959,7 +959,7 @@ export default function DashboardScreenV2() {
 
   return (
     <div
-      style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', paddingBottom: 'var(--navbar-clearance)' }}
+      style={{ height: '100%', overflowY: 'auto', background: 'transparent', paddingBottom: 'var(--navbar-clearance)' }}
       className="lg-scroll"
     >
       {/* ══ Editorial hero — gauge replaces the cinematic mesh (HANDOFF) ══ */}
@@ -1053,7 +1053,9 @@ export default function DashboardScreenV2() {
           className="lg-scroll a-rise d3"
           role="list"
           aria-label="Trip days"
-          style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}
+          /* full-bleed + vertical breathing room so the active day's terra glow
+             ("shine") is never clipped by the scroll container's overflow */
+          style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '10px 20px 14px', margin: '0 -20px', scrollPaddingInline: 20 }}
         >
           {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
             const dayNum   = i + 1;
@@ -1094,6 +1096,18 @@ export default function DashboardScreenV2() {
             );
           })}
         </div>
+
+        {/* Weather estimate note — sits directly under the day slider */}
+        {weather.length > 0 && isEstimatedWeather && (
+          <p style={{
+            margin: '8px 2px 0', fontSize: 11, color: 'var(--text-3)',
+            textAlign: 'start',
+          }}>
+            {locale === 'he'
+              ? 'מזג אוויר משוער — נתונים היסטוריים מאותה עונה בשנה שעברה'
+              : 'Typical weather estimate — based on historical data from the same dates last year'}
+          </p>
+        )}
       </div>
 
       {/* ══ Main content ════════════════════════════════════════════════ */}
@@ -1181,19 +1195,7 @@ export default function DashboardScreenV2() {
 
         {/* ── Weather alerts ── */}
         {weather.length > 0 && (
-          <>
-            <WeatherAlerts trip={trip} weather={weather} onGoToDay={handleDayClick} />
-            {isEstimatedWeather && (
-              <p style={{
-                margin: '4px 0 0', fontSize: 11, color: 'var(--text-3)',
-                textAlign: 'start',
-              }}>
-                {locale === 'he'
-                  ? 'מזג אוויר משוער — נתונים היסטוריים מאותה עונה בשנה שעברה'
-                  : 'Typical weather estimate — based on historical data from the same dates last year'}
-              </p>
-            )}
-          </>
+          <WeatherAlerts trip={trip} weather={weather} onGoToDay={handleDayClick} />
         )}
 
         {/* ── Next up ── */}

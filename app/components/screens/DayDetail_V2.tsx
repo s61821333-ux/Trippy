@@ -129,6 +129,22 @@ function dayDateStr(startDate: string | undefined, dayNum: number, locale: strin
   return dt.toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
+// Best-effort city name from a hotel's free-text location so a day can show
+// where you sleep (e.g. "New York City") instead of a bare "Day N". Handles the
+// common shapes: "City", "City, Country", and "Hotel Name, Street, City, …".
+function cityFromLocation(loc?: string | null, hotelName?: string | null): string {
+  if (!loc) return '';
+  let s = loc.trim();
+  const name = hotelName?.trim();
+  if (name && s.toLowerCase().startsWith(name.toLowerCase())) {
+    s = s.slice(name.length).replace(/^[\s,]+/, '');
+  }
+  const parts = s.split(',').map(p => p.trim()).filter(Boolean);
+  if (!parts.length) return '';
+  // Skip street segments (those carry a number); first clean segment ≈ the city.
+  return parts.find(p => !/\d/.test(p)) ?? parts[0];
+}
+
 // ── HotelAnchor ───────────────────────────────────────────────────────────────
 
 function HotelAnchor({ hotel, isEnd, onClick }: {
@@ -987,7 +1003,11 @@ export default function DayDetail_V2() {
 
   const tripYear  = trip.startDate ? new Date(trip.startDate).getFullYear() : new Date().getFullYear();
   const eyebrow   = `${trip.name || 'Adventure'} · ${tripYear}`;
-  const dayLabel  = `${locale === 'he' ? 'יום' : 'Day'} ${activeDay}${meta?.region ? ` · ${meta.region}` : ''}`;
+  // The day's location: an explicit day-meta region, else the city of the hotel
+  // you sleep in that night (checkout day falls back to that morning's hotel).
+  const sleepHotel = tonightHotel ?? checkoutHotel;
+  const dayRegion  = meta?.region || cityFromLocation(sleepHotel?.location, sleepHotel?.name);
+  const dayLabel  = `${locale === 'he' ? 'יום' : 'Day'} ${activeDay}${dayRegion ? ` · ${dayRegion}` : ''}`;
 
   const openAdd = (prefillTime?: string) => {
     const last = evs[evs.length - 1];
@@ -1002,7 +1022,7 @@ export default function DayDetail_V2() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full" style={{ background: 'var(--bg)' }}>
+    <div className="flex flex-col h-full w-full" style={{ background: 'transparent' }}>
 
       {/* ── Sticky header ── */}
       <div className="resp-container" style={{ padding: '6px 20px 12px', flexShrink: 0 }}>
@@ -1027,11 +1047,11 @@ export default function DayDetail_V2() {
           <div style={{ minWidth: 0 }}>
             <Eyebrow tone="terra" style={{ marginBottom: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{eyebrow}</Eyebrow>
             <h1 className="text-display-sm" style={{ margin: 0, whiteSpace: 'nowrap' }}>
-              {locale === 'he' ? 'יום' : 'Day'} {activeDay}{meta?.region ? '.' : ''}
+              {locale === 'he' ? 'יום' : 'Day'} {activeDay}{dayRegion ? '.' : ''}
             </h1>
-            {meta?.region && (
+            {dayRegion && (
               <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: 'var(--text-3)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 }}>
-                {meta.region}
+                {dayRegion}
               </span>
             )}
           </div>
