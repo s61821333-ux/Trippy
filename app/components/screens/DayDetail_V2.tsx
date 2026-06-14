@@ -175,6 +175,23 @@ function shareEventToWhatsApp(
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
+// Categories that typically have bookable tickets / guided experiences on
+// GetYourGuide — used to surface a quick "Tickets" link on those events.
+const BOOKABLE_CATS = new Set<string>([
+  'attraction', 'museum', 'theme_park', 'guided_tour', 'concert', 'festival',
+  'theater', 'safari', 'cruise', 'boat', 'winery', 'cooking', 'water_sports',
+  'aerial', 'sport', 'art', 'cultural', 'national_park', 'spa', 'wellness', 'cinema',
+]);
+
+// Optional partner id (affiliate). Set NEXT_PUBLIC_GYG_PARTNER_ID to earn on bookings.
+const GYG_PARTNER_ID = process.env.NEXT_PUBLIC_GYG_PARTNER_ID;
+
+function getYourGuideUrl(event: TripEvent): string {
+  const q = [event.name, event.location].filter(Boolean).join(' ');
+  const partner = GYG_PARTNER_ID ? `&partner_id=${encodeURIComponent(GYG_PARTNER_ID)}` : '';
+  return `https://www.getyourguide.com/s/?q=${encodeURIComponent(q)}${partner}`;
+}
+
 // ── HotelAnchor ───────────────────────────────────────────────────────────────
 
 function HotelAnchor({ hotel, isEnd, onClick }: {
@@ -434,6 +451,15 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
                     : encodeURIComponent(event.location!);
                   window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank', 'noopener,noreferrer');
                 }}
+              />
+            )}
+            {BOOKABLE_CATS.has(event.category) && (
+              <QuickAction
+                icon="ticket"
+                label={locale === 'he' ? 'כרטיסים' : 'Tickets'}
+                color="#FF5533"
+                ariaLabel={locale === 'he' ? 'הזמן כרטיסים ב-GetYourGuide' : 'Book tickets on GetYourGuide'}
+                onClick={() => { setOpen(false); window.open(getYourGuideUrl(event), '_blank', 'noopener,noreferrer'); }}
               />
             )}
             <QuickAction

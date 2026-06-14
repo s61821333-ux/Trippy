@@ -37,6 +37,8 @@ const SecuritySettings   = dynamic(() => import('./screens/SecuritySettings'));
 const MFAChallenge       = dynamic(() => import('./screens/MFAChallenge'));
 const PersonaSheet       = dynamic(() => import('./PersonaSheet'));
 const AISheetLazy        = dynamic(() => import('./Sheets_V2').then(m => ({ default: m.AISheet })));
+const AIMenuSheet        = dynamic(() => import('./screens/AIMenuSheet'));
+const HaikoChat          = dynamic(() => import('./screens/HaikoChat'));
 
 
 // Watches network status, wires online/offline events, flushes pending changes on reconnect
@@ -181,6 +183,8 @@ function Shell() {
   const [showWishlist,    setShowWishlist]    = useState(false);
   const [showSecurity,    setShowSecurity]    = useState(false);
   const [showMfaChallenge, setShowMfaChallenge] = useState(false);
+  const [showAIMenu,      setShowAIMenu]      = useState(false);
+  const [showHaiko,       setShowHaiko]       = useState(false);
   const prevScreen = React.useRef(screen);
 
   const resolvedDark = themeMode === 'dark' || (themeMode === 'system' && osDark);
@@ -592,7 +596,7 @@ function Shell() {
               onLogout={() => logout()}
               onNotes={() => setScreen('notes')}
               onWishlist={() => setShowWishlist(true)}
-              onAI={() => { if (trip) setShowPersona(true); }}
+              onAI={() => { if (trip) setShowAIMenu(true); }}
               wishlistOpen={showWishlist}
             />
           )}
@@ -640,6 +644,16 @@ function Shell() {
 
           {/* Wishlist sheet */}
           {showWishlist && <WishlistSheet onClose={() => setShowWishlist(false)} />}
+
+          {/* AI assistant — Ask (Haiko chat) | Find (discovery) chooser */}
+          {showAIMenu && (
+            <AIMenuSheet
+              onClose={() => setShowAIMenu(false)}
+              onAsk={() => { setShowAIMenu(false); setShowHaiko(true); }}
+              onFind={() => { setShowAIMenu(false); setShowPersona(true); }}
+            />
+          )}
+          {showHaiko && <HaikoChat onClose={() => setShowHaiko(false)} />}
 
           {/* AI persona + suggestions sheets — available from any screen */}
           {showPersona && <PersonaSheet dayNumber={activeDay} />}
