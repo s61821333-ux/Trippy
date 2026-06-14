@@ -18,12 +18,12 @@ const LeafletMap = dynamic(() => import('../ui/LeafletMap'), {
     <div style={{
       width: '100%', height: '100%',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(165deg, #E3EBE4 0%, #DCE6DD 35%, #EBE2D2 70%, #E8DCC8 100%)',
+      background: 'var(--bg)',
     }}>
       <div style={{
         width: 44, height: 44, borderRadius: '50%',
         border: '3px solid transparent',
-        borderTopColor: '#C4714A',
+        borderTopColor: 'var(--lg-terra)',
         animation: 'spin 0.9s linear infinite',
       }} />
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>

@@ -191,10 +191,10 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
                 whileTap={{ scale: 0.9 }}
                 onClick={() => onSuggest(gap.startMins, gap.endMins)}
                 style={{
-                  background: 'linear-gradient(135deg, rgba(91,79,207,0.12) 0%, rgba(59,126,212,0.12) 100%)',
-                  border: '1px solid rgba(91,79,207,0.25)',
+                  background: 'var(--terra-muted)',
+                  border: '1px solid oklch(from var(--lg-terra) l c h / 25%)',
                   borderRadius: 100, padding: '3px 10px',
-                  fontSize: 10, fontWeight: 700, color: '#5B4FCF',
+                  fontSize: 10, fontWeight: 700, color: 'var(--terra-text)',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
                 }}
               >

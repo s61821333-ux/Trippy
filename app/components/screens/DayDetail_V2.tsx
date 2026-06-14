@@ -10,9 +10,9 @@ import type { MapEvent } from '../ui/LeafletMap';
 // ── Lazy-load Leaflet (client-only, avoids SSR penalty) ───────────────────────
 const LeafletMap = dynamic(() => import('../ui/LeafletMap'), { ssr: false, loading: () => (
   <div style={{ width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',
-    background:'linear-gradient(165deg,#E3EBE4 0%,#DCE6DD 35%,#EBE2D2 70%,#E8DCC8 100%)' }}>
+    background:'var(--bg)' }}>
     <div style={{ width:40,height:40,borderRadius:'50%',border:'3px solid transparent',
-      borderTopColor:'#C4714A',animation:'spin .9s linear infinite' }} />
+      borderTopColor:'var(--lg-terra)',animation:'spin .9s linear infinite' }} />
     <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
   </div>
 ) });
@@ -950,22 +950,24 @@ function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
       {selected && (
         <div style={{
           position: 'absolute', bottom: 12, left: 12, right: 12, zIndex: 20,
-          background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(18px)',
+          background: 'var(--lg-panel-strong)', backdropFilter: 'var(--lg-blur-strong)',
+          WebkitBackdropFilter: 'var(--lg-blur-strong)',
           borderRadius: 16, padding: '12px 14px',
-          boxShadow: '0 4px 20px rgba(0,0,0,.18)',
+          boxShadow: 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 40%)',
+          border: '1px solid oklch(100% 0 0 / 18%)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               {selected.category === 'hotel' && (
-                <div style={{ fontSize: 11, fontWeight: 600, color: '#6B5CE7', marginBottom: 2 }}>🏨 Hotel</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--lg-forest)', marginBottom: 2 }}>Hotel</div>
               )}
-              <div style={{ fontSize: 14, fontWeight: 700, color: '#1a1410', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selected.name}</div>
-              <div style={{ fontSize: 12, color: '#666', marginTop: 2 }}>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selected.name}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
                 {selected.category !== 'hotel' && selected.time}
                 {selected.location ? `${selected.category !== 'hotel' && selected.time ? ' · ' : ''}${selected.location}` : ''}
               </div>
             </div>
-            <button onClick={() => setSelectedId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#888' }}>
+            <button onClick={() => setSelectedId(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-3)' }}>
               <Icon name="x" size={15} />
             </button>
           </div>
@@ -977,11 +979,12 @@ function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
         <div style={{
           position: 'absolute', inset: 0, zIndex: 10,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          background: 'rgba(227,235,228,.85)', backdropFilter: 'blur(6px)',
+          background: 'var(--lg-panel)', backdropFilter: 'var(--lg-blur)',
+          WebkitBackdropFilter: 'var(--lg-blur)',
         }}>
-          <Icon name="pin" size={32} color="#888" />
-          <p style={{ margin: '8px 0 4px', fontSize: 14, fontWeight: 700, color: '#444' }}>No pinned locations</p>
-          <p style={{ margin: 0, fontSize: 12, color: '#888', textAlign: 'center', maxWidth: 220 }}>Add a location to your events to see them here.</p>
+          <Icon name="pin" size={32} color="var(--text-3)" />
+          <p style={{ margin: '8px 0 4px', fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>No pinned locations</p>
+          <p style={{ margin: 0, fontSize: 12, color: 'var(--text-3)', textAlign: 'center', maxWidth: 220 }}>Add a location to your events to see them here.</p>
         </div>
       )}
 
@@ -995,7 +998,10 @@ function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
             position: 'absolute', top: 12, right: 12, zIndex: 20,
             display: 'inline-flex', alignItems: 'center', gap: 6,
             height: 36, padding: '0 14px', borderRadius: 9999,
-            background: '#fff', boxShadow: '0 2px 10px rgba(0,0,0,.18)',
+            background: 'var(--lg-panel-strong)', backdropFilter: 'var(--lg-blur)',
+            WebkitBackdropFilter: 'var(--lg-blur)',
+            boxShadow: 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 30%)',
+            border: '1px solid oklch(100% 0 0 / 18%)',
             fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 700,
             color: '#1a73e8', textDecoration: 'none',
           }}

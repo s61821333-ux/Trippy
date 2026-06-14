@@ -2822,8 +2822,8 @@ input[inputmode="numeric"]:not([data-ltr]) {
   z-index: 2;
   padding-bottom: 12px;
   background: inherit;
-  backdrop-filter: inherit;
-  -webkit-backdrop-filter: inherit;
+  /* No backdrop-filter here — the sheet panel already applies it.
+     Adding it on the child compounds the blur and creates a visible dark band. */
 }
 
 /* Row 81: OTP / code hint text */
