@@ -159,17 +159,20 @@ function shareEventToWhatsApp(
     ? new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (dayNum - 1) * 86_400_000)
         .toLocaleDateString(isHe ? 'he-IL' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })
     : `${isHe ? 'יום' : 'Day'} ${dayNum}`;
+  const costStr = event.cost && event.cost > 0
+    ? new Intl.NumberFormat(isHe ? 'he-IL' : 'en-US', { style: 'currency', currency: currCode, maximumFractionDigits: 0 }).format(event.cost)
+    : '';
   const lines = [
-    `🧭 ${event.name}`,
-    `🗓️ ${dateStr} · ${event.time}–${endT}`,
-    event.location ? `📍 ${event.location}` : '',
-    event.cost && event.cost > 0 ? `💰 ${currCode} ${event.cost}` : '',
-    event.notes ? `📝 ${event.notes}` : '',
+    `*${event.name}*`,
+    `${dateStr}  ·  ${event.time}–${endT}`,
+    event.location ? `${event.location}` : '',
+    costStr ? (isHe ? `עלות: ${costStr}` : `Cost: ${costStr}`) : '',
+    event.notes ? event.notes : '',
     '',
+    '—',
     isHe
-      ? 'תוכנן עם Trippy — מתכנן הטיולים הקבוצתי החינמי 🌍'
-      : 'Planned with Trippy — the free group trip planner 🌍',
-    'https://letsexploring.com',
+      ? `תוכנן עם Trippy — מתכנן הטיולים הקבוצתי החינמי\nhttps://letsexploring.com`
+      : `Planned with Trippy — free group trip planner\nhttps://letsexploring.com`,
   ].filter(Boolean);
   const url = `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`;
   window.open(url, '_blank', 'noopener,noreferrer');
@@ -338,27 +341,41 @@ function HotelSheet({ dayNum, existing, onClose }: {
 
 // ── QuickAction ───────────────────────────────────────────────────────────────
 
-function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger }: { icon: string; label: string; onClick: () => void; color: string; ariaLabel?: string; isDanger?: boolean }) {
+function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger, isBrand }: {
+  icon: string; label: string; onClick: () => void; color: string;
+  ariaLabel?: string; isDanger?: boolean; isBrand?: boolean;
+}) {
   const [hovered, setHovered] = useState(false);
+  const bg = isDanger && hovered
+    ? 'var(--danger-bg)'
+    : isBrand
+      ? `${color}1a`
+      : 'var(--lg-panel-strong)';
+  const textColor = isDanger && hovered
+    ? 'var(--danger)'
+    : isBrand
+      ? color
+      : 'var(--lg-ink)';
   return (
     <m.button
       whileTap={{ scale: 0.94 }}
       onClick={onClick}
       aria-label={ariaLabel}
-      onMouseEnter={() => isDanger && setHovered(true)}
+      onMouseEnter={() => (isDanger || isBrand) && setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        height: 44, padding: '0 12px', gap: 6, flexShrink: 0,
+        height: 44, padding: '0 13px', gap: 6, flexShrink: 0,
         display: 'flex', alignItems: 'center',
-        background: isDanger && hovered ? 'var(--danger-bg)' : 'var(--lg-panel-strong)',
-        color: isDanger && hovered ? 'var(--danger)' : 'var(--lg-ink)',
-        border: 'none', borderRadius: 9999, cursor: 'pointer',
-        boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
+        background: bg,
+        color: textColor,
+        border: isBrand ? `1px solid ${color}33` : 'none',
+        borderRadius: 9999, cursor: 'pointer',
+        boxShadow: isBrand ? `0 2px 8px ${color}22` : 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
         fontFamily: 'var(--font-sans)',
-        transition: 'background .2s, color .2s',
+        transition: 'background .2s, color .2s, box-shadow .2s',
       }}
     >
-      <Icon name={icon as any} size={15} color={isDanger && hovered ? 'var(--danger)' : color} />
+      <Icon name={icon as any} size={15} color={isDanger && hovered ? 'var(--danger)' : isBrand ? color : color} />
       <span style={{ fontSize: 12, fontWeight: 600 }}>{label}</span>
     </m.button>
   );
@@ -463,11 +480,12 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
               />
             )}
             <QuickAction
-              icon="share"
-              label={locale === 'he' ? 'וואטסאפ' : 'WhatsApp'}
+              icon="whatsapp"
+              label={locale === 'he' ? 'שתף' : 'Share'}
               color="#25D366"
-              ariaLabel={locale === 'he' ? 'שתף אירוע בוואטסאפ' : 'Share event to WhatsApp'}
+              ariaLabel={locale === 'he' ? 'שתף אירוע בוואטסאפ' : 'Share event on WhatsApp'}
               onClick={() => { setOpen(false); onShare(event); }}
+              isBrand
             />
             <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'Suggest'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
             <QuickAction icon="trash"   label={locale === 'he' ? 'מחק'      : 'Delete'}     color="var(--danger)"    onClick={() => { setOpen(false); onDelete(event.id); }} ariaLabel={locale === 'he' ? 'מחק אירוע' : 'Delete event'} isDanger />
