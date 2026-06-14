@@ -1105,7 +1105,7 @@ export default function DashboardScreenV2() {
 
         {/* ── AI Budget Coach card ── */}
         <div
-          className="a-rise"
+          className="a-rise dash-span2"
           style={{
             borderRadius: 'var(--lg-r-card)', padding: 16,
             background: 'linear-gradient(135deg, var(--lg-forest), var(--lg-forest-deep))',
@@ -1302,7 +1302,7 @@ export default function DashboardScreenV2() {
 
         {/* ── Today's schedule (only shown when trip is active) ── */}
         {todayEvs.length > 0 && currentTripDay !== null && (
-          <div>
+          <div className="dash-span2">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: 0 }}>
                 {isRTL
@@ -1355,7 +1355,7 @@ export default function DashboardScreenV2() {
 
         {/* Upcoming day preview when trip hasn't started */}
         {todayEvs.length > 0 && currentTripDay === null && (
-          <div>
+          <div className="dash-span2">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: 0 }}>
                 {trip.startDate
@@ -1407,7 +1407,7 @@ export default function DashboardScreenV2() {
         {/* ── Empty trip CTA — no events at all ── */}
         {Object.values(trip.events).every((evArr: any) => evArr.length === 0) && (
           <div
-            className="lg a-rise"
+            className="lg a-rise dash-span2"
             style={{ padding: '28px 20px', textAlign: 'center', borderRadius: 'var(--lg-r-card)' }}
           >
             <Icon name="compass" size={40} color="var(--text-3)" />
@@ -1434,7 +1434,7 @@ export default function DashboardScreenV2() {
         ))}
 
         {/* ── Calendar heatmap toggle ── */}
-        <div>
+        <div className="dash-span2">
           <button
             onClick={() => setShowCalendar(c => !c)}
             style={{

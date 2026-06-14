@@ -104,7 +104,7 @@ export default function NavBar_V2({
         flexDirection: 'column',
         alignItems: 'center',
         gap: 8,
-        zIndex: 40,
+        zIndex: 250,
         pointerEvents: 'none',
         transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',

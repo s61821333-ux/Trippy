@@ -1046,6 +1046,8 @@ select {
     gap: 20px;
     align-items: start;
   }
+  /* Cards that should span both columns on desktop */
+  .dash-span2 { grid-column: 1 / -1; }
 }
 
 /* ─── Screen inset ────────────────────────────────────────────── */
