@@ -575,7 +575,8 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
   const eventsCostLocal = Object.values(trip?.events ?? {}).reduce((sum: number, evs: any) => {
     return sum + (evs as any[]).reduce((s: number, ev: any) => s + (ev.cost ?? 0), 0);
   }, 0);
-  const total = manualTotal + eventsCostLocal;
+  const hotelsCostLocal = (trip?.hotels ?? []).reduce((s: number, h: any) => s + (h.cost ?? 0), 0);
+  const total = manualTotal + eventsCostLocal + hotelsCostLocal;
   const remaining = trip?.budget != null ? trip.budget - total : null;
   const pct = trip?.budget ? Math.min(1, total / trip.budget) : 0;
   const statusColor = pct > 0.9 ? 'var(--danger)' : pct > 0.7 ? 'oklch(70% 0.18 68)' : 'var(--lg-forest)';
@@ -854,7 +855,8 @@ export default function DashboardScreenV2() {
   const currSym   = getCurrencySymbol(currency);
   const expenses  = trip.expenses ?? [];
   const eventsCost = Object.values(trip.events).reduce((sum, evs) => sum + getDayBudget(evs), 0);
-  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0) + eventsCost;
+  const hotelsCost = (trip.hotels ?? []).reduce((s, h) => s + (h.cost ?? 0), 0);
+  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0) + eventsCost + hotelsCost;
 
   const budgetPct           = trip.budget ? Math.min(1, totalSpent / trip.budget) : 0;
   const budgetRemaining     = trip.budget != null ? trip.budget - totalSpent : null;

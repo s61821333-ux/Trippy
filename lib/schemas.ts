@@ -95,6 +95,7 @@ export const HotelsBody = z.object({
     checkOutDay: z.number().int().min(1),
     lat: z.number().optional(),
     lng: z.number().optional(),
+    cost: z.number().min(0).max(10_000_000).optional(),
   })).max(50),
 })
 

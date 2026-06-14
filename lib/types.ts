@@ -107,6 +107,7 @@ export interface HotelStay {
   lng?: number;
   checkInDay: number;   // 1-indexed day number (inclusive)
   checkOutDay: number;  // 1-indexed day number (exclusive — don't show banner on this day)
+  cost?: number;        // accommodation cost in local currency — counts toward the trip budget
 }
 
 export interface WishlistItem {

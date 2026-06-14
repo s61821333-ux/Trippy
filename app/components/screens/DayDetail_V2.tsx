@@ -145,6 +145,36 @@ function cityFromLocation(loc?: string | null, hotelName?: string | null): strin
   return parts.find(p => !/\d/.test(p)) ?? parts[0];
 }
 
+// Share a single event to WhatsApp: a short brief + a Trippy brand line and link.
+function shareEventToWhatsApp(
+  event: TripEvent,
+  trip: { name?: string; startDate?: string },
+  dayNum: number,
+  locale: string,
+  currCode: string,
+) {
+  const isHe = locale === 'he';
+  const endT = toTime(toMins(event.time) + event.duration);
+  const dateStr = trip.startDate
+    ? new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (dayNum - 1) * 86_400_000)
+        .toLocaleDateString(isHe ? 'he-IL' : 'en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+    : `${isHe ? 'יום' : 'Day'} ${dayNum}`;
+  const lines = [
+    `🧭 ${event.name}`,
+    `🗓️ ${dateStr} · ${event.time}–${endT}`,
+    event.location ? `📍 ${event.location}` : '',
+    event.cost && event.cost > 0 ? `💰 ${currCode} ${event.cost}` : '',
+    event.notes ? `📝 ${event.notes}` : '',
+    '',
+    isHe
+      ? 'תוכנן עם Trippy — מתכנן הטיולים הקבוצתי החינמי 🌍'
+      : 'Planned with Trippy — the free group trip planner 🌍',
+    'https://letsexploring.com',
+  ].filter(Boolean);
+  const url = `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
+
 // ── HotelAnchor ───────────────────────────────────────────────────────────────
 
 function HotelAnchor({ hotel, isEnd, onClick }: {
@@ -188,25 +218,31 @@ function HotelSheet({ dayNum, existing, onClose }: {
   existing: HotelStay | null;
   onClose: () => void;
 }) {
-  const { trip, addHotel, editHotel, deleteHotel } = useAppStore();
+  const { trip, addHotel, editHotel, deleteHotel, tripDbId, currencyByTrip } = useAppStore();
   const { show } = useToast();
   const { locale } = useI18n();
+
+  const currCode = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
+  const currSym  = getCurrencySymbol(currCode);
 
   const [name,     setName]     = useState(existing?.name     ?? '');
   const [location, setLocation] = useState(existing?.location ?? '');
   const [lat,      setLat]      = useState<number | undefined>(existing?.lat);
   const [lng,      setLng]      = useState<number | undefined>(existing?.lng);
   const [checkOut, setCheckOut] = useState(existing?.checkOutDay ?? dayNum + 1);
+  const [cost,     setCost]     = useState(existing?.cost != null ? String(existing.cost) : '');
 
   const maxDays = trip?.days ?? 30;
 
   const handleSave = () => {
     if (!location.trim()) { show('Enter a hotel name or address'); return; }
+    const costNum = cost.trim() ? Math.max(0, Number(cost.replace(/[^0-9.]/g, ''))) : undefined;
+    const costVal = costNum != null && !Number.isNaN(costNum) ? costNum : undefined;
     if (existing) {
-      editHotel(existing.id, { name: name || undefined, location, lat, lng, checkOutDay: checkOut });
+      editHotel(existing.id, { name: name || undefined, location, lat, lng, checkOutDay: checkOut, cost: costVal });
       show('Hotel updated');
     } else {
-      addHotel({ name: name || undefined, location, lat, lng, checkInDay: dayNum, checkOutDay: checkOut });
+      addHotel({ name: name || undefined, location, lat, lng, checkInDay: dayNum, checkOutDay: checkOut, cost: costVal });
       show('Hotel added');
     }
     onClose();
@@ -227,6 +263,14 @@ function HotelSheet({ dayNum, existing, onClose }: {
           value={location}
           onChange={v => { setLocation(v); setLat(undefined); setLng(undefined); }}
           onSelect={({ name: n, lat: la, lng: lo }) => { setLocation(n); setLat(la); setLng(lo); }}
+        />
+
+        <Field
+          label={locale === 'he' ? `עלות (${currSym}) — נוסף לתקציב` : `Cost (${currSym}) — added to budget`}
+          type="number"
+          placeholder="0"
+          value={cost}
+          onChange={setCost}
         />
 
         <div>
@@ -305,7 +349,7 @@ function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger }: { ico
 
 // ── EventAccordion ────────────────────────────────────────────────────────────
 
-function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSuggest, onDelete }: {
+function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSuggest, onDelete, onShare }: {
   event: TripEvent;
   index: number;
   currCode: string;
@@ -313,6 +357,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
   onReschedule: (e: TripEvent) => void;
   onSuggest: () => void;
   onDelete: (id: string) => void;
+  onShare: (e: TripEvent) => void;
 }) {
   const [open, setOpen] = useState(false);
   const { locale } = useI18n();
@@ -391,6 +436,13 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
                 }}
               />
             )}
+            <QuickAction
+              icon="share"
+              label={locale === 'he' ? 'וואטסאפ' : 'WhatsApp'}
+              color="#25D366"
+              ariaLabel={locale === 'he' ? 'שתף אירוע בוואטסאפ' : 'Share event to WhatsApp'}
+              onClick={() => { setOpen(false); onShare(event); }}
+            />
             <QuickAction icon="sparkle" label={locale === 'he' ? 'הצע'      : 'Suggest'} color="var(--lg-sand)"   onClick={() => { setOpen(false); onSuggest(); }} />
             <QuickAction icon="trash"   label={locale === 'he' ? 'מחק'      : 'Delete'}     color="var(--danger)"    onClick={() => { setOpen(false); onDelete(event.id); }} ariaLabel={locale === 'he' ? 'מחק אירוע' : 'Delete event'} isDanger />
           </div>
@@ -734,7 +786,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
 
 // ── DraggableEvent — Reorder.Item with explicit drag handle ──────────────────
 
-function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSuggest, onDelete }: {
+function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSuggest, onDelete, onShare }: {
   event: TripEvent;
   index: number;
   currCode: string;
@@ -742,6 +794,7 @@ function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSugges
   onReschedule: (e: TripEvent) => void;
   onSuggest: () => void;
   onDelete: (id: string) => void;
+  onShare: (e: TripEvent) => void;
 }) {
   const controls = useDragControls();
   return (
@@ -772,6 +825,7 @@ function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSugges
         onReschedule={onReschedule}
         onSuggest={onSuggest}
         onDelete={onDelete}
+        onShare={onShare}
       />
     </Reorder.Item>
   );
@@ -1178,6 +1232,7 @@ export default function DayDetail_V2() {
                     onReschedule={e => { setRescheduleTarget(e); setShowReschedule(true); }}
                     onSuggest={() => setShowPersona(true)}
                     onDelete={id => deleteEvent(activeDay, id)}
+                    onShare={e => shareEventToWhatsApp(e, trip, activeDay, locale, currCode)}
                   />
                 ))}
               </Reorder.Group>
