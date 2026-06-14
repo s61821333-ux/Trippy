@@ -1,8 +1,9 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import { NextRequest } from 'next/server';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/env';
+import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
 
 export const maxDuration = 20;
@@ -22,6 +23,14 @@ export interface DestinationIntel {
 const INTEL_TTL_MS = 24 * 60 * 60 * 1000;
 const INTEL_CACHE_MAX = 500;
 const intelCache = new Map<string, { data: DestinationIntel; ts: number }>();
+
+// Persistent (DB) cache TTL — country facts barely change, so a month is plenty.
+const DB_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+function serviceClient() {
+  try { return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } }); }
+  catch { return null; }
+}
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
@@ -54,6 +63,25 @@ export async function POST(request: NextRequest) {
   const hit = intelCache.get(cacheKey);
   if (hit && Date.now() - hit.ts < INTEL_TTL_MS) {
     return Response.json(hit.data, { headers: { 'X-Cache': 'HIT' } });
+  }
+
+  // L2: persistent shared cache (Supabase). Survives serverless cold starts and
+  // is shared across every user, so a given country's guide is generated once.
+  const svc = serviceClient();
+  if (svc) {
+    try {
+      const { data: row } = await svc
+        .from('destination_guides')
+        .select('data, updated_at')
+        .eq('country', country.toLowerCase())
+        .eq('locale', locale)
+        .maybeSingle();
+      if (row?.data && Date.now() - new Date(row.updated_at as string).getTime() < DB_TTL_MS) {
+        const data = row.data as DestinationIntel;
+        intelCache.set(cacheKey, { data, ts: Date.now() });
+        return Response.json(data, { headers: { 'X-Cache': 'DB' } });
+      }
+    } catch { /* fall through to AI generation */ }
   }
 
   const langNote = locale === 'he'
@@ -89,6 +117,16 @@ Return ONLY minified JSON (no markdown, no explanation):
       if (oldest !== undefined) intelCache.delete(oldest);
     }
     intelCache.set(cacheKey, { data, ts: Date.now() });
+
+    // Persist to the shared DB cache for every future user / serverless instance.
+    if (svc) {
+      try {
+        await svc.from('destination_guides').upsert(
+          { country: country.toLowerCase(), locale, data, updated_at: new Date().toISOString() },
+          { onConflict: 'country,locale' },
+        );
+      } catch { /* cache write is best-effort */ }
+    }
 
     return Response.json(data, { headers: { 'X-Cache': 'MISS' } });
   } catch (err) {

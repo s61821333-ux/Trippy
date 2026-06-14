@@ -50,23 +50,17 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
       if (TURNSTILE_SITE_KEY && !token && turnstileRef.current) {
         try {
           turnstileRef.current.execute();
-          token = await turnstileRef.current.getResponsePromise(8000);
+          token = await turnstileRef.current.getResponsePromise(6000);
         } catch {
           token = undefined;
         }
       }
 
-      // Captcha is required but no token could be obtained — fail fast with a
-      // clear message instead of making a request the server will reject.
-      if (TURNSTILE_SITE_KEY && !token) {
-        setPasskeyLoading(false);
-        turnstileRef.current?.reset();
-        setError(locale === 'he'
-          ? 'אימות האבטחה לא נטען — רעננו את הדף ונסו שוב'
-          : 'Security check didn’t load — refresh the page and try again');
-        return;
-      }
-
+      // Attempt sign-in regardless of token state. If the project enforces auth
+      // captcha and the token is missing, the server returns a clear error which
+      // we surface below; if captcha is NOT enforced (or Turnstile is broken /
+      // unconfigured for this domain, e.g. error 400020), passkey still works
+      // instead of being hard-blocked client-side.
       await signInWithPasskey(token);
       window.location.href = '/app';
     } catch (e: unknown) {
@@ -125,9 +119,12 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
           justifyContent: 'center',
           gap: 12,
           padding: '14px 24px',
-          background: 'var(--text)',
+          /* Fixed dark ink — NOT var(--text), which inverts to near-white in dark
+             mode and made the white label unreadable. Subtle light border gives
+             the button definition against the dark page background. */
+          background: '#1C1713',
           color: 'oklch(98% 0.002 80)',
-          border: 'none',
+          border: '1px solid oklch(100% 0 0 / 0.14)',
           borderRadius: 'var(--radius-full)',
           fontFamily: 'var(--font-sans)',
           fontSize: 15,

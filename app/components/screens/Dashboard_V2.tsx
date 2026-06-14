@@ -1250,14 +1250,12 @@ export default function DashboardScreenV2() {
           </button>
 
           {/* Budget — shows remaining when budget set, otherwise total spent + set CTA */}
-          {/* div+role instead of button because CurrencyAmount renders its own <button> inside */}
+          {/* Plain container (NOT a button): the amount is a CurrencyAmount that
+              converts on tap. Editing the budget is an explicit pencil button so
+              tapping to convert can never navigate to the budget editor. */}
           <div
-            role="button"
-            tabIndex={0}
             className="lg a-rise d3"
-            onClick={() => setShowBudgetEdit(true)}
-            onKeyDown={e => e.key === 'Enter' && setShowBudgetEdit(true)}
-            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5, cursor: 'pointer', textAlign: 'start', minWidth: 0 }}
+            style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5, textAlign: 'start', minWidth: 0 }}
             aria-label={t('budgetLabel')}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -1266,7 +1264,13 @@ export default function DashboardScreenV2() {
                   ? (budgetRemaining! >= 0 ? (locale === 'he' ? 'נותר' : 'Remaining') : (locale === 'he' ? 'חריגה' : 'Over'))
                   : (locale === 'he' ? 'תקציב' : 'Budget')}
               </span>
-              <Icon name="edit" size={12} color="var(--text-3)" />
+              <button
+                onClick={(e) => { e.stopPropagation(); setShowBudgetEdit(true); }}
+                aria-label={locale === 'he' ? 'ערוך תקציב' : 'Edit budget'}
+                style={{ background: 'none', border: 0, cursor: 'pointer', padding: 6, margin: -6, display: 'flex', WebkitTapHighlightColor: 'transparent' }}
+              >
+                <Icon name="edit" size={14} color="var(--text-3)" />
+              </button>
             </div>
 
             {trip.budget ? (
@@ -1301,9 +1305,12 @@ export default function DashboardScreenV2() {
                 <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, letterSpacing: '-0.02em', fontSize: 21, color: 'var(--lg-ink)', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
                   <CurrencyAmount amount={totalSpent} base={currency} />
                 </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--lg-terra)', fontWeight: 700 }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowBudgetEdit(true); }}
+                  style={{ alignSelf: 'flex-start', background: 'none', border: 0, cursor: 'pointer', padding: '2px 0', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--lg-terra)', fontWeight: 700, WebkitTapHighlightColor: 'transparent' }}
+                >
                   + {locale === 'he' ? 'קבע תקציב' : 'Set budget'}
-                </span>
+                </button>
               </>
             )}
           </div>
