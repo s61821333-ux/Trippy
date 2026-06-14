@@ -104,6 +104,7 @@ export const AddExpenseBody = z.object({
   description: z.string().min(1).max(200),
   amount: z.number().positive().max(1_000_000),
   splitCount: z.number().int().min(1).max(20).optional(),
+  tags: z.array(z.string().min(1).max(40)).max(10).optional(),
 })
 
 export const AddEventBody = z.object({

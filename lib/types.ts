@@ -79,6 +79,7 @@ export interface Expense {
   amount: number;
   paidBy: string;
   splitCount: number; // number of people splitting this
+  tags?: string[];    // optional category labels e.g. ["Food", "Transport"]
 }
 
 export interface EmergencyContact {

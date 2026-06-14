@@ -50,7 +50,7 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid request', details: parsed.error.flatten() }, { status: 400 })
   }
 
-  const { id, description, amount, splitCount } = parsed.data
+  const { id, description, amount, splitCount, tags } = parsed.data
   const client = admin ?? createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
     cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} },
   })
@@ -61,6 +61,7 @@ export async function POST(
     amount,
     paid_by: user.id,
     split_count: splitCount ?? 1,
+    tags: tags ?? [],
   })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })

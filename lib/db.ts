@@ -342,7 +342,7 @@ export async function dbAddExpense(tripId: string, expense: Expense, _userId: st
   const r = await fetch(`/api/trips/${tripId}/expenses`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id: expense.id, description: expense.description, amount: expense.amount, splitCount: expense.splitCount }),
+    body: JSON.stringify({ id: expense.id, description: expense.description, amount: expense.amount, splitCount: expense.splitCount, tags: expense.tags ?? [] }),
   })
   if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
@@ -640,6 +640,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     amount:      e.amount,
     paidBy:      userToInitials.get(e.paid_by) ?? 'Unknown',
     splitCount:  e.split_count ?? 1,
+    tags:        Array.isArray(e.tags) ? e.tags : [],
   }))
 
   const emergencyContacts = ((data.emergency_contacts as any[]) ?? []).map((c: any) => ({

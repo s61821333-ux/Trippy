@@ -22,6 +22,22 @@ import AvatarStack from '../ui/AvatarStack';
 
 // ── Budget edit sheet ─────────────────────────────────────────────────────────
 
+// Quick-pick categories for tagging a spend. The English value is stored; the
+// Hebrew label is shown when locale === 'he'.
+const EXPENSE_TAGS: { en: string; he: string; emoji: string }[] = [
+  { en: 'Food',       he: 'אוכל',     emoji: '🍽️' },
+  { en: 'Transport',  he: 'תחבורה',   emoji: '🚕' },
+  { en: 'Stay',       he: 'לינה',     emoji: '🏨' },
+  { en: 'Activities', he: 'אטרקציות', emoji: '🎟️' },
+  { en: 'Shopping',   he: 'קניות',    emoji: '🛍️' },
+  { en: 'Other',      he: 'אחר',      emoji: '•'  },
+];
+
+function tagLabel(tagEn: string, isHe: boolean): string {
+  const m = EXPENSE_TAGS.find(t => t.en === tagEn);
+  return m ? (isHe ? m.he : m.en) : tagEn;
+}
+
 function BudgetEditSheet({ current, currSym, onClose, onSave }: {
   current: number | undefined;
   currSym: string;
@@ -539,6 +555,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
   const { show } = useToast();
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [scanning, setScanning] = useState(false);
   const [showBudgetInput, setShowBudgetInput] = useState(false);
   const [budgetVal, setBudgetVal] = useState(trip?.budget ? String(trip.budget) : '');
@@ -584,8 +601,8 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
   const handleAdd = () => {
     const n = parseFloat(amount);
     if (!desc.trim() || isNaN(n) || n <= 0) { show(t('validExpenseError')); return; }
-    addExpense({ description: desc.trim(), amount: n, paidBy: t('youLabel'), splitCount: 1 });
-    setDesc(''); setAmount('');
+    addExpense({ description: desc.trim(), amount: n, paidBy: t('youLabel'), splitCount: 1, tags: tags.length ? tags : undefined });
+    setDesc(''); setAmount(''); setTags([]);
     show(t('expenseAdded'));
   };
 
@@ -711,6 +728,33 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
               <Icon name="plus" size={20} color="#fff" />
             </button>
           </div>
+
+          {/* Tag chips — categorise the spend (multi-select, optional) */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
+            {EXPENSE_TAGS.map(tg => {
+              const label = isHe ? tg.he : tg.en;
+              const on = tags.includes(tg.en);
+              return (
+                <button
+                  key={tg.en}
+                  type="button"
+                  onClick={() => setTags(ts => on ? ts.filter(x => x !== tg.en) : [...ts, tg.en])}
+                  aria-pressed={on}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    padding: '5px 11px', borderRadius: 9999, cursor: 'pointer',
+                    border: on ? '1px solid var(--lg-terra)' : '1px solid var(--border)',
+                    background: on ? 'var(--terra-muted)' : 'transparent',
+                    color: on ? 'var(--terra-text)' : 'var(--text-3)',
+                    fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 600,
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  <span aria-hidden>{tg.emoji}</span>{label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* ── Expense list ── */}
@@ -721,6 +765,15 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
               <div key={exp.id} className="lg" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.description}</div>
+                  {Array.isArray(exp.tags) && exp.tags.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
+                      {exp.tags.map((tg: string) => (
+                        <span key={tg} style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.02em', color: 'var(--terra-text)', background: 'var(--terra-muted)', padding: '2px 7px', borderRadius: 9999 }}>
+                          {tagLabel(tg, isHe)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {exp.paidBy && <div style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 2 }}>{exp.paidBy}</div>}
                 </div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: 'var(--lg-ink)', flexShrink: 0 }}>
