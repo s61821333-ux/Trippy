@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+﻿import Anthropic from '@anthropic-ai/sdk';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
@@ -17,14 +17,14 @@ export interface DestinationIntel {
   emergency: string;
 }
 
-// Server-side cache — country facts barely change, so a warm instance can
+// Server-side cache - country facts barely change, so a warm instance can
 // answer repeats (from any user) instantly without another Claude call.
 // Note: browsers never cache POST responses, so Cache-Control alone did nothing.
 const INTEL_TTL_MS = 24 * 60 * 60 * 1000;
 const INTEL_CACHE_MAX = 500;
 const intelCache = new Map<string, { data: DestinationIntel; ts: number }>();
 
-// Persistent (DB) cache TTL — country facts barely change, so a month is plenty.
+// Persistent (DB) cache TTL - country facts barely change, so a month is plenty.
 const DB_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
 function serviceClient() {
@@ -85,11 +85,11 @@ export async function POST(request: NextRequest) {
   }
 
   const langNote = locale === 'he'
-    ? 'ענה בעברית. שמות פרטיים, מספרים וקודים — השאר באנגלית.'
+    ? 'ענה בעברית. שמות פרטיים, מספרים וקודים - השאר באנגלית.'
     : 'Reply in English only.';
 
   const prompt = `Practical travel quick-facts for a visitor to ${country}. ${langNote}
-Be specific and actionable — real numbers, real names, real tips. Not generic advice.
+Be specific and actionable - real numbers, real names, real tips. Not generic advice.
 Return ONLY minified JSON (no markdown, no explanation):
 {"currency":"local currency name, whether cards are widely accepted, and any cash tips","tipping":"local tipping norm with specific amounts or percentages","customs":"one concrete local etiquette rule that surprises most visitors","safety":"honest safety rating and one specific precaution that matters here","adapter":"plug type letter(s), voltage, and whether a converter/adapter is needed","emergency":"police number and ambulance number"}`;
 
@@ -100,7 +100,7 @@ Return ONLY minified JSON (no markdown, no explanation):
       max_tokens: 300,
       system:     locale === 'he'
         ? 'אתה מומחה מידע לטיולים. ענה אך ורק ב-JSON מינימלי בעברית. מידע ספציפי ומדויק בלבד.'
-        : 'You are a practical travel expert. Return only minified JSON. Give specific, actionable facts — not generic travel advice.',
+        : 'You are a practical travel expert. Return only minified JSON. Give specific, actionable facts - not generic travel advice.',
       messages:   [
         { role: 'user', content: prompt },
         // Prefill so the model can't prepend prose or markdown fences

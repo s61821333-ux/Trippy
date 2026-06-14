@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
@@ -137,7 +137,7 @@ function AddWishItemSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ── Schedule Sheet — pick day + time ──────────────────────────────────────────
+// ── Schedule Sheet - pick day + time ──────────────────────────────────────────
 
 function ScheduleSheet({ item, onClose }: { item: WishlistItem; onClose: () => void }) {
   const { trip, scheduleWishlistItem } = useAppStore();
@@ -398,8 +398,8 @@ export default function WishlistSheet({ onClose }: WishlistSheetProps) {
             </div>
             <p style={{ fontSize: 14, lineHeight: 1.55, margin: 0 }}>
               {locale === 'he'
-                ? 'עדיין ריק — הוסף מקומות שאתה רוצה לבקר ותקבל המלצה מתי לשלב אותם.'
-                : 'No items yet — add places you want to visit and get a recommendation for when to fit them in.'}
+                ? 'עדיין ריק - הוסף מקומות שאתה רוצה לבקר ותקבל המלצה מתי לשלב אותם.'
+                : 'No items yet - add places you want to visit and get a recommendation for when to fit them in.'}
             </p>
           </m.div>
         ) : (

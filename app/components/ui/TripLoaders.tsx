@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import type { LoaderTheme } from '@/lib/deriveTheme';
@@ -7,7 +7,7 @@ import { BRAND_THEME } from '@/lib/deriveTheme';
 export type { LoaderTheme };
 export { BRAND_THEME };
 
-// ─── Shared keyframes — inject once at the root ──────────────────────────────
+// ─── Shared keyframes - inject once at the root ──────────────────────────────
 export function LoaderStyles() {
   return (
     <style>{`
@@ -42,7 +42,7 @@ interface LoaderProps {
   size?: number;
 }
 
-// ─── 1 · Compass — signature multi-orbit mark ─────────────────────────────────
+// ─── 1 · Compass - signature multi-orbit mark ─────────────────────────────────
 export function CompassLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: LoaderProps) {
   const t = theme;
   const d = (s: number) => `${s / speed}s`;
@@ -92,7 +92,7 @@ export function CompassLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: Lo
   );
 }
 
-// ─── Dashboard boot skeleton — branded perceived-performance placeholder ─────
+// ─── Dashboard boot skeleton - branded perceived-performance placeholder ─────
 // Shown while a returning user's trip loads, instead of a blank full-screen
 // spinner. Mirrors the real Dashboard layout (cinematic hero + glass cards) so
 // the app feels present immediately.
@@ -137,7 +137,7 @@ export function DashboardSkeleton() {
   );
 }
 
-// ─── 2 · Route — drawing a path between two pins ─────────────────────────────
+// ─── 2 · Route - drawing a path between two pins ─────────────────────────────
 const ROUTE_PATH = 'M26 86 C 60 30, 96 124, 130 70 S 178 26, 190 34';
 
 export function RouteLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: LoaderProps) {
@@ -172,7 +172,7 @@ export function RouteLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: Load
   );
 }
 
-// ─── 3 · Pack — stamps dropping into the bag ─────────────────────────────────
+// ─── 3 · Pack - stamps dropping into the bag ─────────────────────────────────
 export function PackLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: LoaderProps) {
   const t = theme;
   const d = (s: number) => `${s / speed}s`;
@@ -206,7 +206,7 @@ export function PackLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: Loade
   );
 }
 
-// ─── 4 · Sync — the crew saving together ─────────────────────────────────────
+// ─── 4 · Sync - the crew saving together ─────────────────────────────────────
 export function SyncLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: LoaderProps) {
   const t = theme;
   const d = (s: number) => `${s / speed}s`;
@@ -238,7 +238,7 @@ export function SyncLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: Loade
   );
 }
 
-// ─── 5 · Sparkle — Trippy is thinking (AI suggestions) ───────────────────────
+// ─── 5 · Sparkle - Triplly is thinking (AI suggestions) ───────────────────────
 const SPARK_PATH = 'M11 3l1.4 5.6L18 10l-5.6 1.4L11 17l-1.4-5.6L4 10l5.6-1.4z';
 
 export function SparkleLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: LoaderProps) {

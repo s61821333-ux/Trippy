@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
@@ -145,7 +145,7 @@ function cityFromLocation(loc?: string | null, hotelName?: string | null): strin
   return parts.find(p => !/\d/.test(p)) ?? parts[0];
 }
 
-// Share a single event to WhatsApp: a short brief + a Trippy brand line and link.
+// Share a single event to WhatsApp: a short brief + a Triplly brand line and link.
 function shareEventToWhatsApp(
   event: TripEvent,
   trip: { name?: string; startDate?: string },
@@ -164,22 +164,22 @@ function shareEventToWhatsApp(
     : '';
   const lines = [
     `*${event.name}*`,
-    `${dateStr}  ·  ${event.time}–${endT}`,
+    `${dateStr}  ·  ${event.time}-${endT}`,
     event.location ? `${event.location}` : '',
     costStr ? (isHe ? `עלות: ${costStr}` : `Cost: ${costStr}`) : '',
     event.notes ? event.notes : '',
     '',
-    '—',
+    '-',
     isHe
-      ? `תוכנן עם Trippy — מתכנן הטיולים הקבוצתי החינמי\nhttps://letsexploring.com`
-      : `Planned with Trippy — free group trip planner\nhttps://letsexploring.com`,
+      ? `תוכנן עם Triplly - מתכנן הטיולים הקבוצתי החינמי\nhttps://letsexploring.com`
+      : `Planned with Triplly - free group trip planner\nhttps://letsexploring.com`,
   ].filter(Boolean);
   const url = `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`;
   window.open(url, '_blank', 'noopener,noreferrer');
 }
 
 // Categories that typically have bookable tickets / guided experiences on
-// GetYourGuide — used to surface a quick "Tickets" link on those events.
+// GetYourGuide - used to surface a quick "Tickets" link on those events.
 const BOOKABLE_CATS = new Set<string>([
   'attraction', 'museum', 'theme_park', 'guided_tour', 'concert', 'festival',
   'theater', 'safari', 'cruise', 'boat', 'winery', 'cooking', 'water_sports',
@@ -279,14 +279,14 @@ function HotelSheet({ dayNum, existing, onClose }: {
 
         <PlacesInput
           label="Address or location"
-          placeholder="—"
+          placeholder="-"
           value={location}
           onChange={v => { setLocation(v); setLat(undefined); setLng(undefined); }}
           onSelect={({ name: n, lat: la, lng: lo }) => { setLocation(n); setLat(la); setLng(lo); }}
         />
 
         <Field
-          label={locale === 'he' ? `עלות (${currSym}) — נוסף לתקציב` : `Cost (${currSym}) — added to budget`}
+          label={locale === 'he' ? `עלות (${currSym}) - נוסף לתקציב` : `Cost (${currSym}) - added to budget`}
           type="number"
           placeholder="0"
           value={cost}
@@ -319,7 +319,7 @@ function HotelSheet({ dayNum, existing, onClose }: {
             })}
           </div>
           <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 6 }}>
-            The hotel will appear on the morning of day {checkOut} as checkout. Staying until day {checkOut} means it covers nights {dayNum}–{checkOut - 1}.
+            The hotel will appear on the morning of day {checkOut} as checkout. Staying until day {checkOut} means it covers nights {dayNum}-{checkOut - 1}.
           </p>
         </div>
 
@@ -441,7 +441,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
           <div style={{ display: 'flex', gap: 18, marginBottom: 10 }}>
             <div>
               <div className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5 }}>{locale === 'he' ? 'משך' : 'Duration'}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--lg-ink)' }}>{event.time}–{endT} ({fmtDuration(event.duration)})</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--lg-ink)' }}>{event.time}-{endT} ({fmtDuration(event.duration)})</div>
             </div>
             {event.cost != null && event.cost > 0 && (
               <div>
@@ -519,7 +519,7 @@ function TimelineView({ events }: { events: TripEvent[] }) {
             style={{ position: 'absolute', insetInlineStart: 46, insetInlineEnd: 20, top, height, borderRadius: 12, padding: '4px 8px', background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff', boxShadow: `0 6px 18px ${color}55`, overflow: 'hidden' }}
           >
             <div style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.05, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.name}</div>
-            <div style={{ fontSize: 8.5, opacity: 0.85, fontFamily: 'var(--font-mono)', lineHeight: 1.05 }}>{ev.time}–{toTime(toMins(ev.time) + ev.duration)}</div>
+            <div style={{ fontSize: 8.5, opacity: 0.85, fontFamily: 'var(--font-mono)', lineHeight: 1.05 }}>{ev.time}-{toTime(toMins(ev.time) + ev.duration)}</div>
           </m.div>
         );
       })}
@@ -716,7 +716,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
       onClose={onClose}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <Field label={locale === 'he' ? 'שם האירוע' : 'Event name'} placeholder="—" value={name} onChange={setName} autoFocus />
+        <Field label={locale === 'he' ? 'שם האירוע' : 'Event name'} placeholder="-" value={name} onChange={setName} autoFocus />
 
         {/* Start + End times */}
         <div style={{ display: 'flex', gap: 12 }}>
@@ -799,7 +799,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
 
         <PlacesInput
           label={locale === 'he' ? 'מיקום (אופציונלי)' : 'Location (optional)'}
-          placeholder="—"
+          placeholder="-"
           value={loc}
           onChange={v => { setLoc(v); setLat(undefined); setLng(undefined); }}
           onSelect={({ name: n, lat: la, lng: lo }) => { setLoc(n); setLat(la); setLng(lo); }}
@@ -828,7 +828,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
   );
 }
 
-// ── DraggableEvent — Reorder.Item with explicit drag handle ──────────────────
+// ── DraggableEvent - Reorder.Item with explicit drag handle ──────────────────
 
 function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSuggest, onDelete, onShare }: {
   event: TripEvent;
@@ -849,7 +849,7 @@ function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSugges
       whileDrag={{ scale: 1.02, boxShadow: '0 8px 24px oklch(20% 0.03 60 / 22%)' }}
       style={{ position: 'relative' }}
     >
-      {/* Drag handle — only this element activates drag; rest of card is scrollable */}
+      {/* Drag handle - only this element activates drag; rest of card is scrollable */}
       <div
         onPointerDown={e => { e.preventDefault(); controls.start(e); }}
         style={{
@@ -909,7 +909,7 @@ function buildGoogleMapsUrl(evs: TripEvent[]): string {
     return url;
   }
 
-  // Mix of named + geocoded — build path-style URL (no JS API key needed)
+  // Mix of named + geocoded - build path-style URL (no JS API key needed)
   const parts = (geo.length > 0 ? geo : named)
     .map(e => e.lat != null ? `${e.lat},${e.lng}` : encodeURIComponent(e.location!))
     .slice(0, 10)
@@ -1006,7 +1006,7 @@ function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
         </div>
       )}
 
-      {/* Open in Google Maps — always visible */}
+      {/* Open in Google Maps - always visible */}
       {mapsUrl && (
         <a
           href={mapsUrl}
@@ -1145,7 +1145,7 @@ export default function DayDetail_V2() {
           {locale === 'he' ? 'לוח בקרה' : 'Dashboard'}
         </button>
         {/* One compact bar: title block on the lead side, a single actions cluster
-            on the trailing side. "Suggest" was removed — the global AI FAB already
+            on the trailing side. "Suggest" was removed - the global AI FAB already
             opens the same per-day suggestions sheet, so it was redundant here. */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <div style={{ minWidth: 0 }}>
@@ -1160,7 +1160,7 @@ export default function DayDetail_V2() {
             )}
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-            {/* Google Maps route — icon-only neutral chip */}
+            {/* Google Maps route - icon-only neutral chip */}
             {(() => {
               const url = buildGoogleMapsUrl(evs);
               if (!url) return null;
@@ -1183,7 +1183,7 @@ export default function DayDetail_V2() {
                 </a>
               );
             })()}
-            {/* List / Map toggle — segmented pill */}
+            {/* List / Map toggle - segmented pill */}
             <SegmentedPill
               aria-label={locale === 'he' ? 'תצוגה' : 'View'}
               value={viewMode}
@@ -1206,7 +1206,7 @@ export default function DayDetail_V2() {
           {fmtDuration(freeTimeMins)} {locale === 'he' ? 'פנוי' : 'free'}
         </p>
 
-        {/* Day pill rail — 48×60 mono-date pills, active terra (HANDOFF) */}
+        {/* Day pill rail - 48×60 mono-date pills, active terra (HANDOFF) */}
         <div className="lg-scroll days-container" style={{ display: 'flex', gap: 7, overflowX: 'auto' }}>
           {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
             const d  = i + 1;

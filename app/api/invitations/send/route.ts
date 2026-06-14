@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -11,7 +11,7 @@ function tryAdminClient() {
   catch { return null }
 }
 
-// POST /api/invitations/send — send an email invitation to a trip
+// POST /api/invitations/send - send an email invitation to a trip
 // Body: { tripId: string, invitedEmail: string }
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
   try {
     const db = admin ?? supabase
 
-    // Upsert so that re-inviting someone who previously accepted/rejected works —
+    // Upsert so that re-inviting someone who previously accepted/rejected works -
     // without this, the UNIQUE(trip_id, invited_email) constraint would block the insert
     // even though the old invitation is no longer pending.
     const { error } = await db.from('trip_invitations').upsert(

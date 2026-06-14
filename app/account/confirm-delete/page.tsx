@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -30,7 +30,7 @@ function ConfirmDeleteContent() {
       })
       .catch(() => {
         setStatus('error')
-        setMessage('Network error — your account has not been deleted.')
+        setMessage('Network error - your account has not been deleted.')
       })
   }, [token])
 
@@ -56,7 +56,7 @@ function ConfirmDeleteContent() {
             Your account has been deleted.
           </div>
           <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5 }}>
-            All your personal data has been removed. Thank you for using Trippy.
+            All your personal data has been removed. Thank you for using Triplly.
           </div>
         </>
       )}

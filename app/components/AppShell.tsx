@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, m, MotionConfig } from 'framer-motion';
@@ -53,8 +53,8 @@ function OfflineWatcher() {
       const count = pendingChanges.length;
       flushPendingChanges().then(() => {
         if (count > 0) show(locale === 'he'
-          ? `חזרת לרשת — ${count} ${count > 1 ? 'שינויים סונכרנו' : 'שינוי סונכרן'} ✓`
-          : `Back online — ${count} change${count > 1 ? 's' : ''} synced ✓`);
+          ? `חזרת לרשת - ${count} ${count > 1 ? 'שינויים סונכרנו' : 'שינוי סונכרן'} ✓`
+          : `Back online - ${count} change${count > 1 ? 's' : ''} synced ✓`);
       }).catch(() => {});
     };
     const goOffline = () => useAppStore.getState().setIsOffline(true);
@@ -94,7 +94,7 @@ function BudgetAlertWatcher() {
   return null;
 }
 
-// Watches lastSyncError globally and shows a toast — must live inside ToastProvider
+// Watches lastSyncError globally and shows a toast - must live inside ToastProvider
 function SyncErrorWatcher() {
   const lastSyncError = useAppStore(s => s.lastSyncError);
   const { show } = useToast();
@@ -103,12 +103,12 @@ function SyncErrorWatcher() {
     if (!lastSyncError) return;
     const isRLS = lastSyncError.includes('row-level security') || lastSyncError.includes('violates') || lastSyncError.includes('rls');
     const msg = lastSyncError === 'not_authed'
-      ? (locale === 'he' ? '⚠️ לא מחובר — שינויים נשמרו מקומית בלבד' : '⚠️ Not signed in — changes saved locally only')
+      ? (locale === 'he' ? '⚠️ לא מחובר - שינויים נשמרו מקומית בלבד' : '⚠️ Not signed in - changes saved locally only')
       : lastSyncError === 'join_failed'
-      ? (locale === 'he' ? '⚠️ לא ניתן היה לטעון את הטיול — נסה שוב' : '⚠️ Could not load the trip — please try again')
+      ? (locale === 'he' ? '⚠️ לא ניתן היה לטעון את הטיול - נסה שוב' : '⚠️ Could not load the trip - please try again')
       : isRLS
       ? (locale === 'he' ? 'לא ניתן לשמור. נסה שוב.' : "Couldn't save. Please try again.")
-      : (locale === 'he' ? 'שגיאת סנכרון — יסונכרן בחיבור הבא' : 'Sync error — will retry on reconnect');
+      : (locale === 'he' ? 'שגיאת סנכרון - יסונכרן בחיבור הבא' : 'Sync error - will retry on reconnect');
     show(msg);
     useAppStore.setState({ lastSyncError: null });
   }, [lastSyncError]);
@@ -118,13 +118,13 @@ function SyncErrorWatcher() {
 const screenTransition = spring.default;
 
 function Shell() {
-  // Single Supabase client instance — survives React 18 Strict Mode's double-invoke of effects.
+  // Single Supabase client instance - survives React 18 Strict Mode's double-invoke of effects.
   // A fresh createClient() on the second run would fire INITIAL_SESSION before cookies are re-read,
   // causing a brief redirect to 'welcome' even for authenticated users.
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
   const lastLoadedTripRef = useRef<string | null>(null);
 
-  // Granular selectors — each group only re-renders Shell when its slice changes (ME-5)
+  // Granular selectors - each group only re-renders Shell when its slice changes (ME-5)
   const screen          = useAppStore(s => s.screen);
   const isGlobalLoading = useAppStore(s => s.isGlobalLoading);
   const themeMode       = useAppStore(s => s.themeMode);
@@ -194,13 +194,13 @@ function Shell() {
 
     // Dev-only test hooks: lets Playwright inject/read store state
     if (process.env.NODE_ENV !== 'production') {
-      (window as unknown as Record<string, unknown>).__trippySetState__ =
+      (window as unknown as Record<string, unknown>).__TripllySetState__ =
         (patch: Record<string, unknown>) => useAppStore.setState(patch as unknown as Parameters<typeof useAppStore.setState>[0]);
-      (window as unknown as Record<string, unknown>).__trippyGetScreen__ =
+      (window as unknown as Record<string, unknown>).__TripllyGetScreen__ =
         () => useAppStore.getState().screen;
     }
 
-    // Strip external ?next params — prevent open redirect attacks where
+    // Strip external ?next params - prevent open redirect attacks where
     // a crafted URL like /?next=https://evil.com lingers in the address bar.
     {
       const p = new URLSearchParams(window.location.search);
@@ -217,7 +217,7 @@ function Shell() {
     const joinId = params.get('join');
     if (joinId) {
       window.history.replaceState({}, '', '/app');
-      sessionStorage.setItem('trippy-pending-join', joinId);
+      sessionStorage.setItem('Triplly-pending-join', joinId);
     }
 
     // onAuthStateChange fires immediately with INITIAL_SESSION on every page load.
@@ -236,7 +236,7 @@ function Shell() {
         // never see the home/trip-picker screen flash before loadTripById navigates there.
         const cur = useAppStore.getState().screen;
         if (cur === 'welcome' || cur === 'splash') {
-          // Resolve auth immediately so the spinner goes away — don't block on the
+          // Resolve auth immediately so the spinner goes away - don't block on the
           // MFA network call. The challenge overlay appears as soon as the check
           // completes (usually <1 s later); users without MFA never pay that cost.
           const { trip, tripDbId } = useAppStore.getState();
@@ -249,21 +249,21 @@ function Shell() {
           // navigate to 'dashboard' once ready. isGlobalLoading covers the wait.
           setAuthResolved(true);
           // MFA check runs outside the onAuthStateChange lock (calling auth methods
-          // inside the callback deadlocks). Non-blocking — shows challenge if needed.
+          // inside the callback deadlocks). Non-blocking - shows challenge if needed.
           setTimeout(async () => {
             try {
               const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
               if (aal?.nextLevel === 'aal2' && aal?.currentLevel !== 'aal2') {
                 setShowMfaChallenge(true);
               }
-            } catch { /* ignore — proceed normally if AAL check fails */ }
+            } catch { /* ignore - proceed normally if AAL check fails */ }
           }, 0);
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });
         const isTestMode = process.env.NODE_ENV !== 'production' &&
-          !!(window as unknown as Record<string, unknown>).__trippyTestMode__;
-        // Session gone — send the user back to the landing page instead of showing
+          !!(window as unknown as Record<string, unknown>).__TripllyTestMode__;
+        // Session gone - send the user back to the landing page instead of showing
         // the old login screen. In test mode keep the current screen so test scripts
         // can control auth state directly.
         if (!isTestMode) {
@@ -284,9 +284,9 @@ function Shell() {
   // After auth resolves, auto-load a trip joined via invite link
   useEffect(() => {
     if (!authUser) return;
-    const pendingJoin = sessionStorage.getItem('trippy-pending-join');
+    const pendingJoin = sessionStorage.getItem('Triplly-pending-join');
     if (!pendingJoin) return;
-    sessionStorage.removeItem('trippy-pending-join');
+    sessionStorage.removeItem('Triplly-pending-join');
     loadTripById(pendingJoin).catch(() => {
       useAppStore.setState({ lastSyncError: 'join_failed' });
     });
@@ -321,7 +321,7 @@ function Shell() {
     }
     if (lastLoadedTripRef.current === tripDbId) return;
     lastLoadedTripRef.current = tripDbId;
-    // Silent load — the branded DashboardSkeleton covers this wait, so we don't
+    // Silent load - the branded DashboardSkeleton covers this wait, so we don't
     // stack a full-screen compass overlay on top of it.
     loadTripById(tripDbId, { showLoader: false, showEntry: false }).catch(() => {
       lastLoadedTripRef.current = null;
@@ -347,7 +347,7 @@ function Shell() {
     return () => mq.removeEventListener('change', handler);
   }, []);
 
-  // Respect system prefers-contrast: more — enable high contrast on first visit if OS requests it.
+  // Respect system prefers-contrast: more - enable high contrast on first visit if OS requests it.
   // Only auto-enables; never auto-disables so user manual toggle is preserved.
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -364,19 +364,19 @@ function Shell() {
 
   // Keep body background and <html data-dark> in sync with the resolved theme.
   // Also writes a cookie so the layout server component can pre-apply the correct
-  // theme on the next page load — eliminating any theme flash without a script tag.
+  // theme on the next page load - eliminating any theme flash without a script tag.
   useEffect(() => {
     if (typeof document !== 'undefined') {
-      // Must be the literal string 'false' (not '') — the CSS dark-mode media
+      // Must be the literal string 'false' (not '') - the CSS dark-mode media
       // query is keyed on :root:not([data-dark="false"]), so any other value
       // leaves dark tokens applied when the OS prefers dark.
       document.documentElement.dataset.dark = resolvedDark ? 'true' : 'false';
       document.body.style.background = 'var(--bg)';
-      document.cookie = `trippy-dark=${resolvedDark ? 'true' : 'false'}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `Triplly-dark=${resolvedDark ? 'true' : 'false'}; path=/; max-age=31536000; SameSite=Lax`;
     }
   }, [resolvedDark]);
 
-  // Service Worker registration lives in ServiceWorkerRegistrar (root layout) —
+  // Service Worker registration lives in ServiceWorkerRegistrar (root layout) -
   // registering here as well was redundant.
 
   // Prevent iOS Safari pull-to-refresh (the gesture causes a full page reload
@@ -387,14 +387,14 @@ function Shell() {
     const onTouchStart = (e: TouchEvent) => { touchStartY = e.touches[0].clientY; };
     const onTouchMove = (e: TouchEvent) => {
       const dy = e.touches[0].clientY - touchStartY;
-      if (dy <= 0) return; // scrolling up — always fine
+      if (dy <= 0) return; // scrolling up - always fine
       // Walk up from the target to find a scrollable ancestor
       let el: Element | null = e.target as Element;
       while (el && el !== document.documentElement) {
         const style = window.getComputedStyle(el);
         const oy = style.overflowY;
         if (oy === 'auto' || oy === 'scroll') {
-          if ((el as HTMLElement).scrollTop > 0) return; // not at top — allow
+          if ((el as HTMLElement).scrollTop > 0) return; // not at top - allow
           break; // at top of scroll container → fall through to prevent
         }
         el = el.parentElement;
@@ -409,18 +409,18 @@ function Shell() {
     };
   }, []);
 
-  // Row 807: dynamic page title per screen (before early return — Rules of Hooks)
+  // Row 807: dynamic page title per screen (before early return - Rules of Hooks)
   useEffect(() => {
     if (!mounted || !authResolved) return;
     const SCREEN_TITLES: Record<string, string> = {
-      home: 'Trippy — Your Trips',
-      dashboard: trip ? `${trip.name} — Trippy` : 'Dashboard — Trippy',
-      day: 'Day Planner — Trippy',
-      map: 'Map — Trippy',
-      supplies: 'Packing — Trippy',
-      settings: 'Settings — Trippy',
+      home: 'Triplly - Your Trips',
+      dashboard: trip ? `${trip.name} - Triplly` : 'Dashboard - Triplly',
+      day: 'Day Planner - Triplly',
+      map: 'Map - Triplly',
+      supplies: 'Packing - Triplly',
+      settings: 'Settings - Triplly',
     };
-    document.title = SCREEN_TITLES[screen] ?? 'Trippy';
+    document.title = SCREEN_TITLES[screen] ?? 'Triplly';
   }, [mounted, authResolved, screen, trip?.name]);
 
   // Row 809: move focus to main content h1 after screen navigation (before early return)
@@ -461,7 +461,7 @@ function Shell() {
           direction: 'ltr',
           unicodeBidi: 'isolate',
         }}>
-          Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+          Triplly<span style={{ color: 'var(--terra)' }}>.</span>
         </span>
       </div>
     );
@@ -493,10 +493,10 @@ function Shell() {
             touchAction: 'pan-x pan-y',
           }}
         >
-          {/* Soft brand-tinted ambient background — shared by every screen */}
+          {/* Soft brand-tinted ambient background - shared by every screen */}
           <div className="app-ambient" aria-hidden="true" />
 
-          {/* Row 808: skip link — visible on focus for keyboard users */}
+          {/* Row 808: skip link - visible on focus for keyboard users */}
           <a
             href="#main-content"
             style={{
@@ -534,7 +534,7 @@ function Shell() {
               : ''}
           </div>
 
-          {/* Offline banner — shown above nav and content */}
+          {/* Offline banner - shown above nav and content */}
           {isOffline && (
             <div style={{
               background: 'var(--danger-bg)',
@@ -557,7 +557,7 @@ function Shell() {
             </div>
           )}
 
-          {/* Saving indicator — subtle pill shown while writes are in-flight */}
+          {/* Saving indicator - subtle pill shown while writes are in-flight */}
           {!isOffline && pendingWriteCount > 0 && (
             <div
               className="lg"
@@ -616,7 +616,7 @@ function Shell() {
                   <div className="w-full h-full">
                     <ErrorBoundary>
                       {!trip && tripDbId && screen !== 'home' ? (
-                        /* Returning user: persisted trip is still loading — show the
+                        /* Returning user: persisted trip is still loading - show the
                            branded skeleton instead of flashing the trip-picker. */
                         <DashboardSkeleton />
                       ) : screen === 'splash' || screen === 'home' || !trip ? (
@@ -645,7 +645,7 @@ function Shell() {
           {/* Wishlist sheet */}
           {showWishlist && <WishlistSheet onClose={() => setShowWishlist(false)} />}
 
-          {/* AI assistant — Ask (Haiko chat) | Find (discovery) chooser */}
+          {/* AI assistant - Ask (Haiko chat) | Find (discovery) chooser */}
           {showAIMenu && (
             <AIMenuSheet
               onClose={() => setShowAIMenu(false)}
@@ -655,14 +655,14 @@ function Shell() {
           )}
           {showHaiko && <HaikoChat onClose={() => setShowHaiko(false)} />}
 
-          {/* AI persona + suggestions sheets — available from any screen */}
+          {/* AI persona + suggestions sheets - available from any screen */}
           {showPersona && <PersonaSheet dayNumber={activeDay} />}
           {showSuggestions && !showPersona && <AISheetLazy dayNumber={activeDay} />}
 
           {/* Security settings sheet */}
           {showSecurity && <SecuritySettings onClose={() => setShowSecurity(false)} />}
 
-          {/* MFA challenge — shown after OAuth if the account has MFA enrolled */}
+          {/* MFA challenge - shown after OAuth if the account has MFA enrolled */}
           {showMfaChallenge && (
             <MFAChallenge
               onSuccess={() => {
@@ -693,7 +693,7 @@ function Shell() {
             )}
           </AnimatePresence>
 
-          {/* Global loading overlay — shown during loadTripById / createTrip */}
+          {/* Global loading overlay - shown during loadTripById / createTrip */}
           <AnimatePresence>
             {isGlobalLoading && (
               <m.div
@@ -719,7 +719,7 @@ function Shell() {
                   direction: 'ltr',
                   unicodeBidi: 'isolate',
                 }}>
-                  Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+                  Triplly<span style={{ color: 'var(--terra)' }}>.</span>
                 </span>
               </m.div>
             )}

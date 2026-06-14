@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import { m, AnimatePresence, useMotionValue, animate } from 'framer-motion';
@@ -66,7 +66,7 @@ function storeToFilter(cat: string): FilterCat | null {
 
 function autoCategory(name: string): SupplyItem['category'] {
   const n = name.toLowerCase();
-  // Hebrew equivalents listed after the pipe — no case folding needed for Hebrew
+  // Hebrew equivalents listed after the pipe - no case folding needed for Hebrew
   if (/passport|visa|ticket|boarding|document|id card|insurance|permit|certificate|דרכון|ויזה|כרטיס טיסה|ביטוח|תעודה|היתר|רישיון/i.test(n)) return 'Documents';
   if (/water|bottle|hydration|filter|purif|מים|בקבוק|סינון|מסנן/i.test(n)) return 'Water';
   if (/food|snack|protein|bar|nuts|bread|fruit|meal|sandwich|granola|אוכל|חטיף|פירות|לחם|ארוחה|כריך|אגוזים|פרוטאין/i.test(n)) return 'Food';
@@ -183,7 +183,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
           }}
         />
 
-        {/* Content — opacity only fades this inner layer, keeping glass bg opaque */}
+        {/* Content - opacity only fades this inner layer, keeping glass bg opaque */}
         <div style={{
           display: 'flex', alignItems: 'center', gap: 11,
           flex: 1, minWidth: 0,
@@ -216,7 +216,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
           <CheckCircle done={item.checked} />
         </div>
 
-        {/* Trash button — always visible, tapping deletes the item */}
+        {/* Trash button - always visible, tapping deletes the item */}
         <button
           onClick={e => { e.stopPropagation(); onDelete(item.id); }}
           aria-label={`Delete ${item.name}`}
@@ -319,7 +319,7 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
           </div>
           {autoDetected && (
             <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 7, fontFamily: 'var(--font-sans)', paddingInlineStart: 2 }}>
-              {locale === 'he' ? `זוהה אוטומטית: ${getCatLabel(category, locale)} — אפשר לשנות` : `Suggested: ${getCatLabel(category, locale)} — tap to change`}
+              {locale === 'he' ? `זוהה אוטומטית: ${getCatLabel(category, locale)} - אפשר לשנות` : `Suggested: ${getCatLabel(category, locale)} - tap to change`}
             </p>
           )}
         </div>
@@ -413,7 +413,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
         setFetched(true);
       }
     } catch {
-      show(isHe ? 'שגיאה — נסה שוב' : 'Error fetching suggestions');
+      show(isHe ? 'שגיאה - נסה שוב' : 'Error fetching suggestions');
     } finally {
       setLoading(false);
     }
@@ -648,7 +648,7 @@ export default function Packing_V2() {
           transition={{ delay: 0.13, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           style={{ marginBottom: 16, overflow: 'hidden', position: 'relative' }}
         >
-          {/* Gradient tint — shifts terra→forest as you pack more */}
+          {/* Gradient tint - shifts terra→forest as you pack more */}
           <div aria-hidden style={{
             position: 'absolute', inset: 0, pointerEvents: 'none', borderRadius: 'inherit',
             background: pct === 100

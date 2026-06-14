@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -80,7 +80,7 @@ export async function PUT(
       return NextResponse.json({ ok: true })
     }
 
-    // Fallback — user's JWT subject to RLS
+    // Fallback - user's JWT subject to RLS
     const { error } = await supabase
       .from('trips')
       .update({ hotels } as any)

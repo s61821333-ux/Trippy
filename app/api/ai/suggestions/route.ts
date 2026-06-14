@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+﻿import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest } from 'next/server';
 import type { AiSuggestion, Category } from '@/lib/types';
@@ -65,7 +65,7 @@ async function enrichWithPlaces(
 export const maxDuration = 30;
 
 export async function POST(request: NextRequest) {
-  // Auth check — extract userId for per-user rate limiting
+  // Auth check - extract userId for per-user rate limiting
   const cookieStore = await cookies();
   const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
     cookies: {
@@ -114,13 +114,13 @@ export async function POST(request: NextRequest) {
     : dayMeta?.region ?? (isHebrew ? 'יעד הטיול' : 'the trip destination');
 
   const regionText = dayMeta
-    ? `${isHebrew ? 'אזור' : 'Region'}: ${dayMeta.region}${dayMeta.desc ? ` — ${dayMeta.desc}` : ''}`
+    ? `${isHebrew ? 'אזור' : 'Region'}: ${dayMeta.region}${dayMeta.desc ? ` - ${dayMeta.desc}` : ''}`
     : isHebrew ? `יום ${dayNumber}` : `Day ${dayNumber}`;
 
   const gapLine = gapStart != null && gapEnd != null
     ? (isHebrew
-        ? `\nחלון פנוי למילוי: ${toHHMM(gapStart)}–${toHHMM(gapEnd)} (${gapEnd - gapStart} דקות פנויות). כל הצעה חייבת להתחיל בשעה ${toHHMM(gapStart)} או אחריה ולהסתיים עד ${toHHMM(gapEnd)}. קבע "time" בתוך החלון הזה ושמור על "duration" קצר מספיק כדי להיכנס בו.`
-        : `\nFree slot to fill: ${toHHMM(gapStart)} – ${toHHMM(gapEnd)} (${gapEnd - gapStart} min available). Every suggestion MUST start at or after ${toHHMM(gapStart)} and finish by ${toHHMM(gapEnd)}. Set "time" to a value within this window and keep "duration" short enough to fit.`)
+        ? `\nחלון פנוי למילוי: ${toHHMM(gapStart)}-${toHHMM(gapEnd)} (${gapEnd - gapStart} דקות פנויות). כל הצעה חייבת להתחיל בשעה ${toHHMM(gapStart)} או אחריה ולהסתיים עד ${toHHMM(gapEnd)}. קבע "time" בתוך החלון הזה ושמור על "duration" קצר מספיק כדי להיכנס בו.`
+        : `\nFree slot to fill: ${toHHMM(gapStart)} - ${toHHMM(gapEnd)} (${gapEnd - gapStart} min available). Every suggestion MUST start at or after ${toHHMM(gapStart)} and finish by ${toHHMM(gapEnd)}. Set "time" to a value within this window and keep "duration" short enough to fit.`)
     : '';
 
   const hotelLine = hotelLocation
@@ -137,21 +137,21 @@ export async function POST(request: NextRequest) {
 
   const hebrewPrompt = `טיול: "${tripName}" → ${destinationText}.
 
-יום ${dayNumber} — ${regionText}${hotelLine}
+יום ${dayNumber} - ${regionText}${hotelLine}
 לוח הזמנים של היום:
 ${eventsText}
 ${gapLine}
 תן בדיוק 4 הצעות לפעילויות. כללים:
-• הצע אך ורק מקומות אמיתיים וקיימים ב-${destinationText} — עם שם המקום המדויק
-• כל ההצעות חייבות להיות בתוך ${destinationText} או קרוב מאוד אליו — לעולם לא בעיר או באזור אחר
+• הצע אך ורק מקומות אמיתיים וקיימים ב-${destinationText} - עם שם המקום המדויק
+• כל ההצעות חייבות להיות בתוך ${destinationText} או קרוב מאוד אליו - לעולם לא בעיר או באזור אחר
 • גוון בקטגוריות (אוכל / בית קפה / אטרקציה וכו') ובאווירה
 • בלי התנגשויות זמנים עם הלו"ז הקיים למעלה
 • העדף פנינות מקומיות אהובות על פני מלכודות תיירים מפורסמות${excludeLine}
 
-שדה "description": משפט אחד או שניים בעברית טבעית וזורמת — כמו חבר ישראלי שגר ביעד וממליץ לך אישית. תאר את האווירה, מה מיוחד במקום, או טיפ פרקטי אחד. אסור עברית מליצית, אסור ניסוח שנשמע כמו תרגום מילולי מאנגלית, ואסור סופרלטיבים ריקים ("מדהים", "חובה", "מושלם").
-שדה "name": שם המקום בשפת המקור (כתב לטיני) — אל תתרגם שמות פרטיים. אסור אותיות ערביות בשום שדה.
+שדה "description": משפט אחד או שניים בעברית טבעית וזורמת - כמו חבר ישראלי שגר ביעד וממליץ לך אישית. תאר את האווירה, מה מיוחד במקום, או טיפ פרקטי אחד. אסור עברית מליצית, אסור ניסוח שנשמע כמו תרגום מילולי מאנגלית, ואסור סופרלטיבים ריקים ("מדהים", "חובה", "מושלם").
+שדה "name": שם המקום בשפת המקור (כתב לטיני) - אל תתרגם שמות פרטיים. אסור אותיות ערביות בשום שדה.
 
-החזר אך ורק JSON תקין — מערך של בדיוק 4 אובייקטים:
+החזר אך ורק JSON תקין - מערך של בדיוק 4 אובייקטים:
 [
   {
     "id": "ai-1",
@@ -176,20 +176,20 @@ cost: עלות משוערת במטבע המקומי (0 אם חינם)
 
   const englishPrompt = `Trip: "${tripName}" → ${destinationText}.
 
-Day ${dayNumber} — ${regionText}${hotelLine}
+Day ${dayNumber} - ${regionText}${hotelLine}
 Today's schedule:
 ${eventsText}
 ${gapLine}
 Give exactly 4 activity suggestions. Rules:
-• ONLY suggest real, named places that actually exist in ${destinationText} — include the exact venue name
-• All suggestions MUST be within or very close to ${destinationText} — never suggest places in other cities or regions
+• ONLY suggest real, named places that actually exist in ${destinationText} - include the exact venue name
+• All suggestions MUST be within or very close to ${destinationText} - never suggest places in other cities or regions
 • Good variety of category (mix food/cafe/attraction/etc.) and vibe
 • No time conflicts with the existing schedule above
 • Prioritize local favourites over famous tourist traps${excludeLine}
 
-Each description: 1–2 vivid sentences. Mention atmosphere, what makes it special, or one practical tip. Write like a knowledgeable local friend.
+Each description: 1-2 vivid sentences. Mention atmosphere, what makes it special, or one practical tip. Write like a knowledgeable local friend.
 
-Return ONLY valid JSON — array of exactly 4 objects:
+Return ONLY valid JSON - array of exactly 4 objects:
 [
   {
     "id": "ai-1",
@@ -215,8 +215,8 @@ Respond with ONLY the JSON array, no markdown.`;
   const prompt = isHebrew ? hebrewPrompt : englishPrompt;
 
   const systemPrompt = isHebrew
-    ? 'אתה מדריך טיולים ישראלי שמכיר את היעד מקרוב. כתוב עברית טבעית ועכשווית — כמו שחבר ישראלי באמת מדבר, לא כמו תרגום מאנגלית ולא כמו חוברת תיירות. משפטים קצרים וקונקרטיים. שמות מקומות, עסקים ומותגים נשארים בכתב הלטיני המקורי. השב עם JSON תקין בלבד, ללא markdown. אסור להמציא מקומות שאינם קיימים. אסור להשתמש באותיות ערביות.'
-    : 'You are a local travel expert who knows real, specific places. Respond with valid JSON only — no markdown. Only suggest real venues that actually exist at the destination. Descriptions must be vivid and specific — like a knowledgeable friend, not a travel brochure. Never invent fictional places.';
+    ? 'אתה מדריך טיולים ישראלי שמכיר את היעד מקרוב. כתוב עברית טבעית ועכשווית - כמו שחבר ישראלי באמת מדבר, לא כמו תרגום מאנגלית ולא כמו חוברת תיירות. משפטים קצרים וקונקרטיים. שמות מקומות, עסקים ומותגים נשארים בכתב הלטיני המקורי. השב עם JSON תקין בלבד, ללא markdown. אסור להמציא מקומות שאינם קיימים. אסור להשתמש באותיות ערביות.'
+    : 'You are a local travel expert who knows real, specific places. Respond with valid JSON only - no markdown. Only suggest real venues that actually exist at the destination. Descriptions must be vivid and specific - like a knowledgeable friend, not a travel brochure. Never invent fictional places.';
 
   const validCategories: Category[] = [
     'food', 'cafe', 'attraction', 'hotel', 'rest', 'transport', 'flight', 'other',
@@ -231,7 +231,7 @@ Respond with ONLY the JSON array, no markdown.`;
     async start(controller) {
       try {
         // Prefill the assistant turn with '[' so the model can't prepend prose
-        // or markdown fences — faster first token and far fewer parse failures.
+        // or markdown fences - faster first token and far fewer parse failures.
         let accumulated = '[';
         controller.enqueue(encoder.encode('['));
 
@@ -267,7 +267,7 @@ Respond with ONLY the JSON array, no markdown.`;
           try {
             rawParsed = JSON.parse(cleanText) as RawSuggestion[];
           } catch {
-            // Truncated/malformed array — salvage every complete object inside it
+            // Truncated/malformed array - salvage every complete object inside it
             rawParsed = [...cleanText.matchAll(/\{[^{}]*\}/g)].flatMap(m => {
               try { return [JSON.parse(m[0]) as RawSuggestion]; } catch { return []; }
             });
@@ -280,7 +280,7 @@ Respond with ONLY the JSON array, no markdown.`;
             description: s.description ?? '',
             duration: typeof s.duration === 'number' ? s.duration : 60,
             time: s.time ?? '10:00',
-            distance: s.distance ?? '—',
+            distance: s.distance ?? '-',
             open: s.open ?? true,
             cost: typeof s.cost === 'number' ? s.cost : undefined,
             location: s.location,

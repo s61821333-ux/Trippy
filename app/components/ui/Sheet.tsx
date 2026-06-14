@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { ReactNode, useRef, useEffect, useState, useId } from 'react';
 import { createPortal } from 'react-dom';
@@ -84,7 +84,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
     if (panelRef.current) panelRef.current.scrollTop = 0;
   }, []);
 
-  // Row 810: focus trap — cycle Tab/Shift+Tab within the sheet
+  // Row 810: focus trap - cycle Tab/Shift+Tab within the sheet
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key !== 'Tab') return;
     const panel = panelRef.current;
@@ -126,7 +126,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
   };
 
   // Scroll the panel so the focused field is visible above the keyboard.
-  // Uses manual scrollTop calculation — scrollIntoView is unreliable inside
+  // Uses manual scrollTop calculation - scrollIntoView is unreliable inside
   // position:fixed overflow containers on iOS.
   const handleFocusCapture = (e: React.FocusEvent) => {
     const target = e.target as HTMLElement;

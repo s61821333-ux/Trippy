@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -75,7 +75,7 @@ export async function POST(
     added_by: user.id,
     cost: d.cost ?? null,
   }
-  // Only include tags if non-null — avoids errors when the tags migration hasn't been applied yet
+  // Only include tags if non-null - avoids errors when the tags migration hasn't been applied yet
   if (d.tags != null) row.tags = d.tags
 
   const client = admin ?? await getUserClient()

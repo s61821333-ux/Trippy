@@ -1,11 +1,11 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
-  /* ── V2 Jelly Liquid Glass surfaces — pure white translucent ── */
-  --surface:        rgba(255, 255, 255, 0.72); /* increased from 0.45 — light-mode glass must be distinguishable from bg */
+  /* ── V2 Jelly Liquid Glass surfaces - pure white translucent ── */
+  --surface:        rgba(255, 255, 255, 0.72); /* increased from 0.45 - light-mode glass must be distinguishable from bg */
   --surface-strong: rgba(255, 255, 255, 0.88);
   --nav-surface:    rgba(255, 255, 255, 0.82);
 
@@ -15,7 +15,7 @@
   --glass-specular: linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 50%);
 
   /* Row 129: sRGB hex fallbacks for browsers without oklch support (pre-2023).
-     CSS uses the last understood value — oklch wins on modern browsers. */
+     CSS uses the last understood value - oklch wins on modern browsers. */
   --bg:            #faf8f4;
   --text:          #1c1108;
   --brand:         #2d6040;
@@ -23,18 +23,18 @@
   --danger:        #9b2a1a;
   --warning:       #7a5c0a;
 
-  /* Backgrounds — warm paper (oklch) */
+  /* Backgrounds - warm paper (oklch) */
   --bg:            oklch(98% 0.010 75);
   --bg-alt:        oklch(94% 0.014 75);
   --bg-paper:      oklch(98% 0.010 75);
   --bg-warm:       oklch(96% 0.012 75);
   --surface-warm:  oklch(98% 0.010 75);
 
-  /* Borders — stronger definition in light mode */
+  /* Borders - stronger definition in light mode */
   --border:        oklch(83% 0.012 75); /* darkened from 89% for better light-mode visibility */
   --border-strong: oklch(74% 0.016 75); /* darkened from 80% for card edges + inputs */
 
-  /* Brand — deep forest green (oklch perceptual). Vivid pass: chroma lifted. */
+  /* Brand - deep forest green (oklch perceptual). Vivid pass: chroma lifted. */
   --brand:              oklch(45% 0.150 152); /* richer, livelier forest */
   --brand-hover:        oklch(38% 0.138 152);
   --brand-deep:         oklch(30% 0.090 158); /* deep stop for gradients (was --lg-forest-deep) */
@@ -45,15 +45,15 @@
   --primary-container:  oklch(52% 0.158 152);
   --coral-glow:         oklch(60% 0.162 30);
 
-  /* Accent — warm terracotta. Vivid pass: hotter, more saturated. */
-  --terra:         oklch(65% 0.198 42); /* glossy living terracotta — chroma lifted for life */
+  /* Accent - warm terracotta. Vivid pass: hotter, more saturated. */
+  --terra:         oklch(65% 0.198 42); /* glossy living terracotta - chroma lifted for life */
   --terra-hover:   oklch(58% 0.186 42);
   --terra-bright:  oklch(72% 0.208 40); /* bright glossy top stop for gradients (was --lg-terra-bright) */
   --terra-light:   oklch(94% 0.050 38);
   --terra-muted:   oklch(63% 0.170 38 / 12%);
-  /* Row 84: darkened variant for text on light bg — oklch(62%) fails 4.5:1 on white */
+  /* Row 84: darkened variant for text on light bg - oklch(62%) fails 4.5:1 on white */
   --terra-text:    oklch(48% 0.128 38);
-  /* Row 85: darkened gradient stops for white-text CTA buttons — meets 4.5:1 with white */
+  /* Row 85: darkened gradient stops for white-text CTA buttons - meets 4.5:1 with white */
   --terra-btn:         oklch(48% 0.128 38);
   --terra-btn-bright:  oklch(54% 0.140 36);
 
@@ -86,14 +86,14 @@
   --danger:        oklch(48% 0.130 25); /* overrides sRGB fallback above */
   --danger-bg:     oklch(95% 0.030 25);
 
-  /* Shadows — 2027: layered depth, oklch-based warm ink */
+  /* Shadows - 2027: layered depth, oklch-based warm ink */
   --shadow-xs: 0 1px 2px oklch(13% 0.012 55 / 5%),  0 1px 4px oklch(13% 0.012 55 / 3%);
   --shadow-sm: 0 2px 8px oklch(13% 0.012 55 / 7%),  0 1px 2px oklch(13% 0.012 55 / 4%);
   --shadow-md: 0 4px 16px oklch(13% 0.012 55 / 8%),  0 2px 6px oklch(13% 0.012 55 / 5%);
   --shadow-lg: 0 12px 40px oklch(13% 0.012 55 / 10%), 0 4px 12px oklch(13% 0.012 55 / 6%);
   --shadow-xl: 0 24px 64px oklch(13% 0.012 55 / 12%), 0 8px 24px oklch(13% 0.012 55 / 7%);
 
-  /* Border radii — v2: min 24px for cards, 32px for containers (Jelly Glass spec) */
+  /* Border radii - v2: min 24px for cards, 32px for containers (Jelly Glass spec) */
   --radius-xs:   10px;
   --radius-sm:   16px;
   --radius-md:   20px;
@@ -102,7 +102,7 @@
   --radius-full: 9999px;
   --radius-screen: 48px; /* device frame (2026 redesign) */
 
-  /* 2026 redesign — paper pill on dark canvas + onboarding canvas base */
+  /* 2026 redesign - paper pill on dark canvas + onboarding canvas base */
   --paper-pill-bg:   #F7F3EC;
   --paper-pill-text: #1C1713;
   --canvas:          #0E0C0A;
@@ -113,7 +113,7 @@
   --radius-3: 32px;
   --radius-4: 40px;
 
-  /* Typography — 2027 variable font stack */
+  /* Typography - 2027 variable font stack */
   --font-sans:     'DM Sans Variable', 'DM Sans', -apple-system, system-ui, sans-serif;
   --font-display:  'Instrument Serif', Georgia, serif;
   --font-serif:    'Instrument Serif', Georgia, serif;
@@ -121,7 +121,7 @@
   --font-hebrew:   'Assistant', 'DM Sans', sans-serif;
   --font-friendly: 'Assistant', 'DM Sans', system-ui, sans-serif;
 
-  /* V2 type scale — Major Third (1.25) */
+  /* V2 type scale - Major Third (1.25) */
   --text-xs:   0.64rem;
   --text-sm:   0.8rem;
   --text-base: 1rem;
@@ -141,7 +141,7 @@
   --weight-semibold: 600;
   --weight-bold:     700;
 
-  /* V2 space scale — 4px base */
+  /* V2 space scale - 4px base */
   --space-1:  4px;
   --space-2:  8px;
   --space-3:  12px;
@@ -164,7 +164,7 @@
   --page-px: 24px;
   --page-pt: 20px;
   --nav-h:        68px;
-  --navbar-height: 80px; /* pill height + insets — used for clearance calculations */
+  --navbar-height: 80px; /* pill height + insets - used for clearance calculations */
   --safe-left:   env(safe-area-inset-left, 0px);
   --safe-right:  env(safe-area-inset-right, 0px);
   --safe-top:    env(safe-area-inset-top, 0px);
@@ -179,13 +179,13 @@
   --t-caption: 0.8125rem;
   --t-micro:   0.6875rem;
 
-  /* ── Avatar palette — 6 brand-adjacent hues, no purple/magenta ── */
-  --avatar-1: oklch(55% 0.115 40);   /* terracotta — darkened for white text contrast */
-  --avatar-2: oklch(48% 0.100 72);   /* sand gold  — darkened; use --avatar-2-text for initials */
-  --avatar-3: oklch(46% 0.100 155);  /* forest     — darkened for white text contrast */
-  --avatar-4: oklch(40% 0.100 195);  /* teal       — darkened for white text contrast */
-  --avatar-5: oklch(50% 0.090 30);   /* rust       — darkened for white text contrast */
-  --avatar-6: oklch(38% 0.085 130);  /* moss       — darkened for white text contrast */
+  /* ── Avatar palette - 6 brand-adjacent hues, no purple/magenta ── */
+  --avatar-1: oklch(55% 0.115 40);   /* terracotta - darkened for white text contrast */
+  --avatar-2: oklch(48% 0.100 72);   /* sand gold  - darkened; use --avatar-2-text for initials */
+  --avatar-3: oklch(46% 0.100 155);  /* forest     - darkened for white text contrast */
+  --avatar-4: oklch(40% 0.100 195);  /* teal       - darkened for white text contrast */
+  --avatar-5: oklch(50% 0.090 30);   /* rust       - darkened for white text contrast */
+  --avatar-6: oklch(38% 0.085 130);  /* moss       - darkened for white text contrast */
   --avatar-2-text: oklch(13% 0.012 55); /* dark text for sand-gold bg (white fails contrast) */
 
   /* ── Brand book extended tokens (oklch) ── */
@@ -258,7 +258,7 @@
   --hotel-route-bg:     rgba(59,126,212,0.05);
   --hotel-route-border: rgba(59,126,212,0.18);
 
-  /* Row 176: Sheet backdrop — warm dark overlay */
+  /* Row 176: Sheet backdrop - warm dark overlay */
   --sheet-backdrop: rgba(26, 20, 16, 0.55);
 }
 
@@ -324,7 +324,7 @@
   --compass-ew:   #E6B574;
   --compass-hub:  #F4EFE8;
 
-  /* V2 Jelly Glass — dark mode */
+  /* V2 Jelly Glass - dark mode */
   --surface:        rgba(30, 26, 20, 0.82);
   --surface-strong: rgba(25, 22, 16, 0.94);
   --nav-surface:    rgba(25, 22, 16, 0.90);
@@ -335,7 +335,7 @@
   --bg-warm:       #1C1916;
   --surface-warm:  #252018;
 
-  /* Borders — higher contrast so dividers are visible on dark surfaces */
+  /* Borders - higher contrast so dividers are visible on dark surfaces */
   --border:        oklch(30% 0.016 65);
   --border-strong: oklch(40% 0.020 65);
 
@@ -347,7 +347,7 @@
   --primary-container:  oklch(58% 0.100 155);
   --coral-glow:         oklch(64% 0.138 30);
 
-  /* Row 167: dark-mode terra — boosted chroma to match the Batch-1 vivid update */
+  /* Row 167: dark-mode terra - boosted chroma to match the Batch-1 vivid update */
   --terra:         oklch(70% 0.165 38);
   --terra-hover:   oklch(64% 0.155 38);
   --terra-light:   oklch(70% 0.165 38 / 20%);
@@ -356,13 +356,13 @@
   --sand:          oklch(72% 0.112 72);
   --sand-light:    oklch(72% 0.112 72 / 20%);
 
-  /* Text — boosted for better readability on dark glass surfaces */
+  /* Text - boosted for better readability on dark glass surfaces */
   --text:          oklch(96% 0.005 80);
   --text-2:        oklch(82% 0.014 65);
   --text-3:        oklch(65% 0.012 65);
   --text-inv:      oklch(8% 0.008 55);
 
-  /* Form fields — more opaque + visible borders */
+  /* Form fields - more opaque + visible borders */
   --field-bg:              oklch(22% 0.018 65 / 95%);
   --field-bg-focused:      oklch(26% 0.020 65 / 98%);
   --field-border:          oklch(100% 0 0 / 18%);
@@ -370,7 +370,7 @@
   --field-label:           var(--text-3);
   --field-icon:            var(--text-3);
 
-  /* Semantic — brighter tones so badges/alerts read clearly */
+  /* Semantic - brighter tones so badges/alerts read clearly */
   --success:       oklch(68% 0.090 155);
   --success-bg:    oklch(68% 0.090 155 / 14%);
   --warning:       oklch(72% 0.110 68);
@@ -384,7 +384,7 @@
   --shadow-lg: 0 12px 40px oklch(0% 0 0 / 55%), 0 4px 12px oklch(0% 0 0 / 30%);
   --shadow-xl: 0 24px 64px oklch(0% 0 0 / 62%), 0 8px 24px oklch(0% 0 0 / 36%);
 
-  /* ── Insight chip colors (dark — slightly boosted opacity) ── */
+  /* ── Insight chip colors (dark - slightly boosted opacity) ── */
   --insight-gap-bg:       rgba(240,170,30,0.14);
   --insight-gap-border:   rgba(240,170,30,0.32);
   --insight-gap-text:     oklch(68% 0.18 75);
@@ -414,11 +414,11 @@
   --hotel-route-bg:     rgba(59,126,212,0.07);
   --hotel-route-border: rgba(59,126,212,0.20);
 
-  /* Row 176: Sheet backdrop darkened for dark mode — 35% black on dark bg barely darkens */
+  /* Row 176: Sheet backdrop darkened for dark mode - 35% black on dark bg barely darkens */
   --sheet-backdrop: rgba(0, 0, 0, 0.65);
 }
 
-/* data-theme="dark" alias — ds.css uses this selector */
+/* data-theme="dark" alias - ds.css uses this selector */
 [data-theme="dark"] {
   --bg:        oklch(17% 0.022 62);
   --bg-warm:   oklch(21% 0.024 62);
@@ -459,7 +459,7 @@
   box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 20%), inset 0 0 0 1px oklch(100% 0 0 / 14%);
 }
 
-/* Row 165: Instrument Serif strokes are thin — increase weight in dark mode for legibility */
+/* Row 165: Instrument Serif strokes are thin - increase weight in dark mode for legibility */
 [data-dark="true"] h1, [data-dark="true"] h2, [data-dark="true"] h3,
 [data-dark="true"] .hero-title, [data-dark="true"] .display-xl {
   font-weight: 500;
@@ -551,19 +551,19 @@ body {
   transition: background-color 0.35s ease, color 0.35s ease;
 }
 
-/* Row 227: force light mode for print — dark mode wastes ink */
+/* Row 227: force light mode for print - dark mode wastes ink */
 @media print {
   html, body { background: #fff !important; color: #000 !important; }
   .lg, .glass, .glass-panel { backdrop-filter: none !important; background: #fff !important; }
   [data-dark="true"] { filter: none !important; }
 }
 
-/* Eliminate tap highlight on iOS — we provide our own press feedback */
+/* Eliminate tap highlight on iOS - we provide our own press feedback */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* ─── Reduced motion — comprehensive disable ──────────────────── */
+/* ─── Reduced motion - comprehensive disable ──────────────────── */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
@@ -601,7 +601,7 @@ h4, h5, h6 {
   letter-spacing: -0.02em;
 }
 
-/* Row 748: flip directional icons in RTL — only chevrons/arrows use this class.
+/* Row 748: flip directional icons in RTL - only chevrons/arrows use this class.
    Non-directional icons (trash, star, settings, globe, etc.) must NOT use it. */
 [dir="rtl"] .rtl-flip { transform: scaleX(-1); }
 
@@ -619,7 +619,7 @@ h4, h5, h6 {
   --text-base: 0.975rem;
   --leading-normal: 1.6;
 }
-/* Row 33: Hebrew body text min weight 500 — 400 is too thin at small sizes */
+/* Row 33: Hebrew body text min weight 500 - 400 is too thin at small sizes */
 :lang(he) body, :lang(he) p, :lang(he) li {
   font-weight: 500;
 }
@@ -631,7 +631,7 @@ h4, h5, h6 {
   font-family: var(--font-friendly);
   font-weight: 700;
   letter-spacing: 0;
-  line-height: 1.35; /* Hebrew has ascenders/descenders — needs more room than 1.1 */
+  line-height: 1.35; /* Hebrew has ascenders/descenders - needs more room than 1.1 */
 }
 [dir="rtl"] .section-eyebrow, [dir="rtl"] .eyebrow,
 :lang(he) .section-eyebrow, :lang(he) .eyebrow {
@@ -653,7 +653,7 @@ h4, h5, h6 {
 /* Standard scrollbar API */
 * { scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent; }
 
-/* NavBar clearance utility — applies correct bottom padding to any scroll container */
+/* NavBar clearance utility - applies correct bottom padding to any scroll container */
 .navbar-clearance {
   padding-bottom: var(--navbar-clearance);
 }
@@ -683,12 +683,12 @@ select {
   box-sizing: border-box;
 }
 
-/* ═══ Jelly Liquid Glass System — matches v2 prototype exactly ═══ */
+/* ═══ Jelly Liquid Glass System - matches v2 prototype exactly ═══ */
 
-/* Base glass surface — 2027: oklch bg, layered shadows, directional border */
+/* Base glass surface - 2027: oklch bg, layered shadows, directional border */
 .glass {
-  background: oklch(99% 0.004 80 / 72%); /* increased from 52% — glass must be visible on light bg */
-  /* Unified iOS26 recipe — vivid blur + high saturation (see --lg-blur) */
+  background: oklch(99% 0.004 80 / 72%); /* increased from 52% - glass must be visible on light bg */
+  /* Unified iOS26 recipe - vivid blur + high saturation (see --lg-blur) */
   backdrop-filter: var(--lg-blur);
   -webkit-backdrop-filter: var(--lg-blur);
   border-style: solid;
@@ -719,7 +719,7 @@ select {
 [data-high-contrast="true"] .glass::before,
 [data-high-contrast="true"] .lg::before { display: none !important; }
 
-/* Specular diagonal highlight inside every glass surface — softened, no hard band */
+/* Specular diagonal highlight inside every glass surface - softened, no hard band */
 .glass::before {
   content: '';
   position: absolute;
@@ -731,7 +731,7 @@ select {
 }
 .glass::after { display: none; }
 
-/* Elevated float glass — 2027: higher opacity, richer depth */
+/* Elevated float glass - 2027: higher opacity, richer depth */
 .glass-panel, .glass-float {
   background: oklch(99% 0.004 80 / 72%);
   backdrop-filter: var(--lg-blur-strong);
@@ -763,7 +763,7 @@ select {
   pointer-events: none;
 }
 
-/* Active / modal elevation — much deeper shadow */
+/* Active / modal elevation - much deeper shadow */
 .glass-active, .glass-elevated {
   box-shadow: 0 40px 80px rgba(26, 20, 16, 0.15) !important;
 }
@@ -797,7 +797,7 @@ select {
   pointer-events: none;
 }
 
-/* Liquid hover: spring scale + lift + deepen blur — desktop pointer only */
+/* Liquid hover: spring scale + lift + deepen blur - desktop pointer only */
 .liquid-hover {
   transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -810,7 +810,7 @@ select {
   }
 }
 
-/* Aliases kept for backward compat — opacities raised for light-mode visibility */
+/* Aliases kept for backward compat - opacities raised for light-mode visibility */
 .glass-1 { background: rgba(255,255,255,0.62); box-shadow: 0 2px 8px rgba(26,20,16,0.07), 0 1px 3px rgba(26,20,16,0.05); border: 1px solid rgba(0,0,0,0.08); }
 .glass-2 { background: rgba(255,255,255,0.72); box-shadow: 0 4px 16px rgba(26,20,16,0.08); border: 1px solid rgba(0,0,0,0.08); }
 .glass-3 { background: rgba(255,255,255,0.82); box-shadow: 0 12px 40px rgba(26,20,16,0.10); border: 1px solid rgba(0,0,0,0.09); }
@@ -872,7 +872,7 @@ select {
   background-clip: unset;
 }
 
-/* ─── Specular card — diagonal shine overlay ─────────────────── */
+/* ─── Specular card - diagonal shine overlay ─────────────────── */
 .specular-card {
   position: relative;
   overflow: hidden;
@@ -905,7 +905,7 @@ select {
 }
 
 /* ─── Focus indicators (WCAG AA) ─────────────────────────────── */
-/* Use brand green (not terra) — consistent with primary brand identity */
+/* Use brand green (not terra) - consistent with primary brand identity */
 :focus-visible {
   outline: 2.5px solid var(--brand);
   outline-offset: 3px;
@@ -955,7 +955,7 @@ select {
   88%  { transform: scale(1.01, 0.99); }
   100% { transform: scale(1); }
 }
-/* Specular sweep — diagonal shine across glass surfaces */
+/* Specular sweep - diagonal shine across glass surfaces */
 @keyframes specularSweep {
   0%   { background-position: -200% -200%; opacity: 0; }
   20%  { opacity: 0.6; }
@@ -1011,21 +1011,21 @@ select {
 
 /* ─── Responsive ─────────────────────────────────────────────── */
 
-/* ─── DayScreen itinerary bottom padding — clears 2 mobile FABs ── */
+/* ─── DayScreen itinerary bottom padding - clears 2 mobile FABs ── */
 /* Row 302: include env(safe-area-inset-bottom) so last item clears the home indicator */
 .day-list-pb { padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px)); }
 @media (min-width: 768px) { .day-list-pb { padding-bottom: 24px; } }
 
 /* ─── Responsive layout helpers ─────────────────────────────── */
 
-/* Centered content column — max 1200px, auto horizontal margin */
+/* Centered content column - max 1200px, auto horizontal margin */
 .resp-container {
   width: 100%;
   max-width: 1200px;
   margin-inline: auto;
 }
 
-/* Row 868/869: reflow at 320px (400% zoom on 1280px screen) — no horizontal scroll */
+/* Row 868/869: reflow at 320px (400% zoom on 1280px screen) - no horizontal scroll */
 @media (max-width: 320px) {
   .resp-container { padding-inline: 12px; }
   .lg, .lg-strong { border-radius: 14px !important; }
@@ -1061,9 +1061,9 @@ select {
 }
 .screen-inset-nav {
   bottom: 0;
-  /* no extra padding — each screen's own scroll container carries the clearance */
+  /* no extra padding - each screen's own scroll container carries the clearance */
 }
-/* On desktop keep the old behaviour — content sits above the nav bar */
+/* On desktop keep the old behaviour - content sits above the nav bar */
 @media (min-width: 1024px) {
   .screen-inset-nav {
     bottom: var(--nav-total-h);
@@ -1091,7 +1091,7 @@ select {
 
 /* ─── Brand Book v2 Utilities ───────────────────────────────── */
 
-/* Wordmark — matches brand book .wm */
+/* Wordmark - matches brand book .wm */
 .wm {
   font-family: var(--font-sans);
   font-weight: 700;
@@ -1100,7 +1100,7 @@ select {
 }
 .wm .dot { color: var(--terra); }
 
-/* Wordmark serif variant — italic editorial */
+/* Wordmark serif variant - italic editorial */
 .wm-serif {
   font-family: var(--font-serif);
   font-weight: 600;
@@ -1109,7 +1109,7 @@ select {
   line-height: 1;
 }
 
-/* Mono label — brand book .mono-label */
+/* Mono label - brand book .mono-label */
 .mono-label {
   font-family: var(--font-mono);
   font-size: 0.75rem;
@@ -1118,7 +1118,7 @@ select {
   font-weight: 500;
 }
 
-/* Pill badge — brand book .pill */
+/* Pill badge - brand book .pill */
 .bb-pill {
   display: inline-flex;
   align-items: center;
@@ -1142,7 +1142,7 @@ select {
 }
 
 /* ── Login / welcome screen helpers ── */
-/* Hero glass card 3-D tilt — transform-style must be set on parent */
+/* Hero glass card 3-D tilt - transform-style must be set on parent */
 .glass-card-3d {
   transform-style: preserve-3d;
   transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1229,7 +1229,7 @@ select {
   .lg::before, .glass::before { display: none !important; }
 }
 
-/* ─── Tiny Compass — tri-color gradient clipped to text ─────── */
+/* ─── Tiny Compass - tri-color gradient clipped to text ─────── */
 /* Matches the demo's gradient: terracotta → gold → forest-dk    */
 .tiny-compass {
   background: linear-gradient(135deg, #E05A3A 0%, #E6B574 50%, #2B5340 100%);
@@ -1239,7 +1239,7 @@ select {
   font-weight: 700;
 }
 
-/* ─── Specular highlight — radial shine on glass cards ───────── */
+/* ─── Specular highlight - radial shine on glass cards ───────── */
 .specular-highlight {
   position: relative;
   overflow: hidden;
@@ -1256,7 +1256,7 @@ select {
   z-index: 1;
 }
 
-/* ─── Cursor glow — ambient mouse-tracking light ─────────────── */
+/* ─── Cursor glow - ambient mouse-tracking light ─────────────── */
 .cursor-glow {
   position: fixed;
   width: 256px;
@@ -1304,7 +1304,7 @@ select {
   box-shadow: 0 0 0 2px var(--brand), 0 0 12px rgba(59,110,82,0.35);
 }
 
-/* ─── Dune background blob — ambient warm glow on paper bg ──── */
+/* ─── Dune background blob - ambient warm glow on paper bg ──── */
 .scene-dune {
   position: absolute;
   bottom: -10%;
@@ -1317,7 +1317,7 @@ select {
   pointer-events: none;
 }
 
-/* ─── App ambient — soft brand-tinted glow behind every in-app screen ───
+/* ─── App ambient - soft brand-tinted glow behind every in-app screen ───
    One fixed layer rendered once in AppShell so all screens share the same
    alive, depth-y background instead of a flat paper fill. */
 .app-ambient {
@@ -1358,7 +1358,7 @@ select {
   border: 1px dashed rgba(43,83,64,0.22);
 }
 
-/* ─── v2 Card — glass surface shorthand ─────────────────────── */
+/* ─── v2 Card - glass surface shorthand ─────────────────────── */
 /* Drop this class on any card div instead of repeating inline styles */
 .v2-card {
   background: oklch(97% 0.01 80 / 0.82);
@@ -1404,7 +1404,7 @@ select {
   }
 }
 
-/* ─── Scroll snap — day navigation ──────────────────────────── */
+/* ─── Scroll snap - day navigation ──────────────────────────── */
 .days-container {
   display: flex;
   overflow-x: auto;
@@ -1439,7 +1439,7 @@ nav, [data-no-select] {
 .start-0  { inset-inline-start: 0; }
 .end-0    { inset-inline-end: 0; }
 
-/* ─── Brand wordmark — always LTR ───────────────────────────── */
+/* ─── Brand wordmark - always LTR ───────────────────────────── */
 .wordmark {
   direction: ltr;
   unicode-bidi: isolate;
@@ -1469,7 +1469,7 @@ nav, [data-no-select] {
 .press { transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1); }
 .press:active { transform: scale(0.96); }
 
-/* ─── hoverlift — used on glass cards that should lift ─────────── */
+/* ─── hoverlift - used on glass cards that should lift ─────────── */
 @media (hover: hover) and (pointer: fine) {
   .hoverlift:hover {
     transform: scale(1.02) translateY(-3px);
@@ -1477,10 +1477,10 @@ nav, [data-no-select] {
   }
 }
 
-/* ─── Hero mesh — cinematic dark gradient for dashboard hero ───── */
+/* ─── Hero mesh - cinematic dark gradient for dashboard hero ───── */
 /* Already defined in LIQUID GLASS section below, alias kept here  */
 
-/* ─── V3: Ambient gradient orbs — floats behind all glass surfaces ─ */
+/* ─── V3: Ambient gradient orbs - floats behind all glass surfaces ─ */
 body::before, body::after {
   content: '';
   position: fixed;
@@ -1521,7 +1521,7 @@ body::after {
 /* Ensure page content layers above ambient orbs */
 #__next, main { position: relative; z-index: 1; }
 
-/* ─── prefers-color-scheme:dark — applies when no explicit cookie preference ─ */
+/* ─── prefers-color-scheme:dark - applies when no explicit cookie preference ─ */
 /* Covers landing page (SSR, no JS yet) and first-time visitors on dark devices */
 @media (prefers-color-scheme: dark) {
   :root:not([data-dark="false"]) {
@@ -1613,7 +1613,7 @@ body::after {
   }
 }
 
-/* ─── Landing page — allow the page to scroll (body has overflow:hidden for app) */
+/* ─── Landing page - allow the page to scroll (body has overflow:hidden for app) */
 .landing-scroll {
   height: 100dvh;
   overflow-y: auto;
@@ -1708,7 +1708,7 @@ body::after {
   flex-shrink: 0;
 }
 
-/* hero ambient orbs — CSS-var based so dark mode adapts */
+/* hero ambient orbs - CSS-var based so dark mode adapts */
 .landing-orb-1 {
   position: absolute;
   top: -10%; left: 8%;
@@ -1759,7 +1759,7 @@ body::after {
 [data-reduced-motion="true"] body::before,
 [data-reduced-motion="true"] body::after { animation: none !important; }
 
-/* ─── V3: Hero panel — full-bleed dark gradient header ─────── */
+/* ─── V3: Hero panel - full-bleed dark gradient header ─────── */
 .hero-panel-v3 {
   position: relative;
   overflow: hidden;
@@ -1785,7 +1785,7 @@ body::after {
   color: rgba(255,255,255,0.70);
 }
 
-/* ─── 2027: Grain texture overlay — noise film over all glass surfaces ──── */
+/* ─── 2027: Grain texture overlay - noise film over all glass surfaces ──── */
 /* Apply .grain to <body> or root wrapper. Uses fixed positioning so it      */
 /* scrolls with the viewport, creating a persistent film grain effect.       */
 .grain::before {
@@ -1840,7 +1840,7 @@ body::after {
   background-position: -100% 0;
 }
 
-/* ─── 2027: Morphic button — brand pill with living inner-border ─────────── */
+/* ─── 2027: Morphic button - brand pill with living inner-border ─────────── */
 .btn-morphic {
   position: relative;
   isolation: isolate;
@@ -1874,7 +1874,7 @@ body::after {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   LIQUID GLASS — 2027 design layer (ds.css from design system)
+   LIQUID GLASS - 2027 design layer (ds.css from design system)
    Elevated chroma, cinematic hero, morphing nav, apple OS26 glass
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -1899,7 +1899,7 @@ body::after {
   --hero-2: oklch(16% 0.045 160);
   --hero-3: oklch(11% 0.024 58);
 
-  /* Liquid-glass panel recipe — vivid iOS26: strong blur + high saturation */
+  /* Liquid-glass panel recipe - vivid iOS26: strong blur + high saturation */
   --lg-blur:          blur(36px) saturate(1.8);
   --lg-blur-strong:   blur(48px) saturate(1.9);
   --lg-panel:         oklch(99% 0.004 80 / 60%);
@@ -1929,7 +1929,7 @@ body::after {
   --hero-2: oklch(15% 0.035 160);
   --hero-3: oklch(9% 0.018 58);
 
-  /* Panels: near-neutral dark glass — low chroma so no brownish cast */
+  /* Panels: near-neutral dark glass - low chroma so no brownish cast */
   --lg-panel:         oklch(18% 0.006 60 / 84%);
   --lg-panel-strong:  oklch(22% 0.006 60 / 92%);
   --lg-card-border:   transparent; /* dark mode: border replaces by inset shadow */
@@ -1982,7 +1982,7 @@ body::after {
   box-shadow: 0 0 0 4px var(--brand-muted);
 }
 
-/* NavBar pill — solid enough to contrast against any background */
+/* NavBar pill - solid enough to contrast against any background */
 @media (max-width: 767px) {
   .nav-pill.lg,
   .nav-pill.lg-strong {
@@ -2097,13 +2097,13 @@ body::after {
 [dir="rtl"] .eyebrow-lg { letter-spacing: 0.04em; }
 
 /* ═══════════════════════════════════════════════════════════════════
-   2026 Redesign — Editorial structure layer (HANDOFF.md)
+   2026 Redesign - Editorial structure layer (HANDOFF.md)
    Bold DM Sans heroes · two-tone statements · hairline rows · mono eyebrows.
    Palette, stamps, icons, compass mark and the jelly-glass recipe are
-   intentionally untouched — this layer only adds structure/hierarchy/type.
+   intentionally untouched - this layer only adds structure/hierarchy/type.
    ═══════════════════════════════════════════════════════════════════ */
 
-/* Rule 1 — Bold DM Sans display (replaces serif for hero moments) — v2 */
+/* Rule 1 - Bold DM Sans display (replaces serif for hero moments) - v2 */
 .text-display, .text-display-lg, .text-display-sm {
   font-family: var(--font-sans);
   font-style: normal;
@@ -2134,11 +2134,11 @@ body::after {
   line-height: 1.25;
 }
 
-/* Rule 2 — Two-tone statement headline (bright fact / muted promise) */
+/* Rule 2 - Two-tone statement headline (bright fact / muted promise) */
 .statement .line-1 { color: var(--text);   display: block; }
 .statement .line-2 { color: var(--text-3); display: block; }
 
-/* Rule 5 — Mono eyebrow carrying metadata; terra when active/urgent */
+/* Rule 5 - Mono eyebrow carrying metadata; terra when active/urgent */
 .mono-eyebrow {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -2161,7 +2161,7 @@ body::after {
   font-weight: 700;
 }
 
-/* Rule 4 — Hairline row (rows over cards for dense lists) */
+/* Rule 4 - Hairline row (rows over cards for dense lists) */
 .hairline-row {
   display: flex;
   align-items: center;
@@ -2176,7 +2176,7 @@ body::after {
 }
 .hairline-row.no-rule { border-bottom: 0; }
 
-/* Tap-pill — the vote/claim affordance (the only colored pills in a list) */
+/* Tap-pill - the vote/claim affordance (the only colored pills in a list) */
 .tap-pill {
   display: inline-flex; align-items: center; gap: 6px;
   height: 30px; padding: 0 14px; border-radius: 9999px;
@@ -2194,7 +2194,7 @@ body::after {
 .tap-pill.is-settled { background: var(--bg-alt); color: var(--text-3); }
 .tap-pill:active { transform: scale(0.94); }
 
-/* Segmented control — glass track, active label sits over a moving blob */
+/* Segmented control - glass track, active label sits over a moving blob */
 .segmented {
   position: relative;
   display: inline-flex; align-items: center; gap: 2px;
@@ -2231,7 +2231,7 @@ body::after {
 .progress-thin.is-gradient > span { background: linear-gradient(90deg, var(--terra), var(--sand)); }
 .progress-thin.is-forest > span  { background: var(--brand); }
 
-/* Stat triplet — borderless, mono label over bold value */
+/* Stat triplet - borderless, mono label over bold value */
 .stat-triplet { display: flex; align-items: stretch; }
 .stat-triplet > .cell {
   flex: 1; display: flex; flex-direction: column; gap: 4px;
@@ -2249,7 +2249,7 @@ body::after {
   :root:not([data-dark="false"]) .stat-triplet .val.is-terra { color: var(--terra); }
 }
 
-/* Day pill — itinerary day scroller */
+/* Day pill - itinerary day scroller */
 .day-pill {
   flex-shrink: 0; width: 48px; height: 60px; border-radius: 16px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
@@ -2264,7 +2264,7 @@ body::after {
 .day-pill .d-num { font-size: 19px; font-weight: 800; line-height: 1; }
 [dir="rtl"] .day-pill .d-label, :lang(he) .day-pill .d-label { font-family: var(--font-friendly); text-transform: none; letter-spacing: 0; }
 
-/* Chat bubble — onboarding only (glass over dark canvas) */
+/* Chat bubble - onboarding only (glass over dark canvas) */
 .chat-bubble {
   background: oklch(100% 0 0 / 10%);
   backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
@@ -2274,7 +2274,7 @@ body::after {
   line-height: 1.4;
 }
 
-/* Code circle — invite-code slots */
+/* Code circle - invite-code slots */
 .code-circle {
   width: 56px; height: 56px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -2308,7 +2308,7 @@ body::after {
   box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 12%);
 }
 
-/* Dark onboarding/auth canvas — low-chroma forest+terra wash, bottom-anchored */
+/* Dark onboarding/auth canvas - low-chroma forest+terra wash, bottom-anchored */
 .canvas-dark {
   background:
     radial-gradient(120% 80% at 50% 0%,   oklch(24% 0.06 40 / 45%) 0%, transparent 55%),
@@ -2344,21 +2344,21 @@ body::after {
 .lg-scroll::-webkit-scrollbar { width: 0; height: 0; }
 .lg-scroll { scrollbar-width: none; }
 
-/* RTL font redirection is handled in the base RTL block above — Assistant covers both scripts */
+/* RTL font redirection is handled in the base RTL block above - Assistant covers both scripts */
 
 /* ── RTL medium: typography adjustments (rows 780-782) ─────────── */
 [dir="rtl"] body, [dir="rtl"] p, [dir="rtl"] li,
 :lang(he) body, :lang(he) p, :lang(he) li {
-  letter-spacing: 0.01em;    /* Row 781: Hebrew glyphs are narrow — slight loosening */
+  letter-spacing: 0.01em;    /* Row 781: Hebrew glyphs are narrow - slight loosening */
   line-height: 1.7;           /* Row 782: diacritics may clip at tight line-height */
 }
-/* Row 780: Hebrew text renders visually larger at same px — slight reduction keeps parity */
+/* Row 780: Hebrew text renders visually larger at same px - slight reduction keeps parity */
 :lang(he), [dir="rtl"] {
   font-size: 0.975em;
 }
 :lang(he) input, :lang(he) textarea, :lang(he) button,
 [dir="rtl"] input, [dir="rtl"] textarea, [dir="rtl"] button {
-  font-size: 1em; /* reset — 0.975em on root is enough; don't double-apply */
+  font-size: 1em; /* reset - 0.975em on root is enough; don't double-apply */
   letter-spacing: 0.01em;
 }
 
@@ -2419,25 +2419,25 @@ body::after {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MOBILE THERMAL FIX — pointer:coarse = touch-first device.
+   MOBILE THERMAL FIX - pointer:coarse = touch-first device.
    Eliminates the GPU workloads responsible for sustained heat:
-     1. body pseudo-element orbs with blur(72–88px) + infinite animation
+     1. body pseudo-element orbs with blur(72-88px) + infinite animation
      2. Film grain: SVG feTurbulence animated every 0.5 s at z-index 9000
-     3. backdrop-filter: 28–44 px on every card/button → reduced to 8–14 px
+     3. backdrop-filter: 28-44 px on every card/button → reduced to 8-14 px
      4. Infinite idle animations: float, pulse, breathe, spin, cloudDrift
    ═══════════════════════════════════════════════════════════════════════ */
 @media (pointer: coarse) {
-  /* 1 — Kill animated background orbs (was blur 72 px + 88 px, always compositing) */
+  /* 1 - Kill animated background orbs (was blur 72 px + 88 px, always compositing) */
   body::before,
   body::after {
     animation: none !important;
     filter: none !important;
   }
 
-  /* 2 — Kill film grain (SVG filter + 0.5 s step loop covering the whole screen) */
+  /* 2 - Kill film grain (SVG filter + 0.5 s step loop covering the whole screen) */
   .grain::before { animation: none !important; }
 
-  /* 3 — Reduce backdrop-filter design tokens */
+  /* 3 - Reduce backdrop-filter design tokens */
   :root {
     --lg-blur:        blur(10px) saturate(1.1);
     --lg-blur-strong: blur(18px) saturate(1.15);
@@ -2465,7 +2465,7 @@ body::after {
     -webkit-backdrop-filter: blur(10px) !important;
   }
 
-  /* 4 — Kill all infinite idle animations */
+  /* 4 - Kill all infinite idle animations */
   .an-float,
   .an-pulse,
   .an-breathe,
@@ -2477,10 +2477,10 @@ body::after {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — batched from UI/UX audit rows 100–203
+   MEDIUM PRIORITY FIXES - batched from UI/UX audit rows 100-203
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Row 100: Disabled state — clear visual indication */
+/* Row 100: Disabled state - clear visual indication */
 :disabled,
 [aria-disabled="true"] {
   opacity: 0.45;
@@ -2500,7 +2500,7 @@ select:focus-visible {
               0 0 0 3px var(--brand-muted);
 }
 
-/* Row 171: Dark placeholder opacity — more visible without competing with input text */
+/* Row 171: Dark placeholder opacity - more visible without competing with input text */
 [data-dark="true"] ::placeholder {
   color: oklch(100% 0 0 / 35%);
 }
@@ -2510,7 +2510,7 @@ select:focus-visible {
   }
 }
 
-/* Row 175: Toast dark background — glass surface */
+/* Row 175: Toast dark background - glass surface */
 [data-dark="true"] .toast,
 [data-dark="true"] [role="status"].toast {
   background: rgba(18, 16, 12, 0.88);
@@ -2523,7 +2523,7 @@ select:focus-visible {
   background: rgba(255, 255, 255, 0.15) !important;
 }
 
-/* Row 185: Ring/donut progress track dark — must be visible on dark bg */
+/* Row 185: Ring/donut progress track dark - must be visible on dark bg */
 [data-dark="true"] .ring-track {
   stroke: oklch(100% 0 0 / 10%);
 }
@@ -2536,7 +2536,7 @@ select:focus-visible {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
-/* Row 190: Eyebrow labels in dark mode — use text-2 not text-3 for readability */
+/* Row 190: Eyebrow labels in dark mode - use text-2 not text-3 for readability */
 [data-dark="true"] .eyebrow,
 [data-dark="true"] .section-eyebrow,
 [data-dark="true"] .eyebrow-lg {
@@ -2550,7 +2550,7 @@ select:focus-visible {
   }
 }
 
-/* Row 192: Form error dark — soften red to avoid harshness on dark surface */
+/* Row 192: Form error dark - soften red to avoid harshness on dark surface */
 [data-dark="true"] .field-error,
 [data-dark="true"] [role="alert"] {
   color: var(--danger);
@@ -2560,7 +2560,7 @@ select:focus-visible {
   box-shadow: inset 0 0 0 1.5px rgba(220, 60, 40, 0.6) !important;
 }
 
-/* Row 203: Notes textarea dark — plain bg needs subtle glass treatment */
+/* Row 203: Notes textarea dark - plain bg needs subtle glass treatment */
 [data-dark="true"] .notes-textarea {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.10);
@@ -2575,7 +2575,7 @@ select:focus-visible {
 }
 
 /* ─── Medium: Glass specular reduced opacity in dark mode (row 211) ─────── */
-/* .lg::before already has a custom dark background — only reduce .glass::before */
+/* .lg::before already has a custom dark background - only reduce .glass::before */
 [data-dark="true"] .glass::before {
   opacity: 0.3;
 }
@@ -2670,10 +2670,10 @@ button[aria-label="סגור"]:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — Typography batch (rows 24-82)
+   MEDIUM PRIORITY FIXES - Typography batch (rows 24-82)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Row 24: Budget totals — prominent with tabular nums */
+/* Row 24: Budget totals - prominent with tabular nums */
 .budget-total,
 .stat-total {
   font-size: var(--font-size-xl, 1.25rem);
@@ -2682,7 +2682,7 @@ button[aria-label="סגור"]:hover {
   font-feature-settings: 'tnum';
 }
 
-/* Row 25: Event time labels — legible but secondary */
+/* Row 25: Event time labels - legible but secondary */
 .event-time {
   font-size: max(13px, 0.8125rem);
   color: var(--text-3);
@@ -2713,7 +2713,7 @@ button[aria-label="סגור"]:hover {
   line-height: 1.5 !important;
 }
 
-/* Row 30: Landing hero headline — fluid sizing */
+/* Row 30: Landing hero headline - fluid sizing */
 .hero-headline,
 .landing-headline {
   font-size: clamp(2rem, 7vw, 4.5rem);
@@ -2727,7 +2727,7 @@ button[aria-label="סגור"]:hover {
   line-height: 1.5;
 }
 
-/* Row 38: Expense/budget amounts — tabular-nums + right align */
+/* Row 38: Expense/budget amounts - tabular-nums + right align */
 .amount,
 .budget-number,
 .expense-amount,
@@ -2743,7 +2743,7 @@ button[aria-label="סגור"]:hover {
   text-align: left; /* logical end in RTL */
 }
 
-/* Row 41: Packing category badge count — min 12px, bold, tabular */
+/* Row 41: Packing category badge count - min 12px, bold, tabular */
 .cat-badge,
 .packing-badge,
 .category-count {
@@ -2761,13 +2761,13 @@ button[aria-label="סגור"]:hover {
   font-synthesis: none;
 }
 
-/* Row 53: Prose containers — limit to readable line length */
+/* Row 53: Prose containers - limit to readable line length */
 .prose {
   max-width: 680px;
   margin-inline: auto;
 }
 
-/* Row 55: User-input text — graceful word wrapping */
+/* Row 55: User-input text - graceful word wrapping */
 .user-content,
 [dir="auto"],
 .note-text,
@@ -2776,7 +2776,7 @@ button[aria-label="סגור"]:hover {
   word-break: break-word;
 }
 
-/* Row 57: Budget / financial number inputs — aligned right */
+/* Row 57: Budget / financial number inputs - aligned right */
 .budget-input,
 input[data-numeric],
 input[data-budget],
@@ -2790,7 +2790,7 @@ input[inputmode="numeric"]:not([data-ltr]) {
   text-align: left;
 }
 
-/* Row 61: Wishlist item titles — 2-line clamp */
+/* Row 61: Wishlist item titles - 2-line clamp */
 .wishlist-item-name {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -2800,13 +2800,13 @@ input[inputmode="numeric"]:not([data-ltr]) {
   white-space: normal;
 }
 
-/* Row 67: Notes textarea — readable line-height */
+/* Row 67: Notes textarea - readable line-height */
 .notes-textarea {
   line-height: 1.75;
   font-family: var(--font-sans);
 }
 
-/* Row 70: Trip stat values — visually prominent */
+/* Row 70: Trip stat values - visually prominent */
 .stat-value,
 .trip-stat-value {
   font-size: var(--font-size-2xl, 1.5rem);
@@ -2815,14 +2815,14 @@ input[inputmode="numeric"]:not([data-ltr]) {
   line-height: 1.1;
 }
 
-/* Row 80: Sheet sticky header — stays visible while content scrolls */
+/* Row 80: Sheet sticky header - stays visible while content scrolls */
 .sheet-header-sticky {
   position: sticky;
   top: -1px; /* avoids 1px gap on fractional scroll */
   z-index: 2;
   padding-bottom: 12px;
   background: inherit;
-  /* No backdrop-filter here — the sheet panel already applies it.
+  /* No backdrop-filter here - the sheet panel already applies it.
      Adding it on the child compounds the blur and creates a visible dark band. */
 }
 
@@ -2834,7 +2834,7 @@ input[inputmode="numeric"]:not([data-ltr]) {
   font-weight: 500;
 }
 
-/* Row 82: Day pill text — minimum 12px, bold */
+/* Row 82: Day pill text - minimum 12px, bold */
 .day-pill-label,
 .day-pill span {
   font-size: max(12px, 0.75rem);
@@ -2876,10 +2876,10 @@ input[inputmode="numeric"]:not([data-ltr]) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — Color + Dark Mode batch (rows 91-213)
+   MEDIUM PRIORITY FIXES - Color + Dark Mode batch (rows 91-213)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Row 91: Dark surface border — ensure visible card edges */
+/* Row 91: Dark surface border - ensure visible card edges */
 [data-dark="true"] .glass,
 [data-dark="true"] .lg,
 [data-dark="true"] .v2-card {
@@ -2893,7 +2893,7 @@ input[inputmode="numeric"]:not([data-ltr]) {
   }
 }
 
-/* Row 98: Skeleton shimmer colors — light vs dark */
+/* Row 98: Skeleton shimmer colors - light vs dark */
 .shimmer,
 .skeleton,
 [class*="skeleton-"],
@@ -2970,7 +2970,7 @@ hr.divider,
   );
 }
 
-/* Row 142: High-contrast mode — hide specular sweeps */
+/* Row 142: High-contrast mode - hide specular sweeps */
 [data-high-contrast="true"] .glass::before,
 [data-high-contrast="true"] .lg::before {
   display: none;
@@ -3012,7 +3012,7 @@ body {
   -webkit-backdrop-filter: blur(32px) saturate(1.4) !important;
 }
 
-/* Row 177: Skeleton shimmer dark — already covered in row 98 above */
+/* Row 177: Skeleton shimmer dark - already covered in row 98 above */
 
 /* Row 189: Section dividers dark */
 [data-dark="true"] .card-divider,
@@ -3020,7 +3020,7 @@ body {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Row 199: Settings rows dark — hover + divider */
+/* Row 199: Settings rows dark - hover + divider */
 [data-dark="true"] .settings-row:hover {
   background: rgba(255, 255, 255, 0.04);
   border-radius: 12px;
@@ -3052,7 +3052,7 @@ body {
   border: 1px solid rgba(220, 50, 40, 0.20);
 }
 
-/* Row 225: Gradient text — increase lightness in dark mode */
+/* Row 225: Gradient text - increase lightness in dark mode */
 [data-dark="true"] .gradient-text {
   filter: brightness(1.35);
 }
@@ -3083,10 +3083,10 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — Light Mode batch (rows 239-297)
+   MEDIUM PRIORITY FIXES - Light Mode batch (rows 239-297)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Row 239: Card shadow — two-layer for better depth on light bg */
+/* Row 239: Card shadow - two-layer for better depth on light bg */
 .glass-card,
 .trip-card,
 .v2-card {
@@ -3095,13 +3095,13 @@ body {
     0 4px 16px rgba(0, 0, 0, 0.06);
 }
 
-/* Row 242: Glass border in light mode — subtle but visible */
+/* Row 242: Glass border in light mode - subtle but visible */
 .glass,
 .lg {
   border: 1px solid rgba(0, 0, 0, 0.06);
 }
 
-/* Row 247: Sheet backdrop — slightly stronger in light mode */
+/* Row 247: Sheet backdrop - slightly stronger in light mode */
 :root {
   --sheet-backdrop: rgba(26, 20, 16, 0.45);
 }
@@ -3117,17 +3117,17 @@ select {
 /* Row 252: Skeleton shimmer light (Skeleton.module.css uses own animation) */
 /* Handled per row 98 above */
 
-/* Row 258: Toggle off state in light — defined border */
+/* Row 258: Toggle off state in light - defined border */
 [role="switch"][aria-checked="false"],
 .toggle-off {
   background: oklch(80% 0.010 55) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — Spacing batch (rows 298-387)
+   MEDIUM PRIORITY FIXES - Spacing batch (rows 298-387)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Row 298: Page padding — padding-inline token */
+/* Row 298: Page padding - padding-inline token */
 .page-content,
 .resp-content {
   padding-inline: var(--page-px, 24px);
@@ -3219,7 +3219,7 @@ button[data-primary] {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — Buttons batch (rows 388-469)
+   MEDIUM PRIORITY FIXES - Buttons batch (rows 388-469)
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Row 404: Full-width button */
@@ -3253,7 +3253,7 @@ button[aria-label*="ערוך"]:hover {
   -webkit-backdrop-filter: inherit;
 }
 
-/* Row 453: Button label — no wrap, clip */
+/* Row 453: Button label - no wrap, clip */
 button,
 .lg-btn,
 [role="button"] {
@@ -3264,14 +3264,14 @@ button,
 
 /* Row 451: Enter key hint on inputs */
 input[enterkeyhint] {
-  /* CSS can't set enterKeyHint — done in components */
+  /* CSS can't set enterKeyHint - done in components */
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — NavBar + Cards batch (rows 547-663)
+   MEDIUM PRIORITY FIXES - NavBar + Cards batch (rows 547-663)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Row 547: NavBar @supports fallback — solid bg when backdrop-filter unavailable */
+/* Row 547: NavBar @supports fallback - solid bg when backdrop-filter unavailable */
 @supports not (backdrop-filter: blur(1px)) {
   .nav-pill,
   .lg,
@@ -3386,7 +3386,7 @@ input[enterkeyhint] {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — Motion + A11y + Scroll + Perf (rows 713-984)
+   MEDIUM PRIORITY FIXES - Motion + A11y + Scroll + Perf (rows 713-984)
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Row 713: GPU compositing on animated glass elements */
@@ -3403,7 +3403,7 @@ input[enterkeyhint] {
   -webkit-transform: translateZ(0);
 }
 
-/* Row 717: Overscroll behavior — contain bounce on nested scrollers */
+/* Row 717: Overscroll behavior - contain bounce on nested scrollers */
 .sheet-scroll,
 [role="dialog"] > * {
   overscroll-behavior-y: contain;
@@ -3446,14 +3446,14 @@ textarea[aria-invalid="true"].shake {
   inset-block-start: 0;
 }
 
-/* Row 859 (A11y): Focus visible ring — global */
+/* Row 859 (A11y): Focus visible ring - global */
 :focus-visible {
   outline: 2.5px solid var(--brand);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Row 882 (A11y): prefers-contrast: more — high contrast media support */
+/* Row 882 (A11y): prefers-contrast: more - high contrast media support */
 @media (prefers-contrast: more) {
   .glass,
   .lg,
@@ -3492,7 +3492,7 @@ textarea[aria-invalid="true"].shake {
   overscroll-behavior: contain;
 }
 
-/* Row 897 (Scroll): Horizontal chip row — auto scroll */
+/* Row 897 (Scroll): Horizontal chip row - auto scroll */
 .chip-scroll-row {
   display: flex;
   gap: var(--space-2, 8px);
@@ -3517,7 +3517,7 @@ textarea[aria-invalid="true"].shake {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   MEDIUM PRIORITY FIXES — Icons + Loading + Micro-interactions (1079-1121)
+   MEDIUM PRIORITY FIXES - Icons + Loading + Micro-interactions (1079-1121)
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Row 1079: Icon size consistency utilities */
@@ -3527,7 +3527,7 @@ textarea[aria-invalid="true"].shake {
 .icon-lg  { width: 24px; height: 24px; }
 .icon-xl  { width: 32px; height: 32px; }
 
-/* Row 1081: Icon color — currentColor by default */
+/* Row 1081: Icon color - currentColor by default */
 svg[aria-hidden="true"] {
   fill: none;
   stroke: currentColor;
@@ -3595,10 +3595,10 @@ svg[aria-hidden="true"] {
 .save-indicator[data-visible="true"] { opacity: 1; }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   REMAINING MEDIUM FIXES — RTL, Color, misc
+   REMAINING MEDIUM FIXES - RTL, Color, misc
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Row 156 (Color): ::selection — brand tint */
+/* Row 156 (Color): ::selection - brand tint */
 ::selection {
   background: oklch(42% 0.092 155 / 0.25);
   color: inherit;
@@ -3634,7 +3634,7 @@ svg[aria-hidden="true"] {
 [dir="rtl"] .leaflet-left  { left: unset; right: 10px; }
 [dir="rtl"] .leaflet-right { right: unset; left: 10px; }
 
-/* Row 927 (Scroll): Elastic overscroll — html bg matches content to avoid white flash */
+/* Row 927 (Scroll): Elastic overscroll - html bg matches content to avoid white flash */
 html {
   background-color: var(--bg, oklch(98% 0.010 75));
 }
@@ -3649,17 +3649,17 @@ html[data-dark="true"] {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   LOW PRIORITY FIXES — 🟢 batch (selected CSS-only rows)
+   LOW PRIORITY FIXES - 🟢 batch (selected CSS-only rows)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* Row 18: WorldClock time digits — tabular nums */
+/* Row 18: WorldClock time digits - tabular nums */
 .world-clock-time,
 .world-clock .time {
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum';
 }
 
-/* Row 19: Ring center text — tabular nums */
+/* Row 19: Ring center text - tabular nums */
 .ring-center-text {
   font-variant-numeric: tabular-nums;
 }
@@ -3672,7 +3672,7 @@ html[data-dark="true"] {
   max-width: 80px;
 }
 
-/* Row 42: Weather temp — tabular nums */
+/* Row 42: Weather temp - tabular nums */
 .weather-temp {
   font-variant-numeric: tabular-nums;
   font-size: var(--font-size-2xl, 1.5rem);
@@ -3688,14 +3688,14 @@ body, * {
   will-change: transform, opacity;
 }
 
-/* Row 60: Grain pseudo-element — pointer-events: none */
+/* Row 60: Grain pseudo-element - pointer-events: none */
 .grain::before,
 .grain::after {
   pointer-events: none;
   user-select: none;
 }
 
-/* Row 153: Print styles — hide chrome, show content */
+/* Row 153: Print styles - hide chrome, show content */
 @media print {
   .nav-pill,
   .navbar-root,
@@ -3742,13 +3742,13 @@ body, * {
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/* Row 174: Active nav blob in dark — slightly more luminous */
+/* Row 174: Active nav blob in dark - slightly more luminous */
 [data-dark="true"] .nav-pill .blob,
 [data-dark="true"] [data-nav-blob] {
   filter: saturate(1.1);
 }
 
-/* Row 180: Grain opacity in dark — reduce noise */
+/* Row 180: Grain opacity in dark - reduce noise */
 [data-dark="true"] body::after,
 [data-dark="true"] .grain::before {
   opacity: 0.035;
@@ -3764,7 +3764,7 @@ body, * {
   opacity: 0.80;
 }
 
-/* Row 206: Scroll indicator dots — dark mode */
+/* Row 206: Scroll indicator dots - dark mode */
 [data-dark="true"] .scroll-dot {
   background: rgba(255, 255, 255, 0.25);
 }
@@ -3784,9 +3784,9 @@ body, * {
   background: rgba(255, 255, 255, 0.12);
 }
 
-/* Row 233: Print pure white bg note — warm off-white confirmed ✓ */
+/* Row 233: Print pure white bg note - warm off-white confirmed ✓ */
 
-/* Row 269: Chip 'open' variant — min contrast */
+/* Row 269: Chip 'open' variant - min contrast */
 .chip[data-variant="open"],
 .chip--open {
   background: oklch(42% 0.13 155 / 0.15);
@@ -3825,7 +3825,7 @@ body, * {
   flex-shrink: 0;
 }
 
-/* Row 285: Empty state — muted warm colors */
+/* Row 285: Empty state - muted warm colors */
 .empty-state-icon {
   color: var(--text-3);
   opacity: 0.55;
@@ -3841,7 +3841,7 @@ body, * {
   }
 }
 
-/* Row 325: Chip padding — slightly more breathing room */
+/* Row 325: Chip padding - slightly more breathing room */
 .chip {
   padding: 4px 10px;
 }
@@ -3891,7 +3891,7 @@ body, * {
   font-weight: 600;
 }
 
-/* Row 127: PopIn glow at scale peak — override earlier keyframe */
+/* Row 127: PopIn glow at scale peak - override earlier keyframe */
 :root { --pop-glow: rgba(196, 113, 74, 0.18); }
 [data-dark="true"] { --pop-glow: rgba(150, 200, 155, 0.22); }
 @keyframes popIn {
@@ -3900,7 +3900,7 @@ body, * {
   100% { opacity: 1; transform: scale(1) translateY(0); box-shadow: none; }
 }
 
-/* Row 159: Turnstile captcha widget — match glass surface */
+/* Row 159: Turnstile captcha widget - match glass surface */
 .cf-turnstile, #turnstile-widget {
   border-radius: var(--lg-r-md, 16px) !important;
   overflow: hidden;
@@ -3915,7 +3915,7 @@ body, * {
   border-color: rgba(0, 188, 212, 0.28);
 }
 
-/* Row 212: glassGlow dark — override earlier keyframe with CSS custom prop */
+/* Row 212: glassGlow dark - override earlier keyframe with CSS custom prop */
 :root { --glass-glow-color: rgba(196, 113, 74, 0.08); }
 [data-dark="true"] { --glass-glow-color: rgba(120, 200, 140, 0.18); }
 @keyframes glassGlow {
@@ -3929,7 +3929,7 @@ body, * {
   opacity: 0.85;
 }
 
-/* Row 262: Settings row hover — light mode */
+/* Row 262: Settings row hover - light mode */
 .settings-row:hover {
   background: rgba(0, 0, 0, 0.03);
   border-radius: 12px;

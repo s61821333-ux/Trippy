@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (record.cancelled_at) {
-      // Already cancelled — idempotent success
+      // Already cancelled - idempotent success
       return NextResponse.json({ message: 'Account deletion cancelled.' })
     }
 

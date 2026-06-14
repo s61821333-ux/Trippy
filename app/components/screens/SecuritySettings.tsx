@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
@@ -168,7 +168,7 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
       setOtpCode('');
       await load();
     } catch {
-      show(isHe ? 'קוד שגוי, נסה שוב' : 'Wrong code — try again');
+      show(isHe ? 'קוד שגוי, נסה שוב' : 'Wrong code - try again');
     } finally {
       setVerifying(false);
     }
@@ -211,7 +211,7 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : '';
       if (msg.includes('abort') || msg.includes('cancel') || msg.includes('NotAllowed')) {
-        // User cancelled the browser dialog — silent
+        // User cancelled the browser dialog - silent
       } else {
         show(isHe ? 'שגיאה בהוספת Passkey' : 'Could not add passkey');
       }
@@ -419,7 +419,7 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
               <div style={SUB_STYLE}>
                 {isHe
                   ? 'Passkeys מאפשרים כניסה ביומטרית מהירה ומאובטחת ללא סיסמה.'
-                  : 'Passkeys let you sign in with Face ID, fingerprint, or device PIN — no password needed.'}
+                  : 'Passkeys let you sign in with Face ID, fingerprint, or device PIN - no password needed.'}
               </div>
             </div>
           )}

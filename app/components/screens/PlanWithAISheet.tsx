@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useRef } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
@@ -53,7 +53,7 @@ const TRAVELER_OPTIONS = [
 
 const PACE_OPTIONS = [
   { id: 'relaxed',  en: 'Relaxed',       he: 'רגוע',   stamp: 'palm_tree', desc: 'Few activities, lots of breathing room' },
-  { id: 'balanced', en: 'Balanced',      he: 'מאוזן',  stamp: 'compass',   desc: '3–4 activities per day'                },
+  { id: 'balanced', en: 'Balanced',      he: 'מאוזן',  stamp: 'compass',   desc: '3-4 activities per day'                },
   { id: 'packed',   en: 'Action-packed', he: 'עמוס',   stamp: 'hiking',    desc: 'Make the most of every hour'           },
 ];
 
@@ -464,7 +464,7 @@ export default function PlanWithAISheet({ onClose }: { onClose: () => void }) {
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') return;
       console.error('[PlanWithAI]', err);
-      show(isHe ? 'שגיאה ביצירת המסלול — נסה שוב' : 'Failed to generate — please try again');
+      show(isHe ? 'שגיאה ביצירת המסלול - נסה שוב' : 'Failed to generate - please try again');
       setStep('form');
     }
   };

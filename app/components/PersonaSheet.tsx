@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import { useShallow } from 'zustand/react/shallow';
@@ -11,7 +11,7 @@ import Btn from './ui/Btn';
 import Icon from './ui/Icon';
 import PlacesInput, { PlaceResult } from './ui/PlacesInput';
 
-// ── All event categories — icons match DayDetail_V2 CATS_CORE + CATS_EXTENDED ──
+// ── All event categories - icons match DayDetail_V2 CATS_CORE + CATS_EXTENDED ──
 
 const STYLE_OPTIONS: { value: string; label: string; labelHe: string; icon: string }[] = [
   // Core
@@ -70,7 +70,7 @@ const BUDGET_OPTIONS: { value: BudgetTier; label: string; labelHe: string }[] = 
   { value: 'any',  label: 'Any',           labelHe: 'כל תקציב'     },
 ];
 
-// ── High-level "moods" — the friendly entry point. Picking a mood reveals only
+// ── High-level "moods" - the friendly entry point. Picking a mood reveals only
 // its relevant subtypes (drawn from STYLE_OPTIONS) instead of a 38-chip wall. ──
 type IntentId = 'eat' | 'see' | 'do' | 'relax' | 'night';
 const INTENTS: { id: IntentId; label: string; labelHe: string; icon: string; subs: string[] }[] = [
@@ -105,7 +105,7 @@ const TEXT_INPUT: React.CSSProperties = {
   resize: 'none' as const,
 };
 
-// ── Chip row (supports single and multi-select, Trippy icons) ────────────────
+// ── Chip row (supports single and multi-select, Triplly icons) ────────────────
 
 function ChipRow<T extends string>({
   options, value, onChange, multi = false,
@@ -275,7 +275,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '4px 0 24px' }}>
 
-        {/* 1. Mood — the friendly entry point (5 choices, not 38) */}
+        {/* 1. Mood - the friendly entry point (5 choices, not 38) */}
         <div>
           <div style={SECTION_LABEL}>{t('What are you in the mood for?', 'מה בא לכם?')}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -305,7 +305,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
           </div>
         </div>
 
-        {/* 2. Refine — only the subtypes for the chosen moods + optional detail */}
+        {/* 2. Refine - only the subtypes for the chosen moods + optional detail */}
         {visibleSubs.length > 0 && (
           <div>
             <div style={SECTION_LABEL}>{t('Refine the vibe', 'דייקו את הסגנון')}</div>
@@ -329,13 +329,13 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
           </div>
         )}
 
-        {/* 3. Location — required */}
+        {/* 3. Location - required */}
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
             <div style={{ ...SECTION_LABEL, margin: 0 }}>{t('Where? *', 'איפה? *')}</div>
             {locationErr && (
               <span style={{ fontSize: 11, color: 'var(--danger, #e05252)', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>
-                {t('Required — enter a city or area', 'חובה — הזן עיר או אזור')}
+                {t('Required - enter a city or area', 'חובה - הזן עיר או אזור')}
               </span>
             )}
           </div>

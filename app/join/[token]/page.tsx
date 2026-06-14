@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
@@ -67,7 +67,7 @@ export default function JoinPage() {
       // Give the user a moment to see the success message, then redirect
       setTimeout(() => { window.location.href = `/?join=${data.tripId}` }, 350)
     } else {
-      setJoinError(data.error ?? 'Could not join trip — please try again')
+      setJoinError(data.error ?? 'Could not join trip - please try again')
       setStatus('ready')
     }
   }
@@ -100,7 +100,7 @@ export default function JoinPage() {
             fontSize: '1.6rem', fontWeight: 700, letterSpacing: '-0.04em',
             color: '#1A1410',
           }}>
-            Trippy<span style={{ color: '#C4714A' }}>.</span>
+            Triplly<span style={{ color: '#C4714A' }}>.</span>
           </div>
         </div>
 
@@ -137,7 +137,7 @@ export default function JoinPage() {
                   fontSize: 13, fontWeight: 600, color: '#444', cursor: 'pointer',
                 }}
               >
-                Go to Trippy
+                Go to Triplly
               </button>
             </div>
           )}

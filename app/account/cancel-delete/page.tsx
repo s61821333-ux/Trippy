@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
@@ -30,7 +30,7 @@ function CancelDeleteContent() {
       })
       .catch(() => {
         setStatus('error')
-        setMessage('Network error — please try again.')
+        setMessage('Network error - please try again.')
       })
   }, [token])
 
@@ -56,7 +56,7 @@ function CancelDeleteContent() {
             Account deletion cancelled.
           </div>
           <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5, marginBottom: 20 }}>
-            You're still in — nothing has changed.
+            You're still in - nothing has changed.
           </div>
           <button
             onClick={() => window.location.href = '/'}

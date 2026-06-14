@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 
@@ -8,7 +8,7 @@ interface Props {
 }
 
 /**
- * Trippy brand compass mark. Colors automatically adapt to light/dark mode
+ * Triplly brand compass mark. Colors automatically adapt to light/dark mode
  * via CSS custom properties defined in globals.css.
  *
  * Anatomy (brand book):
@@ -35,23 +35,23 @@ export default function CompassMark({ size = 48, style }: Props) {
         strokeWidth="4"
         fill="none"
       />
-      {/* North — terracotta */}
+      {/* North - terracotta */}
       <path
         d="M120 36 L138 120 L120 124 L102 120 Z"
         fill="var(--compass-n)"
       />
-      {/* South — forest */}
+      {/* South - forest */}
       <path
         d="M120 204 L102 120 L120 116 L138 120 Z"
         fill="var(--compass-s)"
       />
-      {/* East — gold */}
+      {/* East - gold */}
       <path
         d="M204 120 L120 102 L116 120 L120 138 Z"
         fill="var(--compass-ew)"
         opacity="0.85"
       />
-      {/* West — gold */}
+      {/* West - gold */}
       <path
         d="M36 120 L120 138 L124 120 L120 102 Z"
         fill="var(--compass-ew)"

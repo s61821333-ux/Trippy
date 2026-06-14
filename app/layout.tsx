@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from 'next';
+﻿import type { Metadata, Viewport } from 'next';
 import { DM_Sans, Instrument_Serif, JetBrains_Mono, Assistant } from 'next/font/google';
 import { cookies } from 'next/headers';
 import { Analytics } from '@vercel/analytics/next';
@@ -26,7 +26,7 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-mono',
   display: 'swap',
-  // Used only for small eyebrow/mono labels — no need to block first paint on it.
+  // Used only for small eyebrow/mono labels - no need to block first paint on it.
   preload: false,
   weight: ['400', '500', '600'],
 });
@@ -41,10 +41,10 @@ const assistant = Assistant({
 export const metadata: Metadata = {
   metadataBase: new URL('https://letsexploring.com'),
   title: {
-    default: 'Trippy — Free Group Trip Planner | Plan Together',
-    template: '%s | Trippy',
+    default: 'Triplly - Free Group Trip Planner | Plan Together',
+    template: '%s | Triplly',
   },
-  description: 'Plan your group trip for free — shared itinerary, interactive map, group budget, and packing list. Invite friends in seconds.',
+  description: 'Plan your group trip for free - shared itinerary, interactive map, group budget, and packing list. Invite friends in seconds.',
   manifest: '/manifest.json',
   icons: {
     icon: [
@@ -56,20 +56,20 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Trippy',
+    title: 'Triplly',
   },
   openGraph: {
-    title: 'Trippy — Free Group Trip Planner',
-    description: 'Plan your group trip for free — shared itinerary, interactive map, group budget, and packing list.',
+    title: 'Triplly - Free Group Trip Planner',
+    description: 'Plan your group trip for free - shared itinerary, interactive map, group budget, and packing list.',
     url: 'https://letsexploring.com',
-    siteName: 'Trippy',
+    siteName: 'Triplly',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Trippy — Group Trip Planner' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Triplly - Group Trip Planner' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Trippy — Free Group Trip Planner',
-    description: 'Plan your group trip for free — shared itinerary, interactive map, group budget, and packing list.',
+    title: 'Triplly - Free Group Trip Planner',
+    description: 'Plan your group trip for free - shared itinerary, interactive map, group budget, and packing list.',
     images: ['/og-image.png'],
   },
 };
@@ -86,12 +86,12 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
-  const locale = (cookieStore.get('trippy-locale')?.value === 'he') ? 'he' : 'en';
+  const locale = (cookieStore.get('Triplly-locale')?.value === 'he') ? 'he' : 'en';
   const dir = locale === 'he' ? 'rtl' : 'ltr';
   // Read resolved dark value from cookie so the server renders the correct theme
-  // on every page load — prevents the flash without any client-side script.
+  // on every page load - prevents the flash without any client-side script.
   // AppShell's useEffect writes this cookie whenever the resolved theme changes.
-  const darkCookie = cookieStore.get('trippy-dark')?.value;
+  const darkCookie = cookieStore.get('Triplly-dark')?.value;
   const isDark = darkCookie === 'true';
   // Explicitly set data-dark="false" when the user has chosen light so the
   // prefers-color-scheme:dark media query in globals.css doesn't override it.

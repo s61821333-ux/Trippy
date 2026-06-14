@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+﻿import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createServerClient } from '@supabase/ssr';
@@ -199,7 +199,7 @@ function cacheToSuggestion(r: CacheRow, style: string): AiSuggestion {
     description: r.short_description ?? '',
     duration: r.avg_duration_min ?? 60,
     time: '10:00',
-    distance: '—',
+    distance: '-',
     open: true,
     rating: r.google_rating ?? undefined,
     priceLevel: r.price_level ?? undefined,
@@ -212,7 +212,7 @@ function cacheToSuggestion(r: CacheRow, style: string): AiSuggestion {
   };
 }
 
-// ── Claude fallback (persona-aware, direct call — no web search) ──────────────
+// ── Claude fallback (persona-aware, direct call - no web search) ──────────────
 
 const STYLE_LABEL: Record<string, string> = {
   food:         'restaurant, food market, or dining experience',
@@ -265,7 +265,7 @@ const STYLE_LABEL: Record<string, string> = {
 
 const DURATION_LABEL: Record<string, string> = {
   short:    'under 2 hours',
-  half_day: 'half a day (2–5 hours)',
+  half_day: 'half a day (2-5 hours)',
   full_day: 'a full day (5+ hours)',
 };
 
@@ -303,35 +303,35 @@ async function searchAndEnrich(ctx: {
     ? `\nSkip these already-suggested names: ${ctx.exclude.join(', ')}.` : '';
 
   const systemPrompt = isHe
-    ? 'אתה מומחה טיולים ישראלי שמכיר את היעד מקרוב. כתוב עברית טבעית ועכשווית — כמו שחבר ישראלי באמת מדבר, לא כמו תרגום מאנגלית ולא כמו חוברת תיירות. כלל ברזל: הפלט הוא אך ורק מערך JSON תקין — ללא markdown, ללא הקדמה, ללא שום טקסט מחוץ למערך. פתח מיד עם [.'
-    : 'You are a local travel expert. Iron rule: output ONLY a raw JSON array — no markdown fences, no intro sentence, no explanation. Start your response with [ and end with ].';
+    ? 'אתה מומחה טיולים ישראלי שמכיר את היעד מקרוב. כתוב עברית טבעית ועכשווית - כמו שחבר ישראלי באמת מדבר, לא כמו תרגום מאנגלית ולא כמו חוברת תיירות. כלל ברזל: הפלט הוא אך ורק מערך JSON תקין - ללא markdown, ללא הקדמה, ללא שום טקסט מחוץ למערך. פתח מיד עם [.'
+    : 'You are a local travel expert. Iron rule: output ONLY a raw JSON array - no markdown fences, no intro sentence, no explanation. Start your response with [ and end with ].';
 
   const BUDGET_LABEL_HE: Record<string, string> = {
     low: 'חינמיים או זולים', mid: 'במחיר בינוני', high: 'יוקרתיים ושווים את הפינוק', any: '',
   };
   const DURATION_LABEL_HE: Record<string, string> = {
-    short: 'פחות משעתיים', half_day: 'חצי יום (2–5 שעות)', full_day: 'יום שלם (5+ שעות)',
+    short: 'פחות משעתיים', half_day: 'חצי יום (2-5 שעות)', full_day: 'יום שלם (5+ שעות)',
   };
   const SEASON_HE: Record<string, string> = {
     spring: 'האביב', summer: 'הקיץ', autumn: 'הסתיו', fall: 'הסתיו', winter: 'החורף',
   };
 
-  const budgetLineHe = ctx.budget_tier !== 'any' ? ` — ${BUDGET_LABEL_HE[ctx.budget_tier]} —` : '';
+  const budgetLineHe = ctx.budget_tier !== 'any' ? ` - ${BUDGET_LABEL_HE[ctx.budget_tier]} -` : '';
   const exclusionLineHe = ctx.exclude?.length
     ? `\nדלג על שמות שכבר הוצעו: ${ctx.exclude.join(', ')}.` : '';
 
   const hebrewPrompt = `המלץ על בדיוק 6 מקומות מהסוג הזה: ${styleLabel}${budgetLineHe} ב-${locationText}, בעונת ${SEASON_HE[ctx.season] ?? ctx.season}. כל מקום צריך להתאים לביקור של ${DURATION_LABEL_HE[ctx.duration_bucket] ?? 'שעה עד שלוש שעות'}. רק מקומות אמיתיים ומוכרים שקיימים היום.${exclusionLineHe}
 
-שדה "description": משפט אחד או שניים בעברית טבעית וזורמת — כמו חבר ישראלי שגר ביעד וממליץ לך אישית. תאר את האווירה, מה מיוחד במקום, או טיפ פרקטי אחד. אסור עברית מליצית, אסור ניסוח שנשמע כמו תרגום מילולי מאנגלית, ואסור סופרלטיבים ריקים ("מדהים", "חובה", "מושלם").
-שדה "name": שם המקום בכתב הלטיני המקורי — אל תתרגם שמות פרטיים.
+שדה "description": משפט אחד או שניים בעברית טבעית וזורמת - כמו חבר ישראלי שגר ביעד וממליץ לך אישית. תאר את האווירה, מה מיוחד במקום, או טיפ פרקטי אחד. אסור עברית מליצית, אסור ניסוח שנשמע כמו תרגום מילולי מאנגלית, ואסור סופרלטיבים ריקים ("מדהים", "חובה", "מושלם").
+שדה "name": שם המקום בכתב הלטיני המקורי - אל תתרגם שמות פרטיים.
 
 החזר מערך JSON של בדיוק 6 אובייקטים עם המפתחות: name, description, location.
 דוגמה לצורה (החלף את התוכן):
 [{"name":"Café de Flore","description":"בית קפה ותיק עם טרסה שנעים לשבת בה, כדאי להגיע מוקדם לפני העומס.","location":"Saint-Germain-des-Prés"}]`;
 
-  // Ask for 6 — Google Places enrichment then ranks them and the top 4 by
+  // Ask for 6 - Google Places enrichment then ranks them and the top 4 by
   // rating are returned, so hallucinated or mediocre picks get filtered out.
-  const englishPrompt = `Recommend exactly 6 ${styleLabel}s${budgetLine} in ${locationText} during ${ctx.season}. Each should take ${DURATION_LABEL[ctx.duration_bucket] ?? '1–3 hours'} to enjoy. Only real, well-known venues that exist today.${exclusionLine}
+  const englishPrompt = `Recommend exactly 6 ${styleLabel}s${budgetLine} in ${locationText} during ${ctx.season}. Each should take ${DURATION_LABEL[ctx.duration_bucket] ?? '1-3 hours'} to enjoy. Only real, well-known venues that exist today.${exclusionLine}
 
 Output a JSON array of exactly 6 objects with keys: name, description, location.
 Example shape (replace content):
@@ -353,7 +353,7 @@ Example shape (replace content):
   const textBlock = message.content.find(b => b.type === 'text');
   const rawText = '[' + (textBlock && textBlock.type === 'text' ? textBlock.text : '');
 
-  // Extract the JSON array robustly — find the first [ … ] span
+  // Extract the JSON array robustly - find the first [ … ] span
   let candidates: Array<{ name: string; description: string; location?: string }> = [];
   const arrayMatch = rawText.match(/\[[\s\S]*\]/);
   if (arrayMatch) {
@@ -382,7 +382,7 @@ Example shape (replace content):
         description: c.description,
         duration: ctx.duration_bucket === 'short' ? 90 : ctx.duration_bucket === 'half_day' ? 210 : 390,
         time: '10:00',
-        distance: '—',
+        distance: '-',
         open: place?.currentOpeningHours?.openNow ?? true,
         rating: place?.rating,
         ratingCount: place?.userRatingCount,
@@ -445,7 +445,7 @@ async function storeToCache(
   });
 
   // Upsert: if google_place_id already exists for city+style+season → increment.
-  // Rows are independent — run them in parallel (this is awaited before the
+  // Rows are independent - run them in parallel (this is awaited before the
   // response is sent, so sequential round-trips added user-visible latency).
   await Promise.all(rows.map(async (row) => {
     if (row.google_place_id) {
@@ -489,7 +489,7 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 });
 
-  // Rate limit (shared bucket with /api/ai/suggestions) — persistent, so it
+  // Rate limit (shared bucket with /api/ai/suggestions) - persistent, so it
   // survives serverless cold starts like the suggestions route already does.
   let rlAdmin = null;
   try { rlAdmin = serviceClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY()); } catch {}
@@ -508,13 +508,13 @@ export async function POST(request: NextRequest) {
 
   const ctx = parsed.data;
   // Descriptions are generated in Hebrew only for locale 'he', English for
-  // everything else — tag/filter cache rows by the same rule.
+  // everything else - tag/filter cache rows by the same rule.
   const cacheLocale = ctx.locale === 'he' ? 'he' : 'en';
   const supabaseUrl = SUPABASE_URL();
   const serviceKey = SUPABASE_SERVICE_ROLE_KEY();
   const googleKey = GOOGLE_MAPS_API_KEY();
 
-  // ── Cache lookup — use authenticated user client (satisfies RLS policy) ──────
+  // ── Cache lookup - use authenticated user client (satisfies RLS policy) ──────
   const cacheHits = await queryCacheHits(
     { city: ctx.city, lat: ctx.lat, lng: ctx.lng, radius_km: ctx.radius_km,
       style: ctx.style, season: ctx.season, duration_bucket: ctx.duration_bucket,
@@ -541,7 +541,7 @@ export async function POST(request: NextRequest) {
     return Response.json(suggestions);
   }
 
-  // ── Claude fallback (awaited, returns JSON — no streaming protocol) ──────────
+  // ── Claude fallback (awaited, returns JSON - no streaming protocol) ──────────
   try {
     const timeoutPromise = new Promise<AiSuggestion[]>((_, reject) =>
       setTimeout(() => reject(new Error('timeout')), 22000)
@@ -568,7 +568,7 @@ export async function POST(request: NextRequest) {
       if (!timedOut) throw err;
     }
 
-    // Await storage before returning — Vercel may terminate after Response.json
+    // Await storage before returning - Vercel may terminate after Response.json
     if (suggestions.length > 0) {
       await storeToCache(suggestions, {
         city: ctx.city, area: ctx.area, country: ctx.country, region: ctx.region,

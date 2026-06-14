@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+﻿import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit'
@@ -7,7 +7,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, GOOGLE_MAPS_API_KEY } from '@/lib/env'
 // GET /api/places/details?place_id=PLACE_ID
 // Resolves a Google Place ID to lat/lng + formatted address
 export async function GET(request: NextRequest) {
-  // Auth check — prevents anonymous quota exhaustion on Google Places Details API
+  // Auth check - prevents anonymous quota exhaustion on Google Places Details API
   const cookieStore = await cookies()
   const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
     cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} },

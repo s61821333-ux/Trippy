@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -9,7 +9,7 @@ function tryAdminClient() {
   catch { return null }
 }
 
-// GET /api/invitations — authenticated: return pending invitations with trip names
+// GET /api/invitations - authenticated: return pending invitations with trip names
 // Uses admin client to bypass RLS when available, so the invitee can see trip
 // names even before they join the trip.
 export async function GET(_request: NextRequest) {
@@ -37,7 +37,7 @@ export async function GET(_request: NextRequest) {
   const admin = tryAdminClient()
 
   try {
-    // Fetch invitations — use admin client if available, otherwise rely on RLS
+    // Fetch invitations - use admin client if available, otherwise rely on RLS
     const invDb = admin ?? supabase
     const { data: invitations, error: invErr } = await invDb
       .from('trip_invitations')
@@ -47,7 +47,7 @@ export async function GET(_request: NextRequest) {
 
     if (invErr || !invitations?.length) return NextResponse.json([])
 
-    // Fetch trip names — always use admin client so invitees can see the trip
+    // Fetch trip names - always use admin client so invitees can see the trip
     // name before they are participants (bypasses the is_trip_participant RLS check)
     const tripIds = invitations.map((i: any) => i.trip_id)
     const { data: trips } = await (admin ?? supabase)
@@ -72,7 +72,7 @@ export async function GET(_request: NextRequest) {
   }
 }
 
-// PATCH /api/invitations?id=xxx — reject an invitation (invitee perspective)
+// PATCH /api/invitations?id=xxx - reject an invitation (invitee perspective)
 export async function PATCH(request: NextRequest) {
   const id = request.nextUrl.searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
@@ -99,7 +99,7 @@ export async function PATCH(request: NextRequest) {
   return NextResponse.json({ ok: true })
 }
 
-// DELETE /api/invitations?id=xxx — cancel an invitation (trip owner perspective)
+// DELETE /api/invitations?id=xxx - cancel an invitation (trip owner perspective)
 export async function DELETE(request: NextRequest) {
   const id = request.nextUrl.searchParams.get('id')
   if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })

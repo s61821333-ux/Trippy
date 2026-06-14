@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+﻿import type { Metadata } from 'next';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
@@ -9,7 +9,7 @@ import StatementHeading from './components/ui/StatementHeading';
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
-  const locale = cookieStore.get('trippy-locale')?.value === 'he' ? 'he' : 'en';
+  const locale = cookieStore.get('Triplly-locale')?.value === 'he' ? 'he' : 'en';
 
   const alternates = {
     canonical: 'https://letsexploring.com',
@@ -21,42 +21,42 @@ export async function generateMetadata(): Promise<Metadata> {
 
   if (locale === 'he') {
     return {
-      title: 'Trippy — מתכנן טיולים קבוצתי חינמי | תכנן יחד',
+      title: 'Triplly - מתכנן טיולים קבוצתי חינמי | תכנן יחד',
       description:
-        'תכנן את הטיול הקבוצתי שלך בחינם — מסלול משותף, מפה אינטראקטיבית, תקציב קבוצתי ורשימת ציוד. הזמן חברים בשניות.',
+        'תכנן את הטיול הקבוצתי שלך בחינם - מסלול משותף, מפה אינטראקטיבית, תקציב קבוצתי ורשימת ציוד. הזמן חברים בשניות.',
       alternates,
       openGraph: {
-        title: 'Trippy — מתכנן טיולים קבוצתי חינמי',
+        title: 'Triplly - מתכנן טיולים קבוצתי חינמי',
         description:
-          'תכנן את הטיול הקבוצתי שלך בחינם — מסלול משותף, מפה אינטראקטיבית, תקציב קבוצתי ורשימת ציוד.',
+          'תכנן את הטיול הקבוצתי שלך בחינם - מסלול משותף, מפה אינטראקטיבית, תקציב קבוצתי ורשימת ציוד.',
         url: 'https://letsexploring.com',
         locale: 'he_IL',
         alternateLocale: ['en_US'],
-        images: [{ url: '/og-image-he.png', width: 1200, height: 630, alt: 'Trippy — מתכנן טיולים קבוצתי' }],
+        images: [{ url: '/og-image-he.png', width: 1200, height: 630, alt: 'Triplly - מתכנן טיולים קבוצתי' }],
       },
     };
   }
 
   return {
-    title: 'Trippy — Free Group Trip Planner | Plan Together',
+    title: 'Triplly - Free Group Trip Planner | Plan Together',
     description:
-      'Plan your group trip for free — shared itinerary, interactive map, group budget, and packing list. Invite friends in seconds.',
+      'Plan your group trip for free - shared itinerary, interactive map, group budget, and packing list. Invite friends in seconds.',
     alternates,
     openGraph: {
-      title: 'Trippy — Free Group Trip Planner',
+      title: 'Triplly - Free Group Trip Planner',
       description:
-        'Plan your group trip for free — shared itinerary, interactive map, group budget, and packing list.',
+        'Plan your group trip for free - shared itinerary, interactive map, group budget, and packing list.',
       url: 'https://letsexploring.com',
       locale: 'en_US',
       alternateLocale: ['he_IL'],
-      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Trippy — Group Trip Planner' }],
+      images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Triplly - Group Trip Planner' }],
     },
   };
 }
 
 export default async function LandingPage() {
   const cookieStore = await cookies();
-  const locale = cookieStore.get('trippy-locale')?.value === 'he' ? 'he' as const : 'en' as const;
+  const locale = cookieStore.get('Triplly-locale')?.value === 'he' ? 'he' as const : 'en' as const;
   const isHe = locale === 'he';
 
   const hasAuthCookie = cookieStore
@@ -77,12 +77,12 @@ export default async function LandingPage() {
     {
       icon: '💰',
       title: 'מעקב תקציב קבוצתי',
-      desc: 'הגדר תקציב, רשום הוצאות וחשב אוטומטית מי חייב למי — עם תמיכה במטבעות מרובים. אין יותר ויכוחים על כסף אחרי הטיול.',
+      desc: 'הגדר תקציב, רשום הוצאות וחשב אוטומטית מי חייב למי - עם תמיכה במטבעות מרובים. אין יותר ויכוחים על כסף אחרי הטיול.',
     },
     {
       icon: '🗺️',
       title: 'מפת טיול אינטראקטיבית',
-      desc: 'ראה כל פעילות על מפה אינטראקטיבית. סנן לפי יום, הערך זמני נסיעה וצפה במסלול כולו במבט אחד — גם ללא אינטרנט.',
+      desc: 'ראה כל פעילות על מפה אינטראקטיבית. סנן לפי יום, הערך זמני נסיעה וצפה במסלול כולו במבט אחד - גם ללא אינטרנט.',
     },
     {
       icon: '🎒',
@@ -98,12 +98,12 @@ export default async function LandingPage() {
     {
       icon: '💰',
       title: 'Group Budget & Expense Splitter',
-      desc: 'Set a budget, log every expense, and automatically calculate who owes what — with multi-currency support. No more awkward money talks after the trip.',
+      desc: 'Set a budget, log every expense, and automatically calculate who owes what - with multi-currency support. No more awkward money talks after the trip.',
     },
     {
       icon: '🗺️',
       title: 'Interactive Trip Map',
-      desc: 'See every activity pinned on an interactive map. Filter by day, estimate travel times between stops, and visualize your whole route at a glance — even offline.',
+      desc: 'See every activity pinned on an interactive map. Filter by day, estimate travel times between stops, and visualize your whole route at a glance - even offline.',
     },
     {
       icon: '🎒',
@@ -113,58 +113,58 @@ export default async function LandingPage() {
   ];
 
   const whyItems = isHe ? [
-    { emoji: '✅', label: '100% חינמי — ללא כרטיס אשראי, ללא תוכנית פרמיום' },
-    { emoji: '📶', label: 'עובד גם ללא אינטרנט — מסלול, אנשי קשר והערות תמיד זמינים' },
-    { emoji: '📱', label: 'אין צורך בהורדה — אפליקציית PWA, עובדת ישירות מהדפדפן' },
-    { emoji: '🌐', label: 'עברית ואנגלית — תמיכה מלאה ב-RTL, ממשק דו-לשוני' },
+    { emoji: '✅', label: '100% חינמי - ללא כרטיס אשראי, ללא תוכנית פרמיום' },
+    { emoji: '📶', label: 'עובד גם ללא אינטרנט - מסלול, אנשי קשר והערות תמיד זמינים' },
+    { emoji: '📱', label: 'אין צורך בהורדה - אפליקציית PWA, עובדת ישירות מהדפדפן' },
+    { emoji: '🌐', label: 'עברית ואנגלית - תמיכה מלאה ב-RTL, ממשק דו-לשוני' },
   ] : [
-    { emoji: '✅', label: '100% free — no credit card, no premium tier, no catch' },
-    { emoji: '📶', label: 'Works offline — itinerary, contacts, and notes always available' },
-    { emoji: '📱', label: 'No download needed — PWA that installs directly from the browser' },
-    { emoji: '🌐', label: 'English & Hebrew — full RTL support, bilingual interface' },
+    { emoji: '✅', label: '100% free - no credit card, no premium tier, no catch' },
+    { emoji: '📶', label: 'Works offline - itinerary, contacts, and notes always available' },
+    { emoji: '📱', label: 'No download needed - PWA that installs directly from the browser' },
+    { emoji: '🌐', label: 'English & Hebrew - full RTL support, bilingual interface' },
   ];
 
   const faqs = isHe ? [
     {
-      q: 'האם Trippy באמת חינמי?',
-      a: 'כן. Trippy חינמי לחלוטין — אין תוכנית פרמיום, אין כרטיס אשראי נדרש, אין מגבלה על מספר הטיולים או חברי הקבוצה.',
+      q: 'האם Triplly באמת חינמי?',
+      a: 'כן. Triplly חינמי לחלוטין - אין תוכנית פרמיום, אין כרטיס אשראי נדרש, אין מגבלה על מספר הטיולים או חברי הקבוצה.',
     },
     {
       q: 'איך מזמינים חברים לטיול?',
-      a: 'אחרי יצירת טיול, תוכל לשלוח קישור הזמנה בלחיצה אחת. הם מצטרפים דרך הדפדפן — ללא צורך בחשבון.',
+      a: 'אחרי יצירת טיול, תוכל לשלוח קישור הזמנה בלחיצה אחת. הם מצטרפים דרך הדפדפן - ללא צורך בחשבון.',
     },
     {
       q: 'האם האפליקציה עובדת ללא אינטרנט?',
-      a: 'כן. Trippy שומר את תוכנית הטיול מקומית. תוכל לצפות במסלול, באנשי קשר לחירום ובהערות גם ללא חיבור לאינטרנט.',
+      a: 'כן. Triplly שומר את תוכנית הטיול מקומית. תוכל לצפות במסלול, באנשי קשר לחירום ובהערות גם ללא חיבור לאינטרנט.',
     },
     {
       q: 'אילו שפות נתמכות?',
-      a: 'Trippy תומך באנגלית ועברית עם תמיכה מלאה ב-RTL. שפת הממשק עוקבת אחר העדפות הדפדפן שלך.',
+      a: 'Triplly תומך באנגלית ועברית עם תמיכה מלאה ב-RTL. שפת הממשק עוקבת אחר העדפות הדפדפן שלך.',
     },
     {
       q: 'איך עובד מחשבון חלוקת ההוצאות?',
-      a: 'כל חבר קבוצה רושם הוצאות. Trippy מחשב אוטומטית מי חייב למי ובכמה — עם תמיכה במטבעות מרובים.',
+      a: 'כל חבר קבוצה רושם הוצאות. Triplly מחשב אוטומטית מי חייב למי ובכמה - עם תמיכה במטבעות מרובים.',
     },
   ] : [
     {
-      q: 'Is Trippy really free?',
-      a: 'Yes. Trippy is completely free — no premium plan, no credit card required, no limit on trips or group members.',
+      q: 'Is Triplly really free?',
+      a: 'Yes. Triplly is completely free - no premium plan, no credit card required, no limit on trips or group members.',
     },
     {
       q: 'How do I invite friends to a trip?',
-      a: 'After creating a trip, send a one-click invite link. Friends join via browser — no account or download needed.',
+      a: 'After creating a trip, send a one-click invite link. Friends join via browser - no account or download needed.',
     },
     {
       q: 'Does it work offline?',
-      a: 'Yes. Trippy saves your trip plan locally. You can view the itinerary, emergency contacts, and notes without an internet connection.',
+      a: 'Yes. Triplly saves your trip plan locally. You can view the itinerary, emergency contacts, and notes without an internet connection.',
     },
     {
-      q: 'What languages does Trippy support?',
-      a: 'Trippy supports English and Hebrew with full RTL support. The interface language follows your browser preferences.',
+      q: 'What languages does Triplly support?',
+      a: 'Triplly supports English and Hebrew with full RTL support. The interface language follows your browser preferences.',
     },
     {
       q: 'How does the expense splitter work?',
-      a: 'Each group member logs expenses as they happen. Trippy automatically calculates who owes what and how much — with multi-currency support.',
+      a: 'Each group member logs expenses as they happen. Triplly automatically calculates who owes what and how much - with multi-currency support.',
     },
   ];
 
@@ -202,7 +202,7 @@ export default async function LandingPage() {
           </svg>
         </div>
 
-        {/* Wordmark — serif (the one place serif remains) */}
+        {/* Wordmark - serif (the one place serif remains) */}
         <div style={{
           fontFamily: 'var(--font-display)',
           fontSize: 32,
@@ -212,10 +212,10 @@ export default async function LandingPage() {
           lineHeight: 1,
           margin: '0 0 16px',
         }} aria-hidden="true">
-          Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+          Triplly<span style={{ color: 'var(--terra)' }}>.</span>
         </div>
 
-        {/* Two-tone statement — bold DM Sans hero (visual, not the SEO h1) */}
+        {/* Two-tone statement - bold DM Sans hero (visual, not the SEO h1) */}
         <StatementHeading
           as="p"
           size="base"
@@ -227,7 +227,7 @@ export default async function LandingPage() {
           style={{ textAlign: 'center', marginBottom: 14 }}
         />
 
-        {/* SEO H1 — keyword-optimised, styled as a mono eyebrow */}
+        {/* SEO H1 - keyword-optimised, styled as a mono eyebrow */}
         <h1 className="mono-eyebrow" style={{ margin: '0 0 40px', textAlign: 'center' }}>
           {isHe ? 'מתכנן טיולים קבוצתי חינמי' : 'Free Group Trip Planner'}
         </h1>
@@ -261,8 +261,8 @@ export default async function LandingPage() {
             lineHeight: 1.6,
           }}>
             {isHe
-              ? 'מסלול, תקציב, מפה ורשימת ציוד — כולם במקום אחד, לכל חברי הקבוצה'
-              : 'Itinerary, budget, map, and packing list — all in one place, for everyone in the group'}
+              ? 'מסלול, תקציב, מפה ורשימת ציוד - כולם במקום אחד, לכל חברי הקבוצה'
+              : 'Itinerary, budget, map, and packing list - all in one place, for everyone in the group'}
           </p>
           <div style={{
             display: 'grid',
@@ -293,7 +293,7 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* Why Trippy */}
+        {/* Why Triplly */}
         <section style={{ padding: '0 20px 72px', maxWidth: 860, margin: '0 auto' }}>
           <h2 style={{
             fontFamily: 'var(--font-display)',
@@ -302,7 +302,7 @@ export default async function LandingPage() {
             color: 'var(--text)',
             marginBottom: 24,
           }}>
-            {isHe ? 'למה Trippy?' : 'Why Trippy?'}
+            {isHe ? 'למה Triplly?' : 'Why Triplly?'}
           </h2>
           <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
             {whyItems.map(({ emoji, label }) => (
@@ -341,7 +341,7 @@ export default async function LandingPage() {
             {isHe ? 'ללא צורך בחשבון לניסיון ההדגמה' : 'No account needed for the demo'}
           </p>
           <p style={{ fontSize: 12, color: 'var(--text-3)', margin: 0 }}>
-            {isHe ? '© 2026 Trippy — letsexploring.com' : '© 2026 Trippy — letsexploring.com'}
+            {isHe ? '© 2026 Triplly - letsexploring.com' : '© 2026 Triplly - letsexploring.com'}
           </p>
         </section>
 

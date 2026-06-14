@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
@@ -18,7 +18,7 @@ import Eyebrow from '../ui/Eyebrow';
 
 // ── Row ───────────────────────────────────────────────────────────────────────
 
-// Hairline settings row (HANDOFF B10 — rows over cards)
+// Hairline settings row (HANDOFF B10 - rows over cards)
 function Row({ icon, title, sub, right, onClick }: {
   icon?: string; title: string; sub?: string; right?: React.ReactNode; onClick?: () => void;
 }) {
@@ -95,7 +95,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
 
   const currency = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
   const currencyLabel = CURRENCIES.find(c => c.code === currency)
-    ? `${currency} — ${CURRENCIES.find(c => c.code === currency)!.label}`
+    ? `${currency} - ${CURRENCIES.find(c => c.code === currency)!.label}`
     : currency;
 
   const chev = (
@@ -156,7 +156,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                 ${ev.notes ? `<div class="note">${esc(ev.notes)}</div>` : ''}
               </td>
             </tr>`).join('')
-        : `<tr><td class="t">—</td><td class="n"><div class="empty">${esc(locale === 'he' ? 'אין פעילויות' : 'No activities planned')}</div></td></tr>`;
+        : `<tr><td class="t">-</td><td class="n"><div class="empty">${esc(locale === 'he' ? 'אין פעילויות' : 'No activities planned')}</div></td></tr>`;
       return `
         <section class="day">
           <h2>${esc(locale === 'he' ? `יום ${dayNum}` : `Day ${dayNum}`)}${meta?.emoji ? ` ${esc(meta.emoji)}` : ''}
@@ -204,7 +204,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     <div class="sub">${sub}</div>
   </header>
   ${daysHtml}
-  <footer>Trippy · ${esc(new Date().toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US'))}</footer>
+  <footer>Triplly · ${esc(new Date().toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US'))}</footer>
 </body>
 </html>`);
     win.document.close();
@@ -241,7 +241,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         {locale === 'he' ? 'לוח בקרה' : 'Dashboard'}
       </button>
 
-      {/* ── Header — flat bold title + avatar (HANDOFF B10) ── */}
+      {/* ── Header - flat bold title + avatar (HANDOFF B10) ── */}
       <m.div
         initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.06, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
@@ -432,7 +432,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         {locale === 'he' ? 'מחק טיול' : 'Delete trip'}
       </m.button>
 
-      {/* ── Sign out — quiet red text link (HANDOFF B10) ── */}
+      {/* ── Sign out - quiet red text link (HANDOFF B10) ── */}
       <m.button
         initial={{ opacity: 0 }} animate={{ opacity: 1 }}
         transition={{ delay: 0.29, duration: 0.42 }}
@@ -449,7 +449,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
 
       {/* ── Version footer ── */}
       <p style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', letterSpacing: '0.06em' }}>
-        Trippy · v2.0 · Liquid Glass
+        Triplly · v2.0 · Liquid Glass
       </p>
 
       {/* ── Currency picker sheet ── */}
@@ -599,7 +599,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
               <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 20px' }} />
               <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--lg-ink)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>
                 {locale === 'he'
-                  ? 'מחיקה היא בלתי הפיכה — בטוחים שאתם רוצים?'
+                  ? 'מחיקה היא בלתי הפיכה - בטוחים שאתם רוצים?'
                   : 'This is permanent and cannot be undone. Sure you want to delete?'}
               </p>
               <div style={{ display: 'flex', gap: 10 }}>
@@ -615,9 +615,9 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                     setShowDeleteConfirm(false);
                     try {
                       await deleteTrip();
-                      show(locale === 'he' ? 'הטיול נמחק בהצלחה' : 'Trip deleted — see you on the next one.');
+                      show(locale === 'he' ? 'הטיול נמחק בהצלחה' : 'Trip deleted - see you on the next one.');
                     } catch {
-                      show(locale === 'he' ? 'שגיאה במחיקה — נסה שוב' : 'Failed to delete trip. Please try again.');
+                      show(locale === 'he' ? 'שגיאה במחיקה - נסה שוב' : 'Failed to delete trip. Please try again.');
                     }
                   }}
                   className="lg-btn"

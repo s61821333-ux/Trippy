@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+﻿import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// POST /api/route-time  — batch up to 25 pairs in a single server round-trip.
+// POST /api/route-time  - batch up to 25 pairs in a single server round-trip.
 // Body: { pairs: [{ olat, olng, dlat, dlng, departureTime? }] }
 // Returns: { results: [{ driving, walking, transit } | null][] } in input order.
 // ──────────────────────────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ const BatchBody = z.object({
       olng: z.number(),
       dlat: z.number(),
       dlng: z.number(),
-      departureTime: z.number().optional(),  // Unix seconds — for rush-hour estimates
+      departureTime: z.number().optional(),  // Unix seconds - for rush-hour estimates
     })
   ).min(1).max(25),
 })

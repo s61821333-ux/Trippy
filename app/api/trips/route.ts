@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     let { data: trips, error } = await tripsQuery
 
-    // created_at column may not exist if the table was created manually — fall back to two-query approach
+    // created_at column may not exist if the table was created manually - fall back to two-query approach
     if (error && (error.message?.includes('created_at') || error.message?.includes('column') || error.message?.includes('trip_participants'))) {
       const { data: participantRows } = await db
         .from('trip_participants')

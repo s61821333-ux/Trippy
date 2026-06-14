@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { CSSProperties, ReactNode, useId, useState } from 'react';
 
@@ -35,7 +35,7 @@ export default function Field({
 
   // Row 476: placeholder must never substitute for a visible label
   if (process.env.NODE_ENV === 'development' && !label && placeholder) {
-    console.warn('[Field] Missing `label` prop — placeholder alone is not accessible. Add a label.');
+    console.warn('[Field] Missing `label` prop - placeholder alone is not accessible. Add a label.');
   }
   const generatedId = useId();
   const id = idProp ?? generatedId;
@@ -57,7 +57,7 @@ export default function Field({
     borderRadius: 14,
     color: 'var(--text)',
     fontFamily: 'var(--font-sans)',
-    fontSize: 16, // never below 16px — prevents iOS auto-zoom
+    fontSize: 16, // never below 16px - prevents iOS auto-zoom
     padding: '11px 18px',
     paddingInlineStart: icon ? 46 : 18,
     width: '100%',
@@ -95,7 +95,7 @@ export default function Field({
           htmlFor={id}
           style={{
             display: 'block',
-            fontFamily: 'var(--font-sans)', /* changed from mono to sans — less technical feel */
+            fontFamily: 'var(--font-sans)', /* changed from mono to sans - less technical feel */
             fontSize: 11,
             fontWeight: 600,
             letterSpacing: '0.08em',

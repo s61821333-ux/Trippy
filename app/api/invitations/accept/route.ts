@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -10,7 +10,7 @@ function tryAdminClient() {
   catch { return null }
 }
 
-// POST /api/invitations/accept — authenticated: accept an email invitation
+// POST /api/invitations/accept - authenticated: accept an email invitation
 // Body: { invitationId: string }
 // Returns: { tripId: string }
 export async function POST(request: NextRequest) {
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const admin = tryAdminClient()
     const db = admin ?? supabase
 
-    // Look up the invitation — verify it was sent to this user's email
+    // Look up the invitation - verify it was sent to this user's email
     const { data: inv, error: invErr } = await db
       .from('trip_invitations')
       .select('trip_id, invited_email, status, expires_at')
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to update invitation' }, { status: 500 })
     }
 
-    // Add user as participant — insert, ignore 23505 if already a member
+    // Add user as participant - insert, ignore 23505 if already a member
     const userInitials = initials ?? user.user_metadata?.full_name?.slice(0, 2).toUpperCase() ?? 'U'
     const hue = (user.id.charCodeAt(0) * 47 + user.id.charCodeAt(1) * 13) % 360
     const { error: participantErr } = await db.from('trip_participants').insert({

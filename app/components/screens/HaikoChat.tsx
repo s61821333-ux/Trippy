@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
@@ -36,8 +36,8 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
   const city       = dayMeta?.region || sleepHotel?.location || trip?.countries?.[0] || '';
 
   const greeting = isHe
-    ? `היי! אני Haiko, ה-AI של Trippy. שאלו אותי כל דבר על הטיול${city ? ` ב${city}` : ''} — אוכל מקומי, תחבורה, מה לא לפספס…`
-    : `Hey! I'm Haiko, Trippy's AI companion. Ask me anything about your${city ? ` ${city}` : ''} trip — local food, transport, hidden gems, what to book ahead…`;
+    ? `שלום! אני Haiko, בן הלוויה החכם של Triplly.${city ? ` שאלו אותי כל דבר על הטיול ב${city}` : ' שאלו אותי כל דבר על הטיול'} — אוכל מקומי, תחבורה, המלצות ומה לא לפספס.`
+    : `Hey! I'm Haiko, your travel companion from Triplly.${city ? ` Ask me anything about your trip to ${city}` : ' Ask me anything about your trip'} — local food, transport, hidden gems and what to book ahead.`;
 
   const [messages, setMessages] = useState<Msg[]>([{ role: 'assistant', content: greeting }]);
   const [input,   setInput]   = useState('');
@@ -77,12 +77,12 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
       });
       const data = await res.json() as { reply?: string; error?: string };
       if (!res.ok || !data.reply) {
-        setError(isHe ? 'משהו השתבש — נסו שוב' : 'Something went wrong — try again');
+        setError(isHe ? 'משהו השתבש. אנא נסו שוב.' : 'Something went wrong. Please try again.');
       } else {
         setMessages(m => [...m, { role: 'assistant', content: data.reply! }]);
       }
     } catch {
-      setError(isHe ? 'אין חיבור — נסו שוב' : 'No connection — try again');
+      setError(isHe ? 'אין חיבור. אנא נסו שוב.' : 'No connection. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -1,11 +1,11 @@
-import { createServerClient } from '@supabase/ssr';
+﻿import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { SUPABASE_URL, SUPABASE_ANON_KEY, GOOGLE_MAPS_API_KEY } from '@/lib/env';
 
 // GET /api/timezone?lat=&lng=
 // Returns the IANA timezone ID for a lat/lng pair using Google Time Zone API.
-// Cached 24h — timezones are stable.
+// Cached 24h - timezones are stable.
 export async function GET(request: NextRequest) {
   const cookieStore = await cookies();
   const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {

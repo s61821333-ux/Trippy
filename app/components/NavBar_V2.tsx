@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { m, AnimatePresence } from 'framer-motion';
 import React, { useLayoutEffect, useState } from 'react';
@@ -218,7 +218,7 @@ export default function NavBar_V2({
           </m.span>
         </m.button>
 
-        {/* Tab bar pill — 5 tabs (4 screens + Wishlist action) */}
+        {/* Tab bar pill - 5 tabs (4 screens + Wishlist action) */}
         <m.nav
           aria-label={t('navMain')}
           initial={{ y: 12 }}

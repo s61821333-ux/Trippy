@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -8,7 +8,7 @@ function adminClient() {
   return createClient(SUPABASE_URL(), SUPABASE_SERVICE_ROLE_KEY(), { auth: { persistSession: false } })
 }
 
-// GET /api/invite/[token] — public: return trip info for a valid invite link.
+// GET /api/invite/[token] - public: return trip info for a valid invite link.
 // Returns 410 if the link is expired or fully used.
 export async function GET(
   _request: NextRequest,
@@ -16,7 +16,7 @@ export async function GET(
 ) {
   const { token } = await params
 
-  // Basic token format check — hex string of 64 chars (32 bytes)
+  // Basic token format check - hex string of 64 chars (32 bytes)
   if (!/^[0-9a-f]{64}$/.test(token)) {
     return NextResponse.json({ error: 'Invite not found' }, { status: 404 })
   }
@@ -58,7 +58,7 @@ export async function GET(
   }
 }
 
-// POST /api/invite/[token] — authenticated: join the trip via an invite link.
+// POST /api/invite/[token] - authenticated: join the trip via an invite link.
 // Increments use_count after successful join.
 export async function POST(
   _request: NextRequest,

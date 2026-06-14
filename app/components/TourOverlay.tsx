@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
@@ -24,8 +24,8 @@ const STEPS: TourStep[] = [
   {
     id: 'welcome',
     stamp: 'compass',
-    title: 'Welcome to Trippy!',
-    titleHe: 'ברוכים הבאים ל-Trippy!',
+    title: 'Welcome to Triplly!',
+    titleHe: 'ברוכים הבאים ל-Triplly!',
     body: "Plan trips with friends, hour by hour. Let's take a 60-second tour of the key features.",
     bodyHe: 'תכננו טיולים ביחד, שעה-שעה. בואו ניסייר ב-60 שניות בתכונות העיקריות.',
     navigateTo: 'dashboard',
@@ -65,8 +65,8 @@ const STEPS: TourStep[] = [
     stamp: 'ticket',
     title: 'Add Events',
     titleHe: 'הוסיפו אירועים',
-    body: 'Tap + to add a new activity — set the name, category, and end time. Tap any event to edit or delete it.',
-    bodyHe: 'הקישו + להוסיף פעילות — הגדירו שם, קטגוריה ושעת סיום. הקישו על אירוע לעריכה או מחיקה.',
+    body: 'Tap + to add a new activity - set the name, category, and end time. Tap any event to edit or delete it.',
+    bodyHe: 'הקישו + להוסיף פעילות - הגדירו שם, קטגוריה ושעת סיום. הקישו על אירוע לעריכה או מחיקה.',
     hint: 'New events start right after the previous one',
     hintHe: 'אירועים חדשים מתחילים מיד אחרי האירוע הקודם',
     targetSelector: '[data-tour="add-event-fab"]',
@@ -99,8 +99,8 @@ const STEPS: TourStep[] = [
     stamp: 'plane',
     title: "You're all set!",
     titleHe: 'אתם מוכנים!',
-    body: "Start planning your real trip — create a new one from Settings, or keep exploring this demo.",
-    bodyHe: 'התחילו לתכנן את הטיול האמיתי שלכם — צרו חדש בהגדרות, או המשיכו לחקור את ההדגמה.',
+    body: "Start planning your real trip - create a new one from Settings, or keep exploring this demo.",
+    bodyHe: 'התחילו לתכנן את הטיול האמיתי שלכם - צרו חדש בהגדרות, או המשיכו לחקור את ההדגמה.',
     navigateTo: 'dashboard',
   },
 ];
@@ -160,7 +160,7 @@ export default function TourOverlay() {
 
   const advance = () => {
     if (isLast) {
-      localStorage.setItem('trippy-tour-done', '1');
+      localStorage.setItem('Triplly-tour-done', '1');
       setShowTour(false);
     } else {
       setStepIdx(i => i + 1);
@@ -168,7 +168,7 @@ export default function TourOverlay() {
   };
 
   const skip = () => {
-    localStorage.setItem('trippy-tour-done', '1');
+    localStorage.setItem('Triplly-tour-done', '1');
     setShowTour(false);
   };
 
@@ -203,7 +203,7 @@ export default function TourOverlay() {
         style={{ position: 'absolute', inset: 0, background: 'rgba(10,8,6,0.80)' }}
       />
 
-      {/* Spotlight ring — absorbs clicks so backdrop skip isn't triggered */}
+      {/* Spotlight ring - absorbs clicks so backdrop skip isn't triggered */}
       {spotRect && (
         <div
           onClick={e => e.stopPropagation()}

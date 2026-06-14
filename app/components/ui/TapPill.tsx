@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 
@@ -14,7 +14,7 @@ interface TapPillProps {
   'aria-pressed'?: boolean;
 }
 
-/** Vote/claim affordance (HANDOFF) — the only colored pills in a list. */
+/** Vote/claim affordance (HANDOFF) - the only colored pills in a list. */
 export default function TapPill({
   children, variant = 'muted', onClick, disabled, className = '', style, ...aria
 }: TapPillProps) {

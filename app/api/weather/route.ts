@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { GOOGLE_MAPS_API_KEY } from '@/lib/env';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
 
@@ -56,7 +56,7 @@ function wmoToWeather(code: number): { icon: string; label: string } {
   return WMO[code] ?? WMO[0];
 }
 
-// Normalised daily shape returned to clients — same as before
+// Normalised daily shape returned to clients - same as before
 interface DailyWeather {
   time:               string[];
   temperature_2m_max: number[];
@@ -181,7 +181,7 @@ async function fetchOpenMeteoClimateEstimate(
   url.searchParams.set('start_date', toYMD(start));
   url.searchParams.set('end_date',   toYMD(end));
 
-  const res = await fetch(url.toString(), { next: { revalidate: 86400 } }); // cache 24h — historical
+  const res = await fetch(url.toString(), { next: { revalidate: 86400 } }); // cache 24h - historical
   if (!res.ok) return null;
 
   const data = await res.json();
@@ -242,12 +242,12 @@ export async function GET(request: NextRequest) {
     let source = 'unknown';
 
     if (!isFarFuture) {
-      // Within forecast window — try Google first, then Open-Meteo forecast
+      // Within forecast window - try Google first, then Open-Meteo forecast
       const googleData = await fetchGoogleWeather(lat, lng, days).catch(() => null);
       daily = googleData ?? await fetchOpenMeteoForecast(lat, lng, start, days);
       source = googleData ? 'google' : 'open-meteo';
     } else {
-      // Too far out for a real forecast — use historical climate estimate
+      // Too far out for a real forecast - use historical climate estimate
       daily = await fetchOpenMeteoClimateEstimate(lat, lng, start, days);
       source = 'climate-estimate';
     }

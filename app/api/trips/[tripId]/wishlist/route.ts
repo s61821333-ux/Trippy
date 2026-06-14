@@ -1,11 +1,11 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 import { AddWishlistBody } from '@/lib/schemas'
 
-// Sentinel day_index for wishlist items — sits outside the 0–364 range of real trip days
+// Sentinel day_index for wishlist items - sits outside the 0-364 range of real trip days
 const WISHLIST_DAY_INDEX = 999
 
 function tryAdminClient() {
@@ -31,7 +31,7 @@ async function getAuthUser() {
   return user
 }
 
-// POST /api/trips/[tripId]/wishlist — add a wishlist item
+// POST /api/trips/[tripId]/wishlist - add a wishlist item
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
@@ -67,7 +67,7 @@ export async function POST(
     id:         d.id,
     trip_id:    tripId,
     day_index:  WISHLIST_DAY_INDEX,
-    // wishlist items don't have a scheduled time — store placeholder
+    // wishlist items don't have a scheduled time - store placeholder
     time:       '00:00',
     duration:   d.duration ?? 60,
     name:       d.name,
@@ -93,7 +93,7 @@ export async function POST(
   return NextResponse.json({ ok: true })
 }
 
-// DELETE /api/trips/[tripId]/wishlist?itemId=xxx — remove a wishlist item
+// DELETE /api/trips/[tripId]/wishlist?itemId=xxx - remove a wishlist item
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }

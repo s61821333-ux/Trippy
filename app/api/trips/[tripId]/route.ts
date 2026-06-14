@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -36,7 +36,7 @@ function tryAdminClient() {
   catch { return null }
 }
 
-// PATCH /api/trips/[tripId] — update trip metadata (name, days, startDate, theme, trip_notes)
+// PATCH /api/trips/[tripId] - update trip metadata (name, days, startDate, theme, trip_notes)
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
@@ -86,7 +86,7 @@ export async function PATCH(
   return NextResponse.json({ ok: true })
 }
 
-// GET /api/trips/[tripId] — authenticated: load full trip data
+// GET /api/trips/[tripId] - authenticated: load full trip data
 // Uses admin client to bypass RLS when SUPABASE_SERVICE_ROLE_KEY is set,
 // otherwise queries directly via the user's session (subject to RLS).
 export async function GET(
@@ -118,7 +118,7 @@ export async function GET(
     const admin = tryAdminClient()
 
     if (admin) {
-      // Admin path — verify participation then load, bypassing RLS
+      // Admin path - verify participation then load, bypassing RLS
       const { data: participant } = await admin
         .from('trip_participants')
         .select('user_id')
@@ -148,7 +148,7 @@ export async function GET(
       return NextResponse.json(data, { headers: { 'Cache-Control': 'no-store' } })
     }
 
-    // Fallback — query with user's JWT (subject to RLS)
+    // Fallback - query with user's JWT (subject to RLS)
     let { data, error } = await supabase
       .from('trips')
       .select(TRIP_SELECT)
@@ -170,8 +170,8 @@ export async function GET(
   }
 }
 
-// DELETE /api/trips/[tripId] — leave a trip (removes current user from participants)
-// DELETE /api/trips/[tripId]?full=true — permanently delete the entire trip (owner only)
+// DELETE /api/trips/[tripId] - leave a trip (removes current user from participants)
+// DELETE /api/trips/[tripId]?full=true - permanently delete the entire trip (owner only)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ tripId: string }> }
@@ -194,7 +194,7 @@ export async function DELETE(
   const full = request.nextUrl.searchParams.get('full') === 'true'
 
   if (full) {
-    // Full delete — always use admin client so RLS never silently blocks the operation.
+    // Full delete - always use admin client so RLS never silently blocks the operation.
     // If admin is unavailable fall back to user client but the DELETE may fail under RLS.
     const deleteClient = admin ?? supabase;
 

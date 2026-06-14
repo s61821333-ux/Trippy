@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+﻿import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
-      // Code exchange failed (expired, already used, etc.) — send to login, not home
+      // Code exchange failed (expired, already used, etc.) - send to login, not home
       return NextResponse.redirect(`${origin}/app?error=auth`)
     }
   }

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
@@ -204,7 +204,7 @@ export default function LeafletMap({ events, selectedId, onSelect, tileApiKey, h
         />
       ))}
 
-      {/* Hotel markers — always visible, not filterable */}
+      {/* Hotel markers - always visible, not filterable */}
       {hotels.map(h => (
         <Marker
           key={`hotel-${h.id}`}

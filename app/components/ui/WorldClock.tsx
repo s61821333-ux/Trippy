@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import { useI18n } from '@/lib/i18n';
 
@@ -61,7 +61,7 @@ export function WorldClock({ destinationTimezone, destinationCity }: WorldClockP
     localTime = fmt(localTz);
     offsetH = getTimezoneOffsetHours(destinationTimezone, localTz, now);
   } catch {
-    // invalid timezone — don't crash
+    // invalid timezone - don't crash
   }
 
   const offsetLabel =

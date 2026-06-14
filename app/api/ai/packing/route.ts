@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+﻿import Anthropic from '@anthropic-ai/sdk';
 import { NextRequest } from 'next/server';
 import { checkRateLimit, rateLimitResponse } from '@/lib/rateLimit';
 import { createServerClient } from '@supabase/ssr';
@@ -50,20 +50,20 @@ export async function POST(request: NextRequest) {
   const uniqueActivities = [...new Set(eventCats)].slice(0, 12).join(', ');
   const existingStr = existing.slice(0, 30).join(', ');
   const heNote = locale === 'he'
-    ? 'כתוב את כל שמות הפריטים בעברית. שמות מותגים — השאר באנגלית.'
+    ? 'כתוב את כל שמות הפריטים בעברית. שמות מותגים - השאר באנגלית.'
     : '';
 
   const prompt = `Smart packing list for a ${days}-day trip to ${destination}.${season ? ` Season: ${season}.` : ''}${weatherSummary ? ` Expected weather: ${weatherSummary}.` : ''}
 Planned activities: ${uniqueActivities || 'general sightseeing and exploration'}.
-Already on the list: ${existingStr || 'nothing yet'} — skip these completely.
+Already on the list: ${existingStr || 'nothing yet'} - skip these completely.
 ${heNote}
 
-Think like an experienced traveler who knows ${destination} well — include items specific to this destination (voltage adapters, local health risks, cultural dress requirements, etc).
+Think like an experienced traveler who knows ${destination} well - include items specific to this destination (voltage adapters, local health risks, cultural dress requirements, etc).
 
 Return ONLY a JSON array, no markdown, no explanation:
 [{"name":"Specific item name","category":"Documents|Gear|Medical|Food|Water|Other"}]
 
-Aim for 15–20 items. Be specific (e.g. "SPF 50 sunscreen" not just "sunscreen"). Skip anything the hotel typically provides.`;
+Aim for 15-20 items. Be specific (e.g. "SPF 50 sunscreen" not just "sunscreen"). Skip anything the hotel typically provides.`;
 
   try {
     const client = new Anthropic();
@@ -72,7 +72,7 @@ Aim for 15–20 items. Be specific (e.g. "SPF 50 sunscreen" not just "sunscreen"
       max_tokens: 600,
       system: locale === 'he'
         ? 'אתה מומחה אריזה לטיולים. החזר רק JSON תקין בעברית. מידע ספציפי ומעשי.'
-        : 'You are an expert travel packer who knows destinations well. Return only a JSON array — no markdown, no preamble. Be specific and destination-aware.',
+        : 'You are an expert travel packer who knows destinations well. Return only a JSON array - no markdown, no preamble. Be specific and destination-aware.',
       messages: [
         { role: 'user', content: prompt },
         // Prefill so the model can't prepend prose or markdown fences

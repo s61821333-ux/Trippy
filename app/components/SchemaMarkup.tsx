@@ -1,10 +1,10 @@
-const schema = {
+﻿const schema = {
   '@context': 'https://schema.org',
   '@graph': [
     {
       '@type': 'SoftwareApplication',
-      name: 'Trippy',
-      alternateName: ['Trippy Group Trip Planner', 'Trippy Travel App'],
+      name: 'Triplly',
+      alternateName: ['Triplly Group Trip Planner', 'Triplly Travel App'],
       description:
         'Free group trip planner with shared itinerary, interactive map, group budget tracker, and packing list. Plan your trip together in one place.',
       url: 'https://letsexploring.com',
@@ -34,7 +34,7 @@ const schema = {
     },
     {
       '@type': 'Organization',
-      name: 'Trippy',
+      name: 'Triplly',
       url: 'https://letsexploring.com',
       logo: 'https://letsexploring.com/icon-512.png',
       sameAs: [],
@@ -46,7 +46,7 @@ const schema = {
     },
     {
       '@type': 'WebSite',
-      name: 'Trippy',
+      name: 'Triplly',
       url: 'https://letsexploring.com',
       potentialAction: {
         '@type': 'SearchAction',

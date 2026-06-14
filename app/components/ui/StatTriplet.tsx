@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import Eyebrow from './Eyebrow';
@@ -15,7 +15,7 @@ interface StatTripletProps {
   style?: React.CSSProperties;
 }
 
-/** Borderless stat triplet — mono label over bold value (HANDOFF dashboard). */
+/** Borderless stat triplet - mono label over bold value (HANDOFF dashboard). */
 export default function StatTriplet({ stats, separators = true, style }: StatTripletProps) {
   return (
     <div className="stat-triplet" style={style}>

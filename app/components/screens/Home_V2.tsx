@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { m } from 'framer-motion';
@@ -106,10 +106,10 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
       const msg = (err?.message ?? '').toLowerCase();
       if (msg.includes('not authenticated')) {
         show(locale === 'he'
-          ? 'לא מחובר — נסה להתנתק ולהתחבר מחדש'
-          : 'Not signed in — please sign out and sign in again');
+          ? 'לא מחובר - נסה להתנתק ולהתחבר מחדש'
+          : 'Not signed in - please sign out and sign in again');
       } else if (msg.includes('row-level security') || msg.includes('violates') || msg.includes('rls')) {
-        show(locale === 'he' ? 'שגיאת הרשאות Supabase' : 'Supabase permissions error — contact support');
+        show(locale === 'he' ? 'שגיאת הרשאות Supabase' : 'Supabase permissions error - contact support');
       } else {
         show(`${t('createTripFailed')}: ${err?.message ?? ''}`);
       }
@@ -128,7 +128,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-        {/* Theme picker — horizontal scroller */}
+        {/* Theme picker - horizontal scroller */}
         <div>
           <label style={{
             display: 'block', fontSize: 11, fontWeight: 700,
@@ -199,7 +199,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
           icon={<Icon name="tent" size={15} />}
         />
 
-        {/* Dates — responsive, never overlapping */}
+        {/* Dates - responsive, never overlapping */}
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           <div style={{ flex: '1 1 calc(50% - 5px)', minWidth: 140 }}>
             <Field
@@ -229,7 +229,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
         {/* Destinations */}
         <CountriesInput label={t('countriesLabel')} value={cCountries} onChange={setCCountries} />
 
-        {/* Currency — auto-filled from country */}
+        {/* Currency - auto-filled from country */}
         <div>
           <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-2)', marginBottom: 6 }}>
             {t('currencyLabel')}
@@ -249,7 +249,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
           >
             {CURRENCIES.map(c => (
               <option key={c.code} value={c.code}>
-                {c.symbol} {c.code} — {locale === 'he' ? c.labelHe : c.label}
+                {c.symbol} {c.code} - {locale === 'he' ? c.labelHe : c.label}
               </option>
             ))}
           </select>
@@ -257,7 +257,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
             <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 4, fontFamily: 'var(--font-mono)', letterSpacing: '0.04em' }}>
               {locale === 'he'
                 ? `מטבע נקבע לפי ${cCountries[0]}`
-                : `Set from ${cCountries[0]} — change anytime`}
+                : `Set from ${cCountries[0]} - change anytime`}
             </p>
           )}
         </div>
@@ -327,13 +327,13 @@ export default function Home_V2() {
       style={{ height: '100%', overflowY: 'auto', background: 'var(--bg)', paddingBottom: 'var(--navbar-clearance)' }}
     >
       <LoaderStyles />
-      {/* ── Editorial header (dark hero removed — HANDOFF Home) ── */}
+      {/* ── Editorial header (dark hero removed - HANDOFF Home) ── */}
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px 0' }}>
 
         {/* Wordmark + avatar + sign-out */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 'env(safe-area-inset-top, 0px)', marginBottom: 30 }}>
           <span className="wm" style={{ fontSize: 20, color: 'var(--text)' }}>
-            Trippy<span className="dot">.</span>
+            Triplly<span className="dot">.</span>
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div
@@ -376,7 +376,7 @@ export default function Home_V2() {
           style={{ marginBottom: 24 }}
         />
 
-        {/* Primary action — one forest pill */}
+        {/* Primary action - one forest pill */}
         <m.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
@@ -395,9 +395,9 @@ export default function Home_V2() {
           </Btn>
         </m.div>
 
-        {/* Plan with AI — full itinerary generator (hidden for now) */}
+        {/* Plan with AI - full itinerary generator (hidden for now) */}
 
-        {/* ── Resume banner — shown when a previous trip session is remembered ── */}
+        {/* ── Resume banner - shown when a previous trip session is remembered ── */}
         {(() => {
           const lastTrip = tripDbId ? trips.find(tr => tr.id === tripDbId) : null;
           if (!lastTrip) return null;
@@ -490,7 +490,7 @@ export default function Home_V2() {
           </m.div>
         )}
 
-        {/* ── Trips list — hairline rows (HANDOFF rule 4) ── */}
+        {/* ── Trips list - hairline rows (HANDOFF rule 4) ── */}
         {(tripsLoading || trips.length > 0) && (
           <>
             <Eyebrow style={{ marginBottom: 4 }}>{t('myTrips')}</Eyebrow>
@@ -565,7 +565,7 @@ export default function Home_V2() {
         <div style={{ height: 'max(32px, env(safe-area-inset-bottom, 32px))' }} aria-hidden="true" />
       </div>
 
-      {/* ── CreateSheet — manual trip creation ── */}
+      {/* ── CreateSheet - manual trip creation ── */}
       {showCreate && <CreateSheet onClose={() => setShowCreate(false)} />}
 
       {/* ── AI Trip Planner sheet ── */}

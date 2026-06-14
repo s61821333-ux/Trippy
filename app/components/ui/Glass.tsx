@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-// Usage: floating surfaces only — sheets, modals, NavBar, toasts, FABs.
+// Usage: floating surfaces only - sheets, modals, NavBar, toasts, FABs.
 // Do NOT use for inline page-scroll content (section cards, list items). Use plain <div> with var(--surface) + var(--border) instead.
 import React, { CSSProperties, KeyboardEvent, ReactNode } from 'react';
 

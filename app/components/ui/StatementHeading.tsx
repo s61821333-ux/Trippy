@@ -1,10 +1,10 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { m } from 'framer-motion';
 
 interface StatementHeadingProps {
-  /** [brightLine, mutedLine?] — line 1 in --text, line 2 in --text-3. */
+  /** [brightLine, mutedLine?] - line 1 in --text, line 2 in --text-3. */
   lines: React.ReactNode[];
   size?: 'sm' | 'base' | 'lg';
   as?: 'h1' | 'h2' | 'h3' | 'p';

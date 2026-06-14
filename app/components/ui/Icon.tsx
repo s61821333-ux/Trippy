@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { CSSProperties } from 'react';
 
@@ -18,7 +18,7 @@ interface IconProps {
   color?: string;
 }
 
-// Brand icon paths — 24×24, stroke 1.5, round caps/joins, fill:none via outer svg
+// Brand icon paths - 24×24, stroke 1.5, round caps/joins, fill:none via outer svg
 const PATHS: Partial<Record<IconName, string>> = {
   home:      `<path d="M3.5 11L12 4l8.5 7v8.5a1 1 0 0 1-1 1H15v-6h-6v6H4.5a1 1 0 0 1-1-1z"/>`,
   calendar:  `<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3v4M16 3v4"/>`,

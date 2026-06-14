@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Icon from '../ui/Icon';
@@ -61,7 +61,7 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
           <button
             onClick={() => {
               const n = parseFloat(val);
-              if (isNaN(n) || n <= 0) { return; } // silently block — Field is visually focused
+              if (isNaN(n) || n <= 0) { return; } // silently block - Field is visually focused
               onSave(n);
               onClose();
             }}
@@ -123,19 +123,19 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: 
         const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000);
         return dt.toLocaleDateString('he-IL', { month: 'short', day: 'numeric' });
       });
-      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'עדיין ריק' : 'עדיין ריקים'} — מה לגבי להוסיף משהו?`);
+      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'עדיין ריק' : 'עדיין ריקים'} - מה לגבי להוסיף משהו?`);
     } else if (emptyDays.length > 3) {
-      lines.push(`${hebrewPlural(emptyDays.length, 'יום פנוי', 'יומיים פנויים', 'ימים פנויים')} — הרבה מקום להרפתקאות!`);
+      lines.push(`${hebrewPlural(emptyDays.length, 'יום פנוי', 'יומיים פנויים', 'ימים פנויים')} - הרבה מקום להרפתקאות!`);
     }
 
     if (budgetPct !== null) {
-      if (budgetPct > 90) lines.push('התקציב כמעט מוצה — שווה לבדוק הוצאות קרובות.');
-      else if (budgetPct > 70) lines.push(`${budgetPct}% מהתקציב בשימוש — תחת שליטה.`);
-      else lines.push('עדיין הרבה תקציב — תיהנו!');
+      if (budgetPct > 90) lines.push('התקציב כמעט מוצה - שווה לבדוק הוצאות קרובות.');
+      else if (budgetPct > 70) lines.push(`${budgetPct}% מהתקציב בשימוש - תחת שליטה.`);
+      else lines.push('עדיין הרבה תקציב - תיהנו!');
     }
 
     if (packedPct < 50 && supplies.length > 0) {
-      lines.push(`הציוד ${packedPct}% ארוז — אל תשכחו את הדברים החשובים לפני שיוצאים.`);
+      lines.push(`הציוד ${packedPct}% ארוז - אל תשכחו את הדברים החשובים לפני שיוצאים.`);
     } else if (packedPct === 100) {
       lines.push('כל הציוד ארוז. מוכנים לדרך!');
     }
@@ -148,19 +148,19 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: 
         const dt = new Date(new Date(trip.startDate + 'T00:00:00').getTime() + (d - 1) * 86_400_000);
         return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       });
-      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'has' : 'have'} nothing planned yet — worth adding something.`);
+      lines.push(`${labels.join(', ')} ${emptyDays.length === 1 ? 'has' : 'have'} nothing planned yet - worth adding something.`);
     } else if (emptyDays.length > 3) {
-      lines.push(`${emptyDays.length} days still open — lots of room for adventures.`);
+      lines.push(`${emptyDays.length} days still open - lots of room for adventures.`);
     }
 
     if (budgetPct !== null) {
-      if (budgetPct > 90) lines.push('Budget almost used up — worth checking upcoming costs.');
-      else if (budgetPct > 70) lines.push(`${budgetPct}% of budget used — you\'re on track.`);
-      else lines.push('Plenty of budget left — enjoy it!');
+      if (budgetPct > 90) lines.push('Budget almost used up - worth checking upcoming costs.');
+      else if (budgetPct > 70) lines.push(`${budgetPct}% of budget used - you\'re on track.`);
+      else lines.push('Plenty of budget left - enjoy it!');
     }
 
     if (packedPct < 50 && supplies.length > 0) {
-      lines.push(`Packing is ${packedPct}% done — don\'t forget the essentials before you leave.`);
+      lines.push(`Packing is ${packedPct}% done - don\'t forget the essentials before you leave.`);
     } else if (packedPct === 100) {
       lines.push('All packed. Ready to go!');
     }
@@ -194,7 +194,7 @@ const INTEL_ICONS_HE: [keyof Intel, string, string][] = [
 function DestinationIntelCard({ country, locale }: { country: string; locale: string }) {
   const isHe = locale === 'he';
   const isRTL = isHe;
-  const cacheKey = `trippy-intel-v2-${country}-${locale}`;
+  const cacheKey = `Triplly-intel-v2-${country}-${locale}`;
 
   const [intel,    setIntel]    = useState<Intel | null>(() => {
     try { const s = localStorage.getItem(cacheKey); return s ? JSON.parse(s) : null; } catch { return null; }
@@ -663,7 +663,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
             </button>
           </div>
 
-          {/* Tag chips — categorise the spend (multi-select, optional) */}
+          {/* Tag chips - categorise the spend (multi-select, optional) */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
             {EXPENSE_TAGS.map(tg => {
               const label = isHe ? tg.he : tg.en;
@@ -940,7 +940,7 @@ export default function DashboardScreenV2() {
       const data = await res.json() as { advice?: string; error?: string };
       if (data.advice) setCoachAdvice(data.advice);
     } catch {
-      // Silently fail — static summary is still shown
+      // Silently fail - static summary is still shown
     } finally {
       setCoachLoading(false);
     }
@@ -951,7 +951,7 @@ export default function DashboardScreenV2() {
       style={{ height: '100%', overflowY: 'auto', background: 'transparent', paddingBottom: 'var(--navbar-clearance)' }}
       className="lg-scroll"
     >
-      {/* ══ Editorial hero — gauge replaces the cinematic mesh (HANDOFF) ══ */}
+      {/* ══ Editorial hero - gauge replaces the cinematic mesh (HANDOFF) ══ */}
       <div className="resp-container" style={{ padding: 'calc(env(safe-area-inset-top, 0px) + 18px) 20px 16px' }}>
 
         {/* Header: country eyebrow + bold title + glass icon buttons */}
@@ -1013,7 +1013,7 @@ export default function DashboardScreenV2() {
           )}
         </div>
 
-        {/* Gauge — countdown / progress (replaces cinematic imagery) */}
+        {/* Gauge - countdown / progress (replaces cinematic imagery) */}
         <div className="a-rise" style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
           <Gauge
             pct={gaugePct}
@@ -1037,7 +1037,7 @@ export default function DashboardScreenV2() {
           ]}
         />
 
-        {/* Day scroller — real dates (Aug 23, Aug 24…) */}
+        {/* Day scroller - real dates (Aug 23, Aug 24…) */}
         <div
           className="lg-scroll a-rise d3"
           role="list"
@@ -1086,15 +1086,15 @@ export default function DashboardScreenV2() {
           })}
         </div>
 
-        {/* Weather estimate note — sits directly under the day slider */}
+        {/* Weather estimate note - sits directly under the day slider */}
         {weather.length > 0 && isEstimatedWeather && (
           <p style={{
             margin: '8px 2px 0', fontSize: 11, color: 'var(--text-3)',
             textAlign: 'start',
           }}>
             {locale === 'he'
-              ? 'מזג אוויר משוער — נתונים היסטוריים מאותה עונה בשנה שעברה'
-              : 'Typical weather estimate — based on historical data from the same dates last year'}
+              ? 'מזג אוויר משוער - נתונים היסטוריים מאותה עונה בשנה שעברה'
+              : 'Typical weather estimate - based on historical data from the same dates last year'}
           </p>
         )}
       </div>
@@ -1125,7 +1125,7 @@ export default function DashboardScreenV2() {
                 {coachAdvice ? (isRTL ? 'עצות לדרך' : 'Travel tips') : t('aiAnalysisLabel')}
               </span>
             </div>
-            {/* Refresh button — shown once advice is loaded */}
+            {/* Refresh button - shown once advice is loaded */}
             {coachAdvice && !coachLoading && (
               <button
                 onClick={fetchCoachAdvice}
@@ -1154,7 +1154,7 @@ export default function DashboardScreenV2() {
 
           {/* Footer actions */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
-            {/* Ask AI button — shown until advice is loaded */}
+            {/* Ask AI button - shown until advice is loaded */}
             {!coachAdvice && !coachLoading ? (
               <button
                 onClick={fetchCoachAdvice}
@@ -1233,7 +1233,7 @@ export default function DashboardScreenV2() {
             </span>
           </button>
 
-          {/* Budget — shows remaining when budget set, otherwise total spent + set CTA */}
+          {/* Budget - shows remaining when budget set, otherwise total spent + set CTA */}
           {/* Plain container (NOT a button): the amount is a CurrencyAmount that
               converts on tap. Editing the budget is an explicit pencil button so
               tapping to convert can never navigate to the budget editor. */}
@@ -1404,7 +1404,7 @@ export default function DashboardScreenV2() {
           </div>
         )}
 
-        {/* ── Empty trip CTA — no events at all ── */}
+        {/* ── Empty trip CTA - no events at all ── */}
         {Object.values(trip.events).every((evArr: any) => evArr.length === 0) && (
           <div
             className="lg a-rise dash-span2"

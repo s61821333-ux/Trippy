@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 
@@ -16,7 +16,7 @@ interface HairlineRowProps {
 }
 
 /**
- * Hairline list row (HANDOFF rule 4 — rows over cards). Leading stamp/avatar,
+ * Hairline list row (HANDOFF rule 4 - rows over cards). Leading stamp/avatar,
  * flexible middle, right-aligned datum, 1px var(--rule) bottom border.
  */
 export default function HairlineRow({

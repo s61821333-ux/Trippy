@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
@@ -21,7 +21,7 @@ function tryAdminClient() {
   catch { return null }
 }
 
-// POST /api/trips/create — authenticated: create a trip + participant + day_meta
+// POST /api/trips/create - authenticated: create a trip + participant + day_meta
 // Uses admin client to bypass RLS when SUPABASE_SERVICE_ROLE_KEY is set,
 // otherwise falls back to the create_trip RPC via the user's session.
 export async function POST(request: NextRequest) {
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const admin = tryAdminClient()
 
     if (admin) {
-      // Admin path — bypasses RLS entirely
+      // Admin path - bypasses RLS entirely
       const tripPayload: Record<string, unknown> = {
         name,
         days,
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ tripId: trip.id })
     }
 
-    // Fallback — direct inserts using the user's JWT (subject to RLS)
+    // Fallback - direct inserts using the user's JWT (subject to RLS)
     const fallbackPayload: Record<string, unknown> = {
       name, days,
       start_date: startDate,

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
@@ -41,7 +41,7 @@ export default function TripEntryAnimation({ tripName, onDone }: Props) {
             color: 'var(--text)', lineHeight: 1,
             direction: 'ltr', unicodeBidi: 'isolate',
           }}>
-            Trippy<span style={{ color: 'var(--terra)' }}>.</span>
+            Triplly<span style={{ color: 'var(--terra)' }}>.</span>
           </span>
           {tripName && (
             <span style={{

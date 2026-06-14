@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { m } from 'framer-motion';
@@ -47,7 +47,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
       await mfaChallengeAndVerify(factorId, code);
       onSuccess();
     } catch {
-      setError(isHe ? 'קוד שגוי — נסה שוב' : 'Wrong code — try again');
+      setError(isHe ? 'קוד שגוי - נסה שוב' : 'Wrong code - try again');
       setCode('');
     } finally {
       setVerifying(false);

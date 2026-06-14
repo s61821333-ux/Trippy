@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+﻿import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -10,7 +10,7 @@ function adminClient() {
 }
 
 // POST /api/account/delete/request
-// Step 1: user taps "Delete account" — creates a pending deletion record and
+// Step 1: user taps "Delete account" - creates a pending deletion record and
 // sends a confirmation email. The account is NOT deleted yet.
 export async function POST(_request: Request) {
   let user: { id: string; email?: string } | null = null
@@ -34,7 +34,7 @@ export async function POST(_request: Request) {
 
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
-  // Rate limit: 3 requests/hour — prevent email flooding
+  // Rate limit: 3 requests/hour - prevent email flooding
   const rl = checkRateLimit(`delete-req:${user.id}`, 3, 3600)
   if (!rl.allowed) return rateLimitResponse(rl.retryAfter, 3)
 
@@ -70,15 +70,15 @@ export async function POST(_request: Request) {
     console.info('  Confirm:', confirmUrl)
     console.info('  Cancel: ', cancelUrl)
 
-    // TODO: integrate email provider — example with Resend:
+    // TODO: integrate email provider - example with Resend:
     // await resend.emails.send({
-    //   from: 'Trippy <noreply@trippy.app>',
+    //   from: 'Triplly <noreply@Triplly.app>',
     //   to: user.email!,
     //   subject: 'Confirm your account deletion',
     //   html: `
-    //     <p>Your Trippy account will be deleted on ${new Date(record.scheduled_for).toLocaleString()}.</p>
+    //     <p>Your Triplly account will be deleted on ${new Date(record.scheduled_for).toLocaleString()}.</p>
     //     <p><a href="${confirmUrl}">Confirm deletion</a></p>
-    //     <p><a href="${cancelUrl}">Cancel — keep my account</a></p>
+    //     <p><a href="${cancelUrl}">Cancel - keep my account</a></p>
     //   `,
     // })
 

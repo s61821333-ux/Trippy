@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk';
+﻿import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@supabase/supabase-js';
 import { NextRequest } from 'next/server';
 import { checkRateLimitPersistent, rateLimitResponse } from '@/lib/rateLimit';
@@ -15,7 +15,7 @@ export const maxDuration = 45;
 
 // ── Token budget ──────────────────────────────────────────────────────────────
 // ~230 tokens/day of minified JSON (4-5 events) + packing list + tips overhead.
-// The cap must cover the longest allowed trip (21 days ≈ 4800 tokens) — a cap
+// The cap must cover the longest allowed trip (21 days ≈ 4800 tokens) - a cap
 // below that truncates the JSON mid-stream and the whole plan fails to parse.
 const tokensForDays = (days: number) => Math.min(6000, Math.max(1000, days * 280));
 
@@ -41,7 +41,7 @@ ${heNote}
 Return ONLY minified JSON, no markdown:
 {"name":"2-4 word name","theme":"city|beach|nature|desert|mountain|lake|sunset","countries":["X"],"estimatedBudget":0,"currency":"${p.currency}","days":[{"dayNumber":1,"region":"Area","description":"1 sentence","events":[{"time":"HH:MM","name":"Name","category":"food|cafe|attraction|museum|rest|transport|beach|hiking|shopping|nightlife|other","duration":60,"location":"Place","cost":0}]}],"packingList":["item"],"tips":["tip"]}
 
-Rules: start 08:00–09:30, no overlaps, include breakfast+lunch+dinner each day, costs in ${p.currency}, packingList 6–8 items, tips 2–3.`;
+Rules: start 08:00-09:30, no overlaps, include breakfast+lunch+dinner each day, costs in ${p.currency}, packingList 6-8 items, tips 2-3.`;
 }
 
 // ── Route ─────────────────────────────────────────────────────────────────────

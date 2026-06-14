@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -159,7 +159,7 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
         </AnimatePresence>
       </button>
 
-      {/* Portal popover — renders to document.body, unaffected by parent overflow */}
+      {/* Portal popover - renders to document.body, unaffected by parent overflow */}
       {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {open && (

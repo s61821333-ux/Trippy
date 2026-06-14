@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import { AnimatePresence, m } from 'framer-motion';
 import { pageVariants } from '@/lib/motion';
 
 interface PageTransitionProps {
   children: React.ReactNode;
-  /** Unique key for the current "page" — changing it triggers the transition */
+  /** Unique key for the current "page" - changing it triggers the transition */
   pageKey: string;
 }
 

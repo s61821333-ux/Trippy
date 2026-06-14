@@ -1,7 +1,7 @@
-'use client';
+﻿'use client';
 
 /**
- * Sheets_V2 — shared overlay payloads for Trippy 2.0 Liquid Glass.
+ * Sheets_V2 - shared overlay payloads for Triplly 2.0 Liquid Glass.
  *
  * Exports:
  *  - AISheet   replaces SuggestionsSheet.tsx
@@ -234,7 +234,7 @@ function SuggCard({
           </a>
         )}
 
-        {/* GetYourGuide tickets — bookable experiences only */}
+        {/* GetYourGuide tickets - bookable experiences only */}
         {GYG_BOOKABLE.has(s.category) && (
           <a
             href={gygSearchUrl(s.name, s.location)} target="_blank" rel="noopener noreferrer"
@@ -332,7 +332,7 @@ const LOADING_MSGS_EN = [
   "Checking what’s open nearby…",
   'Finding hidden gems…',
   'Asking the locals…',
-  'Almost there — curating picks…',
+  'Almost there - curating picks…',
   'Just a moment more…',
 ];
 const LOADING_MSGS_HE = [
@@ -340,11 +340,11 @@ const LOADING_MSGS_HE = [
   'בודקים מה פתוח בקרבת מקום…',
   'מוצאים אבני חן נסתרות…',
   'שואלים את המקומיים…',
-  'כמעט שם — מסננים את הטוב ביותר…',
+  'כמעט שם - מסננים את הטוב ביותר…',
   'עוד רגע קטן…',
 ];
 
-// Trusted sources surfaced during a search — sequential pulse gives the
+// Trusted sources surfaced during a search - sequential pulse gives the
 // "scanning the web in real time" feel and signals breadth (incl. GetYourGuide).
 const SEARCH_SOURCES: { name: string; color: string }[] = [
   { name: 'Google',        color: '#4285F4' },
@@ -406,7 +406,7 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
           </span>
         </div>
 
-        {/* Progress bar — animated dots at the tip */}
+        {/* Progress bar - animated dots at the tip */}
         <div style={{ position: 'relative', height: 6, background: 'oklch(50% 0.02 60 / 12%)', borderRadius: 3, overflow: 'hidden' }}>
           <m.div
             animate={{ width: `${pct}%` }}
@@ -428,7 +428,7 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
           />
         </div>
 
-        {/* Searching across trusted sources — staggered pulse = "real-time" feel */}
+        {/* Searching across trusted sources - staggered pulse = "real-time" feel */}
         <div style={{ marginTop: 14 }}>
           <p style={{ fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-3)', margin: '0 0 8px', fontFamily: 'var(--font-mono)' }}>
             {isHe ? 'מחפש במקורות מובילים' : 'Searching trusted sources'}
@@ -452,14 +452,14 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
         </div>
 
         <p style={{ fontSize: 10, color: 'var(--text-3)', margin: '12px 0 0', fontFamily: 'var(--font-mono)' }}>
-          {isHe ? 'מופעל על ידי Claude · ~3–5 שניות' : 'Powered by Claude · ~3–5 sec'}
+          {isHe ? 'מופעל על ידי Claude · ~3-5 שניות' : 'Powered by Claude · ~3-5 sec'}
         </p>
       </div>
     </div>
   );
 }
 
-// ── AISheet — replaces SuggestionsSheet ──────────────────────────────────────
+// ── AISheet - replaces SuggestionsSheet ──────────────────────────────────────
 
 interface AISheetProps {
   dayNumber: number;
@@ -557,7 +557,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
           if (!res.ok) {
             const err = await res.json().catch(() => ({})) as { error?: string; retryAfter?: number };
             if (res.status === 429 && err.retryAfter) {
-              reject(new Error(`Rate limited — try again in ${err.retryAfter}s`));
+              reject(new Error(`Rate limited - try again in ${err.retryAfter}s`));
             } else {
               reject(new Error(err.error ?? `Server error ${res.status}`));
             }
@@ -603,7 +603,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
         if (!res.ok) {
           const body = await res.json().catch(() => ({})) as { error?: string; retryAfter?: number };
           if (res.status === 429 && body.retryAfter) {
-            reject(new Error(`Rate limited — try again in ${body.retryAfter}s`));
+            reject(new Error(`Rate limited - try again in ${body.retryAfter}s`));
           } else {
             reject(new Error(body.error ?? `Server error ${res.status}`));
           }

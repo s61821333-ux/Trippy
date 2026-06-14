@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
@@ -65,15 +65,15 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
       window.location.href = '/app';
     } catch (e: unknown) {
       setPasskeyLoading(false);
-      setCaptchaToken('');         // single-use — drop the consumed token
+      setCaptchaToken('');         // single-use - drop the consumed token
       turnstileRef.current?.reset();
       const msg = e instanceof Error ? e.message : '';
-      // User cancelled the browser prompt — don't show an error
+      // User cancelled the browser prompt - don't show an error
       if (msg.includes('cancel') || msg.includes('abort') || msg.includes('NotAllowed')) return;
       // Surface the real reason so genuine config/registration issues are visible.
       const base = locale === 'he' ? 'כניסה עם Passkey נכשלה' : 'Passkey sign-in failed';
-      const hint = locale === 'he' ? ' — ודאו שרשום Passkey במכשיר' : ' — make sure you have one registered';
-      setError(msg ? `${base} — ${msg}` : `${base}${hint}`);
+      const hint = locale === 'he' ? ' - ודאו שרשום Passkey במכשיר' : ' - make sure you have one registered';
+      setError(msg ? `${base} - ${msg}` : `${base}${hint}`);
     }
   };
 
@@ -119,7 +119,7 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
           justifyContent: 'center',
           gap: 12,
           padding: '14px 24px',
-          /* Fixed dark ink — NOT var(--text), which inverts to near-white in dark
+          /* Fixed dark ink - NOT var(--text), which inverts to near-white in dark
              mode and made the white label unreadable. Subtle light border gives
              the button definition against the dark page background. */
           background: '#1C1713',
@@ -144,7 +144,7 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
         {locale === 'he' ? 'כניסה עם Google' : 'Continue with Google'}
       </button>
 
-      {/* Passkey — only rendered when the browser supports WebAuthn */}
+      {/* Passkey - only rendered when the browser supports WebAuthn */}
       {passkeySupported && (
         <>
           <div style={{
@@ -203,7 +203,7 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
         </p>
       )}
 
-      {/* Invisible captcha — Supabase Auth requires a captchaToken for passkey sign-in.
+      {/* Invisible captcha - Supabase Auth requires a captchaToken for passkey sign-in.
           Default execution ('render') auto-solves on mount, so the token is ready
           before the user clicks instead of being fetched on demand. */}
       {passkeySupported && TURNSTILE_SITE_KEY && (

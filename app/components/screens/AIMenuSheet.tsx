@@ -1,11 +1,11 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { useI18n } from '@/lib/i18n';
 import Sheet from '../ui/Sheet';
 import Icon from '../ui/Icon';
 
-// The AI entry point: two clear modes — Ask (Haiko chatbot) and Find (discovery).
+// The AI entry point: two clear modes - Ask (Haiko chatbot) and Find (discovery).
 export default function AIMenuSheet({ onClose, onAsk, onFind }: {
   onClose: () => void;
   onAsk: () => void;
@@ -19,7 +19,7 @@ export default function AIMenuSheet({ onClose, onAsk, onFind }: {
       key: 'ask',
       icon: 'ai',
       title: isHe ? 'לשאול' : 'Ask',
-      desc: isHe ? 'שיחה עם Haiko — שאלו כל דבר על הטיול' : 'Chat with Haiko — anything about your trip',
+      desc: isHe ? 'שיחה עם Haiko - שאלו כל דבר על הטיול' : 'Chat with Haiko - anything about your trip',
       onClick: onAsk,
       grad: 'linear-gradient(135deg, var(--lg-terra-bright), var(--lg-terra))',
       glow: 'var(--lg-glow-terra)',
