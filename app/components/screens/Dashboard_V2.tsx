@@ -169,72 +169,6 @@ function buildAiSummary(trip: any, supplies: any[], totalSpent: number, locale: 
   return lines.join(' ');
 }
 
-// ── Weather-aware rescheduling alerts ────────────────────────────────────────
-
-const OUTDOOR_CATS = new Set(['beach', 'hiking', 'nature_walk', 'cycling', 'sport', 'picnic', 'golf', 'water_sports', 'aerial', 'safari', 'national_park', 'photography', 'attraction']);
-const BAD_WEATHER  = /rain|shower|drizzle|thunder|storm/i;
-const SNOW_WEATHER = /snow/i;
-
-function WeatherAlerts({ trip, weather, onGoToDay }: {
-  trip: any; weather: WeatherDay[]; onGoToDay: (d: number) => void;
-}) {
-  const { locale } = useI18n();
-  const isHe = locale === 'he';
-
-  // Find days with bad weather AND outdoor events
-  const alerts: { day: number; label: string; outdoorCount: number; altDay: number | null }[] = [];
-
-  weather.forEach((w, i) => {
-    const day = i + 1;
-    if (!w.label) return;
-    const isBad  = BAD_WEATHER.test(w.label);
-    const isSnow = SNOW_WEATHER.test(w.label);
-    if (!isBad && !isSnow) return;
-
-    const outdoor = (trip.events[day] ?? []).filter((e: any) => OUTDOOR_CATS.has(e.category));
-    if (outdoor.length === 0) return;
-
-    // Find nearest dry alternative day (future first, then past)
-    const altDay = weather
-      .map((ww, j) => ({ day: j + 1, label: ww.label ?? '' }))
-      .filter(x => x.day !== day && !BAD_WEATHER.test(x.label) && !SNOW_WEATHER.test(x.label))
-      .sort((a, b) => Math.abs(a.day - day) - Math.abs(b.day - day))[0]?.day ?? null;
-
-    alerts.push({ day, label: w.label, outdoorCount: outdoor.length, altDay });
-  });
-
-  if (alerts.length === 0) return null;
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {alerts.slice(0, 2).map(({ day, label, outdoorCount, altDay }) => {
-        const isStorm = /thunder|storm/i.test(label);
-        const color   = isStorm ? '#E05A3A' : '#C8944A';
-        const bg      = isStorm ? 'oklch(62% 0.18 28 / 10%)' : 'oklch(68% 0.14 58 / 10%)';
-        const border  = isStorm ? 'oklch(62% 0.18 28 / 25%)' : 'oklch(68% 0.14 58 / 25%)';
-        const msg = isHe
-          ? `יום ${day}: ${label} — ${outdoorCount} פעילות חיצונית מתוכננת${altDay ? `. יום ${altDay} נראה יותר יבש.` : '.'}`
-          : `Day ${day}: ${label} — ${outdoorCount} outdoor ${outdoorCount === 1 ? 'activity' : 'activities'} planned${altDay ? `. Day ${altDay} looks clearer.` : '.'}`;
-
-        return (
-          <div
-            key={day}
-            style={{ padding: '11px 14px', borderRadius: 14, background: bg, border: `1px solid ${border}`, display: 'flex', alignItems: 'center', gap: 10 }}
-          >
-            <Icon name={isStorm ? 'wind' : 'wave'} size={16} color={color} style={{ flexShrink: 0 }} />
-            <p style={{ flex: 1, fontSize: 13, color, fontWeight: 500, margin: 0, lineHeight: 1.45 }}>{msg}</p>
-            <button
-              onClick={() => onGoToDay(day)}
-              style={{ flexShrink: 0, height: 44, padding: '0 12px', border: 0, borderRadius: 9999, cursor: 'pointer', background: color, color: '#fff', fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 12 }}
-            >
-              {isHe ? `יום ${day}` : `Day ${day}`}
-            </button>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
 
 // ── Destination Intelligence card ─────────────────────────────────────────────
 
@@ -1247,11 +1181,6 @@ export default function DashboardScreenV2() {
             </button>
           </div>
         </div>
-
-        {/* ── Weather alerts ── */}
-        {weather.length > 0 && (
-          <WeatherAlerts trip={trip} weather={weather} onGoToDay={handleDayClick} />
-        )}
 
         {/* ── Next up ── */}
         {nextEvent && (
