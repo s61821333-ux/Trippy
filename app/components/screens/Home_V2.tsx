@@ -333,7 +333,7 @@ export default function Home_V2() {
         {/* Wordmark + avatar + sign-out */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 'env(safe-area-inset-top, 0px)', marginBottom: 30 }}>
           <span className="wm" style={{ fontSize: 20, color: 'var(--text)' }}>
-            Triplly<span className="dot">.</span>
+            Trippy<span className="dot">.</span>
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div

@@ -238,7 +238,7 @@ export function SyncLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: Loade
   );
 }
 
-// ─── 5 · Sparkle - Triplly is thinking (AI suggestions) ───────────────────────
+// ─── 5 · Sparkle - Trippy is thinking (AI suggestions) ───────────────────────
 const SPARK_PATH = 'M11 3l1.4 5.6L18 10l-5.6 1.4L11 17l-1.4-5.6L4 10l5.6-1.4z';
 
 export function SparkleLoader({ theme = BRAND_THEME, speed = 1, size = 124 }: LoaderProps) {

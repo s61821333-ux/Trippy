@@ -72,11 +72,11 @@ export async function POST(_request: Request) {
 
     // TODO: integrate email provider - example with Resend:
     // await resend.emails.send({
-    //   from: 'Triplly <noreply@Triplly.app>',
+    //   from: 'Trippy <noreply@Trippy.app>',
     //   to: user.email!,
     //   subject: 'Confirm your account deletion',
     //   html: `
-    //     <p>Your Triplly account will be deleted on ${new Date(record.scheduled_for).toLocaleString()}.</p>
+    //     <p>Your Trippy account will be deleted on ${new Date(record.scheduled_for).toLocaleString()}.</p>
     //     <p><a href="${confirmUrl}">Confirm deletion</a></p>
     //     <p><a href="${cancelUrl}">Cancel - keep my account</a></p>
     //   `,

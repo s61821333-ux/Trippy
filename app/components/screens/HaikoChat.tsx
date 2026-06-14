@@ -36,8 +36,8 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
   const city       = dayMeta?.region || sleepHotel?.location || trip?.countries?.[0] || '';
 
   const greeting = isHe
-    ? `שלום! אני Haiko, בן הלוויה החכם של Triplly.${city ? ` שאלו אותי כל דבר על הטיול ב${city}` : ' שאלו אותי כל דבר על הטיול'} — אוכל מקומי, תחבורה, המלצות ומה לא לפספס.`
-    : `Hey! I'm Haiko, your travel companion from Triplly.${city ? ` Ask me anything about your trip to ${city}` : ' Ask me anything about your trip'} — local food, transport, hidden gems and what to book ahead.`;
+    ? `שלום! אני Haiko, בן הלוויה החכם של Trippy.${city ? ` שאלו אותי כל דבר על הטיול ב${city}` : ' שאלו אותי כל דבר על הטיול'} — אוכל מקומי, תחבורה, המלצות ומה לא לפספס.`
+    : `Hey! I'm Haiko, your travel companion from Trippy.${city ? ` Ask me anything about your trip to ${city}` : ' Ask me anything about your trip'} — local food, transport, hidden gems and what to book ahead.`;
 
   const [messages, setMessages] = useState<Msg[]>([{ role: 'assistant', content: greeting }]);
   const [input,   setInput]   = useState('');

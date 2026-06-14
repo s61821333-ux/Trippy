@@ -41,8 +41,8 @@ const assistant = Assistant({
 export const metadata: Metadata = {
   metadataBase: new URL('https://letsexploring.com'),
   title: {
-    default: 'Triplly - Free Group Trip Planner | Plan Together',
-    template: '%s | Triplly',
+    default: 'Trippy - Free Group Trip Planner | Plan Together',
+    template: '%s | Trippy',
   },
   description: 'Plan your group trip for free - shared itinerary, interactive map, group budget, and packing list. Invite friends in seconds.',
   manifest: '/manifest.json',
@@ -56,19 +56,19 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Triplly',
+    title: 'Trippy',
   },
   openGraph: {
-    title: 'Triplly - Free Group Trip Planner',
+    title: 'Trippy - Free Group Trip Planner',
     description: 'Plan your group trip for free - shared itinerary, interactive map, group budget, and packing list.',
     url: 'https://letsexploring.com',
-    siteName: 'Triplly',
+    siteName: 'Trippy',
     type: 'website',
-    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Triplly - Group Trip Planner' }],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'Trippy - Group Trip Planner' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Triplly - Free Group Trip Planner',
+    title: 'Trippy - Free Group Trip Planner',
     description: 'Plan your group trip for free - shared itinerary, interactive map, group budget, and packing list.',
     images: ['/og-image.png'],
   },
@@ -86,12 +86,12 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
-  const locale = (cookieStore.get('Triplly-locale')?.value === 'he') ? 'he' : 'en';
+  const locale = (cookieStore.get('Trippy-locale')?.value === 'he') ? 'he' : 'en';
   const dir = locale === 'he' ? 'rtl' : 'ltr';
   // Read resolved dark value from cookie so the server renders the correct theme
   // on every page load - prevents the flash without any client-side script.
   // AppShell's useEffect writes this cookie whenever the resolved theme changes.
-  const darkCookie = cookieStore.get('Triplly-dark')?.value;
+  const darkCookie = cookieStore.get('Trippy-dark')?.value;
   const isDark = darkCookie === 'true';
   // Explicitly set data-dark="false" when the user has chosen light so the
   // prefers-color-scheme:dark media query in globals.css doesn't override it.

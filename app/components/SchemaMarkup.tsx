@@ -3,8 +3,8 @@
   '@graph': [
     {
       '@type': 'SoftwareApplication',
-      name: 'Triplly',
-      alternateName: ['Triplly Group Trip Planner', 'Triplly Travel App'],
+      name: 'Trippy',
+      alternateName: ['Trippy Group Trip Planner', 'Trippy Travel App'],
       description:
         'Free group trip planner with shared itinerary, interactive map, group budget tracker, and packing list. Plan your trip together in one place.',
       url: 'https://letsexploring.com',
@@ -34,7 +34,7 @@
     },
     {
       '@type': 'Organization',
-      name: 'Triplly',
+      name: 'Trippy',
       url: 'https://letsexploring.com',
       logo: 'https://letsexploring.com/icon-512.png',
       sameAs: [],
@@ -46,7 +46,7 @@
     },
     {
       '@type': 'WebSite',
-      name: 'Triplly',
+      name: 'Trippy',
       url: 'https://letsexploring.com',
       potentialAction: {
         '@type': 'SearchAction',

@@ -145,7 +145,7 @@ function cityFromLocation(loc?: string | null, hotelName?: string | null): strin
   return parts.find(p => !/\d/.test(p)) ?? parts[0];
 }
 
-// Share a single event to WhatsApp: a short brief + a Triplly brand line and link.
+// Share a single event to WhatsApp: a short brief + a Trippy brand line and link.
 function shareEventToWhatsApp(
   event: TripEvent,
   trip: { name?: string; startDate?: string },
@@ -171,8 +171,8 @@ function shareEventToWhatsApp(
     '',
     '-',
     isHe
-      ? `תוכנן עם Triplly - מתכנן הטיולים הקבוצתי החינמי\nhttps://letsexploring.com`
-      : `Planned with Triplly - free group trip planner\nhttps://letsexploring.com`,
+      ? `תוכנן עם Trippy - מתכנן הטיולים הקבוצתי החינמי\nhttps://letsexploring.com`
+      : `Planned with Trippy - free group trip planner\nhttps://letsexploring.com`,
   ].filter(Boolean);
   const url = `https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`;
   window.open(url, '_blank', 'noopener,noreferrer');

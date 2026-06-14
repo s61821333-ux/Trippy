@@ -10,20 +10,20 @@ import GlassBtn from './ui/GlassBtn';
 const TERMS_EN = `TERMS OF USE & PRIVACY POLICY
 Last updated: May 2026
 
-PLEASE READ THESE TERMS CAREFULLY BEFORE USING Triplly. BY CREATING AN ACCOUNT OR USING THE SERVICE, YOU AGREE TO BE BOUND BY THESE TERMS.
+PLEASE READ THESE TERMS CAREFULLY BEFORE USING Trippy. BY CREATING AN ACCOUNT OR USING THE SERVICE, YOU AGREE TO BE BOUND BY THESE TERMS.
 
 1. ACCEPTANCE OF TERMS
-By accessing or using Triplly ("the App", "the Service"), you agree to these Terms of Use and Privacy Policy. If you do not agree, you must not use the Service.
+By accessing or using Trippy ("the App", "the Service"), you agree to these Terms of Use and Privacy Policy. If you do not agree, you must not use the Service.
 
 2. DESCRIPTION OF SERVICE
-Triplly is a collaborative trip-planning tool that allows users to organize itineraries, track expenses, manage packing lists, and share trip details with invited participants. The Service is provided for personal, non-commercial use only.
+Trippy is a collaborative trip-planning tool that allows users to organize itineraries, track expenses, manage packing lists, and share trip details with invited participants. The Service is provided for personal, non-commercial use only.
 The Service is provided free of charge and is subject to change at the sole discretion of the operator.
 
 3. ELIGIBILITY
 You must be at least 16 years of age to use this Service. By using the App, you confirm that you meet this requirement. If you are under 18, you confirm that a parent or legal guardian has reviewed and agreed to these Terms on your behalf.
 
 4. USER ACCOUNTS & AUTHENTICATION
-The App uses Google OAuth for authentication. By signing in, you authorise Triplly to access your Google profile name and email address for the sole purpose of identifying your account. We do not access your Google contacts, calendar, or any other Google data.
+The App uses Google OAuth for authentication. By signing in, you authorise Trippy to access your Google profile name and email address for the sole purpose of identifying your account. We do not access your Google contacts, calendar, or any other Google data.
 
 5. DATA WE COLLECT
 We collect and store the following data you provide:
@@ -88,20 +88,20 @@ For questions, data requests, or concerns: guy9d2g5@gmail.com`;
 const TERMS_HE = `תנאי שימוש ומדיניות פרטיות
 עדכון אחרון: מאי 2026
 
-אנא קרא תנאים אלה בעיון לפני השימוש ב-Triplly. על ידי יצירת חשבון או שימוש בשירות, אתה מסכים לתנאים אלה.
+אנא קרא תנאים אלה בעיון לפני השימוש ב-Trippy. על ידי יצירת חשבון או שימוש בשירות, אתה מסכים לתנאים אלה.
 
 1. קבלת התנאים
-על ידי גישה לאפליקציה Triplly ("האפליקציה", "השירות") או שימוש בה, אתה מסכים לתנאי שימוש ומדיניות הפרטיות הללו. אם אינך מסכים, עליך להימנע מהשימוש בשירות.
+על ידי גישה לאפליקציה Trippy ("האפליקציה", "השירות") או שימוש בה, אתה מסכים לתנאי שימוש ומדיניות הפרטיות הללו. אם אינך מסכים, עליך להימנע מהשימוש בשירות.
 
 2. תיאור השירות
-Triplly הוא כלי לתכנון טיולים שיתופי המאפשר למשתמשים לארגן לוחות זמנים, לעקוב אחר הוצאות, לנהל רשימות ציוד ולשתף פרטי טיול עם משתתפים מוזמנים. השירות מיועד לשימוש אישי ולא מסחרי בלבד.
+Trippy הוא כלי לתכנון טיולים שיתופי המאפשר למשתמשים לארגן לוחות זמנים, לעקוב אחר הוצאות, לנהל רשימות ציוד ולשתף פרטי טיול עם משתתפים מוזמנים. השירות מיועד לשימוש אישי ולא מסחרי בלבד.
 השירות ניתן בחינם ונתון לשינוי לשיקול דעתו של המפעיל.
 
 3. כשירות לשימוש
 עליך להיות בן 16 לפחות כדי להשתמש בשירות זה. בשימוש באפליקציה, אתה מאשר כי אתה עומד בדרישה זו. אם אתה מתחת לגיל 18, אתה מאשר כי הורה או אפוטרופוס קרא ואישר תנאים אלה בשמך.
 
 4. חשבונות משתמש ואימות
-האפליקציה משתמשת ב-Google OAuth לצורך אימות. בכניסה לחשבון, אתה מאשר ל-Triplly גישה לשם הפרופיל וכתובת האימייל שלך ב-Google, למטרת זיהוי חשבונך בלבד. אנו לא ניגשים לאנשי הקשר, ליומן או לנתוני Google אחרים שלך.
+האפליקציה משתמשת ב-Google OAuth לצורך אימות. בכניסה לחשבון, אתה מאשר ל-Trippy גישה לשם הפרופיל וכתובת האימייל שלך ב-Google, למטרת זיהוי חשבונך בלבד. אנו לא ניגשים לאנשי הקשר, ליומן או לנתוני Google אחרים שלך.
 
 5. נתונים שאנו אוספים
 אנו אוספים ושומרים את הנתונים הבאים שאתה מספק:

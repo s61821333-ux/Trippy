@@ -105,7 +105,7 @@ const TEXT_INPUT: React.CSSProperties = {
   resize: 'none' as const,
 };
 
-// ── Chip row (supports single and multi-select, Triplly icons) ────────────────
+// ── Chip row (supports single and multi-select, Trippy icons) ────────────────
 
 function ChipRow<T extends string>({
   options, value, onChange, multi = false,

@@ -100,7 +100,7 @@ export default function JoinPage() {
             fontSize: '1.6rem', fontWeight: 700, letterSpacing: '-0.04em',
             color: '#1A1410',
           }}>
-            Triplly<span style={{ color: '#C4714A' }}>.</span>
+            Trippy<span style={{ color: '#C4714A' }}>.</span>
           </div>
         </div>
 
@@ -137,7 +137,7 @@ export default function JoinPage() {
                   fontSize: 13, fontWeight: 600, color: '#444', cursor: 'pointer',
                 }}
               >
-                Go to Triplly
+                Go to Trippy
               </button>
             </div>
           )}

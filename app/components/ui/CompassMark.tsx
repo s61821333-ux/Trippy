@@ -8,7 +8,7 @@ interface Props {
 }
 
 /**
- * Triplly brand compass mark. Colors automatically adapt to light/dark mode
+ * Trippy brand compass mark. Colors automatically adapt to light/dark mode
  * via CSS custom properties defined in globals.css.
  *
  * Anatomy (brand book):

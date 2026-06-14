@@ -204,7 +204,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     <div class="sub">${sub}</div>
   </header>
   ${daysHtml}
-  <footer>Triplly · ${esc(new Date().toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US'))}</footer>
+  <footer>Trippy · ${esc(new Date().toLocaleDateString(locale === 'he' ? 'he-IL' : 'en-US'))}</footer>
 </body>
 </html>`);
     win.document.close();
@@ -449,7 +449,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
 
       {/* ── Version footer ── */}
       <p style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', letterSpacing: '0.06em' }}>
-        Triplly · v2.0 · Liquid Glass
+        Trippy · v2.0 · Liquid Glass
       </p>
 
       {/* ── Currency picker sheet ── */}

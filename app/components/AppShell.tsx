@@ -194,9 +194,9 @@ function Shell() {
 
     // Dev-only test hooks: lets Playwright inject/read store state
     if (process.env.NODE_ENV !== 'production') {
-      (window as unknown as Record<string, unknown>).__TripllySetState__ =
+      (window as unknown as Record<string, unknown>).__TrippySetState__ =
         (patch: Record<string, unknown>) => useAppStore.setState(patch as unknown as Parameters<typeof useAppStore.setState>[0]);
-      (window as unknown as Record<string, unknown>).__TripllyGetScreen__ =
+      (window as unknown as Record<string, unknown>).__TrippyGetScreen__ =
         () => useAppStore.getState().screen;
     }
 
@@ -217,7 +217,7 @@ function Shell() {
     const joinId = params.get('join');
     if (joinId) {
       window.history.replaceState({}, '', '/app');
-      sessionStorage.setItem('Triplly-pending-join', joinId);
+      sessionStorage.setItem('Trippy-pending-join', joinId);
     }
 
     // onAuthStateChange fires immediately with INITIAL_SESSION on every page load.
@@ -262,7 +262,7 @@ function Shell() {
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });
         const isTestMode = process.env.NODE_ENV !== 'production' &&
-          !!(window as unknown as Record<string, unknown>).__TripllyTestMode__;
+          !!(window as unknown as Record<string, unknown>).__TrippyTestMode__;
         // Session gone - send the user back to the landing page instead of showing
         // the old login screen. In test mode keep the current screen so test scripts
         // can control auth state directly.
@@ -284,9 +284,9 @@ function Shell() {
   // After auth resolves, auto-load a trip joined via invite link
   useEffect(() => {
     if (!authUser) return;
-    const pendingJoin = sessionStorage.getItem('Triplly-pending-join');
+    const pendingJoin = sessionStorage.getItem('Trippy-pending-join');
     if (!pendingJoin) return;
-    sessionStorage.removeItem('Triplly-pending-join');
+    sessionStorage.removeItem('Trippy-pending-join');
     loadTripById(pendingJoin).catch(() => {
       useAppStore.setState({ lastSyncError: 'join_failed' });
     });
@@ -372,7 +372,7 @@ function Shell() {
       // leaves dark tokens applied when the OS prefers dark.
       document.documentElement.dataset.dark = resolvedDark ? 'true' : 'false';
       document.body.style.background = 'var(--bg)';
-      document.cookie = `Triplly-dark=${resolvedDark ? 'true' : 'false'}; path=/; max-age=31536000; SameSite=Lax`;
+      document.cookie = `Trippy-dark=${resolvedDark ? 'true' : 'false'}; path=/; max-age=31536000; SameSite=Lax`;
     }
   }, [resolvedDark]);
 
@@ -413,14 +413,14 @@ function Shell() {
   useEffect(() => {
     if (!mounted || !authResolved) return;
     const SCREEN_TITLES: Record<string, string> = {
-      home: 'Triplly - Your Trips',
-      dashboard: trip ? `${trip.name} - Triplly` : 'Dashboard - Triplly',
-      day: 'Day Planner - Triplly',
-      map: 'Map - Triplly',
-      supplies: 'Packing - Triplly',
-      settings: 'Settings - Triplly',
+      home: 'Trippy - Your Trips',
+      dashboard: trip ? `${trip.name} - Trippy` : 'Dashboard - Trippy',
+      day: 'Day Planner - Trippy',
+      map: 'Map - Trippy',
+      supplies: 'Packing - Trippy',
+      settings: 'Settings - Trippy',
     };
-    document.title = SCREEN_TITLES[screen] ?? 'Triplly';
+    document.title = SCREEN_TITLES[screen] ?? 'Trippy';
   }, [mounted, authResolved, screen, trip?.name]);
 
   // Row 809: move focus to main content h1 after screen navigation (before early return)
@@ -461,7 +461,7 @@ function Shell() {
           direction: 'ltr',
           unicodeBidi: 'isolate',
         }}>
-          Triplly<span style={{ color: 'var(--terra)' }}>.</span>
+          Trippy<span style={{ color: 'var(--terra)' }}>.</span>
         </span>
       </div>
     );
@@ -719,7 +719,7 @@ function Shell() {
                   direction: 'ltr',
                   unicodeBidi: 'isolate',
                 }}>
-                  Triplly<span style={{ color: 'var(--terra)' }}>.</span>
+                  Trippy<span style={{ color: 'var(--terra)' }}>.</span>
                 </span>
               </m.div>
             )}

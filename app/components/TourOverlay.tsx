@@ -24,8 +24,8 @@ const STEPS: TourStep[] = [
   {
     id: 'welcome',
     stamp: 'compass',
-    title: 'Welcome to Triplly!',
-    titleHe: 'ברוכים הבאים ל-Triplly!',
+    title: 'Welcome to Trippy!',
+    titleHe: 'ברוכים הבאים ל-Trippy!',
     body: "Plan trips with friends, hour by hour. Let's take a 60-second tour of the key features.",
     bodyHe: 'תכננו טיולים ביחד, שעה-שעה. בואו ניסייר ב-60 שניות בתכונות העיקריות.',
     navigateTo: 'dashboard',
@@ -160,7 +160,7 @@ export default function TourOverlay() {
 
   const advance = () => {
     if (isLast) {
-      localStorage.setItem('Triplly-tour-done', '1');
+      localStorage.setItem('Trippy-tour-done', '1');
       setShowTour(false);
     } else {
       setStepIdx(i => i + 1);
@@ -168,7 +168,7 @@ export default function TourOverlay() {
   };
 
   const skip = () => {
-    localStorage.setItem('Triplly-tour-done', '1');
+    localStorage.setItem('Trippy-tour-done', '1');
     setShowTour(false);
   };
 

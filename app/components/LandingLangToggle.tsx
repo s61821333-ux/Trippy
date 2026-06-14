@@ -7,7 +7,7 @@ interface Props {
 export default function LandingLangToggle({ locale }: Props) {
   const toggle = () => {
     const next = locale === 'en' ? 'he' : 'en';
-    document.cookie = `Triplly-locale=${next}; path=/; max-age=31536000; SameSite=Lax`;
+    document.cookie = `Trippy-locale=${next}; path=/; max-age=31536000; SameSite=Lax`;
     window.location.reload();
   };
 

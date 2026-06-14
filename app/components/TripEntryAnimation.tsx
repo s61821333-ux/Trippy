@@ -41,7 +41,7 @@ export default function TripEntryAnimation({ tripName, onDone }: Props) {
             color: 'var(--text)', lineHeight: 1,
             direction: 'ltr', unicodeBidi: 'isolate',
           }}>
-            Triplly<span style={{ color: 'var(--terra)' }}>.</span>
+            Trippy<span style={{ color: 'var(--terra)' }}>.</span>
           </span>
           {tripName && (
             <span style={{

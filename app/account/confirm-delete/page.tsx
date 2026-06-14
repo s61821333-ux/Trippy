@@ -56,7 +56,7 @@ function ConfirmDeleteContent() {
             Your account has been deleted.
           </div>
           <div style={{ fontSize: 13, color: '#666', lineHeight: 1.5 }}>
-            All your personal data has been removed. Thank you for using Triplly.
+            All your personal data has been removed. Thank you for using Trippy.
           </div>
         </>
       )}

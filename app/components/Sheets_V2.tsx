@@ -1,7 +1,7 @@
 ﻿'use client';
 
 /**
- * Sheets_V2 - shared overlay payloads for Triplly 2.0 Liquid Glass.
+ * Sheets_V2 - shared overlay payloads for Trippy 2.0 Liquid Glass.
  *
  * Exports:
  *  - AISheet   replaces SuggestionsSheet.tsx
