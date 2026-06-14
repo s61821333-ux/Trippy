@@ -239,12 +239,7 @@ function Shell() {
           // Resolve auth immediately so the spinner goes away - don't block on the
           // MFA network call. The challenge overlay appears as soon as the check
           // completes (usually <1 s later); users without MFA never pay that cost.
-          const { trip, tripDbId } = useAppStore.getState();
-          if (trip) {
-            setScreen('dashboard');
-          } else if (!tripDbId) {
-            setScreen('home');
-          }
+          setScreen('home');
           // tripDbId exists but no trip yet: loadTripById is in-flight and will
           // navigate to 'dashboard' once ready. isGlobalLoading covers the wait.
           setAuthResolved(true);
@@ -667,10 +662,7 @@ function Shell() {
             <MFAChallenge
               onSuccess={() => {
                 setShowMfaChallenge(false);
-                const { trip, tripDbId } = useAppStore.getState();
-                if (trip) setScreen('dashboard');
-                else if (!tripDbId) setScreen('home');
-                // tripDbId without trip: loadTripById is in-flight and will navigate
+                setScreen('home');
               }}
               onSignOut={() => {
                 setShowMfaChallenge(false);
