@@ -213,7 +213,7 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
           onSuccess={(token) => setCaptchaToken(token)}
           onError={() => setCaptchaToken('')}
           onExpire={() => setCaptchaToken('')}
-          options={{ size: 'invisible' }}
+          options={{ size: 'invisible', execution: 'execute' }}
         />
       )}
     </div>
