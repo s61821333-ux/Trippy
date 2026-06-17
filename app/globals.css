@@ -948,6 +948,15 @@ select {
 @keyframes cloudDrift { from { transform: translateX(-4px); } to { transform: translateX(4px); } }
 @keyframes float    { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes spin     { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes srcPulse  { 0%, 100% { opacity: .45; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-2px); } }
+@keyframes haikoDot  { 0%,80%,100% { opacity:.25; transform:scale(0.75) } 40% { opacity:1; transform:scale(1.1) } }
+@keyframes haikoFadeUp { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:translateY(0) } }
+.haiko-msg  { animation: haikoFadeUp 0.24s cubic-bezier(0.22,1,0.36,1) both; }
+.haiko-chip:hover  { background: oklch(from var(--lg-terra) l c h / 18%) !important; }
+.haiko-chip:active { transform: scale(0.97); }
+.haiko-send:not(:disabled):hover  { filter: brightness(1.08); }
+.haiko-send:not(:disabled):active { transform: scale(0.94); }
+.haiko-input:focus { box-shadow: inset 0 0 0 1.5px oklch(from var(--lg-terra) l c h / 40%) !important; }
 @keyframes breathe  { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.02); opacity: 0.88; } }
 @keyframes jellyBounce {
   0%   { transform: scale(1); }
@@ -1905,9 +1914,9 @@ body::after {
   /* Liquid-glass panel recipe - vivid iOS26: strong blur + high saturation */
   --lg-blur:          blur(36px) saturate(1.8);
   --lg-blur-strong:   blur(48px) saturate(1.9);
-  --lg-panel:         oklch(99% 0.004 80 / 38%); /* inline rows: barely-there tint */
-  --lg-panel-strong:  oklch(99% 0.004 80 / 72%); /* section groups: visible surface */
-  --lg-panel-float:   oklch(99% 0.004 80 / 88%); /* floating: sheets/navbars/toasts */
+  --lg-panel:         oklch(99% 0.004 80 / 72%);
+  --lg-panel-strong:  oklch(99% 0.004 80 / 88%);
+  --lg-panel-float:   oklch(99% 0.004 80 / 92%);
   --lg-panel-dark:    oklch(22% 0.02 60 / 55%);
 
   --lg-r-card: 26px;
@@ -1916,9 +1925,9 @@ body::after {
   --lg-card-border: transparent; /* borderless in light mode - shadow provides separation */
 
   /* Vivid shadows with brand tint */
-  --lg-shadow:     0 1px 3px oklch(20% 0.03 60 / 8%);   /* inline: barely-there */
-  --lg-shadow-md:  0 4px 14px oklch(20% 0.03 60 / 12%), 0 1px 4px oklch(20% 0.03 60 / 7%);
-  --lg-shadow-lg:  0 12px 40px oklch(20% 0.03 60 / 22%), 0 4px 12px oklch(20% 0.03 60 / 12%);
+  --lg-shadow:     0 4px 16px oklch(20% 0.03 60 / 12%), 0 1px 4px oklch(20% 0.03 60 / 7%);
+  --lg-shadow-md:  0 8px 28px oklch(20% 0.03 60 / 18%), 0 2px 8px oklch(20% 0.03 60 / 10%);
+  --lg-shadow-lg:  0 20px 60px oklch(20% 0.03 60 / 26%), 0 6px 18px oklch(20% 0.03 60 / 14%);
   --lg-glow-terra: 0 12px 40px oklch(66% 0.198 42 / 36%);
   --lg-glow-forest:0 10px 34px oklch(45% 0.150 152 / 22%);
 }
@@ -1951,26 +1960,14 @@ body::after {
 /* Performance budget: aim for ≤5 simultaneous backdrop-filter elements per viewport.
    contain: layout style limits compositing-layer spread without hiding overflow. */
 .lg {
-  /* Inline row: nearly transparent — blends into page background */
   position: relative;
   background: var(--lg-panel);
-  backdrop-filter: none; /* no blur on inline rows — avoids the "frosted box" look */
-  -webkit-backdrop-filter: none;
-  border-radius: var(--lg-r-card);
-  border: none;
-  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 50%);
-  overflow: hidden;
-}
-
-/* Floating glass: sheets, nav, toasts, FABs, popovers */
-.lg-float {
-  position: relative;
-  background: var(--lg-panel-float);
   backdrop-filter: var(--lg-blur);
   -webkit-backdrop-filter: var(--lg-blur);
   border-radius: var(--lg-r-card);
   border: none;
-  box-shadow: var(--lg-shadow-lg),
+  box-shadow:
+    var(--lg-shadow),
     inset 0 1px 0 oklch(100% 0 0 / 72%),
     inset 0 -1px 0 oklch(0% 0 0 / 4%),
     inset 0 0 0 1px oklch(100% 0 0 / 22%);
@@ -2343,16 +2340,16 @@ body::after {
 .canvas-dark .statement .line-2 { color: oklch(98% 0.005 80 / 52%); }
 
 /* ── Liquid Glass animation system ───────────────────────────────── */
-@keyframes lgRise  { from { transform: translateY(18px); } to { transform: none; } }
+@keyframes lgRise  { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 @keyframes lgPop   { 0% { transform: scale(0.9); } 60% { transform: scale(1.03); } 100% { transform: scale(1); } }
 @keyframes lgFade  { from { opacity: 0.001; } to { opacity: 1; } }
 @keyframes lgFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 @keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
 
-.a-rise  { animation: lgRise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.a-pop   { animation: lgPop  0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-.a-fade  { animation: lgFade 0.4s ease both; }
-.a-float { animation: lgFloat 4s ease-in-out infinite; }
+.a-rise  { animation: lgRise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; will-change: transform, opacity; }
+.a-pop   { animation: lgPop  0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; will-change: transform; }
+.a-fade  { animation: lgFade 0.4s ease both; will-change: opacity; }
+.a-float { animation: lgFloat 4s ease-in-out infinite; will-change: transform; }
 
 .d1 { animation-delay: 0.06s; }
 .d2 { animation-delay: 0.12s; }
@@ -3544,11 +3541,7 @@ svg[aria-hidden="true"] {
   stroke: currentColor;
 }
 
-/* Row 1090: Spinner CSS animation */
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
-}
+/* Row 1090: Spinner CSS animation - @keyframes spin defined earlier in file */
 .spinner {
   width: 18px;
   height: 18px;
@@ -3558,6 +3551,7 @@ svg[aria-hidden="true"] {
   animation: spin 0.8s linear infinite;
   display: inline-block;
   flex-shrink: 0;
+  will-change: transform;
 }
 .spinner-sm { width: 14px; height: 14px; }
 .spinner-lg { width: 24px; height: 24px; }

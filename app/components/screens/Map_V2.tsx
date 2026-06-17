@@ -26,7 +26,6 @@ const LeafletMap = dynamic(() => import('../ui/LeafletMap'), {
         borderTopColor: 'var(--lg-terra)',
         animation: 'spin 0.9s linear infinite',
       }} />
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
     </div>
   ),
 });

@@ -4,7 +4,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { m, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/lib/store';
-import { useShallow as useShallowPacking } from 'zustand/react/shallow';
 import { useI18n } from '@/lib/i18n';
 import { StampIcon } from '../ui/StampIcon';
 import { supplyStamp } from '@/lib/categoryStamp';

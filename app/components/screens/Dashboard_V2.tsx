@@ -537,7 +537,6 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
 
   return (
     <Sheet title={isHe ? 'תקציב / הוצאות' : 'Budget / Expenses'} onClose={onClose}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
 
         {/* ── Visual summary ring ── */}
@@ -743,7 +742,7 @@ export default function DashboardScreenV2() {
   const { t, locale } = useI18n();
   const { show } = useToast();
 
-  useEffect(() => { loadExpenses(); }, [tripDbId]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { loadExpenses(); }, [tripDbId, loadExpenses]);
 
   const [weatherResult, setWeatherResult] = useState<WeatherResult>({ days: [], isEstimate: false });
   const [localTime, setLocalTime] = useState('');
@@ -1203,7 +1202,6 @@ export default function DashboardScreenV2() {
           {coachLoading ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
               <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,.35)', borderTopColor: '#fff', animation: 'spin .8s linear infinite', flexShrink: 0 }} />
-              <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
               <span style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', fontStyle: 'italic' }}>
                 {isRTL ? 'חושב על עצות לדרך…' : 'Looking at your trip…'}
               </span>

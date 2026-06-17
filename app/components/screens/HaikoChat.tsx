@@ -100,22 +100,6 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
         : (isHe ? 'בן הלוויה החכם לטיול' : 'Your AI travel companion')}
       onClose={onClose}
     >
-      <style>{`
-        @keyframes haikoDot {
-          0%,80%,100% { opacity:.25; transform:scale(0.75) }
-          40% { opacity:1; transform:scale(1.1) }
-        }
-        @keyframes haikoFadeUp {
-          from { opacity:0; transform:translateY(10px) }
-          to   { opacity:1; transform:translateY(0) }
-        }
-        .haiko-msg { animation: haikoFadeUp 0.24s cubic-bezier(0.22,1,0.36,1) both; }
-        .haiko-chip:hover { background: oklch(from var(--lg-terra) l c h / 18%) !important; }
-        .haiko-chip:active { transform: scale(0.97); }
-        .haiko-send:not(:disabled):hover { filter: brightness(1.08); }
-        .haiko-send:not(:disabled):active { transform: scale(0.94); }
-        .haiko-input:focus { box-shadow: inset 0 0 0 1.5px oklch(from var(--lg-terra) l c h / 40%) !important; }
-      `}</style>
 
       <div style={{ display: 'flex', flexDirection: 'column', height: 'min(62vh, 560px)' }}>
 

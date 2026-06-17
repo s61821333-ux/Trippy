@@ -32,6 +32,8 @@ const nextConfig: NextConfig = {
       '@supabase/ssr',
       'zustand',
       'zod',
+      'clsx',
+      'tailwind-merge',
     ],
   },
   images: {

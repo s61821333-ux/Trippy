@@ -13,7 +13,6 @@ const LeafletMap = dynamic(() => import('../ui/LeafletMap'), { ssr: false, loadi
     background:'var(--bg)' }}>
     <div style={{ width:40,height:40,borderRadius:'50%',border:'3px solid transparent',
       borderTopColor:'var(--lg-terra)',animation:'spin .9s linear infinite' }} />
-    <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
   </div>
 ) });
 import { StampIcon } from '../ui/StampIcon';
@@ -1086,7 +1085,8 @@ export default function DayDetail_V2() {
     }
     if (!lat || !lng) return;
     const start = trip.startDate ?? new Date().toISOString().split('T')[0];
-    fetch(`/api/weather?lat=${lat}&lng=${lng}&start=${start}&days=${trip.days}`)
+    const controller = new AbortController();
+    fetch(`/api/weather?lat=${lat}&lng=${lng}&start=${start}&days=${trip.days}`, { signal: controller.signal })
       .then(r => r.json())
       .then(d => {
         const times: string[] = d?.daily?.time ?? [];
@@ -1095,6 +1095,7 @@ export default function DayDetail_V2() {
         if (idx >= 0) setWeather({ temp: Math.round(d.daily.temperature_2m_max?.[idx] ?? 0), label: d.daily.label?.[idx] });
       })
       .catch(() => {});
+    return () => controller.abort();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeDay, trip?.startDate]);
 

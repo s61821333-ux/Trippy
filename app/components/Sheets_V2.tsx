@@ -435,7 +435,6 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
           <p style={{ fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-3)', margin: '0 0 8px', fontFamily: 'var(--font-mono)' }}>
             {isHe ? 'מחפש במקורות מובילים' : 'Searching trusted sources'}
           </p>
-          <style>{`@keyframes srcPulse{0%,100%{opacity:.45;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}`}</style>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {SEARCH_SOURCES.map((src, i) => (
               <span key={src.name} style={{
