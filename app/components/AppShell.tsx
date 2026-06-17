@@ -505,7 +505,7 @@ function Shell() {
     );
   }
 
-  const showNav = !!authUser && screen !== 'home' && !!trip;
+  const showNav = !!authUser && !!trip && screen !== 'home' && screen !== 'splash' && screen !== 'welcome';
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';

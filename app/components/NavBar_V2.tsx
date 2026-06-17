@@ -186,7 +186,7 @@ export default function NavBar_V2({
               }}
             >
               <button
-                onClick={() => { setExpandOpen(false); onSwitch?.(); }}
+                onClick={() => { setExpandOpen(false); setTimeout(() => onSwitch?.(), 50); }}
                 className="lg-btn"
                 style={{ ...PANEL_BTN }}
               >
