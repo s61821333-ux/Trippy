@@ -111,32 +111,46 @@ export async function GET(
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // When the admin client is available, use getSession() (local JWT decode, no network call)
+  // — the participant query with the service role key is the real authorization check.
+  // Fall back to getUser() (network round-trip) only for the RLS path.
+  const admin = tryAdminClient()
+
+  let user: { id: string } | null = null
+  if (admin) {
+    const { data: { session } } = await supabase.auth.getSession()
+    user = session?.user ?? null
+  } else {
+    const { data: { user: u } } = await supabase.auth.getUser()
+    user = u
+  }
+
   if (!user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
   }
 
   try {
-    const admin = tryAdminClient()
-
     if (admin) {
-      // Admin path - verify participation then load, bypassing RLS
-      const { data: participant } = await admin
-        .from('trip_participants')
-        .select('user_id')
-        .eq('trip_id', tripId)
-        .eq('user_id', user.id)
-        .maybeSingle()
+      // Admin path - verify participation and load trip in parallel, bypassing RLS
+      const [{ data: participant }, tripResult] = await Promise.all([
+        admin
+          .from('trip_participants')
+          .select('user_id')
+          .eq('trip_id', tripId)
+          .eq('user_id', user.id)
+          .maybeSingle(),
+        admin
+          .from('trips')
+          .select(TRIP_SELECT)
+          .eq('id', tripId)
+          .maybeSingle(),
+      ])
 
       if (!participant) {
         return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
       }
 
-      let { data, error } = await admin
-        .from('trips')
-        .select(TRIP_SELECT)
-        .eq('id', tripId)
-        .maybeSingle()
+      let { data, error } = tripResult
 
       if (error && isMissingColumnError(error.message)) {
         const fb = await admin.from('trips').select(TRIP_SELECT_FALLBACK).eq('id', tripId).maybeSingle()
