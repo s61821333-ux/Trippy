@@ -1,10 +1,7 @@
-﻿'use client';
+'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Turnstile, type TurnstileInstance } from '@marsidev/react-turnstile';
-import { signInWithGoogle, signInWithPasskey } from '@/lib/db';
-
-const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+import { useState } from 'react';
+import { signInWithGoogle } from '@/lib/db';
 
 interface Props {
   compact?: boolean;
@@ -12,24 +9,8 @@ interface Props {
 }
 
 export default function LandingSignIn({ compact = false, locale = 'en' }: Props) {
-  const [passkeySupported, setPasskeySupported] = useState(false);
-  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
-  // Only mount Turnstile after the passkey button is clicked — avoids loading
-  // a Cloudflare iframe on page load which blocks the `load` event in Firefox.
-  const [mountTurnstile, setMountTurnstile] = useState(false);
-  const [turnstileKey, setTurnstileKey] = useState(0);
-  const [captchaToken, setCaptchaToken] = useState('');
-  const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
-  // Holds the resolve function of the in-flight captcha Promise
-  const captchaResolverRef = useRef<((token: string | undefined) => void) | null>(null);
-
-  useEffect(() => {
-    setPasskeySupported(
-      typeof window !== 'undefined' && !!window.PublicKeyCredential,
-    );
-  }, []);
 
   const handleGoogle = async () => {
     setGoogleLoading(true);
@@ -39,67 +20,6 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
     } catch {
       setGoogleLoading(false);
       setError(locale === 'he' ? 'שגיאה בכניסה עם Google' : 'Google sign-in failed');
-    }
-  };
-
-  const handlePasskey = async () => {
-    setPasskeyLoading(true);
-    setError('');
-    try {
-      // Mount Turnstile widget on first click (deferred to avoid iframe blocking
-      // page `load` on Firefox). Once mounted the `onSuccess` callback sets
-      // captchaToken; then we call execute() and poll for the result.
-      let token: string | undefined = captchaToken || undefined;
-      if (TURNSTILE_SITE_KEY && !token) {
-        // Reset any previous resolver and token
-        captchaResolverRef.current?.(undefined);
-        captchaResolverRef.current = null;
-
-        if (mountTurnstile) {
-          // Force remount so execution: 'render' auto-fires cleanly
-          setTurnstileKey(k => k + 1);
-          setCaptchaToken('');
-        } else {
-          setMountTurnstile(true);
-        }
-
-        // Wait for onSuccess or onError to fire (up to 30s — Private Access Token
-        // challenges can take several seconds on some browsers/networks).
-        token = await new Promise<string | undefined>((resolve) => {
-          captchaResolverRef.current = resolve;
-          setTimeout(() => {
-            if (captchaResolverRef.current === resolve) {
-              captchaResolverRef.current = null;
-              resolve(undefined);
-            }
-          }, 30_000);
-        });
-      }
-
-      // Attempt sign-in regardless of token state. If the project enforces auth
-      // captcha and the token is missing, the server returns a clear error which
-      // we surface below; if captcha is NOT enforced (or Turnstile is broken /
-      // unconfigured for this domain, e.g. error 400020), passkey still works
-      // instead of being hard-blocked client-side.
-      await signInWithPasskey(token);
-      window.location.href = '/app';
-    } catch (e: unknown) {
-      setPasskeyLoading(false);
-      setCaptchaToken('');
-      captchaResolverRef.current = null;
-      const msg = e instanceof Error ? e.message : '';
-      // User cancelled the browser prompt - don't show an error
-      if (msg.includes('cancel') || msg.includes('abort') || msg.includes('NotAllowed')) return;
-      const base = locale === 'he' ? 'כניסה עם Passkey נכשלה' : 'Passkey sign-in failed';
-      // Captcha-specific hint: sitekey not configured for this domain
-      if (msg.toLowerCase().includes('captcha') || msg.toLowerCase().includes('turnstile')) {
-        setError(locale === 'he'
-          ? `${base} — בעיית Captcha. פנו לתמיכה.`
-          : `${base} — Captcha error. The Turnstile site key may not be configured for this domain.`);
-        return;
-      }
-      const hint = locale === 'he' ? ' - ודאו שרשום Passkey במכשיר' : ' - make sure you have one registered';
-      setError(msg ? `${base} - ${msg}` : `${base}${hint}`);
     }
   };
 
@@ -133,11 +53,9 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, width: '100%', maxWidth: 340 }}>
-
-      {/* Google */}
       <button
         onClick={handleGoogle}
-        disabled={googleLoading || passkeyLoading}
+        disabled={googleLoading}
         style={{
           width: '100%',
           display: 'flex',
@@ -145,9 +63,6 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
           justifyContent: 'center',
           gap: 12,
           padding: '14px 24px',
-          /* Fixed dark ink - NOT var(--text), which inverts to near-white in dark
-             mode and made the white label unreadable. Subtle light border gives
-             the button definition against the dark page background. */
           background: '#1C1713',
           color: 'oklch(98% 0.002 80)',
           border: '1px solid oklch(100% 0 0 / 0.14)',
@@ -156,66 +71,15 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
           fontSize: 15,
           fontWeight: 600,
           letterSpacing: '-0.015em',
-          cursor: (googleLoading || passkeyLoading) ? 'not-allowed' : 'pointer',
-          opacity: (passkeyLoading) ? 0.45 : googleLoading ? 0.7 : 1,
+          cursor: googleLoading ? 'not-allowed' : 'pointer',
+          opacity: googleLoading ? 0.7 : 1,
           boxShadow: 'var(--shadow-lg)',
           transition: 'opacity 0.15s',
         }}
       >
-        {googleLoading ? (
-          <Spinner />
-        ) : (
-          <GoogleIcon />
-        )}
+        {googleLoading ? <Spinner /> : <GoogleIcon />}
         {locale === 'he' ? 'כניסה עם Google' : 'Continue with Google'}
       </button>
-
-      {/* Passkey - only rendered when the browser supports WebAuthn */}
-      {passkeySupported && (
-        <>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            width: '100%',
-          }}>
-            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-            <span style={{ fontSize: 12, color: 'var(--text-3)', whiteSpace: 'nowrap' }}>
-              {locale === 'he' ? 'או' : 'or'}
-            </span>
-            <div style={{ flex: 1, height: 1, background: 'var(--border)' }} />
-          </div>
-
-          <button
-            onClick={handlePasskey}
-            disabled={googleLoading || passkeyLoading}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 10,
-              padding: '13px 24px',
-              background: 'transparent',
-              color: 'var(--text)',
-              border: '1.5px solid var(--border)',
-              borderRadius: 'var(--radius-full)',
-              fontFamily: 'var(--font-sans)',
-              fontSize: 15,
-              fontWeight: 600,
-              letterSpacing: '-0.015em',
-              cursor: (googleLoading || passkeyLoading) ? 'not-allowed' : 'pointer',
-              opacity: (googleLoading) ? 0.45 : passkeyLoading ? 0.7 : 1,
-              transition: 'opacity 0.15s, border-color 0.15s',
-            }}
-            onMouseEnter={e => { if (!googleLoading && !passkeyLoading) e.currentTarget.style.borderColor = 'var(--text-2)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
-          >
-            {passkeyLoading ? <Spinner dark /> : <PasskeyIcon />}
-            {locale === 'he' ? 'כניסה עם Passkey' : 'Sign in with Passkey'}
-          </button>
-        </>
-      )}
 
       {error && (
         <p style={{
@@ -227,30 +91,6 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
         }}>
           {error}
         </p>
-      )}
-
-      {/* Invisible captcha - only mounted after passkey click to avoid Cloudflare
-          iframe blocking the page `load` event on Firefox during tests. */}
-      {passkeySupported && TURNSTILE_SITE_KEY && mountTurnstile && (
-        <Turnstile
-          key={turnstileKey}
-          ref={turnstileRef}
-          siteKey={TURNSTILE_SITE_KEY}
-          onSuccess={(t) => {
-            setCaptchaToken(t);
-            captchaResolverRef.current?.(t);
-            captchaResolverRef.current = null;
-          }}
-          onError={() => {
-            setCaptchaToken('');
-            captchaResolverRef.current?.(undefined);
-            captchaResolverRef.current = null;
-          }}
-          onExpire={() => {
-            setCaptchaToken('');
-          }}
-          options={{ size: 'invisible', execution: 'render' }}
-        />
       )}
     </div>
   );
@@ -267,23 +107,12 @@ function GoogleIcon() {
   );
 }
 
-function PasskeyIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
-      <circle cx="8" cy="8" r="3.5" />
-      <path d="M3 21v-1a5 5 0 0 1 5-5h.5" />
-      <path d="M15 12l1.5 1.5L19 11" />
-      <rect x="13" y="9" width="8" height="6" rx="1.5" />
-    </svg>
-  );
-}
-
-function Spinner({ dark = false }: { dark?: boolean }) {
+function Spinner() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0, animation: 'spin 0.8s linear infinite' }}>
       <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
-      <circle cx="12" cy="12" r="9" stroke={dark ? 'var(--text-3)' : 'rgba(255,255,255,0.3)'} strokeWidth="2.5" />
-      <path d="M12 3a9 9 0 0 1 9 9" stroke={dark ? 'var(--text)' : 'white'} strokeWidth="2.5" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5" />
+      <path d="M12 3a9 9 0 0 1 9 9" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
     </svg>
   );
 }

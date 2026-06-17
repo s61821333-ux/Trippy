@@ -12,9 +12,6 @@ import {
   mfaEnrollTotp,
   mfaChallengeAndVerify,
   mfaUnenroll,
-  passkeyRegister,
-  passkeyList,
-  passkeyDelete,
 } from '@/lib/db';
 
 interface Factor {
@@ -22,13 +19,6 @@ interface Factor {
   friendly_name?: string;
   factor_type: string;
   status: 'verified' | 'unverified';
-}
-
-interface PasskeyItem {
-  id: string;
-  friendly_name?: string;
-  created_at: string;
-  last_used_at?: string;
 }
 
 interface EnrollData {
@@ -113,7 +103,6 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
   const isHe = locale === 'he';
 
   const [factors, setFactors] = useState<Factor[]>([]);
-  const [passkeys, setPasskeys] = useState<PasskeyItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   // TOTP enrollment flow
@@ -121,21 +110,14 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
   const [otpCode, setOtpCode] = useState('');
   const [verifying, setVerifying] = useState(false);
 
-  // Passkey
-  const [addingPasskey, setAddingPasskey] = useState(false);
-
   // Pending removes
   const [removingId, setRemovingId] = useState<string | null>(null);
-
-  const passkeySupported =
-    typeof window !== 'undefined' && !!window.PublicKeyCredential;
 
   const load = async () => {
     setLoading(true);
     try {
-      const [mfaData, pkData] = await Promise.all([mfaListFactors(), passkeyList()]);
+      const mfaData = await mfaListFactors();
       setFactors(mfaData.totp ?? []);
-      setPasskeys(pkData ?? []);
     } catch {
       /* ignore */
     } finally {
@@ -188,42 +170,6 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
     setRemovingId(factorId);
     try {
       await mfaUnenroll(factorId);
-      show(isHe ? 'הוסר בהצלחה' : 'Removed successfully');
-      await load();
-    } catch {
-      show(isHe ? 'שגיאה בהסרה' : 'Could not remove');
-    } finally {
-      setRemovingId(null);
-    }
-  };
-
-  // ── Passkey ──────────────────────────────────────────────────────────────────
-  const handleAddPasskey = async () => {
-    if (!passkeySupported) {
-      show(isHe ? 'הדפדפן שלך לא תומך ב-Passkeys' : 'Passkeys not supported in this browser');
-      return;
-    }
-    setAddingPasskey(true);
-    try {
-      await passkeyRegister();
-      show(isHe ? '✓ Passkey נוסף!' : '✓ Passkey added!');
-      await load();
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : '';
-      if (msg.includes('abort') || msg.includes('cancel') || msg.includes('NotAllowed')) {
-        // User cancelled the browser dialog - silent
-      } else {
-        show(isHe ? 'שגיאה בהוספת Passkey' : 'Could not add passkey');
-      }
-    } finally {
-      setAddingPasskey(false);
-    }
-  };
-
-  const handleRemovePasskey = async (id: string) => {
-    setRemovingId(id);
-    try {
-      await passkeyDelete(id);
       show(isHe ? 'הוסר בהצלחה' : 'Removed successfully');
       await load();
     } catch {
@@ -375,75 +321,6 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
               </m.div>
             )}
           </AnimatePresence>
-        </m.div>
-
-        {/* ── Passkeys ────────────────────────────────────────────────────────── */}
-        <p style={SECTION_STYLE}>{isHe ? 'מפתחות גישה (Passkeys)' : 'Passkeys'}</p>
-
-        <m.div className="lg" style={{ padding: '4px 16px', marginBottom: 20 }}
-          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3, delay: 0.07 }}>
-
-          {passkeys.length > 0 ? (
-            <>
-              {passkeys.map((p, i) => (
-                <React.Fragment key={p.id}>
-                  {i > 0 && <div style={DIVIDER} />}
-                  <div style={ROW_STYLE}>
-                    <span className="lg-btn lg-btn-glass" style={{ width: 38, height: 38, padding: 0, flexShrink: 0 }}>
-                      <Icon name="lock" size={17} color="var(--lg-sand)" />
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={LABEL_STYLE}>{p.friendly_name || (isHe ? 'מפתח גישה' : 'Passkey')}</div>
-                      <div style={{ ...SUB_STYLE, color: 'var(--lg-forest)', fontWeight: 600 }}>
-                        {isHe ? '● פעיל' : '● Active'}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleRemovePasskey(p.id)}
-                      disabled={removingId === p.id}
-                      style={{
-                        background: 'none', border: 0, cursor: 'pointer', padding: 8,
-                        opacity: removingId === p.id ? 0.4 : 0.7,
-                      }}
-                    >
-                      <Icon name="trash" size={16} color="var(--danger)" />
-                    </button>
-                  </div>
-                </React.Fragment>
-              ))}
-              <div style={DIVIDER} />
-            </>
-          ) : (
-            <div style={{ ...ROW_STYLE, flexDirection: 'column', alignItems: 'flex-start', gap: 6, padding: '14px 0' }}>
-              <div style={LABEL_STYLE}>{isHe ? 'אין מפתחות גישה' : 'No passkeys yet'}</div>
-              <div style={SUB_STYLE}>
-                {isHe
-                  ? 'Passkeys מאפשרים כניסה ביומטרית מהירה ומאובטחת ללא סיסמה.'
-                  : 'Passkeys let you sign in with Face ID, fingerprint, or device PIN - no password needed.'}
-              </div>
-            </div>
-          )}
-
-          <div style={{ paddingTop: 8 }}>
-            {passkeySupported ? (
-              <GlassBtn
-                variant="ghost"
-                size="md"
-                onClick={handleAddPasskey}
-                disabled={addingPasskey}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
-              >
-                <Icon name="plus" size={16} color="var(--lg-ink)" />
-                {addingPasskey
-                  ? (isHe ? 'מוסיף…' : 'Adding…')
-                  : (isHe ? 'הוסף Passkey' : 'Add Passkey')}
-              </GlassBtn>
-            ) : (
-              <p style={{ fontSize: 12, color: 'var(--text-3)', textAlign: 'center', padding: '8px 0' }}>
-                {isHe ? 'הדפדפן הנוכחי לא תומך ב-Passkeys' : 'Passkeys are not supported in this browser'}
-              </p>
-            )}
-          </div>
         </m.div>
 
       </div>

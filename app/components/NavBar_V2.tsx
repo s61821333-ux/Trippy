@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import { m, AnimatePresence } from 'framer-motion';
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState, useEffect } from 'react';
 import Icon from './ui/Icon';
 import { Screen } from '@/lib/types';
 import { useI18n, TranslationKey } from '@/lib/i18n';
@@ -65,7 +65,16 @@ export default function NavBar_V2({
   const isHe = locale === 'he';
 
   const [expandOpen, setExpandOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const menuBtnRef = React.useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    setIsDesktop(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   React.useEffect(() => { setExpandOpen(false); }, [active]);
 
@@ -85,7 +94,8 @@ export default function NavBar_V2({
   const activeTabIdx = wishlistOpen
     ? TABS.findIndex(tb => tb.id === 'wishlist')
     : TABS.findIndex(tb => tb.kind === 'screen' && tb.id === active);
-  const blobX = (isHe ? -1 : 1) * Math.max(0, activeTabIdx) * TAB_W;
+  const blobX = isDesktop ? 0 : (isHe ? -1 : 1) * Math.max(0, activeTabIdx) * TAB_W;
+  const blobY = isDesktop ? Math.max(0, activeTabIdx) * TAB_W : 0;
 
   const handleChange = (id: Screen) => {
     onChange(id);
@@ -94,12 +104,28 @@ export default function NavBar_V2({
 
   return (
     <div
-      style={{
+      style={isDesktop ? {
+        position: 'fixed',
+        right: 0,
+        top: 0,
+        bottom: 0,
+        paddingRight: 'calc(12px + env(safe-area-inset-right, 0px))',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        gap: 8,
+        zIndex: 250,
+        pointerEvents: 'none',
+        transform: 'translateZ(0)',
+        WebkitTransform: 'translateZ(0)',
+        willChange: 'transform',
+      } : {
         position: 'fixed',
         left: 0,
         right: 0,
-        bottom: 0, /* start from true bottom edge */
-        paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))', /* clear home indicator */
+        bottom: 0,
+        paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -125,9 +151,9 @@ export default function NavBar_V2({
           <m.div
             key="expand-panel"
             className="lg lg-strong"
-            initial={{ opacity: 0, y: 12, scale: 0.92 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.92 }}
+            initial={isDesktop ? { opacity: 0, x: 12, scale: 0.92 } : { opacity: 0, y: 12, scale: 0.92 }}
+            animate={isDesktop ? { opacity: 1, x: 0, scale: 1 } : { opacity: 1, y: 0, scale: 1 }}
+            exit={isDesktop ? { opacity: 0, x: 12, scale: 0.92 } : { opacity: 0, y: 12, scale: 0.92 }}
             transition={PANEL_SPRING}
             style={{
               display: 'flex',
@@ -182,14 +208,20 @@ export default function NavBar_V2({
       </AnimatePresence>
 
       {/* ── Main row ─────────────────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', pointerEvents: 'auto' }}>
+      <div style={{
+        display: 'flex',
+        gap: 8,
+        alignItems: 'center',
+        pointerEvents: 'auto',
+        flexDirection: isDesktop ? 'column' : 'row',
+      }}>
 
         {/* Menu FAB */}
         <m.button
           ref={menuBtnRef}
           onClick={() => setExpandOpen(o => !o)}
-          initial={{ y: 12 }}
-          animate={{ y: 0 }}
+          initial={isDesktop ? { x: 12 } : { y: 12 }}
+          animate={isDesktop ? { x: 0 } : { y: 0 }}
           transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.08 }}
           whileTap={{ scale: 0.92 }}
           className="lg lg-strong"
@@ -221,31 +253,32 @@ export default function NavBar_V2({
         {/* Tab bar pill - 5 tabs (4 screens + Wishlist action) */}
         <m.nav
           aria-label={t('navMain')}
-          initial={{ y: 12 }}
-          animate={{ y: 0 }}
+          initial={isDesktop ? { x: 12 } : { y: 12 }}
+          animate={isDesktop ? { x: 0 } : { y: 0 }}
           transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.06 }}
           className="lg lg-strong nav-pill"
           role="tablist"
           style={{
             position: 'relative',
             display: 'flex',
+            flexDirection: isDesktop ? 'column' : 'row',
             alignItems: 'center',
             padding: PILL_PAD,
             borderRadius: 9999,
-            height: 66,
+            ...(isDesktop ? { width: 66 } : { height: 66 }),
           }}
         >
           {/* Active blob */}
           <m.div
             aria-hidden="true"
-            animate={{ x: blobX, opacity: activeTabIdx >= 0 ? 1 : 0 }}
+            animate={{ x: blobX, y: blobY, opacity: activeTabIdx >= 0 ? 1 : 0 }}
             transition={BLOB_SPRING}
             style={{
               position: 'absolute',
               top: PILL_PAD,
-              [isHe ? 'right' : 'left']: PILL_PAD,
-              width: TAB_W,
-              height: 66 - PILL_PAD * 2,
+              [isDesktop ? 'left' : (isHe ? 'right' : 'left')]: PILL_PAD,
+              width: isDesktop ? 66 - PILL_PAD * 2 : TAB_W,
+              height: TAB_W,
               borderRadius: 9999,
               background: 'linear-gradient(180deg, var(--lg-terra-bright), var(--lg-terra))',
               boxShadow: 'var(--lg-glow-terra)',
@@ -277,8 +310,8 @@ export default function NavBar_V2({
                 style={{
                   position: 'relative',
                   zIndex: 1,
-                  width: TAB_W,
-                  height: 66 - PILL_PAD * 2,
+                  width: isDesktop ? 66 - PILL_PAD * 2 : TAB_W,
+                  height: TAB_W,
                   border: 0,
                   background: 'transparent',
                   cursor: 'pointer',
@@ -323,8 +356,8 @@ export default function NavBar_V2({
         {onAI && (
           <m.button
             onClick={() => { setExpandOpen(false); onAI(); }}
-            initial={{ y: 12 }}
-            animate={{ y: 0 }}
+            initial={isDesktop ? { x: 12 } : { y: 12 }}
+            animate={isDesktop ? { x: 0 } : { y: 0 }}
             transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
             whileTap={{ scale: 0.92 }}
             className="lg lg-strong ai-fab"
@@ -365,8 +398,8 @@ export default function NavBar_V2({
         {onAdd && (
           <m.button
             onClick={onAdd}
-            initial={{ y: 12 }}
-            animate={{ y: 0 }}
+            initial={isDesktop ? { x: 12 } : { y: 12 }}
+            animate={isDesktop ? { x: 0 } : { y: 0 }}
             transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.12 }}
             whileTap={{ scale: 0.92 }}
             className="lg-btn lg-btn-forest"

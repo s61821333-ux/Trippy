@@ -208,7 +208,8 @@ function Shell() {
       if (next !== null && (!next.startsWith('/') || next.startsWith('//'))) {
         p.delete('next');
         const qs = p.toString();
-        window.history.replaceState({}, '', qs ? `/app?${qs}` : '/app');
+        const base = window.location.pathname;
+        window.history.replaceState({}, '', qs ? `${base}?${qs}` : base);
       }
     }
 
@@ -216,7 +217,7 @@ function Shell() {
     const params = new URLSearchParams(window.location.search);
     const joinId = params.get('join');
     if (joinId) {
-      window.history.replaceState({}, '', '/app');
+      window.history.replaceState({}, '', window.location.pathname);
       sessionStorage.setItem('Trippy-pending-join', joinId);
     }
 
@@ -326,9 +327,9 @@ function Shell() {
     }
     if (lastLoadedTripRef.current === tripDbId) return;
     lastLoadedTripRef.current = tripDbId;
-    // Silent load - the branded DashboardSkeleton covers this wait, so we don't
-    // stack a full-screen compass overlay on top of it.
-    loadTripById(tripDbId, { showLoader: false, showEntry: false }).catch(() => {
+    // Silent load on boot — navigate:false keeps user on the trips-picker (Home_V2)
+    // instead of jumping straight to dashboard. User taps the trip to enter.
+    loadTripById(tripDbId, { showLoader: false, showEntry: false, navigate: false }).catch(() => {
       lastLoadedTripRef.current = null;
     });
   }, [authUser, tripDbId, trip, loadTripById]);
@@ -438,7 +439,10 @@ function Shell() {
     }
   }, [mounted, authResolved, screen]);
 
-  if (!mounted || !authResolved) {
+  // Block render only when we have no idea who the user is yet.
+  // If persisted authUser is available from localStorage, show the app immediately —
+  // onAuthStateChange will correct any stale state (redirect to / if expired).
+  if (!mounted || (!authResolved && !authUser)) {
     return (
       <div style={{
         position: 'fixed', inset: 0,

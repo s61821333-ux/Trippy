@@ -3890,13 +3890,6 @@ body, * {
   100% { opacity: 1; transform: scale(1) translateY(0); box-shadow: none; }
 }
 
-/* Row 159: Turnstile captcha widget - match glass surface */
-.cf-turnstile, #turnstile-widget {
-  border-radius: var(--lg-r-md, 16px) !important;
-  overflow: hidden;
-  border: 1px solid var(--border) !important;
-}
-
 /* Row 208: Gap chip dark mode */
 [data-dark="true"] .chip[data-variant="gap"],
 [data-dark="true"] .chip--gap {

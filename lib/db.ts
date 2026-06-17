@@ -91,35 +91,6 @@ export async function mfaEnrollTotp(friendlyName: string) {
   }
 }
 
-// ─── Passkeys (primary auth, not MFA) ────────────────────────────────────────
-
-export async function signInWithPasskey(captchaToken?: string) {
-  // The Supabase project has Auth captcha protection enabled, so the
-  // authentication-options endpoint rejects requests without a captchaToken.
-  const { data, error } = await sb().auth.signInWithPasskey(
-    captchaToken ? { options: { captchaToken } } : undefined,
-  )
-  if (error) throw error
-  return data
-}
-
-export async function passkeyRegister() {
-  // Triggers the browser's WebAuthn ceremony (Face ID / fingerprint / PIN)
-  const { data, error } = await sb().auth.registerPasskey()
-  if (error) throw error
-  return data
-}
-
-export async function passkeyList() {
-  const { data, error } = await sb().auth.passkey.list()
-  if (error) throw error
-  return data
-}
-
-export async function passkeyDelete(passkeyId: string) {
-  const { error } = await sb().auth.passkey.delete({ passkeyId })
-  if (error) throw error
-}
 
 export async function mfaChallengeAndVerify(factorId: string, code: string) {
   const supabase = sb()

@@ -8,6 +8,7 @@ import LandingSignIn from './components/LandingSignIn';
 import LandingNextGuard from './components/LandingNextGuard';
 import { LandingSchema } from './components/SchemaMarkup';
 import StatementHeading from './components/ui/StatementHeading';
+import AppShell from './components/AppShell';
 
 export async function generateMetadata(): Promise<Metadata> {
   const cookieStore = await cookies();
@@ -87,7 +88,9 @@ export default async function LandingPage({
   const hasAuthCookie = cookieStore
     .getAll()
     .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'));
-  if (hasAuthCookie) redirect('/app');
+  // Render AppShell inline instead of redirecting — saves one full HTTP round-trip.
+  // AppShell's onAuthStateChange validates the session; expired cookies get redirected to '/'.
+  if (hasAuthCookie) return <AppShell />;
 
   const features = isHe ? [
     {
