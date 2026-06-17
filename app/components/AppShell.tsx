@@ -177,6 +177,7 @@ function Shell() {
   const { isRTL, locale, t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [authResolved, setAuthResolved] = useState(false);
+  const authTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [osDark, setOsDark] = useState(false);
   const [showEntryAnim, setShowEntryAnim] = useState(false);
   const [entryCountries, setEntryCountries] = useState<string[]>([]);
@@ -242,8 +243,7 @@ function Shell() {
           // MFA network call. The challenge overlay appears as soon as the check
           // completes (usually <1 s later); users without MFA never pay that cost.
           setScreen('home');
-          // tripDbId exists but no trip yet: loadTripById is in-flight and will
-          // navigate to 'dashboard' once ready. isGlobalLoading covers the wait.
+          if (authTimeoutRef.current) { clearTimeout(authTimeoutRef.current); authTimeoutRef.current = null; }
           setAuthResolved(true);
           // MFA check runs outside the onAuthStateChange lock (calling auth methods
           // inside the callback deadlocks). Non-blocking - shows challenge if needed.
@@ -284,7 +284,18 @@ function Shell() {
     // Reload trip data from DB if the user has a stored tripDbId (no auto-navigation).
     checkAuth();
 
-    return () => subscription.unsubscribe();
+    // Failsafe: if onAuthStateChange never fires (cold Supabase, network issue),
+    // redirect to root after 10s so the user isn't stuck on the spinner forever.
+    authTimeoutRef.current = setTimeout(() => {
+      if (!useAppStore.getState().authUser) {
+        window.location.href = '/';
+      }
+    }, 10_000);
+
+    return () => {
+      subscription.unsubscribe();
+      if (authTimeoutRef.current) clearTimeout(authTimeoutRef.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

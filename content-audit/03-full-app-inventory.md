@@ -211,7 +211,7 @@ Demo AI suggestions: Alpaca Farm, Desert Bistro & Coffee, Camel Crossing Viewpoi
 
 ```json
 {
-  "name": "Trippy — Friendly Trip Planner",
+  "name": "Trippy",
   "short_name": "Trippy",
   "description": "AI-powered collaborative trip planner"
 }
