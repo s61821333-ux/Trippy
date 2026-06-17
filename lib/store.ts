@@ -357,7 +357,13 @@ export const useAppStore = create<AppState>()(
         // never double-loads behind the splash screen or flashes blank mid-session.
         if (showLoader) set({ isGlobalLoading: true });
         try {
-          const data = await dbLoadTripById(tripId);
+          const loadWithTimeout = Promise.race([
+            dbLoadTripById(tripId),
+            new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error('load_timeout')), 15_000)
+            ),
+          ]);
+          const data = await loadWithTimeout;
           if (!data) throw new Error('not_found');
           const { trip: dbTrip, supplies } = rowToTrip(data);
           // If this is the same trip we had locally, merge pending events before overwriting

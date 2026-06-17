@@ -397,6 +397,17 @@ function Shell() {
   // Service Worker registration lives in ServiceWorkerRegistrar (root layout) -
   // registering here as well was redundant.
 
+  // Reset stuck global loader when app returns from background (PWA suspend/resume)
+  useEffect(() => {
+    const onVisible = () => {
+      if (!document.hidden && useAppStore.getState().isGlobalLoading) {
+        useAppStore.setState({ isGlobalLoading: false });
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, []);
+
   // Prevent iOS Safari pull-to-refresh (the gesture causes a full page reload
   // which shows the global loader). Allow vertical panning inside scroll containers
   // that are not at their top boundary.

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'trippy-v3';
+const CACHE_NAME = 'trippy-v4';
 
 // Cache app shell assets on install
 self.addEventListener('install', (event) => {
