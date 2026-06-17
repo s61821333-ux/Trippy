@@ -965,13 +965,16 @@ export const useAppStore = create<AppState>()(
         let debounceTimer: ReturnType<typeof setTimeout> | null = null;
         let pollTimer: ReturnType<typeof setInterval> | null = null;
 
+        const AUTH_SCREENS_RT = ['home', 'splash', 'welcome'];
         const scheduleReload = () => {
           if (debounceTimer) clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => {
             debounceTimer = null;
             // Skip reload if the store is already mid-load (prevents cascade)
             if (get().isGlobalLoading) return;
-            get().loadTripById(tripId, { showLoader: false }).catch(() => {});
+            // Never auto-navigate from realtime updates — user is on home/trip-picker
+            const onAuthScreen = AUTH_SCREENS_RT.includes(get().screen);
+            get().loadTripById(tripId, { showLoader: false, navigate: !onAuthScreen }).catch(() => {});
           }, 150);
         };
 
@@ -980,7 +983,8 @@ export const useAppStore = create<AppState>()(
           // Poll every 30 s as a fallback when WebSocket is unavailable (e.g. Brave shields)
           pollTimer = setInterval(() => {
             if (!get().isGlobalLoading && get().tripDbId === tripId) {
-              get().loadTripById(tripId, { showLoader: false }).catch(() => {});
+              const onAuthScreen = AUTH_SCREENS_RT.includes(get().screen);
+              get().loadTripById(tripId, { showLoader: false, navigate: !onAuthScreen }).catch(() => {});
             }
           }, 30_000);
         };
