@@ -263,10 +263,18 @@ function Shell() {
         // so defer the redirect check by one macrotask to allow test scripts to set the flag.
         // SIGNED_OUT always redirects unless already in test mode.
         const doRedirect = () => {
-          // If already at root, sign out to clear the stale auth cookie then reload
-          // (prevents an infinite loop where the landing page re-renders AppShell).
+          // If already at root, wipe stale sb-* cookies directly (no signOut() call —
+          // that fires onAuthStateChange again and creates an infinite loop), then reload
+          // so the server sees no auth cookie and renders the real landing page.
           if (window.location.pathname === '/') {
-            supabase.auth.signOut().finally(() => window.location.reload());
+            document.cookie.split(';').forEach(c => {
+              const name = c.split('=')[0].trim();
+              if (name.startsWith('sb-')) {
+                document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
+                document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax; Secure`;
+              }
+            });
+            window.location.reload();
           } else {
             window.location.href = '/';
           }
