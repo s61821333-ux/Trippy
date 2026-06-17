@@ -1077,7 +1077,9 @@ export default function DashboardScreenV2() {
                 background: 'var(--lg-panel)',
                 borderRadius: 12,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                boxShadow: 'var(--shadow-xs)',
+                boxShadow: 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 50%)',
+                backdropFilter: 'blur(16px) saturate(1.6)',
+                WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
               }}>
                 <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14, color: m.done ? readinessColor : 'var(--text)' }}>
                   {m.value}

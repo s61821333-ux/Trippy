@@ -24,9 +24,10 @@ export default function Chip({ children, v = 'neutral', style = {} }: ChipProps)
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', gap: 3,
-      padding: '3px 9px', borderRadius: 'var(--radius-sm)',
+      padding: '3px 10px', borderRadius: 'var(--radius-sm)',
       fontSize: 11, fontWeight: 600,
       background: s.bg, color: s.color, border: s.border,
+      boxShadow: 'inset 0 1px 0 oklch(100% 0 0 / 45%)',
       ...style,
     }}>
       {children}

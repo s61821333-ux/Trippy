@@ -9,11 +9,11 @@ interface ToastCtx { show: (msg: string, opts?: ToastOptions) => void }
 
 const Ctx = createContext<ToastCtx>({ show: () => {} });
 
-const VARIANT_STYLES: Record<ToastVariant, { bg: string; color: string; border: string }> = {
-  default:  { bg: 'rgba(255,255,255,0.92)', color: 'rgba(28,18,8,0.88)',  border: 'rgba(255,255,255,0.85)' },
-  success:  { bg: 'oklch(97% 0.020 155 / 0.95)', color: 'var(--brand)',   border: 'oklch(42% 0.092 155 / 0.25)' },
-  error:    { bg: 'oklch(97% 0.018 25 / 0.95)',  color: 'var(--danger)',  border: 'oklch(48% 0.130 25 / 0.25)' },
-  info:     { bg: 'rgba(255,255,255,0.92)', color: 'oklch(52% 0.16 225)', border: 'oklch(52% 0.16 225 / 0.25)' },
+const VARIANT_STYLES: Record<ToastVariant, { bg: string; color: string; border: string; shadow: string }> = {
+  default:  { bg: 'oklch(16% 0.016 60 / 92%)', color: 'oklch(96% 0.005 80)', border: 'oklch(100% 0 0 / 14%)', shadow: 'var(--shadow-xl), inset 0 1px 0 oklch(100% 0 0 / 18%)' },
+  success:  { bg: 'oklch(16% 0.016 60 / 92%)', color: 'var(--success)',      border: 'oklch(42% 0.092 155 / 0.30)', shadow: 'var(--shadow-xl), inset 0 1px 0 oklch(100% 0 0 / 14%)' },
+  error:    { bg: 'oklch(16% 0.016 60 / 92%)', color: 'var(--danger)',       border: 'oklch(48% 0.130 25 / 0.30)', shadow: 'var(--shadow-xl), inset 0 1px 0 oklch(100% 0 0 / 14%)' },
+  info:     { bg: 'oklch(16% 0.016 60 / 92%)', color: 'oklch(68% 0.15 225)', border: 'oklch(52% 0.16 225 / 0.25)', shadow: 'var(--shadow-xl), inset 0 1px 0 oklch(100% 0 0 / 14%)' },
 };
 
 // Row 118: icon + color + text triple redundancy
@@ -60,19 +60,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       >
         {msg && (
           <div
-            className="an-fade"
+            className="an-pop"
             style={{
               background: vs.bg,
-              backdropFilter: 'blur(28px) saturate(1.8)',
-              WebkitBackdropFilter: 'blur(28px) saturate(1.8)',
+              backdropFilter: 'var(--lg-blur-3)',
+              WebkitBackdropFilter: 'var(--lg-blur-3)',
               border: `1px solid ${vs.border}`,
-              borderRadius: 14,
-              padding: '10px 16px',
+              borderRadius: 20,
+              padding: '11px 18px',
               fontSize: 13,
               fontWeight: 600,
               fontFamily: 'var(--font-sans)',
               whiteSpace: 'nowrap',
-              boxShadow: '0 4px 24px rgba(80,60,20,0.12)',
+              boxShadow: vs.shadow,
               color: vs.color,
               display: 'flex',
               alignItems: 'center',

@@ -79,9 +79,13 @@ export const scaleVariants: Variants = {
 };
 
 export const screenVariants: Variants = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0 },
-  exit:    { opacity: 0, y: -4 },
+  initial: { opacity: 0, y: 10, filter: 'blur(5px)' },
+  animate: { opacity: 1, y: 0,  filter: 'blur(0px)',
+    transition: { duration: 0.38, ease: [0.25, 0, 0, 1] },
+  },
+  exit:    { opacity: 0, y: -5, filter: 'blur(3px)',
+    transition: { duration: 0.20, ease: [0.4, 0, 1, 1] },
+  },
 };
 
 export const listItemVariants: Variants = {

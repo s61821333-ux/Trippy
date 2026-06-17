@@ -51,8 +51,8 @@ export default function Field({
 
   const baseStyle: CSSProperties = {
     background: focused ? 'var(--field-bg-focused)' : 'var(--field-bg)',
-    backdropFilter: 'blur(20px) saturate(1.8)',
-    WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+    backdropFilter: 'blur(24px) saturate(1.8)',
+    WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
     border: 'none',
     borderRadius: 14,
     color: 'var(--text)',
@@ -66,10 +66,10 @@ export default function Field({
     boxSizing: 'border-box' as const,
     transition: 'background 0.2s ease, box-shadow 0.2s ease',
     boxShadow: error
-      ? 'inset 0 0 0 1.5px var(--danger), inset 0 1px 0 oklch(100% 0 0 / 40%)'
+      ? 'inset 0 0 0 1.5px var(--danger), inset 0 1px 0 oklch(100% 0 0 / 50%)'
       : focused
-        ? `inset 0 0 0 1.5px var(--field-border-focused), inset 0 1px 0 oklch(100% 0 0 / 40%), 0 0 0 3px var(--brand-muted)`
-        : 'inset 0 0 0 1px var(--field-border), inset 0 1px 0 oklch(100% 0 0 / 44%)',
+        ? `inset 0 0 0 1.5px var(--field-border-focused), inset 0 1px 0 oklch(100% 0 0 / 55%), 0 0 0 3px var(--brand-muted)`
+        : 'inset 0 0 0 1px var(--field-border), inset 0 1px 0 oklch(100% 0 0 / 52%), inset 0 -1px 0 oklch(13% 0.012 55 / 3%)',
     caretColor: 'var(--brand)',
     ...style,
   };

@@ -173,12 +173,16 @@ export default function NavBar_V2({
                 borderRadius: 28,
                 pointerEvents: 'auto',
                 width: 'min(260px, calc(100vw - 32px))',
+                position: 'absolute',
+                zIndex: 41,
                 ...(isDesktop ? {
-                  position: 'absolute',
                   right: 'calc(100% + 8px)',
                   top: 0,
-                  zIndex: 41,
-                } : {}),
+                } : {
+                  bottom: 'calc(100% + 8px)',
+                  left: '50%',
+                  marginLeft: 'min(-130px, calc(-50vw + 16px))',
+                }),
               }}
             >
               <button
@@ -209,7 +213,7 @@ export default function NavBar_V2({
               </button>
 
               {/* Divider */}
-              <div style={{ height: 1, background: 'oklch(50% 0.02 60 / 12%)', margin: '2px 8px' }} />
+              <hr className="lg-rule" style={{ margin: '2px 8px' }} />
 
               <button
                 onClick={() => { setExpandOpen(false); onLogout?.(); }}
@@ -231,7 +235,7 @@ export default function NavBar_V2({
           animate={isDesktop ? { x: 0 } : { y: 0 }}
           transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.08 }}
           whileTap={{ scale: 0.92 }}
-          className="lg lg-strong"
+          className="lg lg-strong specular-hover"
           aria-label={t('navMenu')}
           aria-expanded={expandOpen}
           aria-haspopup="menu"
@@ -367,31 +371,24 @@ export default function NavBar_V2({
             animate={isDesktop ? { x: 0 } : { y: 0 }}
             transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
             whileTap={{ scale: 0.92 }}
-            className="lg lg-strong ai-fab"
+            className="lg-fab lg-fab-terra ai-fab specular-hover"
             aria-label={isHe ? 'הצעות AI' : 'AI suggestions'}
             aria-haspopup="dialog"
             style={{
               width: 52, height: 52,
-              borderRadius: 9999,
               flexShrink: 0,
               border: 0,
-              cursor: 'pointer',
-              display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
               gap: 3,
-              WebkitTapHighlightColor: 'transparent',
-              touchAction: 'manipulation',
             }}
           >
-            <Icon name="sparkle" size={19} style={{ color: 'var(--lg-terra)' }} />
+            <Icon name="sparkle" size={19} style={{ color: '#fff' }} />
             <span style={{
               fontFamily: 'var(--font-sans)',
               fontSize: 9,
               fontWeight: 700,
               letterSpacing: '0.03em',
-              color: 'var(--lg-terra)',
+              color: 'rgba(255,255,255,0.88)',
               lineHeight: 1,
               textTransform: 'uppercase',
               whiteSpace: 'nowrap',

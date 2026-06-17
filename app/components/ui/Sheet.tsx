@@ -183,13 +183,16 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
             width: full ? '100%' : '100%',
             height: full ? '100%' : undefined,
             background: 'var(--lg-panel-strong)',
-            backdropFilter: 'var(--lg-blur-strong)',
-            WebkitBackdropFilter: 'var(--lg-blur-strong)',
+            backdropFilter: 'var(--lg-blur-4)',
+            WebkitBackdropFilter: 'var(--lg-blur-4)',
             color: 'var(--text)',
             borderRadius: full ? 0 : 'var(--lg-r-lg) var(--lg-r-lg) 0 0',
-            border: '1px solid oklch(100% 0 0 / 22%)',
-            borderBottom: full ? 'none' : 'none',
-            padding: full ? 'var(--space-6) var(--space-6)' : 'var(--space-2) var(--space-5)',
+            /* Specular top rim + subtle left rim + lower shadow */
+            borderTop: full ? 'none' : '1px solid oklch(100% 0 0 / 38%)',
+            borderLeft: '1px solid oklch(100% 0 0 / 18%)',
+            borderRight: '1px solid oklch(13% 0.012 55 / 5%)',
+            borderBottom: 'none',
+            padding: full ? 'var(--space-6) var(--space-6)' : '0 var(--space-5)',
             paddingBottom: kbH > 0
               ? 'max(20px, env(safe-area-inset-bottom, 20px))'
               : full
@@ -197,23 +200,21 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
                 : 'calc(env(safe-area-inset-bottom, 0px) + 40px)',
             maxHeight: full ? '100vh' : '92dvh',
             overflowY: 'auto',
-            boxShadow: full ? 'none' : 'var(--lg-shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 70%)',
+            boxShadow: full
+              ? 'none'
+              : 'var(--lg-shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 62%), inset 0 0 0 1px oklch(100% 0 0 / 14%)',
             touchAction: 'pan-y',
             overscrollBehavior: 'contain',
             position: full ? 'relative' : undefined,
           }}
         >
           {/* Drag handle + close button */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', margin: '12px 0 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', margin: '0 0 20px' }}>
             <div
               aria-hidden="true"
-              className="sheet-handle"
-              style={{
-                width: 40, height: 4,
-                background: 'var(--border-strong)',
-                borderRadius: 2,
-                cursor: isDismissable ? 'grab' : 'default',
-              }}
+              data-sheet-handle
+              className="lg-handle sheet-handle"
+              style={{ cursor: isDismissable ? 'grab' : 'default' }}
             />
             {isDismissable && (
               <button

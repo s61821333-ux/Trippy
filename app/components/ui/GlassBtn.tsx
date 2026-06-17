@@ -47,10 +47,10 @@ function getVariantStyles(variant: Variant) {
     case 'accent':
       // Row 85: use darkened --terra-btn tokens so white label meets 4.5:1 WCAG AA
       return {
-        bg: 'linear-gradient(180deg, var(--terra-btn-bright, oklch(54% 0.130 38)), var(--terra-btn, oklch(48% 0.120 40)))',
+        bg: 'linear-gradient(160deg, var(--terra-btn-bright, oklch(54% 0.130 38)), var(--terra-btn, oklch(48% 0.120 40)))',
         color: 'white',
         border: 'none',
-        shadow: 'var(--lg-glow-terra), inset 0 1px 0 oklch(100% 0 0 / 30%)',
+        shadow: 'var(--lg-glow-terra), inset 0 1px 0 oklch(100% 0 0 / 36%), inset 0 0 0 1px oklch(100% 0 0 / 10%)',
       };
     case 'coral':
       return {
@@ -75,19 +75,19 @@ function getVariantStyles(variant: Variant) {
       };
     case 'flat':
       return {
-        bg: 'var(--surface)',
+        bg: 'var(--lg-panel-strong)',
         color: 'var(--text)',
         border: 'none',
-        shadow: 'inset 0 0 0 1px rgba(26,20,16,0.08), inset 0 1px 0 rgba(255,255,255,0.40)',
-        backdropFilter: 'blur(20px) saturate(1.6)',
+        shadow: 'inset 0 1px 0 oklch(100% 0 0 / 55%), inset 0 0 0 1px oklch(100% 0 0 / 22%), var(--shadow-xs)',
+        backdropFilter: 'blur(24px) saturate(1.75)',
       };
     default:
       return {
-        bg: 'rgba(255,255,255,0.72)',
+        bg: 'var(--lg-panel-strong)',
         color: 'var(--text)',
         border: 'none',
-        shadow: 'inset 0 1px 0 rgba(255,255,255,0.60), 0 2px 8px rgba(26,20,16,0.07)',
-        backdropFilter: 'blur(20px) saturate(1.6)',
+        shadow: 'inset 0 1px 0 oklch(100% 0 0 / 62%), inset 0 0 0 1px oklch(100% 0 0 / 24%), var(--shadow-sm)',
+        backdropFilter: 'blur(28px) saturate(1.8)',
       };
   }
 }

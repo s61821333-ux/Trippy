@@ -309,7 +309,7 @@ function HotelSheet({ dayNum, existing, onClose }: {
                     fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12.5,
                     background: checkOut === d ? 'var(--lg-forest)' : 'var(--lg-panel)',
                     color: checkOut === d ? '#fff' : 'var(--text-2)',
-                    boxShadow: checkOut === d ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
+                    boxShadow: checkOut === d ? 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 28%)' : 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 48%)',
                     transition: 'all .25s',
                   }}
                 >
@@ -370,7 +370,7 @@ function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger, isBrand
         color: textColor,
         border: isBrand ? `1px solid ${color}33` : 'none',
         borderRadius: 9999, cursor: 'pointer',
-        boxShadow: isBrand ? `0 2px 8px ${color}22` : 'var(--shadow-xs)',
+        boxShadow: isBrand ? `0 2px 8px ${color}22, inset 0 1px 0 oklch(100% 0 0 / 40%)` : 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 45%)',
         fontFamily: 'var(--font-sans)',
         transition: 'background .2s, color .2s, box-shadow .2s',
       }}
@@ -402,7 +402,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
 
   return (
     <div
-      className="lg a-rise"
+      className="lg lg-event-card a-rise specular-hover"
       style={{ animationDelay: `${Math.min(index, 7) * 0.05}s`, borderInlineStart: `3px solid ${color}`, margin: '0 20px' }}
     >
       <button
@@ -426,7 +426,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
               {event.location}
             </div>
           )}
-          <span style={{ display: 'inline-block', marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color, background: `${color}1f`, padding: '3px 9px', borderRadius: 9999 }}>
+          <span style={{ display: 'inline-block', marginTop: 8, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase', color, background: `${color}1f`, padding: '3px 9px', borderRadius: 9999, boxShadow: `inset 0 1px 0 oklch(100% 0 0 / 45%), inset 0 0 0 1px ${color}2a` }}>
             {meta?.label ?? event.category}
           </span>
         </div>
