@@ -21,6 +21,8 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
   const [mountTurnstile, setMountTurnstile] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
+  // Holds the resolve function of the in-flight captcha Promise
+  const captchaResolverRef = useRef<((token: string | undefined) => void) | null>(null);
 
   useEffect(() => {
     setPasskeySupported(
@@ -48,17 +50,27 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
       // captchaToken; then we call execute() and poll for the result.
       let token: string | undefined = captchaToken || undefined;
       if (TURNSTILE_SITE_KEY && !token) {
-        if (!mountTurnstile) setMountTurnstile(true);
-        // Give Turnstile time to mount + execute and return a token (up to 8s)
+        // Reset any previous resolver and token
+        captchaResolverRef.current?.(undefined);
+        captchaResolverRef.current = null;
+
+        if (mountTurnstile && turnstileRef.current) {
+          // Widget already mounted — reset it so it can execute again
+          turnstileRef.current.reset();
+        } else {
+          setMountTurnstile(true);
+        }
+
+        // Wait for onSuccess or onError to fire (up to 30s — Private Access Token
+        // challenges can take several seconds on some browsers/networks).
         token = await new Promise<string | undefined>((resolve) => {
-          const deadline = Date.now() + 8000;
-          const poll = setInterval(() => {
-            const t = turnstileRef.current?.getResponse();
-            if (t) { clearInterval(poll); resolve(t); return; }
-            if (!turnstileRef.current) { /* still mounting */ }
-            else { turnstileRef.current.execute(); }
-            if (Date.now() > deadline) { clearInterval(poll); resolve(undefined); }
-          }, 100);
+          captchaResolverRef.current = resolve;
+          setTimeout(() => {
+            if (captchaResolverRef.current === resolve) {
+              captchaResolverRef.current = null;
+              resolve(undefined);
+            }
+          }, 30_000);
         });
       }
 
@@ -71,13 +83,20 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
       window.location.href = '/app';
     } catch (e: unknown) {
       setPasskeyLoading(false);
-      setCaptchaToken('');         // single-use - drop the consumed token
+      setCaptchaToken('');
+      captchaResolverRef.current = null;
       turnstileRef.current?.reset();
       const msg = e instanceof Error ? e.message : '';
       // User cancelled the browser prompt - don't show an error
       if (msg.includes('cancel') || msg.includes('abort') || msg.includes('NotAllowed')) return;
-      // Surface the real reason so genuine config/registration issues are visible.
       const base = locale === 'he' ? 'כניסה עם Passkey נכשלה' : 'Passkey sign-in failed';
+      // Captcha-specific hint: sitekey not configured for this domain
+      if (msg.toLowerCase().includes('captcha') || msg.toLowerCase().includes('turnstile')) {
+        setError(locale === 'he'
+          ? `${base} — בעיית Captcha. פנו לתמיכה.`
+          : `${base} — Captcha error. The Turnstile site key may not be configured for this domain.`);
+        return;
+      }
       const hint = locale === 'he' ? ' - ודאו שרשום Passkey במכשיר' : ' - make sure you have one registered';
       setError(msg ? `${base} - ${msg}` : `${base}${hint}`);
     }
@@ -215,9 +234,23 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
         <Turnstile
           ref={turnstileRef}
           siteKey={TURNSTILE_SITE_KEY}
-          onSuccess={(token) => setCaptchaToken(token)}
-          onError={() => setCaptchaToken('')}
-          onExpire={() => setCaptchaToken('')}
+          onLoad={() => {
+            // Widget fully initialised — trigger the invisible challenge once
+            turnstileRef.current?.execute();
+          }}
+          onSuccess={(t) => {
+            setCaptchaToken(t);
+            captchaResolverRef.current?.(t);
+            captchaResolverRef.current = null;
+          }}
+          onError={() => {
+            setCaptchaToken('');
+            captchaResolverRef.current?.(undefined);
+            captchaResolverRef.current = null;
+          }}
+          onExpire={() => {
+            setCaptchaToken('');
+          }}
           options={{ size: 'invisible', execution: 'execute' }}
         />
       )}

@@ -87,10 +87,19 @@ export async function PATCH(request: NextRequest) {
     },
   })
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  if (!user?.email) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
 
   const admin = tryAdminClient()
   const client = admin ?? supabase
+
+  const { data: inv } = await client
+    .from('trip_invitations')
+    .select('invited_email')
+    .eq('id', id)
+    .maybeSingle()
+  if (!inv || inv.invited_email?.toLowerCase() !== user.email.toLowerCase())
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const { error } = await client
     .from('trip_invitations')
     .update({ status: 'rejected' })
@@ -118,6 +127,15 @@ export async function DELETE(request: NextRequest) {
 
   const admin = tryAdminClient()
   const client = admin ?? supabase
+
+  const { data: inv } = await client
+    .from('trip_invitations')
+    .select('invited_by')
+    .eq('id', id)
+    .maybeSingle()
+  if (!inv || inv.invited_by !== user.id)
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const { error } = await client
     .from('trip_invitations')
     .delete()
