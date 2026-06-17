@@ -262,20 +262,29 @@ function Shell() {
         // In dev/test: INITIAL_SESSION fires before Playwright can inject __TrippyTestMode__,
         // so defer the redirect check by one macrotask to allow test scripts to set the flag.
         // SIGNED_OUT always redirects unless already in test mode.
+        const doRedirect = () => {
+          // If already at root, sign out to clear the stale auth cookie then reload
+          // (prevents an infinite loop where the landing page re-renders AppShell).
+          if (window.location.pathname === '/') {
+            supabase.auth.signOut().finally(() => window.location.reload());
+          } else {
+            window.location.href = '/';
+          }
+        };
         if (process.env.NODE_ENV === 'production') {
-          window.location.href = '/';
+          doRedirect();
           return;
         }
         if (event === 'SIGNED_OUT') {
           const isTestMode = !!(window as unknown as Record<string, unknown>).__TrippyTestMode__;
-          if (!isTestMode) { window.location.href = '/'; return; }
+          if (!isTestMode) { doRedirect(); return; }
           setAuthResolved(true);
         } else {
           // INITIAL_SESSION — defer 300 ms so Playwright's waitForFunction→evaluate round-trip
           // can set __TrippyTestMode__ before we decide to redirect.
           setTimeout(() => {
             const isTestMode = !!(window as unknown as Record<string, unknown>).__TrippyTestMode__;
-            if (!isTestMode) { window.location.href = '/'; } else { setAuthResolved(true); }
+            if (!isTestMode) { doRedirect(); } else { setAuthResolved(true); }
           }, 300);
         }
       }
