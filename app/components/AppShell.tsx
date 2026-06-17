@@ -256,16 +256,26 @@ function Shell() {
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         useAppStore.setState({ authUser: null, userId: null });
-        const isTestMode = process.env.NODE_ENV !== 'production' &&
-          !!(window as unknown as Record<string, unknown>).__TrippyTestMode__;
-        // Session gone - send the user back to the landing page instead of showing
-        // the old login screen. In test mode keep the current screen so test scripts
-        // can control auth state directly.
-        if (!isTestMode) {
+        // In production: redirect immediately.
+        // In dev/test: INITIAL_SESSION fires before Playwright can inject __TrippyTestMode__,
+        // so defer the redirect check by one macrotask to allow test scripts to set the flag.
+        // SIGNED_OUT always redirects unless already in test mode.
+        if (process.env.NODE_ENV === 'production') {
           window.location.href = '/';
           return;
         }
-        setAuthResolved(true);
+        if (event === 'SIGNED_OUT') {
+          const isTestMode = !!(window as unknown as Record<string, unknown>).__TrippyTestMode__;
+          if (!isTestMode) { window.location.href = '/'; return; }
+          setAuthResolved(true);
+        } else {
+          // INITIAL_SESSION — defer 300 ms so Playwright's waitForFunction→evaluate round-trip
+          // can set __TrippyTestMode__ before we decide to redirect.
+          setTimeout(() => {
+            const isTestMode = !!(window as unknown as Record<string, unknown>).__TrippyTestMode__;
+            if (!isTestMode) { window.location.href = '/'; } else { setAuthResolved(true); }
+          }, 300);
+        }
       }
     });
 

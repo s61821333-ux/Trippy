@@ -56,7 +56,27 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function LandingPage() {
+export default async function LandingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  // Strip external ?next= open-redirect params at the server before the client
+  // ever sees them, so tests checking page.url() at domcontentloaded pass.
+  const sp = await searchParams;
+  const nextRaw = sp['next'];
+  const nextParam = Array.isArray(nextRaw) ? nextRaw[0] : nextRaw;
+  if (nextParam && (/^https?:\/\//i.test(nextParam) || nextParam.startsWith('//'))) {
+    const safe = new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(sp)
+          .filter(([k]) => k !== 'next')
+          .flatMap(([k, v]) => v === undefined ? [] : [[k, Array.isArray(v) ? v[0] : v]])
+      )
+    ).toString();
+    redirect(safe ? `/?${safe}` : '/');
+  }
+
   const cookieStore = await cookies();
   const locale = cookieStore.get('Trippy-locale')?.value === 'he' ? 'he' as const : 'en' as const;
   const isHe = locale === 'he';

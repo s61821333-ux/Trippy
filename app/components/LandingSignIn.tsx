@@ -16,8 +16,9 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
-  // Captured the moment the invisible Turnstile auto-solves on render, so the
-  // token is ready before the user clicks (no blocking wait at sign-in time).
+  // Only mount Turnstile after the passkey button is clicked — avoids loading
+  // a Cloudflare iframe on page load which blocks the `load` event in Firefox.
+  const [mountTurnstile, setMountTurnstile] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
 
@@ -42,19 +43,20 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
     setPasskeyLoading(true);
     setError('');
     try {
-      // Auth captcha protection is enabled on the project, so signInWithPasskey
-      // needs a Turnstile token. The invisible widget normally auto-solves on
-      // render (captured in `captchaToken`); if it hasn't yet, give it a short
-      // window rather than blocking on the full default timeout.
+      // Mount Turnstile widget on first click (deferred to avoid iframe blocking
+      // page `load` on Firefox). Once mounted the `onSuccess` callback sets
+      // captchaToken; then we call execute() and poll for the result.
       let token: string | undefined = captchaToken || undefined;
-      if (TURNSTILE_SITE_KEY && !token && turnstileRef.current) {
-        turnstileRef.current.execute();
-        // Wait for onSuccess to fire and set captchaToken (up to 8s)
+      if (TURNSTILE_SITE_KEY && !token) {
+        if (!mountTurnstile) setMountTurnstile(true);
+        // Give Turnstile time to mount + execute and return a token (up to 8s)
         token = await new Promise<string | undefined>((resolve) => {
           const deadline = Date.now() + 8000;
           const poll = setInterval(() => {
             const t = turnstileRef.current?.getResponse();
             if (t) { clearInterval(poll); resolve(t); return; }
+            if (!turnstileRef.current) { /* still mounting */ }
+            else { turnstileRef.current.execute(); }
             if (Date.now() > deadline) { clearInterval(poll); resolve(undefined); }
           }, 100);
         });
@@ -207,10 +209,9 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
         </p>
       )}
 
-      {/* Invisible captcha - Supabase Auth requires a captchaToken for passkey sign-in.
-          Default execution ('render') auto-solves on mount, so the token is ready
-          before the user clicks instead of being fetched on demand. */}
-      {passkeySupported && TURNSTILE_SITE_KEY && (
+      {/* Invisible captcha - only mounted after passkey click to avoid Cloudflare
+          iframe blocking the page `load` event on Firefox during tests. */}
+      {passkeySupported && TURNSTILE_SITE_KEY && mountTurnstile && (
         <Turnstile
           ref={turnstileRef}
           siteKey={TURNSTILE_SITE_KEY}
