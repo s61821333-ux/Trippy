@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
@@ -10,17 +10,17 @@ import { StampIcon } from '../ui/StampIcon';
 
 interface Msg { role: 'user' | 'assistant'; content: string }
 
-const STARTERS_EN: { label: string; icon: string }[] = [
-  { label: 'Best local food?',       icon: 'fork'    },
-  { label: 'How to get around?',     icon: 'plane'   },
-  { label: 'Hidden gems nearby?',    icon: 'compass' },
-  { label: 'Worth booking ahead?',   icon: 'ticket'  },
-  { label: 'Budget tips?',           icon: 'coins'   },
+const STARTERS_EN: { label: string; icon: Parameters<typeof Icon>[0]['name'] }[] = [
+  { label: 'Best local food?',     icon: 'fork'    },
+  { label: 'How to get around?',   icon: 'plane'   },
+  { label: 'Hidden gems nearby?',  icon: 'compass' },
+  { label: 'Worth booking ahead?', icon: 'ticket'  },
+  { label: 'Budget tips?',         icon: 'coins'   },
 ];
-const STARTERS_HE: { label: string; icon: string }[] = [
+const STARTERS_HE: { label: string; icon: Parameters<typeof Icon>[0]['name'] }[] = [
   { label: 'האוכל המקומי הכי טוב?', icon: 'fork'    },
   { label: 'איך מתניידים?',          icon: 'plane'   },
-  { label: 'פנינים נסתרות בסביבה?', icon: 'compass' },
+  { label: 'פנינים נסתרות?',         icon: 'compass' },
   { label: 'מה כדאי להזמין מראש?',  icon: 'ticket'  },
   { label: 'טיפים לתקציב?',         icon: 'coins'   },
 ];
@@ -28,7 +28,7 @@ const STARTERS_HE: { label: string; icon: string }[] = [
 export default function HaikoChat({ onClose }: { onClose: () => void }) {
   const { locale } = useI18n();
   const isHe = locale === 'he';
-  const trip     = useAppStore(s => s.trip);
+  const trip      = useAppStore(s => s.trip);
   const activeDay = useAppStore(s => s.activeDay);
 
   const dayMeta    = trip?.dayMeta?.[activeDay - 1];
@@ -36,8 +36,8 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
   const city       = dayMeta?.region || sleepHotel?.location || trip?.countries?.[0] || '';
 
   const greeting = isHe
-    ? `שלום! אני Haiko, בן הלוויה החכם של Trippy.${city ? ` שאלו אותי כל דבר על הטיול ב${city}` : ' שאלו אותי כל דבר על הטיול'} — אוכל מקומי, תחבורה, המלצות ומה לא לפספס.`
-    : `Hey! I'm Haiko, your travel companion from Trippy.${city ? ` Ask me anything about your trip to ${city}` : ' Ask me anything about your trip'} — local food, transport, hidden gems and what to book ahead.`;
+    ? `שלום! אני Haiko 👋\n\nאני בן הלוויה החכם שלך מ-Trippy.${city ? ` שאלו אותי כל דבר על הטיול ב${city}` : ' שאלו אותי כל דבר על הטיול'} — אוכל מקומי, תחבורה, המלצות ומה לא לפספס.`
+    : `Hey! I'm Haiko 👋\n\nYour AI travel companion from Trippy.${city ? ` Ask me anything about your trip to ${city}` : ' Ask me anything about your trip'} — local food, transport, hidden gems and what to book ahead.`;
 
   const [messages, setMessages] = useState<Msg[]>([{ role: 'assistant', content: greeting }]);
   const [input,   setInput]   = useState('');
@@ -102,19 +102,22 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
     >
       <style>{`
         @keyframes haikoDot {
-          0%,80%,100% { opacity:.2; transform:translateY(0) }
-          40% { opacity:1; transform:translateY(-4px) }
+          0%,80%,100% { opacity:.25; transform:scale(0.75) }
+          40% { opacity:1; transform:scale(1.1) }
         }
         @keyframes haikoFadeUp {
-          from { opacity:0; transform:translateY(8px) }
+          from { opacity:0; transform:translateY(10px) }
           to   { opacity:1; transform:translateY(0) }
         }
-        .haiko-msg { animation: haikoFadeUp 0.22s ease both; }
-        .haiko-chip:hover { opacity:.85; }
-        .haiko-send:not(:disabled):hover { filter: brightness(1.1); }
+        .haiko-msg { animation: haikoFadeUp 0.24s cubic-bezier(0.22,1,0.36,1) both; }
+        .haiko-chip:hover { background: oklch(from var(--lg-terra) l c h / 18%) !important; }
+        .haiko-chip:active { transform: scale(0.97); }
+        .haiko-send:not(:disabled):hover { filter: brightness(1.08); }
+        .haiko-send:not(:disabled):active { transform: scale(0.94); }
+        .haiko-input:focus { box-shadow: inset 0 0 0 1.5px oklch(from var(--lg-terra) l c h / 40%) !important; }
       `}</style>
 
-      <div style={{ display: 'flex', flexDirection: 'column', height: 'min(62vh, 540px)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', height: 'min(62vh, 560px)' }}>
 
         {/* ── Messages ── */}
         <div
@@ -125,7 +128,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
           className="lg-scroll"
           style={{
             flex: 1, overflowY: 'auto', overscrollBehavior: 'contain',
-            display: 'flex', flexDirection: 'column', gap: 14,
+            display: 'flex', flexDirection: 'column', gap: 12,
             padding: '4px 0 8px',
           }}
         >
@@ -138,32 +141,36 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
                 style={{
                   display: 'flex', alignItems: 'flex-end', gap: 8,
                   flexDirection: isUser ? 'row-reverse' : 'row',
+                  animationDelay: `${i === messages.length - 1 ? 0 : 0}ms`,
                 }}
               >
                 {!isUser && (
-                  <StampIcon
-                    iconKey="compass"
-                    size={32}
-                    style={{ flexShrink: 0, marginBottom: 2 }}
-                    aria-hidden="true"
-                  />
+                  <div style={{
+                    flexShrink: 0, width: 32, height: 32, borderRadius: 10,
+                    background: 'linear-gradient(145deg, var(--lg-terra-bright), var(--lg-terra))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 2,
+                    boxShadow: '0 3px 10px oklch(65% 0.18 40 / 28%)',
+                  }}>
+                    <Icon name="ai" size={16} color="#fff" />
+                  </div>
                 )}
                 <div
                   style={{
-                    maxWidth: '80%',
-                    padding: isUser ? '10px 16px' : '11px 15px',
-                    borderRadius: 20,
-                    borderBottomRightRadius: isUser ? 5 : 20,
-                    borderBottomLeftRadius:  isUser ? 20 : 5,
+                    maxWidth: '78%',
+                    padding: isUser ? '10px 15px' : '11px 14px',
+                    borderRadius: 18,
+                    borderBottomRightRadius: isUser ? 4 : 18,
+                    borderBottomLeftRadius:  isUser ? 18 : 4,
                     background: isUser
-                      ? 'linear-gradient(160deg, var(--lg-terra-bright), var(--lg-terra))'
+                      ? 'linear-gradient(155deg, var(--lg-terra-bright), var(--lg-terra))'
                       : 'var(--lg-panel)',
                     color: isUser ? '#fff' : 'var(--lg-ink)',
                     boxShadow: isUser
-                      ? 'var(--lg-glow-terra), 0 2px 8px oklch(0% 0 0 / 12%)'
-                      : '0 2px 8px oklch(0% 0 0 / 6%)',
+                      ? '0 4px 18px oklch(65% 0.18 40 / 28%), 0 1px 4px oklch(0% 0 0 / 10%)'
+                      : '0 2px 8px oklch(0% 0 0 / 8%)',
                     fontSize: 14.5,
-                    lineHeight: 1.55,
+                    lineHeight: 1.58,
                     whiteSpace: 'pre-wrap',
                     letterSpacing: '-0.005em',
                   }}
@@ -178,12 +185,20 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
           {/* Typing indicator */}
           {loading && (
             <div className="haiko-msg" style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
-              <StampIcon iconKey="compass" size={32} style={{ flexShrink: 0, marginBottom: 2 }} aria-hidden="true" />
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 5,
-                padding: '14px 18px', borderRadius: 20, borderBottomLeftRadius: 5,
+                flexShrink: 0, width: 32, height: 32, borderRadius: 10,
+                background: 'linear-gradient(145deg, var(--lg-terra-bright), var(--lg-terra))',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 2,
+                boxShadow: '0 3px 10px oklch(65% 0.18 40 / 28%)',
+              }}>
+                <Icon name="ai" size={16} color="#fff" />
+              </div>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                padding: '13px 16px', borderRadius: 18, borderBottomLeftRadius: 4,
                 background: 'var(--lg-panel)',
-                boxShadow: 'var(--shadow-xs)',
+                boxShadow: '0 2px 8px oklch(0% 0 0 / 8%)',
               }}>
                 {[0, 1, 2].map(d => (
                   <span
@@ -191,7 +206,8 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
                     style={{
                       width: 7, height: 7, borderRadius: '50%',
                       background: 'var(--lg-terra)',
-                      animation: `haikoDot 1.3s ${d * 0.18}s ease-in-out infinite`,
+                      display: 'block',
+                      animation: `haikoDot 1.4s ${d * 0.16}s ease-in-out infinite`,
                     }}
                   />
                 ))}
@@ -202,9 +218,19 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
 
         {/* Error */}
         {error && (
-          <p role="alert" style={{ fontSize: 12.5, color: 'var(--danger)', textAlign: 'center', margin: '4px 0 2px', fontWeight: 500 }}>
+          <m.p
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            role="alert"
+            style={{
+              fontSize: 12.5, color: 'var(--danger)', textAlign: 'center',
+              margin: '4px 0 2px', fontWeight: 500,
+              padding: '6px 12px', borderRadius: 8,
+              background: 'var(--danger-bg)',
+            }}
+          >
             {error}
-          </p>
+          </m.p>
         )}
 
         {/* ── Starter chips ── */}
@@ -214,30 +240,33 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
-              transition={{ duration: 0.18 }}
+              transition={{ duration: 0.22 }}
               className="lg-scroll"
               style={{ display: 'flex', gap: 7, overflowX: 'auto', padding: '8px 0 10px', overscrollBehavior: 'contain' }}
             >
-              {starters.map(s => (
-                <button
+              {starters.map((s, idx) => (
+                <m.button
                   key={s.label}
                   className="haiko-chip"
                   onClick={() => send(s.label)}
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: idx * 0.05, duration: 0.2 }}
                   style={{
                     flexShrink: 0,
                     display: 'inline-flex', alignItems: 'center', gap: 6,
-                    padding: '8px 14px', borderRadius: 9999, cursor: 'pointer',
-                    border: '1px solid oklch(from var(--lg-terra) l c h / 30%)',
-                    background: 'var(--terra-muted)',
+                    padding: '8px 13px', borderRadius: 9999, cursor: 'pointer',
+                    border: '1px solid oklch(from var(--lg-terra) l c h / 25%)',
+                    background: 'oklch(from var(--lg-terra) l c h / 9%)',
                     color: 'var(--terra-text)',
-                    fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600,
+                    fontFamily: 'var(--font-sans)', fontSize: 12.5, fontWeight: 600,
                     whiteSpace: 'nowrap', WebkitTapHighlightColor: 'transparent',
-                    transition: 'opacity .15s',
+                    transition: 'background .15s, transform .12s',
                   }}
                 >
-                  <Icon name={s.icon as any} size={13} color="var(--terra-text)" />
+                  <Icon name={s.icon} size={12} color="var(--terra-text)" />
                   {s.label}
-                </button>
+                </m.button>
               ))}
             </m.div>
           )}
@@ -247,7 +276,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
         <div style={{
           display: 'flex', gap: 8, alignItems: 'flex-end',
           paddingTop: 10,
-          borderTop: '1px solid oklch(50% 0.02 60 / 10%)',
+          borderTop: '1px solid oklch(50% 0.02 60 / 8%)',
         }}>
           <textarea
             ref={inputRef}
@@ -258,6 +287,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
             placeholder={isHe ? 'שאלו כל דבר על הטיול…' : 'Ask anything about your trip…'}
             dir="auto"
             aria-label={isHe ? 'הודעה לHaiko' : 'Message Haiko'}
+            className="haiko-input"
             style={{
               flex: 1, resize: 'none', maxHeight: 100, minHeight: 44,
               background: 'var(--field-bg)', border: 'none', borderRadius: 22,
@@ -267,22 +297,23 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
               transition: 'box-shadow .2s',
             }}
           />
-          <button
+          <m.button
             onClick={() => send(input)}
             disabled={!canSend}
             aria-label={isHe ? 'שלח הודעה' : 'Send message'}
             className="haiko-send"
+            whileTap={canSend ? { scale: 0.90 } : {}}
             style={{
               height: 44, width: 44, flexShrink: 0, border: 0, borderRadius: '50%',
               background: canSend
-                ? 'linear-gradient(160deg, var(--lg-terra-bright), var(--lg-terra))'
+                ? 'linear-gradient(155deg, var(--lg-terra-bright), var(--lg-terra))'
                 : 'var(--lg-panel)',
               boxShadow: canSend
-                ? 'var(--lg-glow-terra)'
+                ? '0 4px 18px oklch(65% 0.18 40 / 32%)'
                 : 'var(--shadow-xs)',
               cursor: canSend ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'background .2s, box-shadow .2s, filter .15s',
+              transition: 'background .2s, box-shadow .2s, filter .12s',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -292,7 +323,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
               color={canSend ? '#fff' : 'var(--text-3)'}
               style={{ transform: isHe ? 'scaleX(-1)' : 'none', marginInlineEnd: -2 }}
             />
-          </button>
+          </m.button>
         </div>
       </div>
     </Sheet>

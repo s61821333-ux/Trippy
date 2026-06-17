@@ -1,11 +1,11 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
+import { m } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 import Sheet from '../ui/Sheet';
 import Icon from '../ui/Icon';
 
-// The AI entry point: two clear modes - Ask (Haiko chatbot) and Find (discovery).
 export default function AIMenuSheet({ onClose, onAsk, onFind }: {
   onClose: () => void;
   onAsk: () => void;
@@ -14,24 +14,41 @@ export default function AIMenuSheet({ onClose, onAsk, onFind }: {
   const { locale } = useI18n();
   const isHe = locale === 'he';
 
-  const cards: { key: 'ask' | 'find'; icon: Parameters<typeof Icon>[0]['name']; title: string; desc: string; onClick: () => void; grad: string; glow: string }[] = [
+  const cards: {
+    key: 'ask' | 'find';
+    icon: Parameters<typeof Icon>[0]['name'];
+    badge: string;
+    title: string;
+    desc: string;
+    hint: string;
+    onClick: () => void;
+    grad: string;
+    glow: string;
+    orb: string;
+  }[] = [
     {
       key: 'ask',
       icon: 'ai',
-      title: isHe ? 'לשאול' : 'Ask',
-      desc: isHe ? 'שיחה עם Haiko - שאלו כל דבר על הטיול' : 'Chat with Haiko - anything about your trip',
+      badge: isHe ? 'HAIKO AI' : 'HAIKO AI',
+      title: isHe ? 'שאלו את Haiko' : 'Chat with Haiko',
+      desc: isHe ? 'שיחה חופשית על הטיול — אוכל, תחבורה, טיפים, כל דבר' : 'Free conversation about your trip — food, transport, tips, anything',
+      hint: isHe ? 'מגיב תוך שניות' : 'Responds in seconds',
       onClick: onAsk,
-      grad: 'linear-gradient(135deg, var(--lg-terra-bright), var(--lg-terra))',
-      glow: 'var(--lg-glow-terra)',
+      grad: 'linear-gradient(145deg, var(--lg-terra-bright) 0%, var(--lg-terra) 60%, oklch(55% 0.155 30) 100%)',
+      glow: '0 8px 32px oklch(65% 0.180 40 / 35%)',
+      orb: 'oklch(75% 0.200 44 / 22%)',
     },
     {
       key: 'find',
       icon: 'sparkle',
-      title: isHe ? 'לגלות' : 'Find',
-      desc: isHe ? 'גלו מקומות ופעילויות מותאמים ליום' : 'Discover places & experiences for your day',
+      badge: isHe ? 'גילוי' : 'DISCOVER',
+      title: isHe ? 'גלו מקומות' : 'Find experiences',
+      desc: isHe ? 'המלצות חכמות על מסעדות, אטרקציות ופעילויות ביום הנוכחי' : 'Smart picks for restaurants, attractions & activities for your day',
+      hint: isHe ? 'מותאם ליום הנוכחי' : 'Tailored to today\'s day',
       onClick: onFind,
-      grad: 'linear-gradient(135deg, var(--lg-forest), var(--lg-forest-deep))',
-      glow: 'var(--lg-glow-forest)',
+      grad: 'linear-gradient(145deg, var(--lg-forest) 0%, var(--lg-forest-deep) 100%)',
+      glow: '0 8px 32px oklch(50% 0.130 155 / 30%)',
+      orb: 'oklch(60% 0.120 155 / 20%)',
     },
   ];
 
@@ -41,36 +58,110 @@ export default function AIMenuSheet({ onClose, onAsk, onFind }: {
       subtitle={isHe ? 'איך אפשר לעזור?' : 'How can I help?'}
       onClose={onClose}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '4px 0 12px' }}>
-        {cards.map(c => (
-          <button
+      {/* Ambient orb behind content */}
+      <div aria-hidden style={{
+        position: 'absolute', top: -40, left: '50%', transform: 'translateX(-50%)',
+        width: 280, height: 140, borderRadius: '50%',
+        background: 'radial-gradient(ellipse, oklch(65% 0.170 40 / 10%) 0%, transparent 70%)',
+        pointerEvents: 'none',
+      }} />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '4px 0 8px', position: 'relative' }}>
+        {cards.map((c, idx) => (
+          <m.button
             key={c.key}
             onClick={c.onClick}
-            className="lg"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.08, duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            whileTap={{ scale: 0.975 }}
             style={{
-              display: 'flex', alignItems: 'center', gap: 16, width: '100%',
-              padding: 18, border: 0, cursor: 'pointer', textAlign: 'start',
-              WebkitTapHighlightColor: 'transparent',
+              display: 'flex', alignItems: 'center', gap: 0,
+              width: '100%', border: 0, cursor: 'pointer',
+              borderRadius: 22, overflow: 'hidden', position: 'relative',
+              background: c.grad, boxShadow: c.glow,
+              WebkitTapHighlightColor: 'transparent', textAlign: 'start',
+              padding: 0,
             }}
           >
+            {/* Orb highlight inside card */}
+            <div aria-hidden style={{
+              position: 'absolute', top: -20, right: -20, width: 120, height: 120,
+              borderRadius: '50%', background: c.orb, pointerEvents: 'none',
+            }} />
+
+            {/* Icon column */}
             <div style={{
-              width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: c.grad, boxShadow: c.glow,
+              width: 80, flexShrink: 0, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 6,
+              padding: '20px 0',
+              borderInlineEnd: '1px solid rgba(255,255,255,0.12)',
             }}>
-              <Icon name={c.icon} size={24} color="#fff" />
+              <div style={{
+                width: 44, height: 44, borderRadius: 14,
+                background: 'rgba(255,255,255,0.18)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                backdropFilter: 'blur(8px)',
+              }}>
+                <Icon name={c.icon} size={22} color="#fff" />
+              </div>
+              <span style={{
+                fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.10em',
+                textTransform: 'uppercase', color: 'rgba(255,255,255,0.60)', fontWeight: 600,
+              }}>
+                {c.badge}
+              </span>
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 18, fontWeight: 800, letterSpacing: '-0.01em', color: 'var(--lg-ink)' }}>
+
+            {/* Text column */}
+            <div style={{ flex: 1, minWidth: 0, padding: '18px 16px 18px 18px' }}>
+              <div style={{
+                fontFamily: 'var(--font-sans)', fontSize: 18, fontWeight: 800,
+                letterSpacing: '-0.015em', color: '#fff', marginBottom: 5,
+                lineHeight: 1.1,
+              }}>
                 {c.title}
               </div>
-              <div style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 2, lineHeight: 1.4 }}>
+              <div style={{
+                fontSize: 12.5, color: 'rgba(255,255,255,0.75)',
+                lineHeight: 1.45, marginBottom: 10,
+              }}>
                 {c.desc}
               </div>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                background: 'rgba(255,255,255,0.14)',
+                borderRadius: 9999, padding: '3px 10px',
+                fontSize: 11, fontWeight: 600, color: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(4px)',
+              }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'rgba(255,255,255,0.8)', display: 'inline-block' }} />
+                {c.hint}
+              </div>
             </div>
-            <Icon name={isHe ? 'chevL' : 'chevR'} size={18} color="var(--text-3)" style={{ flexShrink: 0 }} />
-          </button>
+
+            {/* Chevron */}
+            <div style={{ paddingInlineEnd: 16, paddingInlineStart: 4, flexShrink: 0 }}>
+              <Icon name={isHe ? 'chevL' : 'chevR'} size={16} color="rgba(255,255,255,0.55)" />
+            </div>
+          </m.button>
         ))}
+
+        {/* Powered-by footer */}
+        <m.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.4 }}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            paddingTop: 6,
+          }}
+        >
+          <Icon name="sparkle" size={11} color="var(--text-3)" />
+          <span style={{ fontSize: 11, color: 'var(--text-3)', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}>
+            {isHe ? 'מופעל על-ידי Claude AI' : 'Powered by Claude AI'}
+          </span>
+        </m.div>
       </div>
     </Sheet>
   );

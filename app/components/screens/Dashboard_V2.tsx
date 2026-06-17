@@ -228,11 +228,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
 
   const icons = isHe ? INTEL_ICONS_HE : INTEL_ICONS;
 
-  // Arrow: points toward the content in both LTR (›) and RTL (‹)
-  const arrowChar = isRTL ? '‹' : '›';
-  const arrowRotate = expanded
-    ? (isRTL ? 'rotate(-90deg)' : 'rotate(90deg)')
-    : 'none';
+  const arrowRotate = expanded ? 'rotate(90deg)' : 'none';
 
   return (
     <div className="lg a-rise" style={{ borderRadius: 16, overflow: 'hidden' }}>
@@ -259,7 +255,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
         <span style={{ minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {loading
             ? <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite', display: 'block' }} />
-            : <span style={{ fontSize: 14, transform: arrowRotate, transition: 'transform .25s', color: 'var(--text-3)', display: 'inline-block' }}>{arrowChar}</span>
+            : <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ transform: arrowRotate, transition: 'transform .25s', color: 'var(--text-3)', display: 'block', flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
           }
         </span>
       </button>

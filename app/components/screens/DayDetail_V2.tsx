@@ -402,7 +402,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
 
   return (
     <div
-      className="lg lg-event-card a-rise specular-hover"
+      className="lg a-rise specular-hover"
       style={{ animationDelay: `${Math.min(index, 7) * 0.05}s`, borderInlineStart: `3px solid ${color}`, margin: '0 20px' }}
     >
       <button

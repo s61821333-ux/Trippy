@@ -768,8 +768,10 @@ export default function Packing_V2() {
                   background: isActive ? 'var(--lg-forest)' : 'var(--lg-panel)',
                   color:      isActive ? '#fff' : 'var(--text-2)',
                   boxShadow:  isActive
-                    ? 'var(--lg-glow-forest)'
-                    : 'var(--lg-shadow)',
+                    ? 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 28%)'
+                    : 'var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 65%), inset 0 0 0 1px oklch(100% 0 0 / 18%)',
+                  backdropFilter: isActive ? undefined : 'blur(16px) saturate(1.6)',
+                  WebkitBackdropFilter: isActive ? undefined : 'blur(16px) saturate(1.6)',
                   transition: 'all .25s', whiteSpace: 'nowrap',
                   WebkitTapHighlightColor: 'transparent',
                   display: 'flex', alignItems: 'center', gap: 6,
