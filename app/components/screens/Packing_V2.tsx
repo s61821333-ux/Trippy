@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { m, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/lib/store';
@@ -597,9 +597,11 @@ function SectionDivider({
 export default function Packing_V2() {
   const { t, locale } = useI18n();
 
-  const { trip, supplies, toggleSupply, deleteSupplyItem } = useAppStore(
-    useShallow(s => ({ trip: s.trip, supplies: s.supplies, toggleSupply: s.toggleSupply, deleteSupplyItem: s.deleteSupplyItem }))
+  const { trip, supplies, suppliesLoaded, loadSupplies, toggleSupply, deleteSupplyItem } = useAppStore(
+    useShallow(s => ({ trip: s.trip, supplies: s.supplies, suppliesLoaded: s.suppliesLoaded, loadSupplies: s.loadSupplies, toggleSupply: s.toggleSupply, deleteSupplyItem: s.deleteSupplyItem }))
   );
+
+  useEffect(() => { loadSupplies(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [activeCat,  setActiveCat]  = useState<FilterCat>('All');
   const [showAdd,    setShowAdd]    = useState(false);
@@ -626,6 +628,13 @@ export default function Packing_V2() {
       style={{ height: '100%', overflowY: 'auto', background: 'transparent' }}
     >
       <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
+        {!suppliesLoaded && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} style={{ height: 52, borderRadius: 12, background: 'var(--surface)', opacity: 0.6 + i * 0.05 }} className="skeleton" />
+            ))}
+          </div>
+        )}
 
         {/* ── Header ── */}
         <m.div

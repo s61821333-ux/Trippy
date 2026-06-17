@@ -27,6 +27,8 @@ interface AppState {
   nickname: string;
   activeDay: number;
   supplies: SupplyItem[];
+  suppliesLoaded: boolean;
+  expensesLoaded: boolean;
   showAddEvent: boolean;
   showSuggestions: boolean;
   showTour: boolean;
@@ -63,6 +65,8 @@ interface AppState {
   recordDemoClick: () => void;
   loadDemoTrip: () => void;
   loadTripById: (tripId: string, opts?: { showLoader?: boolean; showEntry?: boolean; navigate?: boolean }) => Promise<void>;
+  loadExpenses: () => Promise<void>;
+  loadSupplies: () => Promise<void>;
   createTrip: (name: string, days: number, nickname: string, theme?: TripTheme, startDate?: string, countries?: string[], currency?: string) => Promise<void>;
   loadInvitations: () => Promise<void>;
   acceptInvitation: (invitationId: string) => Promise<void>;
@@ -242,6 +246,8 @@ export const useAppStore = create<AppState>()(
       pendingChanges: [],
       pendingWriteCount: 0,
       isGlobalLoading: false,
+      suppliesLoaded: false,
+      expensesLoaded: false,
       pendingDeleteIds: [],
       lastBudgetAlert: null,
 
@@ -379,11 +385,16 @@ export const useAppStore = create<AppState>()(
             : isSameTrip && !AUTH_SCREENS.includes(currentScreen)
               ? {}  // preserve current screen/activeDay when refreshing an already-open trip
               : { screen: 'dashboard' as const, activeDay: 1 };
+          // Strip lazily-loaded collections from the trip object so they are not
+          // persisted to localStorage or shown as stale on the next trip switch.
+          const tripCore = { ...trip, expenses: undefined, emergencyContacts: undefined };
           set({
             userId,
             tripDbId: data.id,
-            trip,
-            supplies,
+            trip: tripCore,
+            supplies: [],
+            suppliesLoaded: false,
+            expensesLoaded: false,
             nickname,
             ...navUpdate,
             tripEntryCountries: navigate && (showEntry || !isSameTrip) && trip.countries?.length ? trip.countries : null,
@@ -399,6 +410,28 @@ export const useAppStore = create<AppState>()(
           set({ isGlobalLoading: false });
           throw err?.message === 'not_authed' || err?.message === 'not_found' ? err : new Error('load_failed');
         }
+      },
+
+      loadExpenses: async () => {
+        const { tripDbId, expensesLoaded } = get();
+        if (!tripDbId || expensesLoaded) return;
+        try {
+          const r = await fetch(`/api/trips/${tripDbId}/expenses`, { cache: 'no-store' });
+          if (!r.ok) return;
+          const expenses = await r.json();
+          set(s => ({ trip: s.trip ? { ...s.trip, expenses } : null, expensesLoaded: true }));
+        } catch { /* silently ignore — UI shows empty state */ }
+      },
+
+      loadSupplies: async () => {
+        const { tripDbId, suppliesLoaded } = get();
+        if (!tripDbId || suppliesLoaded) return;
+        try {
+          const r = await fetch(`/api/trips/${tripDbId}/supplies`, { cache: 'no-store' });
+          if (!r.ok) return;
+          const supplies = await r.json();
+          set({ supplies, suppliesLoaded: true });
+        } catch { /* silently ignore */ }
       },
 
       createTrip: async (name, days, nickname, theme = 'desert', startDate, countries, currency = 'USD') => {
@@ -430,6 +463,7 @@ export const useAppStore = create<AppState>()(
             userId, tripDbId, trip: newTrip,
             nickname: nickname || 'Traveler',
             screen: 'dashboard', activeDay: 1, supplies: [],
+            suppliesLoaded: true, expensesLoaded: true,
             tripEntryCountries: countries?.length ? countries : null,
             currencyByTrip: { ...s.currencyByTrip, [tripDbId]: currency },
             isGlobalLoading: false,

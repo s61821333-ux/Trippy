@@ -743,9 +743,11 @@ function dayDateLabel(startDate: string | undefined, dayNum: number): { top: str
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function DashboardScreenV2() {
-  const { trip, setScreen, setActiveDay, supplies, tripDbId, currencyByTrip, setTripBudget, createInviteLink } = useAppStore();
+  const { trip, setScreen, setActiveDay, supplies, tripDbId, currencyByTrip, setTripBudget, createInviteLink, loadExpenses, expensesLoaded } = useAppStore();
   const { t, locale } = useI18n();
   const { show } = useToast();
+
+  useEffect(() => { loadExpenses(); }, [tripDbId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [weatherResult, setWeatherResult] = useState<WeatherResult>({ days: [], isEstimate: false });
   const [localTime, setLocalTime] = useState('');
@@ -839,7 +841,7 @@ export default function DashboardScreenV2() {
 
   const currency  = (tripDbId && currencyByTrip[tripDbId]) || 'USD';
   const currSym   = getCurrencySymbol(currency);
-  const expenses  = trip.expenses ?? [];
+  const expenses  = expensesLoaded ? (trip.expenses ?? []) : [];
   const eventsCost = Object.values(trip.events).reduce((sum, evs) => sum + getDayBudget(evs), 0);
   const hotelsCost = (trip.hotels ?? []).reduce((s, h) => s + (h.cost ?? 0), 0);
   const totalSpent = expenses.reduce((s, e) => s + e.amount, 0) + eventsCost + hotelsCost;

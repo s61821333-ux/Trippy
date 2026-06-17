@@ -34,6 +34,31 @@ async function setup(request: NextRequest, tripId: string) {
   return { client, user }
 }
 
+// GET /api/trips/[tripId]/supplies — lazy-loaded when Packing screen is first opened
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ tripId: string }> }
+) {
+  const { tripId } = await params
+  const r = await setup(request, tripId)
+  if ('error' in r) return r.error
+
+  const { data, error } = await r.client.from('supplies')
+    .select('id, name, category, checked, critical, assignee')
+    .eq('trip_id', tripId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  const supplies = (data ?? []).map((s: any) => ({
+    id:       s.id,
+    name:     s.name,
+    category: s.category ?? 'Other',
+    checked:  s.checked  ?? false,
+    critical: s.critical ?? false,
+    assignee: s.assignee ?? undefined,
+  }))
+  return NextResponse.json(supplies, { headers: { 'Cache-Control': 'no-store' } })
+}
+
 // POST /api/trips/[tripId]/supplies
 export async function POST(
   request: NextRequest,

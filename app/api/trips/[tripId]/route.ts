@@ -7,24 +7,19 @@ import { UpdateTripBody } from '@/lib/schemas'
 
 export const runtime = 'edge';
 
+// Core data needed to render Dashboard on entry.
+// expenses / supplies / emergency_contacts are loaded lazily when their screens are first opened.
 const TRIP_SELECT = `
   id, name, days, start_date, theme, trip_notes, countries, hotels, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
   events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes, added_by, wishlist ),
-  expenses ( id, description, amount, paid_by, split_count ),
-  emergency_contacts ( id, name, phone, type ),
-  supplies ( id, name, category, checked, critical, assignee ),
   trip_participants ( user_id, initials, color )
 `
 
-// Fallback select used when optional migration columns (hotels, tags, votes) don't exist yet
 const TRIP_SELECT_FALLBACK = `
   id, name, days, start_date, theme, trip_notes, countries, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
   events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, added_by, wishlist ),
-  expenses ( id, description, amount, paid_by, split_count ),
-  emergency_contacts ( id, name, phone, type ),
-  supplies ( id, name, category, checked, critical, assignee ),
   trip_participants ( user_id, initials, color )
 `
 

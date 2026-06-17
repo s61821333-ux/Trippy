@@ -23,6 +23,60 @@ async function getAuthUser(cookieStore: Awaited<ReturnType<typeof cookies>>) {
   return user
 }
 
+// GET /api/trips/[tripId]/expenses — lazy-loaded when Budget section is first opened
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ tripId: string }> }
+) {
+  const { tripId } = await params
+  const cookieStore = await cookies()
+  const admin = tryAdminClient()
+
+  let userId: string | null = null
+  if (admin) {
+    const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+      cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} },
+    })
+    const { data: { session } } = await supabase.auth.getSession()
+    userId = session?.user?.id ?? null
+  } else {
+    const user = await getAuthUser(cookieStore)
+    userId = user?.id ?? null
+  }
+  if (!userId) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+
+  const client = admin ?? createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+    cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} },
+  })
+
+  if (admin) {
+    const { data: participant } = await admin.from('trip_participants').select('user_id')
+      .eq('trip_id', tripId).eq('user_id', userId).maybeSingle()
+    if (!participant) return NextResponse.json({ error: 'Not a participant' }, { status: 403 })
+  }
+
+  const { data, error } = await client.from('expenses')
+    .select('id, description, amount, paid_by, split_count, tags')
+    .eq('trip_id', tripId)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Resolve paid_by user_id → initials
+  const participantRows = admin
+    ? (await admin.from('trip_participants').select('user_id, initials').eq('trip_id', tripId)).data ?? []
+    : []
+  const userToInitials = new Map<string, string>(participantRows.map((p: any) => [p.user_id, p.initials ?? '??']))
+
+  const expenses = (data ?? []).map((e: any) => ({
+    id:          e.id,
+    description: e.description,
+    amount:      e.amount,
+    paidBy:      userToInitials.get(e.paid_by) ?? 'Unknown',
+    splitCount:  e.split_count ?? 1,
+    tags:        Array.isArray(e.tags) ? e.tags : [],
+  }))
+  return NextResponse.json(expenses, { headers: { 'Cache-Control': 'no-store' } })
+}
+
 // POST /api/trips/[tripId]/expenses
 export async function POST(
   request: NextRequest,
