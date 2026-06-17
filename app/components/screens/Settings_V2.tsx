@@ -59,7 +59,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     trip, themeMode, setThemeMode,
     highContrast, toggleHighContrast,
     currencyByTrip, tripDbId, authUser,
-    deleteTrip, setCurrency, updateTripInfo, setScreen, logout,
+    deleteTrip, setCurrency, updateTripInfo, setScreen, logout, switchTrip,
   } = useAppStore(useShallow(s => ({
     trip:               s.trip,
     themeMode:          s.themeMode,
@@ -74,6 +74,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
     updateTripInfo:     s.updateTripInfo,
     setScreen:          s.setScreen,
     logout:             s.logout,
+    switchTrip:         s.switchTrip,
   })));
 
   const [showDeleteConfirm,  setShowDeleteConfirm]  = useState(false);
@@ -401,7 +402,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
         whileTap={{ scale: 0.97 }}
-        onClick={() => setScreen('home')}
+        onClick={() => switchTrip()}
         className="lg-btn"
         style={{
           width: '100%', height: 50,

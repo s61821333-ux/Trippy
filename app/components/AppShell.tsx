@@ -130,7 +130,7 @@ function Shell() {
   const themeMode       = useAppStore(s => s.themeMode);
 
   const { setScreen, setThemeMode, checkAuth, loadTripById, subscribeToTrip,
-          recordDemoClick, clearTripEntry, logout, setShowPersona } = useAppStore(
+          recordDemoClick, clearTripEntry, logout, setShowPersona, switchTrip } = useAppStore(
     useShallow(s => ({
       setScreen:       s.setScreen,
       setThemeMode:    s.setThemeMode,
@@ -141,6 +141,7 @@ function Shell() {
       clearTripEntry:  s.clearTripEntry,
       logout:          s.logout,
       setShowPersona:  s.setShowPersona,
+      switchTrip:      s.switchTrip,
     }))
   );
 
@@ -590,7 +591,7 @@ function Shell() {
               active={screen}
               onChange={s => setScreen(s)}
               onSettings={() => setScreen('settings')}
-              onSwitch={() => setScreen('home')}
+              onSwitch={() => switchTrip()}
               onLogout={() => logout()}
               onNotes={() => setScreen('notes')}
               onWishlist={() => setShowWishlist(true)}
