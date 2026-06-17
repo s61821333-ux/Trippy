@@ -77,5 +77,8 @@
     "additionalDirectories": [
       "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
 }

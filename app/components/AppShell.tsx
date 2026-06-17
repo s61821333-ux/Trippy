@@ -505,7 +505,8 @@ function Shell() {
     );
   }
 
-  const showNav = !!authUser && !!trip && screen !== 'home' && screen !== 'splash' && screen !== 'welcome';
+  const NAV_SCREENS = new Set(['dashboard', 'day', 'map', 'supplies', 'settings', 'notes']);
+  const showNav = !!authUser && !!trip && NAV_SCREENS.has(screen);
 
   // MotionConfig: 'always' when user toggled reducedMotion, 'user' to respect OS setting
   const motionReduced = reducedMotion ? 'always' : 'user';
