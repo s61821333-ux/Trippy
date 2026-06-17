@@ -210,11 +210,12 @@ function HotelAnchor({ hotel, isEnd, onClick }: {
   return (
     <button
       onClick={onClick}
-      className="lg lg-strong"
       style={{
         display: 'flex', alignItems: 'center', gap: 12,
-        padding: '11px 14px', margin: '0 20px',
-        border: 0, cursor: 'pointer', textAlign: 'start', width: 'calc(100% - 40px)',
+        padding: '12px 20px', margin: 0,
+        background: 'transparent',
+        border: 0, borderBottom: '1px solid oklch(50% 0.02 60 / 8%)',
+        cursor: 'pointer', textAlign: 'start', width: '100%',
       }}
     >
       <StampIcon iconKey="hotel" size={34} style={{ flexShrink: 0 }} />
@@ -402,8 +403,15 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
 
   return (
     <div
-      className="lg a-rise specular-hover"
-      style={{ animationDelay: `${Math.min(index, 7) * 0.05}s`, borderInlineStart: `3px solid ${color}`, margin: '0 20px' }}
+      className="a-rise"
+      style={{
+        animationDelay: `${Math.min(index, 7) * 0.05}s`,
+        margin: '0 20px',
+        borderRadius: 'var(--lg-r-card)',
+        background: 'transparent',
+        borderInlineStart: `3px solid ${color}55`,
+        borderBottom: '1px solid oklch(50% 0.02 60 / 8%)',
+      }}
     >
       <button
         onClick={() => setOpen(o => !o)}
@@ -1173,7 +1181,7 @@ export default function DayDetail_V2() {
                   aria-label={locale === 'he' ? 'פתח מסלול במפות גוגל' : 'Open route in Google Maps'}
                   style={{
                     width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'var(--lg-panel)', border: 0, cursor: 'pointer',
+                    background: 'var(--lg-panel-strong)', border: 0, cursor: 'pointer',
                     boxShadow: 'var(--shadow-xs)',
                   }}
                 >
@@ -1232,24 +1240,24 @@ export default function DayDetail_V2() {
       <div className="lg-scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 'var(--nav-total-h)' }}>
         <div className="resp-container">
 
-        {/* Context bar: Weather + Day budget */}
+        {/* Context bar: Weather + Day budget — inline, no card background */}
         {(weather || dayBudget > 0) && (
-          <div style={{ display: 'flex', gap: 10, margin: '0 20px 14px' }}>
+          <div style={{ display: 'flex', gap: 20, margin: '0 20px 14px', padding: '8px 0', borderBottom: '1px solid oklch(50% 0.02 60 / 10%)' }}>
             {weather && (
-              <div className="lg" style={{ flex: 1, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Icon name={getWeatherIcon(weather.label) as any} size={22} color="var(--lg-sand)" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon name={getWeatherIcon(weather.label) as any} size={18} color="var(--lg-sand)" />
                 <div>
-                  <div className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5 }}>{locale === 'he' ? 'מזג אוויר' : 'Weather'}</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--lg-ink)' }}>{weather.temp}° · {weather.label ?? 'Clear'}</div>
+                  <div className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8 }}>{locale === 'he' ? 'מזג אוויר' : 'Weather'}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--lg-ink)' }}>{weather.temp}° · {weather.label ?? 'Clear'}</div>
                 </div>
               </div>
             )}
             {dayBudget > 0 && (
-              <div className="lg" style={{ flex: 1, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <Icon name="download" size={20} color="var(--lg-terra)" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon name="download" size={16} color="var(--lg-terra)" />
                 <div>
-                  <div className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8.5 }}>{locale === 'he' ? 'תקציב יום' : 'Day budget'}</div>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--lg-ink)' }}>
+                  <div className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 8 }}>{locale === 'he' ? 'תקציב יום' : 'Day budget'}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--lg-ink)' }}>
                     <CurrencyAmount amount={dayBudget} base={currCode} />
                   </div>
                 </div>

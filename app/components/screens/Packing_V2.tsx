@@ -452,13 +452,54 @@ function AIPackingSheet({ trip, supplies, onClose }: {
 
         {/* Loading state */}
         {loading && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '24px 0' }}>
-            <m.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}>
-              <Icon name="compass" size={48} color="var(--lg-terra)" />
-            </m.div>
-            <p style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 16, color: 'var(--lg-ink)', margin: 0 }}>
-              {isHe ? 'מכין רשימת ציוד…' : 'Building your packing list…'}
-            </p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, padding: '28px 0 20px' }}>
+            {/* Pulsing orb + spinning compass */}
+            <div style={{ position: 'relative', width: 88, height: 88 }}>
+              {[1.5, 1.15].map((scale, i) => (
+                <m.div
+                  key={i}
+                  animate={{ scale: [scale, scale * 1.10, scale], opacity: [0.10, 0.18, 0.10] }}
+                  transition={{ duration: 2, delay: i * 0.4, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{
+                    position: 'absolute', inset: 0, borderRadius: '50%',
+                    background: 'radial-gradient(circle, var(--lg-forest) 0%, transparent 70%)',
+                  }}
+                />
+              ))}
+              <m.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex',
+                  alignItems: 'center', justifyContent: 'center',
+                }}
+              >
+                <div style={{
+                  width: 56, height: 56, borderRadius: 16,
+                  background: 'linear-gradient(145deg, var(--lg-forest), var(--brand-deep))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: 'var(--lg-glow-forest)',
+                }}>
+                  <Icon name="checklist" size={26} color="#fff" />
+                </div>
+              </m.div>
+            </div>
+
+            <div style={{ textAlign: 'center' }}>
+              <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', margin: '0 0 6px' }}>
+                {isHe ? 'מכין רשימת ציוד…' : 'Building your packing list…'}
+              </p>
+              <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: 0 }}>
+                {isHe ? 'מותאם לטיול ולפעילויות שלך' : 'Tailored to your trip & activities'}
+              </p>
+            </div>
+
+            {/* Skeleton items */}
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[80, 65, 72, 55].map((w, i) => (
+                <div key={i} className="skeleton" style={{ height: 44, borderRadius: 12, width: `${w}%`, opacity: 1 - i * 0.15 }} />
+              ))}
+            </div>
           </div>
         )}
 
@@ -652,7 +693,7 @@ export default function Packing_V2() {
 
         {/* ── Progress card ── */}
         <m.div
-          className="lg"
+          className="lg lg-strong"
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.13, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           style={{ marginBottom: 16, overflow: 'hidden', position: 'relative' }}

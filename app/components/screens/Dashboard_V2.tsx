@@ -691,7 +691,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9, margin: 0 }}>{isHe ? 'היסטוריה' : 'History'}</p>
             {expenses.map((exp: any) => (
-              <div key={exp.id} className="lg" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px' }}>
+              <div key={exp.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 4px', borderBottom: '1px solid oklch(50% 0.02 60 / 8%)', background: 'transparent' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.description}</div>
                   {Array.isArray(exp.tags) && exp.tags.length > 0 && (
@@ -975,14 +975,14 @@ export default function DashboardScreenV2() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <button
               onClick={() => setScreen('settings')}
-              className="lg"
+              className="lg lg-strong"
               style={{ width: 36, height: 36, borderRadius: '50%', border: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', WebkitTapHighlightColor: 'transparent' }}
               aria-label={t('settings')}
             >
               <Icon name="settings" size={16} color="var(--text-2)" />
             </button>
             <button
-              className="lg"
+              className="lg lg-strong"
               disabled={sharingLink}
               onClick={async () => {
                 setSharingLink(true);
@@ -1072,12 +1072,9 @@ export default function DashboardScreenV2() {
             ].map(m => (
               <div key={m.label} style={{
                 padding: '8px 0',
-                background: 'var(--lg-panel)',
+                background: 'transparent',
                 borderRadius: 12,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                boxShadow: 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 50%)',
-                backdropFilter: 'blur(16px) saturate(1.6)',
-                WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
               }}>
                 <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14, color: m.done ? readinessColor : 'var(--text)' }}>
                   {m.value}
@@ -1123,11 +1120,11 @@ export default function DashboardScreenV2() {
                 aria-pressed={isActive}
                 style={{
                   flexShrink: 0, width: 54, height: dayWeather ? 74 : 62, borderRadius: 16, cursor: 'pointer',
-                  border: isActive ? '1px solid var(--terra)' : '1px solid transparent',
-                  background: isActive ? 'var(--terra)' : 'var(--lg-panel)',
-                  backdropFilter: isActive ? undefined : 'blur(12px) saturate(1.5)',
-                  WebkitBackdropFilter: isActive ? undefined : 'blur(12px) saturate(1.5)',
-                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 50%)',
+                  border: 'none',
+                  background: isActive ? 'var(--terra)' : 'transparent',
+                  backdropFilter: undefined,
+                  WebkitBackdropFilter: undefined,
+                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'none',
                   color: isActive ? '#fff' : 'var(--text-2)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: 1, padding: '4px 0',
@@ -1254,7 +1251,7 @@ export default function DashboardScreenV2() {
               {t('nextEvent')}
             </p>
             <button
-              className="lg a-rise d1"
+              className="lg lg-strong a-rise d1"
               onClick={() => { setActiveDay(nextEvent.dayNum); setScreen('day'); }}
               style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 15, padding: 16, cursor: 'pointer', border: 0, textAlign: 'start' }}
             >
@@ -1287,7 +1284,7 @@ export default function DashboardScreenV2() {
         <div style={{ display: 'flex', gap: 12 }}>
           {/* Packed */}
           <button
-            className="lg a-rise d2"
+            className="lg lg-strong a-rise d2"
             onClick={() => setScreen('supplies')}
             style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer', border: 0 }}
             aria-label={`${t('suppliesLabel')}: ${packedPct}%`}
@@ -1303,7 +1300,7 @@ export default function DashboardScreenV2() {
               converts on tap. Editing the budget is an explicit pencil button so
               tapping to convert can never navigate to the budget editor. */}
           <div
-            className="lg a-rise d3"
+            className="lg lg-strong a-rise d3"
             style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 5, textAlign: 'start', minWidth: 0 }}
             aria-label={t('budgetLabel')}
           >
@@ -1385,12 +1382,12 @@ export default function DashboardScreenV2() {
               {todayEvs.slice(0, 4).map(ev => (
                 <div
                   key={ev.id}
-                  className="lg a-rise"
+                  className="a-rise"
                   role="button"
                   tabIndex={0}
                   onClick={() => handleDayClick(currentTripDay)}
                   onKeyDown={e => e.key === 'Enter' && handleDayClick(currentTripDay)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 13, padding: 13, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 4px', cursor: 'pointer', background: 'transparent', borderBottom: '1px solid oklch(50% 0.02 60 / 8%)' }}
                 >
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: 'var(--lg-ink)', width: 40, flexShrink: 0 }}>
                     {ev.time}

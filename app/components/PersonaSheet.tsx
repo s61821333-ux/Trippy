@@ -1,6 +1,7 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useMemo } from 'react';
+import { m, AnimatePresence } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n';
@@ -11,10 +12,9 @@ import Btn from './ui/Btn';
 import Icon from './ui/Icon';
 import PlacesInput, { PlaceResult } from './ui/PlacesInput';
 
-// ── All event categories - icons match DayDetail_V2 CATS_CORE + CATS_EXTENDED ──
+// ── All event categories ──────────────────────────────────────────────────────
 
 const STYLE_OPTIONS: { value: string; label: string; labelHe: string; icon: string }[] = [
-  // Core
   { value: 'food',         label: 'Food',          labelHe: 'אוכל',           icon: 'fork'    },
   { value: 'cafe',         label: 'Café',          labelHe: 'קפה',            icon: 'cup'     },
   { value: 'attraction',   label: 'Sights',        labelHe: 'אטרקציה',        icon: 'pin'     },
@@ -27,7 +27,6 @@ const STYLE_OPTIONS: { value: string; label: string; labelHe: string; icon: stri
   { value: 'nightlife',    label: 'Nightlife',     labelHe: 'בילוי לילי',     icon: 'music'   },
   { value: 'rest',         label: 'Rest',          labelHe: 'מנוחה',          icon: 'tent'    },
   { value: 'other',        label: 'Other',         labelHe: 'אחר',            icon: 'grid'    },
-  // Extended
   { value: 'hiking',       label: 'Hiking',        labelHe: 'טיול רגלי',      icon: 'compass' },
   { value: 'nature_walk',  label: 'Nature',        labelHe: 'טבע',            icon: 'sun'     },
   { value: 'cycling',      label: 'Cycling',       labelHe: 'רכיבה',          icon: 'bike'    },
@@ -70,19 +69,28 @@ const BUDGET_OPTIONS: { value: BudgetTier; label: string; labelHe: string }[] = 
   { value: 'any',  label: 'Any',           labelHe: 'כל תקציב'     },
 ];
 
-// ── High-level "moods" - the friendly entry point. Picking a mood reveals only
-// its relevant subtypes (drawn from STYLE_OPTIONS) instead of a 38-chip wall. ──
+// ── Mood intents ──────────────────────────────────────────────────────────────
 type IntentId = 'eat' | 'see' | 'do' | 'relax' | 'night';
-const INTENTS: { id: IntentId; label: string; labelHe: string; icon: string; subs: string[] }[] = [
-  { id: 'eat',   label: 'Eat & Drink',     labelHe: 'אוכל ושתייה', icon: 'fork',
+
+const INTENTS: {
+  id: IntentId; label: string; labelHe: string;
+  icon: Parameters<typeof Icon>[0]['name'];
+  color: string; glow: string; subs: string[];
+}[] = [
+  { id: 'eat',   label: 'Eat & Drink',      labelHe: 'אוכל ושתייה',   icon: 'fork',
+    color: 'oklch(58% 0.18 42)',  glow: 'oklch(65% 0.18 40 / 30%)',
     subs: ['food', 'cafe', 'market', 'winery', 'cooking'] },
-  { id: 'see',   label: 'Sights & Culture', labelHe: 'אתרים ותרבות', icon: 'compass',
+  { id: 'see',   label: 'Sights & Culture', labelHe: 'אתרים ותרבות',  icon: 'compass',
+    color: 'oklch(48% 0.14 225)', glow: 'oklch(52% 0.15 225 / 26%)',
     subs: ['attraction', 'museum', 'art', 'cultural', 'religious', 'photography', 'national_park', 'guided_tour'] },
-  { id: 'do',    label: 'Active & Outdoors', labelHe: 'פעילות וטבע', icon: 'sun',
+  { id: 'do',    label: 'Active & Outdoors', labelHe: 'פעילות וטבע',  icon: 'sun',
+    color: 'var(--brand)',        glow: 'oklch(45% 0.15 152 / 25%)',
     subs: ['hiking', 'nature_walk', 'cycling', 'boat', 'water_sports', 'ski', 'aerial', 'golf', 'safari', 'sport', 'cruise', 'farm', 'picnic', 'theme_park'] },
-  { id: 'relax', label: 'Relax',           labelHe: 'רגיעה', icon: 'tent',
+  { id: 'relax', label: 'Relax',            labelHe: 'רגיעה',          icon: 'tent',
+    color: 'oklch(50% 0.13 155)', glow: 'oklch(52% 0.14 155 / 25%)',
     subs: ['beach', 'rest', 'spa', 'wellness', 'hot_springs'] },
-  { id: 'night', label: 'Nightlife & Fun', labelHe: 'בילוי', icon: 'music',
+  { id: 'night', label: 'Nightlife & Fun',  labelHe: 'בילוי',          icon: 'music',
+    color: 'oklch(48% 0.14 300)', glow: 'oklch(52% 0.15 300 / 24%)',
     subs: ['nightlife', 'concert', 'theater', 'cinema', 'festival', 'shopping'] },
 ];
 
@@ -105,15 +113,14 @@ const TEXT_INPUT: React.CSSProperties = {
   resize: 'none' as const,
 };
 
-// ── Chip row (supports single and multi-select, Trippy icons) ────────────────
+// ── Chip row ──────────────────────────────────────────────────────────────────
 
 function ChipRow<T extends string>({
-  options, value, onChange, multi = false,
+  options, value, onChange,
 }: {
   options: { value: T; label: string; icon?: string }[];
   value: T[];
   onChange: (v: T) => void;
-  multi?: boolean;
 }) {
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -126,12 +133,11 @@ function ChipRow<T extends string>({
             onClick={() => onChange(o.value)}
             className="lg-btn"
             style={{
-              height: 44, padding: '0 12px', fontSize: 13, fontWeight: active ? 700 : 500,
+              height: 38, padding: '0 13px', fontSize: 13,
+              fontWeight: active ? 700 : 500,
               background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
               color: active ? '#fff' : 'var(--lg-ink)',
-              boxShadow: active
-                ? '0 0 0 2px var(--lg-forest)'
-                : 'var(--shadow-xs)',
+              boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
               transition: 'all 160ms ease',
               display: 'inline-flex', alignItems: 'center', gap: 6,
             }}
@@ -139,7 +145,7 @@ function ChipRow<T extends string>({
             {o.icon && (
               <Icon
                 name={o.icon as Parameters<typeof Icon>[0]['name']}
-                size={13}
+                size={12}
                 color={active ? '#fff' : 'var(--text-3)'}
               />
             )}
@@ -209,7 +215,6 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
 
   const canSubmit = styles.length > 0 && duration !== null && cityName.trim().length > 0;
 
-  // Subtypes shown = those belonging to the moods the user picked (ordered).
   const visibleSubs = useMemo(() => {
     if (selectedIntents.length === 0) return [];
     const wanted = new Set(INTENTS.filter(i => selectedIntents.includes(i.id)).flatMap(i => i.subs));
@@ -226,13 +231,10 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
     setSelectedIntents(prev => {
       const on = prev.includes(id);
       if (on) {
-        // Deselecting a mood drops any of its subtypes from the selection.
         const subs = new Set(intent.subs);
         setStyles(s => s.filter(v => !subs.has(v)));
         return prev.filter(x => x !== id);
       }
-      // Selecting a mood auto-picks its primary subtype so the user can submit
-      // right away, then refine in the revealed chip row.
       setStyles(s => (s.includes(intent.subs[0]) ? s : [...s, intent.subs[0]]));
       return [...prev, id];
     });
@@ -271,71 +273,107 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
   return (
     <Sheet
       title={t('What are you after?', 'מה מחפשים?')}
+      subtitle={defaultCity ? `${t('Day', 'יום')} ${dayNumber} · ${defaultCity}` : undefined}
       onClose={() => { setShowPersona(false); onCloseProp?.(); }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, padding: '4px 0 24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 22, padding: '4px 0 24px' }}>
 
-        {/* 1. Mood - the friendly entry point (5 choices, not 38) */}
+        {/* 1. Mood — large visual intent cards */}
         <div>
           <div style={SECTION_LABEL}>{t('What are you in the mood for?', 'מה בא לכם?')}</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {INTENTS.map(intent => {
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {INTENTS.map((intent, idx) => {
               const active = selectedIntents.includes(intent.id);
               return (
-                <button
+                <m.button
                   key={intent.id}
                   type="button"
                   onClick={() => toggleIntent(intent.id)}
-                  className="lg-btn"
                   aria-pressed={active}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.06, duration: 0.22 }}
                   style={{
-                    height: 46, padding: '0 16px', fontSize: 14, fontWeight: active ? 700 : 600,
-                    background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
-                    color: active ? '#fff' : 'var(--lg-ink)',
-                    boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
-                    transition: 'all 160ms ease',
-                    display: 'inline-flex', alignItems: 'center', gap: 8,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center',
+                    gap: 7, padding: '14px 8px 12px',
+                    border: active ? `2px solid ${intent.color}` : '2px solid transparent',
+                    borderRadius: 18, cursor: 'pointer',
+                    background: active
+                      ? `oklch(from ${intent.color} l c h / 12%)`
+                      : 'var(--lg-panel)',
+                    boxShadow: active
+                      ? `0 4px 16px ${intent.glow}`
+                      : 'var(--shadow-xs)',
+                    transition: 'all .18s ease',
+                    WebkitTapHighlightColor: 'transparent',
                   }}
                 >
-                  <Icon name={intent.icon as Parameters<typeof Icon>[0]['name']} size={16} color={active ? '#fff' : 'var(--lg-forest)'} />
-                  {isHe ? intent.labelHe : intent.label}
-                </button>
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 12,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: active
+                      ? `oklch(from ${intent.color} l c h / 18%)`
+                      : 'oklch(50% 0.02 60 / 7%)',
+                    transition: 'background .18s',
+                  }}>
+                    <Icon
+                      name={intent.icon}
+                      size={20}
+                      color={active ? intent.color : 'var(--text-3)'}
+                    />
+                  </div>
+                  <span style={{
+                    fontSize: 12, fontWeight: active ? 700 : 500,
+                    color: active ? intent.color : 'var(--text-2)',
+                    lineHeight: 1.2, textAlign: 'center',
+                    transition: 'color .18s',
+                  }}>
+                    {isHe ? intent.labelHe : intent.label}
+                  </span>
+                </m.button>
               );
             })}
           </div>
         </div>
 
-        {/* 2. Refine - only the subtypes for the chosen moods + optional detail */}
-        {visibleSubs.length > 0 && (
-          <div>
-            <div style={SECTION_LABEL}>{t('Refine the vibe', 'דייקו את הסגנון')}</div>
-            <ChipRow
-              options={visibleSubs.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label, icon: o.icon }))}
-              value={styles}
-              onChange={toggleStyle}
-              multi
-            />
-            <textarea
-              rows={2}
-              value={freeText}
-              onChange={e => setFreeText(e.target.value)}
-              placeholder={t(
-                'Anything specific? e.g. rooftop terrace, hidden gem… (optional)',
-                'משהו ספציפי? למשל גג עם נוף, מקום נסתר… (אופציונלי)',
-              )}
-              maxLength={300}
-              style={{ ...TEXT_INPUT, lineHeight: 1.5, marginTop: 12 }}
-            />
-          </div>
-        )}
+        {/* 2. Refine subtypes (revealed after mood selection) */}
+        <AnimatePresence>
+          {visibleSubs.length > 0 && (
+            <m.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.24 }}
+            >
+              <div style={SECTION_LABEL}>{t('Refine the vibe', 'דייקו את הסגנון')}</div>
+              <ChipRow
+                options={visibleSubs.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label, icon: o.icon }))}
+                value={styles}
+                onChange={toggleStyle}
+              />
+              <textarea
+                rows={2}
+                value={freeText}
+                onChange={e => setFreeText(e.target.value)}
+                placeholder={t(
+                  'Anything specific? e.g. rooftop terrace, hidden gem… (optional)',
+                  'משהו ספציפי? למשל גג עם נוף, מקום נסתר… (אופציונלי)',
+                )}
+                maxLength={300}
+                style={{ ...TEXT_INPUT, lineHeight: 1.5, marginTop: 12 }}
+              />
+            </m.div>
+          )}
+        </AnimatePresence>
 
-        {/* 3. Location - required */}
+        {/* 3. Location */}
         <div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 10 }}>
             <div style={{ ...SECTION_LABEL, margin: 0 }}>{t('Where? *', 'איפה? *')}</div>
             {locationErr && (
-              <span style={{ fontSize: 11, color: 'var(--danger, #e05252)', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>
-                {t('Required - enter a city or area', 'חובה - הזן עיר או אזור')}
+              <span style={{ fontSize: 11, color: 'var(--danger)', fontFamily: 'var(--font-sans)', fontWeight: 600 }}>
+                {t('Required', 'חובה')}
               </span>
             )}
           </div>
@@ -360,28 +398,64 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
         {/* 4. Duration */}
         <div>
           <div style={SECTION_LABEL}>{t('How long do you have?', 'כמה זמן?')}</div>
-          <ChipRow
-            options={DURATION_OPTIONS.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label }))}
-            value={duration ? [duration] : []}
-            onChange={v => setDuration(v as DurationBucket)}
-          />
+          <div style={{ display: 'flex', gap: 8 }}>
+            {DURATION_OPTIONS.map(o => {
+              const active = duration === o.value;
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => setDuration(o.value)}
+                  style={{
+                    flex: 1, height: 44, border: 0, borderRadius: 12, cursor: 'pointer',
+                    background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                    color: active ? '#fff' : 'var(--lg-ink)',
+                    fontFamily: 'var(--font-sans)', fontWeight: active ? 700 : 500, fontSize: 13,
+                    boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
+                    transition: 'all .18s',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  {isHe ? o.labelHe : o.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* 5. Budget */}
         <div>
           <div style={SECTION_LABEL}>{t('Budget', 'תקציב')}</div>
-          <ChipRow
-            options={BUDGET_OPTIONS.map(o => ({ value: o.value, label: isHe ? o.labelHe : o.label }))}
-            value={[budget]}
-            onChange={v => setBudget(v as BudgetTier)}
-          />
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {BUDGET_OPTIONS.map(o => {
+              const active = budget === o.value;
+              return (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() => setBudget(o.value)}
+                  style={{
+                    flex: '1 1 80px', height: 40, border: 0, borderRadius: 12, cursor: 'pointer',
+                    background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                    color: active ? '#fff' : 'var(--lg-ink)',
+                    fontFamily: 'var(--font-sans)', fontWeight: active ? 700 : 500, fontSize: 13,
+                    boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
+                    transition: 'all .18s',
+                    WebkitTapHighlightColor: 'transparent',
+                  }}
+                >
+                  {isHe ? o.labelHe : o.label}
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Submit */}
         <Btn
           kind="terra"
           full
-          disabled={styles.length === 0 || duration === null}
+          disabled={!canSubmit}
           onClick={handleSubmit}
           style={{ height: 52, fontSize: 15, marginTop: 4, display: 'flex', alignItems: 'center', gap: 8 }}
         >

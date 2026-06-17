@@ -182,7 +182,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           style={{
             width: full ? '100%' : '100%',
             height: full ? '100%' : undefined,
-            background: 'var(--lg-panel-strong)',
+            background: 'var(--lg-panel-float, var(--lg-panel-strong))',
             backdropFilter: 'var(--lg-blur-4)',
             WebkitBackdropFilter: 'var(--lg-blur-4)',
             color: 'var(--text)',

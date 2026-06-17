@@ -158,13 +158,9 @@ function ChipGroup<T extends string>({
                 padding: '8px 14px 8px 8px',
                 display: 'inline-flex', alignItems: 'center', gap: 7,
                 fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
-                background: active
-                  ? 'linear-gradient(135deg, var(--lg-terra-bright), var(--lg-terra))'
-                  : 'var(--lg-panel)',
+                background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
                 color: active ? '#fff' : 'var(--text-2)',
-                boxShadow: active
-                  ? '0 4px 14px oklch(65% 0.18 40 / 28%)'
-                  : 'var(--shadow-xs)',
+                boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
                 transition: 'all .2s',
                 WebkitTapHighlightColor: 'transparent',
                 outline: active ? 'none' : undefined,

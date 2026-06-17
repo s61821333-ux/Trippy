@@ -380,10 +380,12 @@ function LoadingState({ elapsed, msgIdx, locale }: { elapsed: number; msgIdx: nu
       <div className="lg" style={{ padding: '16px 18px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <m.div
-            animate={{ scale: [1, 1.3, 1], rotate: [0, 12, -12, 0] }}
-            transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ fontSize: 20, lineHeight: 1, flexShrink: 0 }}
-          >✨</m.div>
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
+            style={{ flexShrink: 0, display: 'flex' }}
+          >
+            <Icon name="sparkle" size={20} color="var(--lg-terra)" />
+          </m.div>
           <AnimatePresence mode="wait">
             <m.span
               key={msgIdx}

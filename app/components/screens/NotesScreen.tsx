@@ -94,12 +94,11 @@ export default function NotesScreen() {
             {trip.tripNotes.map((note, i) => (
               <m.div
                 key={i}
-                className="lg"
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, x: 40, transition: { duration: 0.16 } }}
                 transition={{ delay: Math.min(i, 7) * 0.04 }}
-                style={{ padding: '14px 16px', display: 'flex', alignItems: 'flex-start', gap: 12 }}
+                style={{ padding: '14px 4px', display: 'flex', alignItems: 'flex-start', gap: 12, background: 'transparent', borderBottom: '1px solid oklch(50% 0.02 60 / 8%)' }}
               >
                 <Icon name="edit" size={18} color="var(--lg-terra)" style={{ flexShrink: 0, marginTop: 2 }} />
                 <span dir="auto" style={{ flex: 1, fontSize: 14, color: 'var(--lg-ink)', lineHeight: 1.6, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
