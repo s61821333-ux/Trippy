@@ -19,6 +19,7 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
   // Only mount Turnstile after the passkey button is clicked — avoids loading
   // a Cloudflare iframe on page load which blocks the `load` event in Firefox.
   const [mountTurnstile, setMountTurnstile] = useState(false);
+  const [turnstileKey, setTurnstileKey] = useState(0);
   const [captchaToken, setCaptchaToken] = useState('');
   const turnstileRef = useRef<TurnstileInstance | undefined>(undefined);
   // Holds the resolve function of the in-flight captcha Promise
@@ -54,9 +55,10 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
         captchaResolverRef.current?.(undefined);
         captchaResolverRef.current = null;
 
-        if (mountTurnstile && turnstileRef.current) {
-          // Widget already mounted — reset it so it can execute again
-          turnstileRef.current.reset();
+        if (mountTurnstile) {
+          // Force remount so execution: 'render' auto-fires cleanly
+          setTurnstileKey(k => k + 1);
+          setCaptchaToken('');
         } else {
           setMountTurnstile(true);
         }
@@ -85,7 +87,6 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
       setPasskeyLoading(false);
       setCaptchaToken('');
       captchaResolverRef.current = null;
-      turnstileRef.current?.reset();
       const msg = e instanceof Error ? e.message : '';
       // User cancelled the browser prompt - don't show an error
       if (msg.includes('cancel') || msg.includes('abort') || msg.includes('NotAllowed')) return;
@@ -232,12 +233,9 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
           iframe blocking the page `load` event on Firefox during tests. */}
       {passkeySupported && TURNSTILE_SITE_KEY && mountTurnstile && (
         <Turnstile
+          key={turnstileKey}
           ref={turnstileRef}
           siteKey={TURNSTILE_SITE_KEY}
-          onLoad={() => {
-            // Widget fully initialised — trigger the invisible challenge once
-            turnstileRef.current?.execute();
-          }}
           onSuccess={(t) => {
             setCaptchaToken(t);
             captchaResolverRef.current?.(t);
@@ -251,7 +249,7 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
           onExpire={() => {
             setCaptchaToken('');
           }}
-          options={{ size: 'invisible', execution: 'execute' }}
+          options={{ size: 'invisible', execution: 'render' }}
         />
       )}
     </div>
