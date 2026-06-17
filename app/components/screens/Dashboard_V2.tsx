@@ -15,7 +15,6 @@ import { getCapitalCoords } from '@/lib/capitals';
 import { getTimezoneForCountry } from '@/lib/countryTimezones';
 import { getCurrencySymbol } from '@/lib/currency';
 import CurrencyAmount from '../ui/CurrencyAmount';
-import Gauge from '../ui/Gauge';
 import StatTriplet from '../ui/StatTriplet';
 import Eyebrow from '../ui/Eyebrow';
 import AvatarStack from '../ui/AvatarStack';
@@ -895,7 +894,7 @@ export default function DashboardScreenV2() {
 
   const daysLeft = currentTripDay != null ? trip.days - currentTripDay : null;
 
-  // ── Gauge + stat-triplet derivations (HANDOFF dashboard) ─────────────
+  // ── Readiness + stat-triplet derivations ─────────────────────────────
   const totalEvents = Object.values(trip.events).reduce((s, evs) => s + evs.length, 0);
   const plannedDays = Array.from({ length: trip.days }, (_, i) => i + 1)
     .filter(d => (trip.events[d]?.length ?? 0) > 0).length;
@@ -908,12 +907,23 @@ export default function DashboardScreenV2() {
     : currentTripDay !== null
       ? `${t('day')} ${t('ofDays')} ${trip.days}`
       : t('days');
-  const gaugePct = beforeTrip
-    ? plannedPct
-    : currentTripDay !== null
-      ? Math.round((currentTripDay / Math.max(1, trip.days)) * 100)
-      : 100;
-  const gaugeArc = beforeTrip ? 'var(--terra)' : 'var(--brand)';
+
+  // Weighted readiness: all available signals
+  const _hasBudget     = trip.budget ? 100 : 0;
+  const _hasStartDate  = trip.startDate ? 100 : 0;
+  const _hasCountries  = (trip.countries?.length ?? 0) > 0 ? 100 : 0;
+  const _hasCrew       = trip.participants.length > 0 ? 100 : 0;
+  const _hasExpenses   = expenses.length > 0 ? 100 : 0;
+  const readinessPct   = Math.round(
+    plannedPct  * 0.35 +
+    packedPct   * 0.25 +
+    _hasBudget  * 0.15 +
+    _hasStartDate * 0.10 +
+    _hasCountries * 0.05 +
+    _hasCrew    * 0.05 +
+    _hasExpenses * 0.05
+  );
+  const readinessColor = readinessPct >= 80 ? 'var(--brand)' : readinessPct >= 50 ? 'var(--terra)' : 'var(--danger)';
 
   // ── AI Budget Coach ──────────────────────────────────────────────────
   const fetchCoachAdvice = useCallback(async () => {
@@ -1013,18 +1023,71 @@ export default function DashboardScreenV2() {
           )}
         </div>
 
-        {/* Gauge - countdown / progress (replaces cinematic imagery) */}
-        <div className="a-rise" style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
-          <Gauge
-            pct={gaugePct}
-            size={212}
-            arc={gaugeArc}
-            number={gaugeNumber}
-            label={gaugeLabel}
-            status={`${plannedPct}% ${t('plannedLabel')}`}
-            statusColor="var(--brand)"
-            aria-label={typeof gaugeLabel === 'string' ? `${gaugeNumber} ${gaugeLabel}` : undefined}
-          />
+        {/* Readiness progress bar */}
+        <div className="a-rise" style={{ marginBottom: 22 }}>
+
+          {/* Countdown pill */}
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+              <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, fontSize: 52, lineHeight: 1, letterSpacing: '-0.04em', color: 'var(--text)' }}>
+                {readinessPct}%
+              </span>
+              <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 600 }}>
+                {locale === 'he' ? 'מוכנות' : 'readiness'}
+              </span>
+            </div>
+            <div style={{ textAlign: 'end' }}>
+              <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, fontSize: 22, lineHeight: 1, letterSpacing: '-0.03em', color: 'var(--text)' }}>
+                {gaugeNumber}
+              </div>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginTop: 2 }}>
+                {gaugeLabel}
+              </div>
+            </div>
+          </div>
+
+          {/* Main bar */}
+          <div
+            role="progressbar"
+            aria-valuenow={readinessPct}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-label={locale === 'he' ? `מוכנות לטיול ${readinessPct}%` : `Trip readiness ${readinessPct}%`}
+            style={{ height: 10, borderRadius: 999, background: 'var(--rule)', overflow: 'hidden', marginBottom: 14 }}
+          >
+            <div style={{
+              height: '100%',
+              width: `${readinessPct}%`,
+              background: readinessColor,
+              borderRadius: 999,
+              transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)',
+            }} />
+          </div>
+
+          {/* Sub-metric chips */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+            {[
+              { label: locale === 'he' ? 'תכנון' : 'Planning', value: `${plannedPct}%`, done: plannedPct === 100 },
+              { label: locale === 'he' ? 'ציוד' : 'Packing',  value: `${packedPct}%`,  done: packedPct === 100 },
+              { label: locale === 'he' ? 'תקציב' : 'Budget',  value: trip.budget ? '✓' : '—', done: !!trip.budget },
+              { label: locale === 'he' ? 'תאריך' : 'Dates',   value: trip.startDate ? '✓' : '—', done: !!trip.startDate },
+            ].map(m => (
+              <div key={m.label} style={{
+                padding: '8px 0',
+                background: 'var(--lg-panel)',
+                borderRadius: 12,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                boxShadow: 'var(--shadow-xs)',
+              }}>
+                <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14, color: m.done ? readinessColor : 'var(--text)' }}>
+                  {m.value}
+                </span>
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)' }}>
+                  {m.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Stat triplet */}

@@ -8,7 +8,6 @@ import { useAppStore } from '@/lib/store';
 import { I18nProvider, useI18n } from '@/lib/i18n';
 import { createClient } from '@/utils/supabase/client';
 import dynamic from 'next/dynamic';
-import NavBar_V2 from './NavBar_V2';
 import Icon from './ui/Icon';
 import ErrorBoundary from './ui/ErrorBoundary';
 
@@ -22,6 +21,7 @@ const ScreenFallback = () => (
   </div>
 );
 
+const NavBar_V2         = dynamic(() => import('./NavBar_V2'));
 const Home_V2           = dynamic(() => import('./screens/Home_V2'),        { loading: ScreenFallback });
 const DashboardScreen   = dynamic(() => import('./screens/Dashboard_V2'),   { loading: ScreenFallback });
 const DayScreen         = dynamic(() => import('./screens/DayDetail_V2'),   { loading: ScreenFallback });
@@ -613,9 +613,8 @@ function Shell() {
                 <div className="w-full h-full">
                   <div className="w-full h-full">
                     <ErrorBoundary>
-                      {!trip && tripDbId && screen !== 'home' ? (
-                        /* Returning user: persisted trip is still loading - show the
-                           branded skeleton instead of flashing the trip-picker. */
+                      {!trip && tripDbId && screen === 'dashboard' ? (
+                        /* Trip data loading while already navigated to dashboard */
                         <DashboardSkeleton />
                       ) : screen === 'splash' || screen === 'home' || !trip ? (
                         <Home_V2 />

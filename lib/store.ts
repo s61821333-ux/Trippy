@@ -257,33 +257,25 @@ export const useAppStore = create<AppState>()(
         if (!user) return
 
         const TWO_DAYS_MS = 2 * 24 * 60 * 60 * 1000;
-        const { tripDbId: persistedTripDbId, lastSessionAt, termsAccepted: persistedTerms } = get();
+        const { termsAccepted: persistedTerms, lastSessionAt } = get();
         const sessionExpired = lastSessionAt !== null && Date.now() - lastSessionAt > TWO_DAYS_MS;
 
         // Set identity immediately so auth-dependent effects (join-link, terms) can proceed.
-        set({ authUser: user, userId: user.id, lastSessionAt: Date.now() })
+        // If the session is stale, clear tripDbId so the boot effect doesn't load an old trip.
+        set({
+          authUser: user, userId: user.id, lastSessionAt: Date.now(),
+          ...(sessionExpired ? { tripDbId: null, trip: null } : {}),
+        })
 
-        // Run terms check and trip load in parallel — they don't depend on each other.
-        await Promise.allSettled([
-          // Terms check: reads persisted value as default, overrides only when DB responds.
-          // Never downgrades true→false from a null DB result (RLS / no record yet).
-          (async () => {
-            let termsAccepted = persistedTerms
-            try {
-              const consent = await dbGetPrivacyConsent(user.id)
-              if (consent !== null) {
-                termsAccepted = consent.content_hash === TERMS_VERSION
-              }
-            } catch {}
-            set({ termsAccepted, termsChecked: true })
-          })(),
-          // Trip restore: reload the persisted trip from DB on page refresh.
-          // Run silently (showLoader: false) so the splash screen covers this wait;
-          // the global overlay is only shown for explicit user-triggered navigations.
-          (!sessionExpired && persistedTripDbId)
-            ? get().loadTripById(persistedTripDbId, { showLoader: false, navigate: false })
-            : Promise.resolve(),
-        ]);
+        // Terms check only — trip loading is handled reactively by AppShell's boot effect
+        // when authUser is set, ensuring a single load path with no duplicate DB calls.
+        try {
+          const consent = await dbGetPrivacyConsent(user.id)
+          const termsAccepted = consent !== null ? consent.content_hash === TERMS_VERSION : persistedTerms
+          set({ termsAccepted, termsChecked: true })
+        } catch {
+          set({ termsAccepted: persistedTerms, termsChecked: true })
+        }
       },
       signInWithGoogle: async () => { await dbSignInWithGoogle() },
 
