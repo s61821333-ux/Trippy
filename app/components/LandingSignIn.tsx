@@ -48,12 +48,16 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
       // window rather than blocking on the full default timeout.
       let token: string | undefined = captchaToken || undefined;
       if (TURNSTILE_SITE_KEY && !token && turnstileRef.current) {
-        try {
-          turnstileRef.current.execute();
-          token = await turnstileRef.current.getResponsePromise(6000);
-        } catch {
-          token = undefined;
-        }
+        turnstileRef.current.execute();
+        // Wait for onSuccess to fire and set captchaToken (up to 8s)
+        token = await new Promise<string | undefined>((resolve) => {
+          const deadline = Date.now() + 8000;
+          const poll = setInterval(() => {
+            const t = turnstileRef.current?.getResponse();
+            if (t) { clearInterval(poll); resolve(t); return; }
+            if (Date.now() > deadline) { clearInterval(poll); resolve(undefined); }
+          }, 100);
+        });
       }
 
       // Attempt sign-in regardless of token state. If the project enforces auth

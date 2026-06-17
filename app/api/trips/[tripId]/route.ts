@@ -5,6 +5,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY } from '@/lib/env'
 import { UpdateTripBody } from '@/lib/schemas'
 
+export const runtime = 'edge';
+
 const TRIP_SELECT = `
   id, name, days, start_date, theme, trip_notes, countries, hotels, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
