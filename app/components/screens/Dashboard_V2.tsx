@@ -1380,12 +1380,11 @@ export default function DashboardScreenV2() {
               {todayEvs.slice(0, 4).map(ev => (
                 <div
                   key={ev.id}
-                  className="a-rise"
+                  className="lg a-rise"
                   role="button"
                   tabIndex={0}
                   onClick={() => handleDayClick(currentTripDay)}
                   onKeyDown={e => e.key === 'Enter' && handleDayClick(currentTripDay)}
-                  className="lg a-rise"
                   style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 14px', cursor: 'pointer', marginBottom: 6, borderRadius: 14 }}
                 >
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: 'var(--lg-ink)', width: 40, flexShrink: 0 }}>
