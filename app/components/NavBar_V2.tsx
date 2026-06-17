@@ -137,8 +137,7 @@ export default function NavBar_V2({
         willChange: 'transform',
       }}
     >
-      {/* ── Expand panel ─────────────────────────────────────── */}
-      {/* Row 556/577: tap-outside backdrop closes expand panel */}
+      {/* ── Expand panel backdrop ────────────────────────────── */}
       {expandOpen && (
         <div
           aria-hidden="true"
@@ -146,75 +145,83 @@ export default function NavBar_V2({
           style={{ position: 'fixed', inset: 0, zIndex: 39 }}
         />
       )}
-      <AnimatePresence>
-        {expandOpen && (
-          <m.div
-            key="expand-panel"
-            className="lg lg-strong"
-            initial={isDesktop ? { opacity: 0, x: 12, scale: 0.92 } : { opacity: 0, y: 12, scale: 0.92 }}
-            animate={isDesktop ? { opacity: 1, x: 0, scale: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isDesktop ? { opacity: 0, x: 12, scale: 0.92 } : { opacity: 0, y: 12, scale: 0.92 }}
-            transition={PANEL_SPRING}
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 2,
-              padding: 8,
-              borderRadius: 28,
-              pointerEvents: 'auto',
-              width: 'min(260px, calc(100vw - 32px))',
-            }}
-          >
-            <button
-              onClick={() => { setExpandOpen(false); onSwitch?.(); }}
-              className="lg-btn"
-              style={{ ...PANEL_BTN }}
-            >
-              <Icon name="swap" size={17} style={{ color: 'var(--lg-terra)' }} />
-              <span>{isHe ? 'החלף טיול' : 'Switch trip'}</span>
-            </button>
-
-            <button
-              onClick={() => { setExpandOpen(false); onNotes?.(); }}
-              className="lg-btn"
-              style={{ ...PANEL_BTN }}
-            >
-              <Icon name="edit" size={17} style={{ color: 'var(--lg-forest)' }} />
-              <span>{isHe ? 'הערות' : 'Notes'}</span>
-            </button>
-
-            <button
-              onClick={() => { setExpandOpen(false); onSettings?.(); }}
-              className="lg-btn"
-              style={{ ...PANEL_BTN }}
-            >
-              <Icon name="settings" size={17} style={{ color: 'var(--lg-forest)' }} />
-              <span>{isHe ? 'הגדרות' : 'Settings'}</span>
-            </button>
-
-            {/* Divider */}
-            <div style={{ height: 1, background: 'oklch(50% 0.02 60 / 12%)', margin: '2px 8px' }} />
-
-            <button
-              onClick={() => { setExpandOpen(false); onLogout?.(); }}
-              className="lg-btn"
-              style={{ ...PANEL_BTN, color: 'var(--danger)' }}
-            >
-              <Icon name="logout" size={17} style={{ color: 'var(--danger)' }} />
-              <span>{isHe ? 'התנתקות' : 'Log out'}</span>
-            </button>
-          </m.div>
-        )}
-      </AnimatePresence>
 
       {/* ── Main row ─────────────────────────────────────────── */}
       <div style={{
+        position: 'relative',
         display: 'flex',
         gap: 8,
         alignItems: 'center',
         pointerEvents: 'auto',
         flexDirection: isDesktop ? 'column' : 'row',
       }}>
+        {/* ── Expand panel ─────────────────────────────────────── */}
+        <AnimatePresence>
+          {expandOpen && (
+            <m.div
+              key="expand-panel"
+              className="lg lg-strong"
+              initial={isDesktop ? { opacity: 0, x: 8, scale: 0.92 } : { opacity: 0, y: 12, scale: 0.92 }}
+              animate={isDesktop ? { opacity: 1, x: 0, scale: 1 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={isDesktop ? { opacity: 0, x: 8, scale: 0.92 } : { opacity: 0, y: 12, scale: 0.92 }}
+              transition={PANEL_SPRING}
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 2,
+                padding: 8,
+                borderRadius: 28,
+                pointerEvents: 'auto',
+                width: 'min(260px, calc(100vw - 32px))',
+                ...(isDesktop ? {
+                  position: 'absolute',
+                  right: 'calc(100% + 8px)',
+                  top: 0,
+                  zIndex: 41,
+                } : {}),
+              }}
+            >
+              <button
+                onClick={() => { setExpandOpen(false); onSwitch?.(); }}
+                className="lg-btn"
+                style={{ ...PANEL_BTN }}
+              >
+                <Icon name="swap" size={17} style={{ color: 'var(--lg-terra)' }} />
+                <span>{isHe ? 'החלף טיול' : 'Switch trip'}</span>
+              </button>
+
+              <button
+                onClick={() => { setExpandOpen(false); onNotes?.(); }}
+                className="lg-btn"
+                style={{ ...PANEL_BTN }}
+              >
+                <Icon name="edit" size={17} style={{ color: 'var(--lg-forest)' }} />
+                <span>{isHe ? 'הערות' : 'Notes'}</span>
+              </button>
+
+              <button
+                onClick={() => { setExpandOpen(false); onSettings?.(); }}
+                className="lg-btn"
+                style={{ ...PANEL_BTN }}
+              >
+                <Icon name="settings" size={17} style={{ color: 'var(--lg-forest)' }} />
+                <span>{isHe ? 'הגדרות' : 'Settings'}</span>
+              </button>
+
+              {/* Divider */}
+              <div style={{ height: 1, background: 'oklch(50% 0.02 60 / 12%)', margin: '2px 8px' }} />
+
+              <button
+                onClick={() => { setExpandOpen(false); onLogout?.(); }}
+                className="lg-btn"
+                style={{ ...PANEL_BTN, color: 'var(--danger)' }}
+              >
+                <Icon name="logout" size={17} style={{ color: 'var(--danger)' }} />
+                <span>{isHe ? 'התנתקות' : 'Log out'}</span>
+              </button>
+            </m.div>
+          )}
+        </AnimatePresence>
 
         {/* Menu FAB */}
         <m.button
