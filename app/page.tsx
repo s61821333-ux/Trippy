@@ -1,7 +1,9 @@
 ﻿import type { Metadata } from 'next';
-import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
+
+// Edge runtime = always warm, zero cold start vs ~5-8s Node.js lambda cold boot.
+export const runtime = 'edge';
 import LandingSignIn from './components/LandingSignIn';
 import LandingNextGuard from './components/LandingNextGuard';
 import { LandingSchema } from './components/SchemaMarkup';
@@ -59,14 +61,13 @@ export default async function LandingPage() {
   const locale = cookieStore.get('Trippy-locale')?.value === 'he' ? 'he' as const : 'en' as const;
   const isHe = locale === 'he';
 
+  // Trust the Supabase auth cookie directly — skipping getUser() removes a
+  // 200-500ms network round-trip. AppShell validates the session client-side
+  // and redirects to '/' if the token is invalid.
   const hasAuthCookie = cookieStore
     .getAll()
     .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'));
-  if (hasAuthCookie) {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) redirect('/app');
-  }
+  if (hasAuthCookie) redirect('/app');
 
   const features = isHe ? [
     {
