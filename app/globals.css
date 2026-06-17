@@ -2269,10 +2269,13 @@ body::after {
 .day-pill {
   flex-shrink: 0; width: 48px; height: 60px; border-radius: 16px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-  border: none; background: transparent; box-shadow: none;
+  border: none;
+  background: var(--lg-panel);
+  backdrop-filter: var(--lg-blur); -webkit-backdrop-filter: var(--lg-blur);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 60%), inset 0 0 0 1px oklch(100% 0 0 / 18%);
   cursor: pointer;
   font-family: var(--font-sans); color: var(--text-2);
-  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), background 0.18s, color 0.18s;
+  transition: transform 0.18s cubic-bezier(0.34,1.56,0.64,1), background 0.18s, box-shadow 0.18s, color 0.18s;
   -webkit-tap-highlight-color: transparent;
 }
 .day-pill.is-active { background: var(--terra); color: #fff; box-shadow: var(--lg-glow-terra); border-radius: 16px; }

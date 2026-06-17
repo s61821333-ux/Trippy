@@ -690,7 +690,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9, margin: 0 }}>{isHe ? 'היסטוריה' : 'History'}</p>
             {expenses.map((exp: any) => (
-              <div key={exp.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 4px', borderBottom: '1px solid oklch(50% 0.02 60 / 8%)', background: 'transparent' }}>
+              <div key={exp.id} className="lg" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', marginBottom: 6, borderRadius: 14 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--lg-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exp.description}</div>
                   {Array.isArray(exp.tags) && exp.tags.length > 0 && (
@@ -1069,11 +1069,11 @@ export default function DashboardScreenV2() {
               { label: locale === 'he' ? 'תקציב' : 'Budget',  value: trip.budget ? '✓' : '—', done: !!trip.budget },
               { label: locale === 'he' ? 'תאריך' : 'Dates',   value: trip.startDate ? '✓' : '—', done: !!trip.startDate },
             ].map(m => (
-              <div key={m.label} style={{
-                padding: '8px 0',
-                background: 'transparent',
-                borderRadius: 12,
+              <div key={m.label} className="lg" style={{
+                padding: '10px 8px',
+                borderRadius: 14,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                flex: 1,
               }}>
                 <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14, color: m.done ? readinessColor : 'var(--text)' }}>
                   {m.value}
@@ -1120,10 +1120,10 @@ export default function DashboardScreenV2() {
                 style={{
                   flexShrink: 0, width: 54, height: dayWeather ? 74 : 62, borderRadius: 16, cursor: 'pointer',
                   border: 'none',
-                  background: isActive ? 'var(--terra)' : 'transparent',
-                  backdropFilter: undefined,
-                  WebkitBackdropFilter: undefined,
-                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'none',
+                  background: isActive ? 'var(--terra)' : 'var(--lg-panel)',
+                  backdropFilter: isActive ? 'none' : 'var(--lg-blur)',
+                  WebkitBackdropFilter: isActive ? 'none' : 'var(--lg-blur)',
+                  boxShadow: isActive ? 'var(--lg-glow-terra)' : 'var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 60%), inset 0 0 0 1px oklch(100% 0 0 / 18%)',
                   color: isActive ? '#fff' : 'var(--text-2)',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                   gap: 1, padding: '4px 0',
@@ -1385,7 +1385,8 @@ export default function DashboardScreenV2() {
                   tabIndex={0}
                   onClick={() => handleDayClick(currentTripDay)}
                   onKeyDown={e => e.key === 'Enter' && handleDayClick(currentTripDay)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 4px', cursor: 'pointer', background: 'transparent', borderBottom: '1px solid oklch(50% 0.02 60 / 8%)' }}
+                  className="lg a-rise"
+                  style={{ display: 'flex', alignItems: 'center', gap: 13, padding: '12px 14px', cursor: 'pointer', marginBottom: 6, borderRadius: 14 }}
                 >
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 12, fontWeight: 600, color: 'var(--lg-ink)', width: 40, flexShrink: 0 }}>
                     {ev.time}

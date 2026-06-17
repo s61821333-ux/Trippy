@@ -209,12 +209,12 @@ function HotelAnchor({ hotel, isEnd, onClick }: {
   return (
     <button
       onClick={onClick}
+      className="lg lg-strong"
       style={{
         display: 'flex', alignItems: 'center', gap: 12,
-        padding: '12px 20px', margin: 0,
-        background: 'transparent',
-        border: 0, borderBottom: '1px solid oklch(50% 0.02 60 / 8%)',
-        cursor: 'pointer', textAlign: 'start', width: '100%',
+        padding: '12px 20px', margin: '0 20px 8px',
+        border: 0, borderRadius: 'var(--lg-r-card)',
+        cursor: 'pointer', textAlign: 'start', width: 'calc(100% - 40px)',
       }}
     >
       <StampIcon iconKey="hotel" size={34} style={{ flexShrink: 0 }} />
@@ -402,14 +402,13 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
 
   return (
     <div
-      className="a-rise"
+      className="lg a-rise specular-hover"
       style={{
         animationDelay: `${Math.min(index, 7) * 0.05}s`,
         margin: '0 20px',
         borderRadius: 'var(--lg-r-card)',
-        background: 'transparent',
-        borderInlineStart: `3px solid ${color}55`,
-        borderBottom: '1px solid oklch(50% 0.02 60 / 8%)',
+        borderInlineStart: `3px solid ${color}88`,
+        overflow: 'hidden',
       }}
     >
       <button
@@ -1241,9 +1240,9 @@ export default function DayDetail_V2() {
       <div className="lg-scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 'var(--nav-total-h)' }}>
         <div className="resp-container">
 
-        {/* Context bar: Weather + Day budget — inline, no card background */}
+        {/* Context bar: Weather + Day budget */}
         {(weather || dayBudget > 0) && (
-          <div style={{ display: 'flex', gap: 20, margin: '0 20px 14px', padding: '8px 0', borderBottom: '1px solid oklch(50% 0.02 60 / 10%)' }}>
+          <div className="lg lg-strong" style={{ display: 'flex', gap: 20, margin: '0 20px 14px', padding: '12px 16px', borderRadius: 'var(--lg-r-card)' }}>
             {weather && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon name={getWeatherIcon(weather.label) as any} size={18} color="var(--lg-sand)" />
