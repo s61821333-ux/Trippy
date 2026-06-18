@@ -445,13 +445,15 @@
   --lg-panel:        oklch(18% 0.006 60 / 50%);
   --lg-panel-strong: oklch(22% 0.006 60 / 80%);
   --lg-panel-float:  oklch(18% 0.006 60 / 92%);
+  --surface-1:       var(--lg-panel);
+  --surface-2:       oklch(100% 0 0 / 7%);
   --lg-shadow:    0 2px 6px oklch(0% 0 0 / 28%);
   --lg-shadow-md: 0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
   --lg-shadow-lg: 0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
   --compass-ring: #F4EFE8; --compass-n: #E0916B; --compass-s: #8BB39A; --compass-ew: #E6B574; --compass-hub: #F4EFE8;
 }
 [data-theme="dark"] .lg {
-  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 24%), inset 0 0 0 1px oklch(100% 0 0 / 16%);
+  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 16%), inset 0 0 0 1px oklch(100% 0 0 / 9%);
 }
 [data-theme="dark"] .lg::before {
   background: linear-gradient(135deg, oklch(100% 0 0 / 20%) 0%, transparent 40%, transparent 70%, oklch(100% 0 0 / 6%) 100%);
@@ -1592,6 +1594,8 @@ body::after {
     --lg-panel:         oklch(18% 0.006 60 / 84%);
     --lg-panel-strong:  oklch(22% 0.006 60 / 92%);
     --lg-card-border:   transparent;
+    --surface-1:        var(--lg-panel);
+    --surface-2:        oklch(100% 0 0 / 7%);
     --lg-shadow:     0 8px 30px oklch(0% 0 0 / 52%), 0 2px 8px oklch(0% 0 0 / 34%);
     --lg-shadow-lg:  0 20px 60px oklch(0% 0 0 / 62%), 0 6px 18px oklch(0% 0 0 / 38%);
     --lg-glow-terra: 0 12px 40px oklch(72% 0.172 40 / 38%);
@@ -1919,6 +1923,14 @@ body::after {
   --lg-panel-float:   oklch(99% 0.004 80 / 92%);
   --lg-panel-dark:    oklch(22% 0.02 60 / 55%);
 
+  /* ── Surface ladder (single source for stacking depth) ──────────────
+     surface-1 = a real card/panel/bubble/button on the page bg.
+     surface-2 = a fill nested INSIDE a card (row, track, inactive chip).
+     Keep surface-2 a faint inset tint — never a second opaque box, so
+     nested elements read as part of the card, not a separate component. */
+  --surface-1:        var(--lg-panel);
+  --surface-2:        oklch(24% 0.03 60 / 6%);
+
   --lg-r-card: 26px;
   --lg-r-lg:   34px;
   --lg-r-pill: 9999px;
@@ -1948,6 +1960,8 @@ body::after {
   --lg-panel-strong:  oklch(22% 0.006 60 / 80%);
   --lg-panel-float:   oklch(18% 0.006 60 / 92%); /* sheets/modals: near-opaque */
   --lg-card-border:   transparent;
+  --surface-1:        var(--lg-panel);
+  --surface-2:        oklch(100% 0 0 / 7%); /* nested fill: faint light inset on dark card */
 
   --lg-blur:          blur(20px) saturate(1.3);
   --lg-blur-strong:   blur(28px) saturate(1.4);
@@ -1971,9 +1985,9 @@ body::after {
   border: none;
   box-shadow:
     var(--lg-shadow),
-    inset 0 1px 0 oklch(100% 0 0 / 72%),
+    inset 0 1px 0 oklch(100% 0 0 / 50%),
     inset 0 -1px 0 oklch(0% 0 0 / 4%),
-    inset 0 0 0 1px oklch(100% 0 0 / 22%);
+    inset 0 0 0 1px oklch(100% 0 0 / 10%);
   overflow: hidden;
 }
 .lg::before {
@@ -2036,7 +2050,7 @@ body::after {
 
 [data-dark="true"] .lg {
   /* Stronger rim light + border so glass cards pop against the dark bg */
-  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 24%), inset 0 0 0 1px oklch(100% 0 0 / 16%);
+  box-shadow: var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 16%), inset 0 0 0 1px oklch(100% 0 0 / 9%);
 }
 [data-dark="true"] .lg::before {
   background: linear-gradient(135deg, oklch(100% 0 0 / 20%) 0%, transparent 40%, transparent 70%, oklch(100% 0 0 / 6%) 100%);

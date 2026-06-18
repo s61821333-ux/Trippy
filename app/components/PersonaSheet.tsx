@@ -135,7 +135,7 @@ function ChipRow<T extends string>({
             style={{
               height: 38, padding: '0 13px', fontSize: 13,
               fontWeight: active ? 700 : 500,
-              background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
+              background: active ? 'var(--lg-forest)' : 'var(--surface-2)',
               color: active ? '#fff' : 'var(--lg-ink)',
               boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
               transition: 'all 160ms ease',
@@ -301,7 +301,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                     borderRadius: 18, cursor: 'pointer',
                     background: active
                       ? `oklch(from ${intent.color} l c h / 12%)`
-                      : 'var(--lg-panel)',
+                      : 'var(--surface-2)',
                     boxShadow: active
                       ? `0 4px 16px ${intent.glow}`
                       : 'var(--shadow-xs)',
@@ -408,7 +408,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                   onClick={() => setDuration(o.value)}
                   style={{
                     flex: 1, height: 44, border: 0, borderRadius: 12, cursor: 'pointer',
-                    background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                    background: active ? 'var(--lg-forest)' : 'var(--surface-2)',
                     color: active ? '#fff' : 'var(--lg-ink)',
                     fontFamily: 'var(--font-sans)', fontWeight: active ? 700 : 500, fontSize: 13,
                     boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
@@ -436,7 +436,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                   onClick={() => setBudget(o.value)}
                   style={{
                     flex: '1 1 80px', height: 40, border: 0, borderRadius: 12, cursor: 'pointer',
-                    background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                    background: active ? 'var(--lg-forest)' : 'var(--surface-2)',
                     color: active ? '#fff' : 'var(--lg-ink)',
                     fontFamily: 'var(--font-sans)', fontWeight: active ? 700 : 500, fontSize: 13,
                     boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',

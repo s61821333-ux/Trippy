@@ -205,7 +205,7 @@ function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
         onClick={() => onSelect(null)}
         style={{
           flexShrink: 0, height: 44, padding: '0 14px', borderRadius: 9999, border: 0, cursor: 'pointer',
-          background: selectedDay == null ? 'var(--lg-terra)' : 'var(--lg-panel)',
+          background: selectedDay == null ? 'var(--lg-terra)' : 'var(--surface-2)',
           color: selectedDay == null ? '#fff' : 'var(--text-3)',
           fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
           letterSpacing: '0.06em', boxShadow: selectedDay == null ? 'var(--lg-glow-terra)' : 'none',
@@ -221,7 +221,7 @@ function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
           onClick={() => onSelect(selectedDay === d ? null : d)}
           style={{
             flexShrink: 0, height: 44, padding: '0 14px', borderRadius: 9999, border: 0, cursor: 'pointer',
-            background: selectedDay === d ? DAY_PALETTE[(d - 1) % DAY_PALETTE.length] : 'var(--lg-panel)',
+            background: selectedDay === d ? DAY_PALETTE[(d - 1) % DAY_PALETTE.length] : 'var(--surface-2)',
             color: selectedDay === d ? '#fff' : 'var(--text-3)',
             fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
             transition: 'all .2s', scrollSnapAlign: 'start',

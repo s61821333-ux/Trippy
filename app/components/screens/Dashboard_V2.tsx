@@ -77,7 +77,7 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
             onClick={onClose}
             style={{
               flex: 1, height: 52, border: 0, borderRadius: 'var(--lg-r-btn)',
-              background: 'var(--lg-panel)', color: 'var(--text-2)',
+              background: 'var(--surface-2)', color: 'var(--text-2)',
               fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 15, cursor: 'pointer',
               boxShadow: 'var(--shadow-xs)',
             }}
@@ -455,7 +455,7 @@ function BudgetBreakdown({ trip, currSym, expenses }: {
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', width: 28, flexShrink: 0 }}>
                   D{day}
                 </span>
-                <div style={{ flex: 1, height: 7, borderRadius: 4, background: 'var(--lg-panel)', overflow: 'hidden' }}>
+                <div style={{ flex: 1, height: 7, borderRadius: 4, background: 'var(--surface-2)', overflow: 'hidden' }}>
                   <div style={{
                     width: `${(amount / maxDay) * 100}%`, height: '100%', borderRadius: 4,
                     background: `var(--lg-terra)`, transition: 'width .4s',
@@ -623,7 +623,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
         <BudgetBreakdown trip={trip} currSym={currSym} expenses={expenses} />
 
         {/* ── Quick add expense ── */}
-        <div style={{ background: 'var(--lg-panel)', borderRadius: 18, padding: '14px 16px' }}>
+        <div style={{ background: 'var(--surface-2)', borderRadius: 18, padding: '14px 16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
             <p className="eyebrow-lg" style={{ color: 'var(--text-3)', fontSize: 9, margin: 0 }}>{isHe ? 'הוסף הוצאה' : 'Add expense'}</p>
             <button
@@ -1120,7 +1120,7 @@ export default function DashboardScreenV2() {
                 style={{
                   flexShrink: 0, width: 54, height: dayWeather ? 74 : 62, borderRadius: 16, cursor: 'pointer',
                   border: 'none',
-                  background: isActive ? 'var(--terra)' : 'var(--lg-panel)',
+                  background: isActive ? 'var(--terra)' : 'var(--surface-2)',
                   backdropFilter: isActive ? 'none' : 'var(--lg-blur)',
                   WebkitBackdropFilter: isActive ? 'none' : 'var(--lg-blur)',
                   boxShadow: isActive ? 'var(--lg-glow-terra)' : 'var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 60%), inset 0 0 0 1px oklch(100% 0 0 / 18%)',

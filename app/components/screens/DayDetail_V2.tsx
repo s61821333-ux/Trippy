@@ -307,7 +307,7 @@ function HotelSheet({ dayNum, existing, onClose }: {
                   style={{
                     border: 0, cursor: 'pointer', borderRadius: 9999, padding: '8px 13px',
                     fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12.5,
-                    background: checkOut === d ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                    background: checkOut === d ? 'var(--lg-forest)' : 'var(--surface-2)',
                     color: checkOut === d ? '#fff' : 'var(--text-2)',
                     boxShadow: checkOut === d ? 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 28%)' : 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 48%)',
                     transition: 'all .25s',
@@ -610,7 +610,7 @@ function RescheduleSheet({ event, onClose, dayLabel }: {
                 style={{
                   flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
-                  background: durPreset === d ? 'var(--lg-terra)' : 'var(--lg-panel)',
+                  background: durPreset === d ? 'var(--lg-terra)' : 'var(--surface-2)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
                   boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'var(--shadow-xs)',
                   transition: 'all .25s', whiteSpace: 'nowrap',
@@ -751,7 +751,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                 style={{
                   flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
-                  background: durPreset === d ? 'var(--lg-terra)' : 'var(--lg-panel)',
+                  background: durPreset === d ? 'var(--lg-terra)' : 'var(--surface-2)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
                   boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'var(--shadow-xs)',
                   transition: 'all .25s', whiteSpace: 'nowrap',
@@ -790,7 +790,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                   border: 0, cursor: 'pointer', borderRadius: 9999, padding: '8px 13px',
                   display: 'inline-flex', alignItems: 'center', gap: 5,
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12.5,
-                  background: cat === c ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                  background: cat === c ? 'var(--lg-forest)' : 'var(--surface-2)',
                   color: cat === c ? '#fff' : 'var(--text-2)',
                   boxShadow: cat === c ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
                   transition: 'all .25s',

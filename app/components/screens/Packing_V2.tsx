@@ -805,7 +805,7 @@ export default function Packing_V2() {
                   flexShrink: 0, border: 0, cursor: 'pointer', borderRadius: 9999,
                   padding: '8px 14px', scrollSnapAlign: 'start',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
-                  background: isActive ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                  background: isActive ? 'var(--lg-forest)' : 'var(--surface-2)',
                   color:      isActive ? '#fff' : 'var(--text-2)',
                   boxShadow:  isActive
                     ? 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 28%)'

@@ -103,7 +103,7 @@ function StepTrack({ step }: { step: 'form' | 'generating' | 'preview' }) {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             background: i <= idx
               ? 'linear-gradient(145deg, var(--lg-terra-bright), var(--lg-terra))'
-              : 'var(--lg-panel)',
+              : 'var(--surface-2)',
             boxShadow: i === idx ? '0 3px 12px oklch(65% 0.18 40 / 30%)' : 'none',
             transition: 'all .3s',
           }}>
@@ -121,7 +121,7 @@ function StepTrack({ step }: { step: 'form' | 'generating' | 'preview' }) {
               flex: 1, height: 2, borderRadius: 1, margin: '0 4px',
               background: i < idx
                 ? 'linear-gradient(90deg, var(--lg-terra), var(--lg-terra-bright))'
-                : 'var(--lg-panel)',
+                : 'var(--surface-2)',
               transition: 'background .4s',
             }} />
           )}
@@ -158,7 +158,7 @@ function ChipGroup<T extends string>({
                 padding: '8px 14px 8px 8px',
                 display: 'inline-flex', alignItems: 'center', gap: 7,
                 fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
-                background: active ? 'var(--lg-forest)' : 'var(--lg-panel)',
+                background: active ? 'var(--lg-forest)' : 'var(--surface-2)',
                 color: active ? '#fff' : 'var(--text-2)',
                 boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
                 transition: 'all .2s',
@@ -240,7 +240,7 @@ function StepGenerating({ progress, totalDays, locale }: {
 
       {totalDays > 0 && (
         <div style={{ width: '100%', maxWidth: 280 }}>
-          <div style={{ height: 6, borderRadius: 3, background: 'var(--lg-panel)', overflow: 'hidden', marginBottom: 8 }}>
+          <div style={{ height: 6, borderRadius: 3, background: 'var(--surface-2)', overflow: 'hidden', marginBottom: 8 }}>
             <m.div
               animate={{ width: `${Math.max(5, pct)}%` }}
               transition={{ type: 'spring', stiffness: 55, damping: 18 }}
@@ -432,7 +432,7 @@ function StepPreview({ plan, locale, onConfirm, creating }: {
           height: 56, border: 0, borderRadius: 'var(--lg-r-btn, 20px)',
           cursor: creating ? 'default' : 'pointer',
           background: creating
-            ? 'var(--lg-panel)'
+            ? 'var(--surface-2)'
             : 'linear-gradient(145deg, var(--lg-terra-bright), var(--lg-terra))',
           color: creating ? 'var(--text-3)' : '#fff',
           fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 16,
