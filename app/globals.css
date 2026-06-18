@@ -558,7 +558,7 @@ body {
 /* Row 227: force light mode for print - dark mode wastes ink */
 @media print {
   html, body { background: #fff !important; color: #000 !important; }
-  .lg, .glass, .glass-panel { backdrop-filter: none !important; background: #fff !important; }
+  .lg { backdrop-filter: none !important; background: #fff !important; }
   [data-dark="true"] { filter: none !important; }
 }
 
@@ -687,32 +687,12 @@ select {
   box-sizing: border-box;
 }
 
-/* ═══ Jelly Liquid Glass System - matches v2 prototype exactly ═══ */
+/* ═══ Liquid Glass card system — see .lg below (canonical) ═══ */
+/* Note: the legacy .glass / .glass-panel / .glass-* / .jelly-glow / .specular-*
+   / .glass-card classes were removed (zero usages app-wide); .lg is the single
+   card surface. */
 
-/* Base glass surface - 2027: oklch bg, layered shadows, directional border */
-.glass {
-  background: oklch(99% 0.004 80 / 72%); /* increased from 52% - glass must be visible on light bg */
-  /* Unified iOS26 recipe - vivid blur + high saturation (see --lg-blur) */
-  backdrop-filter: var(--lg-blur);
-  -webkit-backdrop-filter: var(--lg-blur);
-  border-style: solid;
-  border-width: 1px;
-  border-color: oklch(83% 0.012 75 / 70%); /* visible border on light bg */
-  border-top-color: oklch(100% 0 0 / 60%);
-  border-left-color: oklch(100% 0 0 / 35%);
-  border-bottom-color: oklch(13% 0.012 55 / 10%);
-  border-right-color: oklch(13% 0.012 55 / 6%);
-  border-radius: 32px;
-  box-shadow: var(--shadow-md), 0 1px 3px oklch(13% 0.012 55 / 8%), inset 0 1px 0 oklch(100% 0 0 / 70%);
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease, backdrop-filter 0.3s ease;
-}
-
-/* High contrast: glass becomes opaque with solid border */
-[data-high-contrast="true"] .glass,
-[data-high-contrast="true"] .glass-panel,
-[data-high-contrast="true"] .glass-float,
+/* High contrast: card becomes opaque with solid border */
 [data-high-contrast="true"] .lg,
 [data-high-contrast="true"] .lg-strong {
   background: var(--bg) !important;
@@ -720,86 +700,7 @@ select {
   -webkit-backdrop-filter: none !important;
   border: 1.5px solid var(--text) !important;
 }
-[data-high-contrast="true"] .glass::before,
 [data-high-contrast="true"] .lg::before { display: none !important; }
-
-/* Specular diagonal highlight inside every glass surface - softened, no hard band */
-.glass::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.05) 35%, transparent 65%);
-  pointer-events: none;
-  border-radius: inherit;
-  z-index: 1;
-}
-.glass::after { display: none; }
-
-/* Elevated float glass - 2027: higher opacity, richer depth */
-.glass-panel, .glass-float {
-  background: oklch(99% 0.004 80 / 72%);
-  backdrop-filter: var(--lg-blur-strong);
-  -webkit-backdrop-filter: var(--lg-blur-strong);
-  border-style: solid;
-  border-width: 1px;
-  border-color: oklch(100% 0 0 / 12%);
-  border-top-color: oklch(100% 0 0 / 56%);
-  border-left-color: oklch(100% 0 0 / 32%);
-  border-bottom-color: oklch(13% 0.012 55 / 8%);
-  border-right-color: oklch(13% 0.012 55 / 5%);
-  border-radius: 32px;
-  box-shadow: var(--shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 72%);
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.4s ease;
-}
-.glass-panel::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(to bottom right, rgba(255,255,255,0.40), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
-
-/* Active / modal elevation - much deeper shadow */
-.glass-active, .glass-elevated {
-  box-shadow: 0 40px 80px rgba(26, 20, 16, 0.15) !important;
-}
-
-/* Dark mode glass overrides */
-[data-dark="true"] .glass,
-[data-dark="true"] .glass-panel,
-[data-dark="true"] .glass-float {
-  background: oklch(14% 0.018 55 / 78%);
-  border-color: oklch(100% 0 0 / 8%);
-  border-top-color: oklch(100% 0 0 / 18%);
-  border-left-color: oklch(100% 0 0 / 12%);
-  box-shadow: var(--shadow-lg), inset 0 1px 0 oklch(100% 0 0 / 14%);
-}
-
-/* Jelly-glow: gradient border trick using mask-composite */
-.jelly-glow {
-  position: relative;
-}
-.jelly-glow::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  padding: 1px;
-  border-radius: inherit;
-  background: linear-gradient(to bottom right, rgba(255,255,255,0.40), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  pointer-events: none;
-}
 
 /* Liquid hover: spring scale + lift + deepen blur - desktop pointer only */
 .liquid-hover {
@@ -813,14 +714,6 @@ select {
     box-shadow: 0 40px 80px rgba(26, 20, 16, 0.15);
   }
 }
-
-/* Aliases kept for backward compat - opacities raised for light-mode visibility */
-.glass-1 { background: rgba(255,255,255,0.62); box-shadow: 0 2px 8px rgba(26,20,16,0.07), 0 1px 3px rgba(26,20,16,0.05), inset 0 1px 0 rgba(255,255,255,0.7); border: none; }
-.glass-2 { background: rgba(255,255,255,0.72); box-shadow: 0 4px 16px rgba(26,20,16,0.08), inset 0 1px 0 rgba(255,255,255,0.75); border: none; }
-.glass-3 { background: rgba(255,255,255,0.82); box-shadow: 0 12px 40px rgba(26,20,16,0.10), inset 0 1px 0 rgba(255,255,255,0.8); border: none; }
-.glass-warm  { background: rgba(255,248,240,0.78) !important; }
-.glass-hero  { background: rgba(255,255,255,0.88) !important; box-shadow: 0 40px 80px rgba(26,20,16,0.15) !important; }
-.glass-teal-tint { background: rgba(59,110,82,0.08) !important; }
 
 /* ─── Typography helpers ──────────────────────────────────────── */
 .premium-title {
@@ -874,26 +767,6 @@ select {
   background: none;
   -webkit-background-clip: unset;
   background-clip: unset;
-}
-
-/* ─── Specular card - diagonal shine overlay ─────────────────── */
-.specular-card {
-  position: relative;
-  overflow: hidden;
-}
-.specular-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    135deg,
-    oklch(100% 0 0 / 0.12) 0%,
-    oklch(100% 0 0 / 0.04) 30%,
-    transparent 60%
-  );
-  pointer-events: none;
-  border-radius: inherit;
-  transition: opacity 0.3s ease;
 }
 
 /* ─── Interactions ────────────────────────────────────────────── */
@@ -1155,13 +1028,6 @@ select {
   50%       { transform: scale(1.04); opacity: 1;   }
 }
 
-/* ── Login / welcome screen helpers ── */
-/* Hero glass card 3-D tilt - transform-style must be set on parent */
-.glass-card-3d {
-  transform-style: preserve-3d;
-  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.glass-card-3d:hover { transform: translateY(-4px); }
 
 /* ─── Reduced Motion ─────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
@@ -1234,13 +1100,13 @@ select {
 
 /* Row 882: honour OS-level contrast preference (mirrors [data-high-contrast]) */
 @media (prefers-contrast: more) {
-  .lg, .glass, .glass-panel, .glass-float, .lg-strong {
+  .lg, .lg-strong {
     background: var(--bg) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
     border: 1.5px solid var(--text) !important;
   }
-  .lg::before, .glass::before { display: none !important; }
+  .lg::before { display: none !important; }
 }
 
 /* ─── Tiny Compass - tri-color gradient clipped to text ─────── */
@@ -1251,23 +1117,6 @@ select {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   font-weight: 700;
-}
-
-/* ─── Specular highlight - radial shine on glass cards ───────── */
-.specular-highlight {
-  position: relative;
-  overflow: hidden;
-}
-.specular-highlight::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.40) 0%, transparent 40%);
-  pointer-events: none;
-  z-index: 1;
 }
 
 /* ─── Cursor glow - ambient mouse-tracking light ─────────────── */
@@ -1930,6 +1779,9 @@ body::after {
      nested elements read as part of the card, not a separate component. */
   --surface-1:        var(--lg-panel);
   --surface-2:        oklch(24% 0.03 60 / 6%);
+  /* White translucent chrome that sits ON a colored/dark hero (theme-agnostic) */
+  --on-accent-fill:        oklch(100% 0 0 / 15%);
+  --on-accent-fill-strong: oklch(100% 0 0 / 18%);
 
   --lg-r-card: 26px;
   --lg-r-lg:   34px;
@@ -2481,15 +2333,7 @@ body::after {
     --lg-blur-strong: blur(18px) saturate(1.15);
   }
 
-  /* Reduce explicit backdrop-filter on legacy glass classes */
-  .glass {
-    backdrop-filter: blur(10px) saturate(1.1) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(1.1) !important;
-  }
-  .glass-panel, .glass-float {
-    backdrop-filter: blur(14px) saturate(1.15) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(1.15) !important;
-  }
+  /* Reduce explicit backdrop-filter on legacy card classes */
   .v2-card {
     backdrop-filter: blur(10px) saturate(1.1) !important;
     -webkit-backdrop-filter: blur(10px) saturate(1.1) !important;
@@ -2612,17 +2456,6 @@ select:focus-visible {
   }
 }
 
-/* ─── Medium: Glass specular reduced opacity in dark mode (row 211) ─────── */
-/* .lg::before already has a custom dark background - only reduce .glass::before */
-[data-dark="true"] .glass::before {
-  opacity: 0.3;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-dark="false"]) .glass::before {
-    opacity: 0.3;
-  }
-}
-
 /* ─── Medium: Sheet drag handle visible in dark (row 217) ───────────────── */
 [data-dark="true"] .sheet-handle,
 [data-dark="true"] [data-sheet-handle] {
@@ -2679,13 +2512,11 @@ button[aria-label="סגור"]:hover {
 }
 
 /* ─── Medium: Card hover transition (row 603) ──────────────────────────── */
-.glass-card,
 .trip-card,
 .event-card {
   transition: transform 200ms ease, box-shadow 200ms ease;
 }
 @media (hover: hover) and (pointer: fine) {
-  .glass-card:hover,
   .trip-card:hover,
   .event-card:hover {
     transform: scale(1.01) translateY(-2px);
@@ -2912,13 +2743,11 @@ input[inputmode="numeric"]:not([data-ltr]) {
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Row 91: Dark surface border - ensure visible card edges */
-[data-dark="true"] .glass,
 [data-dark="true"] .lg,
 [data-dark="true"] .v2-card {
   border-color: rgba(255, 255, 255, 0.10);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-dark="false"]) .glass,
   :root:not([data-dark="false"]) .lg,
   :root:not([data-dark="false"]) .v2-card {
     border-color: rgba(255, 255, 255, 0.10);
@@ -3003,11 +2832,9 @@ hr.divider,
 }
 
 /* Row 142: High-contrast mode - hide specular sweeps */
-[data-high-contrast="true"] .glass::before,
 [data-high-contrast="true"] .lg::before {
   display: none;
 }
-[data-high-contrast="true"] .glass,
 [data-high-contrast="true"] .lg {
   border: 1.5px solid currentColor !important;
 }
@@ -3119,7 +2946,6 @@ body {
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Row 239: Card shadow - two-layer for better depth on light bg */
-.glass-card,
 .trip-card,
 .v2-card {
   box-shadow:
@@ -3302,13 +3128,11 @@ input[enterkeyhint] {
 /* Row 547: NavBar @supports fallback - solid bg when backdrop-filter unavailable */
 @supports not (backdrop-filter: blur(1px)) {
   .nav-pill,
-  .lg,
-  .glass {
+  .lg {
     background: var(--surface, rgba(245, 240, 235, 0.97)) !important;
   }
   [data-dark="true"] .nav-pill,
-  [data-dark="true"] .lg,
-  [data-dark="true"] .glass {
+  [data-dark="true"] .lg {
     background: rgba(15, 13, 10, 0.97) !important;
   }
 }
@@ -3352,13 +3176,11 @@ input[enterkeyhint] {
 .event-card {
   border-radius: 20px;
 }
-.glass-panel,
 .sheet-surface {
   border-radius: 24px;
 }
 
 /* Row 602: Card shadow lighter in dark mode */
-[data-dark="true"] .glass-card,
 [data-dark="true"] .trip-card,
 [data-dark="true"] .event-card {
   box-shadow:
@@ -3390,8 +3212,7 @@ input[enterkeyhint] {
 
 /* Row 644: Card focus ring for keyboard navigation */
 .trip-card:focus-visible,
-.event-card:focus-visible,
-.glass-card:focus-visible {
+.event-card:focus-visible {
   outline: 2.5px solid var(--brand);
   outline-offset: 2px;
 }
@@ -3418,7 +3239,6 @@ input[enterkeyhint] {
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Row 713: GPU compositing on animated glass elements */
-.glass-card[data-animated],
 .trip-card[data-animated],
 .event-card[data-animated] {
   will-change: transform, opacity;
@@ -3483,10 +3303,8 @@ textarea[aria-invalid="true"].shake {
 
 /* Row 882 (A11y): prefers-contrast: more - high contrast media support */
 @media (prefers-contrast: more) {
-  .glass,
   .lg,
-  .v2-card,
-  .glass-card {
+  .v2-card {
     background: var(--surface, rgba(245, 240, 235, 0.97)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -3539,8 +3357,7 @@ textarea[aria-invalid="true"].shake {
 
 /* Row 984 (Perf): CSS contain on isolated card components */
 .trip-card,
-.event-card,
-.glass-card {
+.event-card {
   contain: layout style;
 }
 
@@ -3734,7 +3551,7 @@ body, * {
     color: black !important;
     filter: none !important;
   }
-  .glass, .lg {
+  .lg {
     background: white !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -3758,7 +3575,6 @@ body, * {
 }
 
 /* Row 169: Inner glow on dark cards for elevation feel */
-[data-dark="true"] .glass-card,
 [data-dark="true"] .trip-card,
 [data-dark="true"] .event-card {
   box-shadow:
