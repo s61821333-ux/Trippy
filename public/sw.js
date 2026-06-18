@@ -1,59 +1,41 @@
-const CACHE_NAME = 'trippy-v4';
+// Trippy service worker.
+//
+// Deliberately minimal: it ONLY caches immutable hashed build assets
+// (/_next/static/*). Everything else — HTML navigations, /api/* calls, auth —
+// goes straight to the network with no SW interception.
+//
+// Why: a previous version cached navigations and /api/trips responses. That
+// served stale app code after deploys AND masked expired sessions (the cached
+// trips list rendered fine, but opening a trip hit the network, got 401, and
+// failed — leaving the user stuck on the home screen). Caching only fingerprinted
+// assets keeps the repeat-load speed win without ever serving stale app/data.
 
-// Cache app shell assets on install
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      cache.addAll(['/', '/manifest.json']).catch(() => {})
-    )
-  );
+const CACHE_NAME = 'trippy-v5';
+
+self.addEventListener('install', () => {
+  // Activate this version immediately instead of waiting for old tabs to close.
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys()
+      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  const { request } = event;
+  if (request.method !== 'GET') return;
+  const url = new URL(request.url);
 
-  // Never cache AI suggestions — always needs network
-  if (url.pathname === '/api/ai/suggestions') return;
-
-  // Hashed build assets are immutable — serve straight from cache, no network wait.
-  // This makes repeat loads near-instant.
-  if (url.pathname.startsWith('/_next/static/')) {
-    event.respondWith(cacheForever(event.request));
-    return;
+  // Only immutable, content-hashed build assets are safe to cache. Let the
+  // browser handle navigations and APIs over the network so they are never stale.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(cacheForever(request));
   }
-
-  // StaleWhileRevalidate for weather (TTL 1h via Cache-Control)
-  if (url.pathname === '/api/weather') {
-    event.respondWith(staleWhileRevalidate(event.request));
-    return;
-  }
-
-  // CacheFirst for route-time (TTL 7 days) and exchange-rates (TTL 1h)
-  if (url.pathname === '/api/route-time' || url.pathname === '/api/exchange-rates') {
-    event.respondWith(cacheFirst(event.request, 7 * 24 * 60 * 60 * 1000));
-    return;
-  }
-
-  // Network-first for trips — always fetch fresh data; fall back to cache only when offline
-  if (url.pathname.startsWith('/api/trips')) {
-    event.respondWith(networkWithCacheFallback(event.request));
-    return;
-  }
-
-  // For all other same-origin requests: network with cache fallback
-  if (url.origin === self.location.origin) {
-    event.respondWith(networkWithCacheFallback(event.request));
-  }
+  // All other requests: no respondWith → default browser network fetch (with cookies).
 });
 
 async function cacheForever(request) {
@@ -66,45 +48,5 @@ async function cacheForever(request) {
     return res;
   } catch {
     return new Response('Offline', { status: 503 });
-  }
-}
-
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-  const networkFetch = fetch(request).then((res) => {
-    if (res.ok) cache.put(request, res.clone());
-    return res;
-  }).catch(() => null);
-  return cached ?? await networkFetch ?? new Response('Offline', { status: 503 });
-}
-
-async function cacheFirst(request, maxAgeMs) {
-  const cache = await caches.open(CACHE_NAME);
-  const cached = await cache.match(request);
-  if (cached) {
-    const dateHeader = cached.headers.get('date');
-    const age = dateHeader ? Date.now() - new Date(dateHeader).getTime() : 0;
-    if (age < maxAgeMs) return cached;
-  }
-  try {
-    const res = await fetch(request);
-    if (res.ok) cache.put(request, res.clone());
-    return res;
-  } catch {
-    if (cached) return cached;
-    return new Response('Offline', { status: 503 });
-  }
-}
-
-async function networkWithCacheFallback(request) {
-  const cache = await caches.open(CACHE_NAME);
-  try {
-    const res = await fetch(request);
-    if (res.ok && request.method === 'GET') cache.put(request, res.clone());
-    return res;
-  } catch {
-    const cached = await cache.match(request);
-    return cached ?? new Response('Offline', { status: 503 });
   }
 }
