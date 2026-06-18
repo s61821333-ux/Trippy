@@ -482,42 +482,18 @@ export const useAppStore = create<AppState>()(
 
       deleteAccount: async () => {
         await dbDeleteAccount();
-        if (typeof document !== 'undefined') {
-          document.cookie.split(';').forEach(c => {
-            const name = c.split('=')[0].trim();
-            if (name.startsWith('sb-')) {
-              document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
-            }
-          });
-        }
-        set({ screen: 'welcome', trip: null, tripDbId: null, supplies: [], activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false, lastSessionAt: null });
+        set({ screen: 'splash', trip: null, tripDbId: null, supplies: [], activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false, lastSessionAt: null });
+        if (typeof window !== 'undefined') window.location.href = '/api/signout';
       },
 
       // Full sign-out — does NOT remove the user from the trip so they can rejoin later
       logout: () => {
-        // Fire signOut without awaiting — prevents UI freeze when the Supabase API
-        // is slow or unreachable; local cleanup below is what actually logs the user out.
-        signOut().catch(() => {});
-
-        // Clear every sb-* cookie (Supabase session tokens).
-        // Also clear from localStorage in case createBrowserClient wrote there.
-        if (typeof document !== 'undefined') {
-          document.cookie.split(';').forEach(c => {
-            const name = c.split('=')[0].trim();
-            if (name.startsWith('sb-')) {
-              document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
-              document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax; Secure`;
-            }
-          });
-        }
-        if (typeof localStorage !== 'undefined') {
-          Object.keys(localStorage).forEach(key => {
-            if (key.startsWith('sb-')) localStorage.removeItem(key);
-          });
-        }
-
+        // Clear local store state immediately so the UI reflects logged-out status.
         set({ screen: 'splash', trip: null, tripDbId: null, supplies: [], activeDay: 1, aiSuggestions: [], userId: null, authUser: null, nickname: '', termsAccepted: false, termsChecked: false, lastSessionAt: null });
-        if (typeof window !== 'undefined') window.location.href = '/';
+        // Navigate to the server-side signout endpoint: it invalidates the Supabase session
+        // and clears auth cookies via Set-Cookie response headers (reliable on iOS PWA where
+        // client-side document.cookie wipes don't reach HttpOnly/domain-scoped cookies).
+        if (typeof window !== 'undefined') window.location.href = '/api/signout';
       },
 
       // Keep the Supabase session but go back to the trip picker

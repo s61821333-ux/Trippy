@@ -17,7 +17,16 @@ function isWebView(): boolean {
   const ua = navigator.userAgent
   if (/FBAN|FBAV|FB_IAB|Instagram|Twitter\/|Line\/|WhatsApp|Snapchat/i.test(ua)) return true
   if (/Android/.test(ua) && /wv/.test(ua)) return true
-  if (/iPhone|iPad/.test(ua) && !/Safari\//.test(ua) && /AppleWebKit/.test(ua)) return true
+  // iOS WebView detection — but PWA standalone mode has no "Safari/" in the UA and must
+  // NOT be treated as a WebView: it uses its own WKWebView with full cookie/storage access
+  // and standard OAuth redirects work correctly (no need for window.open workaround).
+  // navigator.standalone is true when launched from home screen; display-mode:standalone
+  // covers the CSS media query path used by some iOS versions.
+  if (/iPhone|iPad/.test(ua) && !/Safari\//.test(ua) && /AppleWebKit/.test(ua)) {
+    const nav = window.navigator as Navigator & { standalone?: boolean }
+    const isPWA = nav.standalone === true || window.matchMedia('(display-mode: standalone)').matches
+    if (!isPWA) return true
+  }
   return false
 }
 

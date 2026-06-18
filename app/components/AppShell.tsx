@@ -223,6 +223,15 @@ function Shell() {
       sessionStorage.setItem('Trippy-pending-join', joinId);
     }
 
+    // Auth callback failure: /auth/callback redirects here with ?error=auth when the
+    // code exchange fails (expired code, mismatched PKCE verifier, etc.).
+    // Strip the param immediately so it doesn't persist in the URL, then redirect to
+    // the landing page so the user can retry sign-in with a fresh PKCE flow.
+    if (params.get('error') === 'auth') {
+      window.history.replaceState({}, '', window.location.pathname);
+      window.location.href = '/';
+    }
+
     // onAuthStateChange fires immediately with INITIAL_SESSION on every page load.
     // If the session is valid → confirm/update authUser.
     // If no session (expired or logged out) → clear persisted authUser and go to login.
@@ -263,21 +272,12 @@ function Shell() {
         // so defer the redirect check by one macrotask to allow test scripts to set the flag.
         // SIGNED_OUT always redirects unless already in test mode.
         const doRedirect = () => {
-          // If already at root, wipe stale sb-* cookies directly (no signOut() call —
-          // that fires onAuthStateChange again and creates an infinite loop), then reload
-          // so the server sees no auth cookie and renders the real landing page.
-          if (window.location.pathname === '/') {
-            document.cookie.split(';').forEach(c => {
-              const name = c.split('=')[0].trim();
-              if (name.startsWith('sb-')) {
-                document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax`;
-                document.cookie = `${name}=; Max-Age=0; path=/; SameSite=Lax; Secure`;
-              }
-            });
-            window.location.reload();
-          } else {
-            window.location.href = '/';
-          }
+          // Navigate to the server-side signout endpoint: it calls supabase.auth.signOut()
+          // via the server client (which reliably clears both regular and HttpOnly cookies via
+          // Set-Cookie response headers) then redirects to '/'.
+          // This replaces the old client-side cookie-wipe + reload approach, which failed on
+          // iOS PWA and some cookie configurations where sb-* cookies were HttpOnly/domain-scoped.
+          window.location.href = '/api/signout';
         };
         if (process.env.NODE_ENV === 'production') {
           doRedirect();
