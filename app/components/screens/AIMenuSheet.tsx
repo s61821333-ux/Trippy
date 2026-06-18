@@ -29,10 +29,10 @@ export default function AIMenuSheet({ onClose, onAsk, onFind }: {
     {
       key: 'ask',
       icon: 'ai',
-      badge: isHe ? 'HAIKO AI' : 'HAIKO AI',
+      badge: 'HAIKO AI',
       title: isHe ? 'שאלו את Haiko' : 'Chat with Haiko',
-      desc: isHe ? 'שיחה חופשית על הטיול — אוכל, תחבורה, טיפים, כל דבר' : 'Free conversation about your trip — food, transport, tips, anything',
-      hint: isHe ? 'מגיב תוך שניות' : 'Responds in seconds',
+      desc: isHe ? 'אוכל, תחבורה, מה לא לפספס — שאלו כל דבר על הטיול' : 'Food, getting around, what not to miss — ask anything about your trip',
+      hint: isHe ? 'עונה תוך שניות' : 'Answers in seconds',
       onClick: onAsk,
       grad: 'linear-gradient(145deg, var(--lg-terra-bright) 0%, var(--lg-terra) 60%, oklch(55% 0.155 30) 100%)',
       glow: '0 8px 32px oklch(65% 0.180 40 / 35%)',
@@ -42,9 +42,9 @@ export default function AIMenuSheet({ onClose, onAsk, onFind }: {
       key: 'find',
       icon: 'sparkle',
       badge: isHe ? 'גילוי' : 'DISCOVER',
-      title: isHe ? 'גלו מקומות' : 'Find experiences',
-      desc: isHe ? 'המלצות חכמות על מסעדות, אטרקציות ופעילויות ביום הנוכחי' : 'Smart picks for restaurants, attractions & activities for your day',
-      hint: isHe ? 'מותאם ליום הנוכחי' : 'Tailored to today\'s day',
+      title: isHe ? 'גלו אטרקציות מקומיות' : 'Discover local spots',
+      desc: isHe ? 'מסעדות, אטרקציות ופעילויות — מסוננות ליום הנוכחי' : 'Restaurants, sights and things to do — matched to today\'s day',
+      hint: isHe ? 'לפי המיקום של היום' : 'Based on where you are today',
       onClick: onFind,
       grad: 'linear-gradient(145deg, var(--lg-forest) 0%, var(--lg-forest-deep) 100%)',
       glow: '0 8px 32px oklch(50% 0.130 155 / 30%)',
@@ -54,8 +54,8 @@ export default function AIMenuSheet({ onClose, onAsk, onFind }: {
 
   return (
     <Sheet
-      title={isHe ? 'עוזר ה-AI' : 'AI assistant'}
-      subtitle={isHe ? 'איך אפשר לעזור?' : 'How can I help?'}
+      title={isHe ? 'שאלו את Haiko' : 'Ask Haiko'}
+      subtitle={isHe ? 'מה תרצו לדעת?' : 'What do you want to know?'}
       onClose={onClose}
     >
       {/* Ambient orb behind content */}

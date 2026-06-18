@@ -372,7 +372,7 @@ export default function NavBar_V2({
             transition={{ duration: 0.35, ease: [0.25, 0, 0, 1], delay: 0.1 }}
             whileTap={{ scale: 0.92 }}
             className="lg-fab lg-fab-terra ai-fab specular-hover"
-            aria-label={isHe ? 'הצעות AI' : 'AI suggestions'}
+            aria-label={isHe ? 'שאלו את Haiko' : 'Ask Haiko'}
             aria-haspopup="dialog"
             style={{
               width: 52, height: 52,

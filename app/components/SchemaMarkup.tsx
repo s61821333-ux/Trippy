@@ -48,14 +48,6 @@
       '@type': 'WebSite',
       name: 'Trippy',
       url: 'https://letsexploring.com',
-      potentialAction: {
-        '@type': 'SearchAction',
-        target: {
-          '@type': 'EntryPoint',
-          urlTemplate: 'https://letsexploring.com/?q={search_term_string}',
-        },
-        'query-input': 'required name=search_term_string',
-      },
     },
   ],
 };

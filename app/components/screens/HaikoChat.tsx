@@ -36,8 +36,8 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
   const city       = dayMeta?.region || sleepHotel?.location || trip?.countries?.[0] || '';
 
   const greeting = isHe
-    ? `שלום! אני Haiko 👋\n\nאני בן הלוויה החכם שלך מ-Trippy.${city ? ` שאלו אותי כל דבר על הטיול ב${city}` : ' שאלו אותי כל דבר על הטיול'} — אוכל מקומי, תחבורה, המלצות ומה לא לפספס.`
-    : `Hey! I'm Haiko 👋\n\nYour AI travel companion from Trippy.${city ? ` Ask me anything about your trip to ${city}` : ' Ask me anything about your trip'} — local food, transport, hidden gems and what to book ahead.`;
+    ? `שלום! אני Haiko 👋\n\nאני כאן כדי לעזור לכם עם הטיול.${city ? ` יש שאלות על ${city}?` : ' יש שאלות?'} שאלו על אוכל, תחבורה, מה לא לפספס, מה כדאי להזמין מראש — הכל.`
+    : `Hey! I'm Haiko 👋\n\nYour travel helper from Trippy.${city ? ` Got questions about your time in ${city}?` : ' Got questions about your trip?'} Ask me about food, getting around, what not to miss, what to book ahead — anything.`;
 
   const [messages, setMessages] = useState<Msg[]>([{ role: 'assistant', content: greeting }]);
   const [input,   setInput]   = useState('');
@@ -96,8 +96,8 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
     <Sheet
       title={isHe ? 'שאלו את Haiko' : 'Ask Haiko'}
       subtitle={city
-        ? (isHe ? `בן הלוויה החכם לטיול · ${city}` : `Your AI travel companion · ${city}`)
-        : (isHe ? 'בן הלוויה החכם לטיול' : 'Your AI travel companion')}
+        ? (isHe ? `עוזר הטיול שלך · ${city}` : `Travel helper · ${city}`)
+        : (isHe ? 'עוזר הטיול שלך' : 'Your travel helper')}
       onClose={onClose}
     >
 

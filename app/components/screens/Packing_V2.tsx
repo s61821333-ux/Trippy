@@ -746,8 +746,8 @@ export default function Packing_V2() {
               <button
                 onClick={() => setShowAI(true)}
                 className="lg-btn"
-                aria-label={locale === 'he' ? 'הצעות AI' : 'AI suggestions'}
-                title={locale === 'he' ? 'הצעות AI לציוד' : 'AI packing suggestions'}
+                aria-label={locale === 'he' ? 'רעיונות לציוד' : 'Packing suggestions'}
+                title={locale === 'he' ? 'רעיונות לפריטי ציוד' : 'Get packing suggestions'}
                 style={{
                   width: 40, height: 40, padding: 0, borderRadius: 9999,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',

@@ -95,44 +95,44 @@ export default async function LandingPage({
   const features = isHe ? [
     {
       icon: '📅',
-      title: 'מסלול יומי שיתופי',
-      desc: 'תכנן את הטיול יום אחרי יום עם כל הקבוצה. הוסף פעילויות, שייך שעות וראה את המסלול המלא בזמן אמת. הצעות AI לפעילויות מקומיות כלולות.',
+      title: 'מסלול יומי לכל הקבוצה',
+      desc: 'תכנן יום אחרי יום עם כל הקבוצה. מוסיפים פעילויות, קובעים שעות, וכולם רואים את אותו מסלול בזמן אמת. לא יודעים מה לתכנן? יש רעיונות מקומיים מובנים.',
     },
     {
       icon: '💰',
-      title: 'מעקב תקציב קבוצתי',
-      desc: 'הגדר תקציב, רשום הוצאות וחשב אוטומטית מי חייב למי - עם תמיכה במטבעות מרובים. אין יותר ויכוחים על כסף אחרי הטיול.',
+      title: 'תקציב משותף ופיצול הוצאות',
+      desc: 'הגדר תקציב ורשמו הוצאות בדרך. Trippy מחשב מי חייב למי בסוף — בכל מטבע. לא תצטרכו להתעסק עם זה אחרי הטיול.',
     },
     {
       icon: '🗺️',
-      title: 'מפת טיול אינטראקטיבית',
-      desc: 'ראה כל פעילות על מפה אינטראקטיבית. סנן לפי יום, הערך זמני נסיעה וצפה במסלול כולו במבט אחד - גם ללא אינטרנט.',
+      title: 'מפה של כל המסלול',
+      desc: 'כל העצירות על מפה אחת. מסננים לפי יום, בודקים זמני נסיעה בין מקומות, ורואים את כל המסלול במבט אחד — גם בלי אינטרנט.',
     },
     {
       icon: '🎒',
-      title: 'רשימת ציוד קבוצתית',
-      desc: 'צור רשימת ציוד משותפת שכל הקבוצה יכולה לראות ולסמן. סמן פריטים קריטיים, שייך אותם לאנשים ועקוב אחרי ההתקדמות.',
+      title: 'רשימת ציוד לכל הקבוצה',
+      desc: 'רשימת ציוד שכל הקבוצה רואה ויכולה לסמן. מסמנים פריטים חיוניים, משייכים אחראים, ורואים מי ארז מה לפני היציאה.',
     },
   ] : [
     {
       icon: '📅',
-      title: 'Collaborative Itinerary Planner',
-      desc: 'Plan your trip day by day with your whole group. Add activities, set times, and share a live itinerary everyone can edit. AI suggestions for local activities are built in.',
+      title: 'Shared Day-by-Day Itinerary',
+      desc: 'Plan day by day with your whole group. Add activities, lock in times, and everyone sees the same live itinerary. Stuck for ideas? Local picks are built right in.',
     },
     {
       icon: '💰',
-      title: 'Group Budget & Expense Splitter',
-      desc: 'Set a budget, log every expense, and automatically calculate who owes what - with multi-currency support. No more awkward money talks after the trip.',
+      title: 'Group Budget & Who Paid What',
+      desc: 'Set a shared budget and log expenses as you go. Trippy works out who owes who at the end — in any currency. No awkward money conversations.',
     },
     {
       icon: '🗺️',
-      title: 'Interactive Trip Map',
-      desc: 'See every activity pinned on an interactive map. Filter by day, estimate travel times between stops, and visualize your whole route at a glance - even offline.',
+      title: 'Map View for the Whole Trip',
+      desc: 'See all your stops on one map. Filter by day, check travel times between places, and view your whole route at once — even offline.',
     },
     {
       icon: '🎒',
-      title: 'Shared Group Packing List',
-      desc: 'Create a packing list your whole group can see and check off together. Mark items as critical, assign them to people, and track progress before departure.',
+      title: 'Packing List for the Group',
+      desc: 'One packing list everyone can see and check off. Mark must-have items, assign things to people, and track who has what before you leave.',
     },
   ];
 
@@ -246,7 +246,7 @@ export default async function LandingPage({
           animate={false}
           lines={[
             isHe ? 'מתכננים יחד.' : 'Plan together.',
-            isHe ? 'בקלות, ישר מהדפדפן.' : 'The easy way, from your browser.',
+            isHe ? 'ללא הורדה — ישירות מהדפדפן.' : 'No app needed — just your browser.',
           ]}
           style={{ textAlign: 'center', marginBottom: 14 }}
         />
@@ -274,7 +274,7 @@ export default async function LandingPage({
             textAlign: 'center',
             marginBottom: 12,
           }}>
-            {isHe ? 'כל מה שצריך לטיול מושלם' : 'Everything your group trip needs'}
+            {isHe ? 'כל מה שצריך לטיול בקבוצה' : 'Everything your group trip needs'}
           </h2>
           <p style={{
             fontSize: 15,
