@@ -946,6 +946,10 @@ export const useAppStore = create<AppState>()(
           if (debounceTimer) clearTimeout(debounceTimer);
           debounceTimer = setTimeout(() => {
             debounceTimer = null;
+            // Bail if the user has switched/left this trip — a debounced or in-flight
+            // event must never resurrect a trip the user just detached from (which
+            // would re-show the navbar / trip UI on the home screen).
+            if (get().tripDbId !== tripId) return;
             // Skip reload if the store is already mid-load (prevents cascade)
             if (get().isGlobalLoading) return;
             // Never auto-navigate from realtime updates — user is on home/trip-picker
