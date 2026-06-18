@@ -262,7 +262,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
 
       {expanded && intel && (
         <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ height: 1, background: 'oklch(50% 0.02 60 / 12%)', marginBottom: 2 }} />
+          <div style={{ height: 1, background: 'var(--rule)', marginBottom: 2 }} />
           {icons.map(([key, stampKey, label]) => intel[key] && (
             <div key={key} style={{ display: 'flex', gap: 10 }}>
               <StampIcon iconKey={stampKey} size={28} style={{ flexShrink: 0 }} />
@@ -423,14 +423,14 @@ function BudgetBreakdown({ trip, currSym, expenses }: {
           {/* Stacked bar */}
           <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', marginBottom: 10 }}>
             {topCats.map(([cat, val]) => (
-              <div key={cat} style={{ width: `${(val / catTotal) * 100}%`, background: cat === 'manual' ? '#999' : catColor(cat), transition: 'width .4s' }} />
+              <div key={cat} style={{ width: `${(val / catTotal) * 100}%`, background: cat === 'manual' ? 'var(--text-3)' : catColor(cat), transition: 'width .4s' }} />
             ))}
           </div>
           {/* Legend */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
             {topCats.map(([cat, val]) => (
               <div key={cat} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                <div style={{ width: 8, height: 8, borderRadius: 2, background: cat === 'manual' ? '#999' : catColor(cat), flexShrink: 0 }} />
+                <div style={{ width: 8, height: 8, borderRadius: 2, background: cat === 'manual' ? 'var(--text-3)' : catColor(cat), flexShrink: 0 }} />
                 <span style={{ fontSize: 11.5, color: 'var(--text-2)', fontWeight: 500 }}>
                   {cat === 'manual' ? (isHe ? 'הוצאות' : 'Expenses') : cat.charAt(0).toUpperCase() + cat.slice(1)}
                 </span>
@@ -1191,7 +1191,7 @@ export default function DashboardScreenV2() {
               <button
                 onClick={fetchCoachAdvice}
                 aria-label="Refresh advice"
-                style={{ background: 'rgba(255,255,255,.15)', border: 0, borderRadius: 9999, width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                style={{ background: 'var(--on-accent-fill)', border: 0, borderRadius: 9999, width: 28, height: 28, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
               >
                 <Icon name="swap" size={13} color="#fff" />
               </button>
@@ -1220,7 +1220,7 @@ export default function DashboardScreenV2() {
                 onClick={fetchCoachAdvice}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
-                  background: 'rgba(255,255,255,.18)', border: 0, borderRadius: 9999,
+                  background: 'var(--on-accent-fill-strong)', border: 0, borderRadius: 9999,
                   padding: '7px 14px', cursor: 'pointer', color: '#fff',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
                   WebkitTapHighlightColor: 'transparent',
@@ -1330,7 +1330,7 @@ export default function DashboardScreenV2() {
                   aria-valuemin={0}
                   aria-valuemax={100}
                   aria-label={locale === 'he' ? 'שימוש בתקציב' : 'Budget usage'}
-                  style={{ height: 4, borderRadius: 2, background: 'oklch(50% 0.02 60 / 14%)', overflow: 'hidden' }}
+                  style={{ height: 4, borderRadius: 2, background: 'var(--surface-2)', overflow: 'hidden' }}
                 >
                   <div style={{
                     width: `${Math.round(budgetPct * 100)}%`,
