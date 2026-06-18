@@ -1221,28 +1221,6 @@ select {
   border: 1px dashed rgba(43,83,64,0.22);
 }
 
-/* ─── v2 Card - glass surface shorthand ─────────────────────── */
-/* Drop this class on any card div instead of repeating inline styles */
-.v2-card {
-  background: oklch(97% 0.01 80 / 0.82);
-  backdrop-filter: blur(36px) saturate(1.7);
-  -webkit-backdrop-filter: blur(36px) saturate(1.7);
-  border-style: solid;
-  border-width: 1px;
-  border-color: oklch(100% 0 0 / 0.10);
-  border-top-color: oklch(100% 0 0 / 0.36);
-  border-left-color: oklch(100% 0 0 / 0.22);
-  border-bottom-color: rgba(26,20,16,0.07);
-  border-right-color: rgba(26,20,16,0.05);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 4px 16px rgba(26,20,16,0.08);
-}
-[data-dark="true"] .v2-card {
-  background: oklch(18% 0.02 80 / 0.85);
-  border-top-color: oklch(100% 0 0 / 0.14);
-  border-color: oklch(100% 0 0 / 0.06);
-}
-
 /* ─── Scroll utilities ───────────────────────────────────────── */
 .scroll-container {
   overflow-y: auto;
@@ -1713,30 +1691,6 @@ body::after {
 }
 .btn-morphic:hover  { transform: translateY(-1px); }
 .btn-morphic:active { transform: scale(0.975) translateY(0); }
-
-/* ─── V3: Horizontal day card ───────────────────────────────── */
-.day-card-v3 {
-  display: grid;
-  grid-template-columns: 68px 1fr auto;
-  overflow: hidden;
-  border-radius: var(--radius-lg);
-  background: rgba(255,255,255,0.80);
-  backdrop-filter: blur(36px) saturate(1.7);
-  -webkit-backdrop-filter: blur(36px) saturate(1.7);
-  border: 1px solid rgba(255,255,255,0.85);
-  box-shadow: 0 2px 12px rgba(26,20,16,0.06);
-  cursor: pointer;
-  min-height: 82px;
-  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease;
-}
-.day-card-v3:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 36px rgba(26,20,16,0.10);
-}
-[data-dark="true"] .day-card-v3 {
-  background: rgba(30,26,20,0.72);
-  border-color: rgba(255,255,255,0.08);
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    LIQUID GLASS - 2027 design layer (ds.css from design system)
@@ -2333,15 +2287,7 @@ body::after {
     --lg-blur-strong: blur(18px) saturate(1.15);
   }
 
-  /* Reduce explicit backdrop-filter on legacy card classes */
-  .v2-card {
-    backdrop-filter: blur(10px) saturate(1.1) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(1.1) !important;
-  }
-  .day-card-v3 {
-    backdrop-filter: blur(10px) saturate(1.1) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(1.1) !important;
-  }
+  /* Reduce explicit backdrop-filter on glass button */
   .lg-btn-glass {
     backdrop-filter: blur(10px) !important;
     -webkit-backdrop-filter: blur(10px) !important;
@@ -2509,19 +2455,6 @@ button[aria-label="סגור"]:hover {
   border-radius: inherit;
   background: var(--brand);
   transition: width 0.5s ease;
-}
-
-/* ─── Medium: Card hover transition (row 603) ──────────────────────────── */
-.trip-card,
-.event-card {
-  transition: transform 200ms ease, box-shadow 200ms ease;
-}
-@media (hover: hover) and (pointer: fine) {
-  .trip-card:hover,
-  .event-card:hover {
-    transform: scale(1.01) translateY(-2px);
-    box-shadow: var(--shadow-lg);
-  }
 }
 
 /* ─── Medium: Card divider lines (row 658) ──────────────────────────────── */
@@ -2743,13 +2676,11 @@ input[inputmode="numeric"]:not([data-ltr]) {
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* Row 91: Dark surface border - ensure visible card edges */
-[data-dark="true"] .lg,
-[data-dark="true"] .v2-card {
+[data-dark="true"] .lg {
   border-color: rgba(255, 255, 255, 0.10);
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-dark="false"]) .lg,
-  :root:not([data-dark="false"]) .v2-card {
+  :root:not([data-dark="false"]) .lg {
     border-color: rgba(255, 255, 255, 0.10);
   }
 }
@@ -2845,12 +2776,6 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Row 161: Active trip card indicator */
-.trip-card[data-active="true"],
-.trip-card--active {
-  box-shadow: inset 4px 0 0 var(--brand), var(--shadow-md);
-}
-
 /* Row 168: Border visibility in dark */
 [data-dark="true"] {
   --border: rgba(255, 255, 255, 0.10);
@@ -2944,14 +2869,6 @@ body {
 /* ═══════════════════════════════════════════════════════════════════════
    MEDIUM PRIORITY FIXES - Light Mode batch (rows 239-297)
    ═══════════════════════════════════════════════════════════════════════ */
-
-/* Row 239: Card shadow - two-layer for better depth on light bg */
-.trip-card,
-.v2-card {
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.10),
-    0 4px 16px rgba(0, 0, 0, 0.06);
-}
 
 /* Row 242: Light mode glass border removed - shadow/specular provide separation */
 
@@ -3171,23 +3088,6 @@ input[enterkeyhint] {
   --z-navbar-panel: 25;
 }
 
-/* Row 601: Card border-radius standardization */
-.trip-card,
-.event-card {
-  border-radius: 20px;
-}
-.sheet-surface {
-  border-radius: 24px;
-}
-
-/* Row 602: Card shadow lighter in dark mode */
-[data-dark="true"] .trip-card,
-[data-dark="true"] .event-card {
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.30),
-    0 4px 16px rgba(0, 0, 0, 0.22);
-}
-
 /* Row 628: Settings group card */
 .settings-group {
   border-radius: 16px;
@@ -3210,18 +3110,6 @@ input[enterkeyhint] {
   background: rgba(255, 255, 255, 0.06);
 }
 
-/* Row 644: Card focus ring for keyboard navigation */
-.trip-card:focus-visible,
-.event-card:focus-visible {
-  outline: 2.5px solid var(--brand);
-  outline-offset: 2px;
-}
-
-/* Row 651: Trip card left stripe */
-.trip-card[data-stripe] {
-  border-inline-start: 4px solid var(--stripe-color, var(--brand));
-}
-
 /* Row 660: Card action bar */
 .card-action-bar {
   border-top: 1px solid var(--border);
@@ -3237,12 +3125,6 @@ input[enterkeyhint] {
 /* ═══════════════════════════════════════════════════════════════════════
    MEDIUM PRIORITY FIXES - Motion + A11y + Scroll + Perf (rows 713-984)
    ═══════════════════════════════════════════════════════════════════════ */
-
-/* Row 713: GPU compositing on animated glass elements */
-.trip-card[data-animated],
-.event-card[data-animated] {
-  will-change: transform, opacity;
-}
 
 /* Row 714: Force GPU layer on NavBar + Sheet for compositing */
 /* (applied to component className in component files) */
@@ -3303,8 +3185,7 @@ textarea[aria-invalid="true"].shake {
 
 /* Row 882 (A11y): prefers-contrast: more - high contrast media support */
 @media (prefers-contrast: more) {
-  .lg,
-  .v2-card {
+  .lg {
     background: var(--surface, rgba(245, 240, 235, 0.97)) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -3354,12 +3235,6 @@ textarea[aria-invalid="true"].shake {
 /* Row 900 (Scroll): Hidden scrollbar on mobile */
 .scroll-container::-webkit-scrollbar { display: none; }
 .scroll-container { scrollbar-width: none; }
-
-/* Row 984 (Perf): CSS contain on isolated card components */
-.trip-card,
-.event-card {
-  contain: layout style;
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    MEDIUM PRIORITY FIXES - Icons + Loading + Micro-interactions (1079-1121)
@@ -3574,15 +3449,6 @@ body, * {
   z-index: 0;
 }
 
-/* Row 169: Inner glow on dark cards for elevation feel */
-[data-dark="true"] .trip-card,
-[data-dark="true"] .event-card {
-  box-shadow:
-    0 1px 3px rgba(0, 0, 0, 0.30),
-    0 4px 16px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
 /* Row 174: Active nav blob in dark - slightly more luminous */
 [data-dark="true"] .nav-pill .blob,
 [data-dark="true"] [data-nav-blob] {
@@ -3598,11 +3464,6 @@ body, * {
   :root:not([data-dark="false"]) .grain::before {
     opacity: 0.035;
   }
-}
-
-/* Row 194: Trip theme stripe opacity in dark */
-[data-dark="true"] .trip-card[data-stripe] {
-  opacity: 0.80;
 }
 
 /* Row 206: Scroll indicator dots - dark mode */
@@ -4434,48 +4295,6 @@ body, * {
   background: var(--lg-handle-color);
   margin: 8px auto 4px;
   flex-shrink: 0;
-}
-
-/* ── Glass event card ──────────────────────────────────────────────────── */
-.lg-event-card {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 14px 16px;
-  border-radius: var(--lg-r-card);
-  background: oklch(99% 0.004 80 / 62%);
-  backdrop-filter: var(--lg-blur-2);
-  -webkit-backdrop-filter: var(--lg-blur-2);
-  border: 1px solid oklch(13% 0.012 55 / 7%);
-  border-top-color: oklch(100% 0 0 / 50%);
-  border-left-color: oklch(100% 0 0 / 28%);
-  box-shadow: var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 55%);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-.lg-event-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, oklch(100% 0 0 / 8%) 0%, transparent 55%);
-  pointer-events: none;
-}
-.lg-event-card:active { transform: scale(0.98); transition-duration: 0.1s; }
-@media (hover: hover) and (pointer: fine) {
-  .lg-event-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md), inset 0 1px 0 oklch(100% 0 0 / 65%);
-  }
-}
-[data-dark="true"] .lg-event-card {
-  background: oklch(20% 0.016 60 / 72%);
-  border-color: oklch(100% 0 0 / 10%);
-  border-top-color: oklch(100% 0 0 / 20%);
-  box-shadow: var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 16%);
 }
 
 /* ── Hero panel enhanced ───────────────────────────────────────────────── */
