@@ -52,31 +52,6 @@ const THEMES: { id: TripTheme; label: string; labelHe: string; bg: string; accen
 
 type UserTrip = { id: string; name: string; theme: string | null; days: number; start_date: string | null };
 
-// ── TripsSkeleton ─────────────────────────────────────────────────────────────
-
-function TripsSkeleton() {
-  return (
-    <div aria-hidden="true">
-      <style>{`@keyframes sk-pulse{0%,100%{opacity:.35}50%{opacity:.75}}`}</style>
-      {[0, 1, 2].map(i => (
-        <div key={i} style={{
-          display: 'flex', alignItems: 'center', gap: 14,
-          padding: '14px 0',
-          borderBottom: '1px solid var(--border)',
-          opacity: 1 - i * 0.18,
-        }}>
-          <div style={{ width: 46, height: 46, borderRadius: 'var(--radius-md)', background: 'var(--glass-bg)', flexShrink: 0, animation: 'sk-pulse 1.4s ease infinite' }} />
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 7 }}>
-            <div style={{ height: 9, width: '40%', borderRadius: 4, background: 'var(--glass-bg)', animation: `sk-pulse 1.4s ease ${i * 0.07}s infinite` }} />
-            <div style={{ height: 17, width: '68%', borderRadius: 4, background: 'var(--glass-bg)', animation: `sk-pulse 1.4s ease ${0.12 + i * 0.07}s infinite` }} />
-          </div>
-          <div style={{ width: 16, height: 16, borderRadius: 4, background: 'var(--glass-bg)', flexShrink: 0, animation: 'sk-pulse 1.4s ease 0.2s infinite' }} />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /** Whole days from today until a trip's start date (null if no date / past). */
@@ -325,7 +300,7 @@ export default function Home_V2() {
   const { show } = useToast();
 
   const [trips,         setTrips]         = useState<UserTrip[]>([]);
-  const [tripsLoading,  setTripsLoading]  = useState(true); // skeleton on mount until auth+cache resolves
+  const [tripsLoading,  setTripsLoading]  = useState(false);
   const [loadingTripId, setLoadingTripId] = useState<string | null>(null);
   const [showCreate,    setShowCreate]    = useState(false);
   const [showAIPlan,    setShowAIPlan]    = useState(false);
@@ -335,26 +310,9 @@ export default function Home_V2() {
 
   useEffect(() => {
     if (!authUser?.id) return;
-
-    // Show cached trips instantly (stale-while-revalidate)
-    const cacheKey = `trippy-trips-${authUser.id}`;
-    let hasCached = false;
-    try {
-      const raw = localStorage.getItem(cacheKey);
-      if (raw) {
-        setTrips(JSON.parse(raw));
-        setTripsLoading(false);
-        hasCached = true;
-      }
-    } catch {}
-
-    if (!hasCached) setTripsLoading(true);
-
+    setTripsLoading(true);
     dbGetUserTrips(authUser.id)
-      .then(fresh => {
-        setTrips(fresh);
-        try { localStorage.setItem(cacheKey, JSON.stringify(fresh)); } catch {}
-      })
+      .then(setTrips)
       .catch(() => {})
       .finally(() => setTripsLoading(false));
   }, [authUser?.id]);
@@ -547,8 +505,10 @@ export default function Home_V2() {
           <>
             <Eyebrow style={{ marginBottom: 4 }}>{t('myTrips')}</Eyebrow>
 
-            {tripsLoading && trips.length === 0 ? (
-              <TripsSkeleton />
+            {tripsLoading ? (
+              <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
+                <CompassLoader theme={BRAND_THEME} size={56} />
+              </div>
             ) : (
               <div role="list" aria-label={t('myTrips')}>
                 {trips.map((trip, i) => {

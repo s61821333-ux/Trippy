@@ -28,10 +28,7 @@ export async function GET(request: NextRequest) {
     }
   )
 
-  // getSession() reads JWT from cookie without a Supabase network round-trip.
-  // getUser() would add ~200-400ms extra latency per request for auth verification.
-  const { data: { session } } = await supabase.auth.getSession()
-  const user = session?.user
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
