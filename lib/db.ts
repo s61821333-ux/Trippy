@@ -145,7 +145,23 @@ export async function dbCreateTrip(
 
 
 export async function dbGetUserTrips(userId: string): Promise<{ id: string; name: string; theme: string | null; days: number; start_date: string | null }[]> {
-  const r = await fetch('/api/trips', { cache: 'no-store' })
+  // Hard timeout so a cold edge function or a flaky mobile connection can never
+  // leave the request hanging forever (which would trap the user on an endless
+  // spinner with no way to open their trips). On timeout we throw so the caller
+  // can show a retry affordance instead of silently spinning.
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 12_000)
+  let r: Response
+  try {
+    r = await fetch('/api/trips', { cache: 'no-store', signal: controller.signal })
+  } catch (err) {
+    if ((err as Error)?.name === 'AbortError') throw new Error('trips_timeout')
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
+  // A 401 during an auth race resolves itself when authUser updates and the
+  // effect re-runs, so treat non-ok as "no trips yet" rather than a hard error.
   if (!r.ok) return []
   const data = await r.json()
   // Support both legacy array shape and new paginated { trips, nextCursor } shape

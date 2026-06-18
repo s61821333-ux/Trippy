@@ -266,7 +266,15 @@ function Shell() {
           }, 0);
         }
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
-        useAppStore.setState({ authUser: null, userId: null });
+        // In test mode, INITIAL_SESSION fires with no real session (Playwright has no
+        // Supabase cookies). Don't wipe the injected authUser in that case, or the app
+        // would unmount the authenticated screens mid-test. Production is unaffected:
+        // __TrippyTestMode__ is never set there, and a real expired session still clears.
+        const testModeInitial = event === 'INITIAL_SESSION'
+          && !!(window as unknown as Record<string, unknown>).__TrippyTestMode__;
+        if (!testModeInitial) {
+          useAppStore.setState({ authUser: null, userId: null });
+        }
         // In production: redirect immediately.
         // In dev/test: INITIAL_SESSION fires before Playwright can inject __TrippyTestMode__,
         // so defer the redirect check by one macrotask to allow test scripts to set the flag.

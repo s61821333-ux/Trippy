@@ -299,8 +299,20 @@ export default function Home_V2() {
   const { t, locale } = useI18n();
   const { show } = useToast();
 
-  const [trips,         setTrips]         = useState<UserTrip[]>([]);
-  const [tripsLoading,  setTripsLoading]  = useState(false);
+  // Stale-while-revalidate: hydrate from the last-known trips cache synchronously
+  // so returning users see their list instantly instead of a spinner. Falls back
+  // to an empty list (+ skeleton) for first-time loads.
+  const cacheKey = authUser?.id ? `trippy-trips-${authUser.id}` : null;
+  const [trips, setTrips] = useState<UserTrip[]>(() => {
+    if (typeof window === 'undefined' || !cacheKey) return [];
+    try {
+      const raw = localStorage.getItem(cacheKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
+  // Only show the loading state if we have nothing cached to display.
+  const [tripsLoading,  setTripsLoading]  = useState(() => trips.length === 0);
+  const [tripsError,    setTripsError]    = useState(false);
   const [loadingTripId, setLoadingTripId] = useState<string | null>(null);
   const [showCreate,    setShowCreate]    = useState(false);
   const [showAIPlan,    setShowAIPlan]    = useState(false);
@@ -308,13 +320,32 @@ export default function Home_V2() {
   const initials = (authUser?.username ?? '?')
     .split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
 
+  const loadTrips = React.useCallback(() => {
+    const uid = useAppStore.getState().authUser?.id;
+    if (!uid) return;
+    const key = `trippy-trips-${uid}`;
+    setTripsError(false);
+    // Keep cached rows visible while revalidating; only spin if list is empty.
+    setTripsLoading(trips.length === 0);
+    dbGetUserTrips(uid)
+      .then(fresh => {
+        setTrips(fresh);
+        setTripsError(false);
+        try { localStorage.setItem(key, JSON.stringify(fresh)); } catch {}
+      })
+      .catch(() => {
+        // Network failure / timeout. If we have cached rows, keep showing them
+        // (silent). Otherwise surface a retry so the user is never stuck.
+        setTripsError(curr => trips.length === 0 ? true : curr);
+      })
+      .finally(() => setTripsLoading(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trips.length]);
+
   useEffect(() => {
     if (!authUser?.id) return;
-    setTripsLoading(true);
-    dbGetUserTrips(authUser.id)
-      .then(setTrips)
-      .catch(() => {})
-      .finally(() => setTripsLoading(false));
+    loadTrips();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser?.id]);
 
   const handleOpen = async (tripId: string) => {
@@ -480,8 +511,31 @@ export default function Home_V2() {
           );
         })()}
 
+        {/* ── Error / retry state - never leave the user stranded on a failed load ── */}
+        {!tripsLoading && tripsError && trips.length === 0 && (
+          <m.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '32px 0 8px', textAlign: 'center' }}
+          >
+            <StampIcon iconKey="compass" size={64} />
+            <div>
+              <p className="text-display-sm" style={{ margin: '0 0 6px' }}>
+                {locale === 'he' ? 'לא הצלחנו לטעון את הטיולים' : "Couldn't load your trips"}
+              </p>
+              <p style={{ fontSize: 13.5, color: 'var(--text-3)', margin: 0 }}>
+                {locale === 'he' ? 'בדקו את החיבור ונסו שוב' : 'Check your connection and try again'}
+              </p>
+            </div>
+            <Btn kind="forest" onClick={loadTrips} aria-label={locale === 'he' ? 'נסה שוב' : 'Retry'}>
+              {locale === 'he' ? 'נסה שוב' : 'Try again'}
+            </Btn>
+          </m.div>
+        )}
+
         {/* ── Empty state ── */}
-        {!tripsLoading && trips.length === 0 && (
+        {!tripsLoading && !tripsError && trips.length === 0 && (
           <m.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}

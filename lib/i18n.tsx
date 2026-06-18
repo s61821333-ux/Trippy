@@ -542,8 +542,8 @@ const en = {
 
   // Home hero
   homeHeroTitle: 'Where to\nnext?',
-  homeHeroSub: ‘All your trips, right here.’,
-  homeStatementEmpty: ‘Let\’s plan the first one.’,
+  homeHeroSub: 'All your trips, right here.',
+  homeStatementEmpty: "Let's plan the first one.",
   homeStatementOne: 'One trip in motion.',
   homeStatementMany: '{n} trips in motion.',
 
