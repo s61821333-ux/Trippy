@@ -364,9 +364,12 @@ function Shell() {
     }
     if (lastLoadedTripRef.current === tripDbId) return;
     lastLoadedTripRef.current = tripDbId;
-    // Silent load on boot — navigate:false keeps user on the trips-picker (Home_V2)
-    // instead of jumping straight to dashboard. User taps the trip to enter.
-    loadTripById(tripDbId, { showLoader: false, showEntry: false, navigate: false }).catch(() => {
+    // A persisted tripDbId means the user was INSIDE this trip when they last left
+    // (switchTrip/leaveTrip/deleteTrip all clear tripDbId). On reload, restore them
+    // to that trip's dashboard instead of dumping them on the picker — landing on
+    // home while the trip is live in the store wedged the UI (navbar showed, taps
+    // did nothing). showLoader avoids a flash of the picker before the dashboard.
+    loadTripById(tripDbId, { showLoader: true, showEntry: false, navigate: true }).catch(() => {
       lastLoadedTripRef.current = null;
     });
   }, [authUser, tripDbId, trip, loadTripById]);
