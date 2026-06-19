@@ -60,7 +60,7 @@ export default function JoinPage() {
     if (!tripInfo) return
     setJoinError('')
     setStatus('joining')
-    const r = await fetch(`/api/invite/${token}`, { method: 'POST' })
+    const r = await fetch(`/api/invite/${token}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } })
     const data = await r.json()
     if (r.ok) {
       setStatus('joined')

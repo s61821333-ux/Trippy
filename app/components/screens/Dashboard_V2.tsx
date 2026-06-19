@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Icon from '../ui/Icon';
 import { StampIcon } from '../ui/StampIcon';
 import Ring from '../ui/Ring';
+import Gauge from '../ui/Gauge';
 import Sheet from '../ui/Sheet';
 import Field from '../ui/Field';
 import { useAppStore } from '@/lib/store';
@@ -910,6 +911,12 @@ export default function DashboardScreenV2() {
     : currentTripDay !== null
       ? `${t('day')} ${t('ofDays')} ${trip.days}`
       : t('days');
+  const gaugePct = beforeTrip
+    ? plannedPct
+    : currentTripDay !== null
+      ? Math.round((currentTripDay / Math.max(1, trip.days)) * 100)
+      : 100;
+  const gaugeArc = beforeTrip ? 'var(--terra)' : 'var(--brand)';
 
   // Weighted readiness: all available signals
   const _hasBudget     = trip.budget ? 100 : 0;
@@ -1026,70 +1033,18 @@ export default function DashboardScreenV2() {
           )}
         </div>
 
-        {/* Readiness progress bar */}
-        <div className="a-rise" style={{ marginBottom: 22 }}>
-
-          {/* Countdown pill */}
-          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-              <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, fontSize: 52, lineHeight: 1, letterSpacing: '-0.04em', color: 'var(--text)' }}>
-                {readinessPct}%
-              </span>
-              <span style={{ fontSize: 13, color: 'var(--text-3)', fontWeight: 600 }}>
-                {locale === 'he' ? 'מוכנות' : 'readiness'}
-              </span>
-            </div>
-            <div style={{ textAlign: 'end' }}>
-              <div style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, fontSize: 22, lineHeight: 1, letterSpacing: '-0.03em', color: 'var(--text)' }}>
-                {gaugeNumber}
-              </div>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginTop: 2 }}>
-                {gaugeLabel}
-              </div>
-            </div>
-          </div>
-
-          {/* Main bar */}
-          <div
-            role="progressbar"
-            aria-valuenow={readinessPct}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label={locale === 'he' ? `מוכנות לטיול ${readinessPct}%` : `Trip readiness ${readinessPct}%`}
-            style={{ height: 10, borderRadius: 999, background: 'var(--rule)', overflow: 'hidden', marginBottom: 14 }}
-          >
-            <div style={{
-              height: '100%',
-              width: `${readinessPct}%`,
-              background: readinessColor,
-              borderRadius: 999,
-              transition: 'width 0.9s cubic-bezier(0.22,1,0.36,1)',
-            }} />
-          </div>
-
-          {/* Sub-metric chips */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-            {[
-              { label: locale === 'he' ? 'תכנון' : 'Planning', value: `${plannedPct}%`, done: plannedPct === 100 },
-              { label: locale === 'he' ? 'ציוד' : 'Packing',  value: `${packedPct}%`,  done: packedPct === 100 },
-              { label: locale === 'he' ? 'תקציב' : 'Budget',  value: trip.budget ? '✓' : '—', done: !!trip.budget },
-              { label: locale === 'he' ? 'תאריך' : 'Dates',   value: trip.startDate ? '✓' : '—', done: !!trip.startDate },
-            ].map(m => (
-              <div key={m.label} className="lg" style={{
-                padding: '10px 8px',
-                borderRadius: 14,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                flex: 1,
-              }}>
-                <span style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14, color: m.done ? readinessColor : 'var(--text)' }}>
-                  {m.value}
-                </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)' }}>
-                  {m.label}
-                </span>
-              </div>
-            ))}
-          </div>
+        {/* Gauge — countdown / progress */}
+        <div className="a-rise" style={{ display: 'flex', justifyContent: 'center', marginBottom: 22 }}>
+          <Gauge
+            pct={gaugePct}
+            size={212}
+            arc={gaugeArc}
+            number={gaugeNumber}
+            label={gaugeLabel}
+            status={`${plannedPct}% ${t('plannedLabel')}`}
+            statusColor="var(--brand)"
+            aria-label={typeof gaugeLabel === 'string' ? `${gaugeNumber} ${gaugeLabel}` : undefined}
+          />
         </div>
 
         {/* Stat triplet */}
