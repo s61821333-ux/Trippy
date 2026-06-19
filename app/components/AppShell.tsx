@@ -436,6 +436,24 @@ function Shell() {
     return () => document.removeEventListener('visibilitychange', onVisible);
   }, []);
 
+  // Watchdog: a load that hangs past 5 s is treated as broken. Drop any stale
+  // service-worker caches, abandon the trip, and return the user to the trip
+  // picker so they are never trapped behind a frozen loader.
+  useEffect(() => {
+    if (!isGlobalLoading) return;
+    const id = setTimeout(() => {
+      if (!useAppStore.getState().isGlobalLoading) return;
+      // Best-effort cache purge — a stale cached asset is the usual culprit.
+      if (typeof caches !== 'undefined') {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+      }
+      lastLoadedTripRef.current = null;
+      useAppStore.setState({ isGlobalLoading: false });
+      switchTrip();
+    }, 5000);
+    return () => clearTimeout(id);
+  }, [isGlobalLoading, switchTrip]);
+
   // Prevent iOS Safari pull-to-refresh (the gesture causes a full page reload
   // which shows the global loader). Allow vertical panning inside scroll containers
   // that are not at their top boundary.
