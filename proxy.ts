@@ -6,11 +6,13 @@ const ALLOWED_ORIGINS = (
 ).split(',').map(s => s.trim()).filter(Boolean)
 
 function buildCsp(nonce: string): string {
+  const isDev = process.env.NODE_ENV !== 'production'
   return [
     "default-src 'self'",
     // nonce covers Next.js inline bootstrap; strict-dynamic trusts anything
     // those scripts load dynamically (chunks, Vercel Analytics via createElement, etc.)
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    // unsafe-eval only in dev: React uses eval for enhanced error stack reconstruction.
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: blob: https:",
@@ -25,9 +27,12 @@ export async function proxy(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID())
   const csp = buildCsp(nonce)
 
-  // Forward nonce to Next.js App Router so it applies it to inline hydration scripts.
+  // Forward nonce + CSP to Next.js App Router via request headers.
+  // Next.js parses Content-Security-Policy from the *request* headers to extract
+  // the nonce and apply it to inline scripts during SSR (see Next.js CSP docs).
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-nonce', nonce)
+  requestHeaders.set('Content-Security-Policy', csp)
 
   // CSRF: block cross-origin mutations on all API routes
   if (request.nextUrl.pathname.startsWith('/api/')) {
