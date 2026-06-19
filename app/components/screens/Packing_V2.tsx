@@ -10,6 +10,7 @@ import { supplyStamp } from '@/lib/categoryStamp';
 import Ring from '../ui/Ring';
 import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
+import { PackLoader, BRAND_THEME } from '../ui/TripLoaders';
 import Field from '../ui/Field';
 import GlassBtn from '../ui/GlassBtn';
 import Eyebrow from '../ui/Eyebrow';
@@ -376,9 +377,10 @@ function AIPackingSheet({ trip, supplies, onClose }: {
   const { show } = useToast();
   const isHe = locale === 'he';
 
-  const [loading, setLoading] = useState(false);
+  const [loading,     setLoading]     = useState(false);
+  const [error,       setError]       = useState(false);
   const [suggestions, setSuggestions] = useState<AISuggestedItem[] | null>(null);
-  const [fetched, setFetched] = useState(false);
+  const [fetched,     setFetched]     = useState(false);
 
   // Gather trip context
   const eventCats = useMemo(() => {
@@ -393,6 +395,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
 
   const fetchSuggestions = async () => {
     setLoading(true);
+    setError(false);
     try {
       const res = await fetch('/api/ai/packing', {
         method:  'POST',
@@ -406,20 +409,23 @@ function AIPackingSheet({ trip, supplies, onClose }: {
           eventCats,
         }),
       });
+      if (!res.ok) { setError(true); return; }
       const data = await res.json() as { items?: { name: string; category: SupplyItem['category'] }[] };
-      if (data.items) {
+      if (data.items?.length) {
         setSuggestions(data.items.map(i => ({ ...i, selected: true })));
         setFetched(true);
+      } else {
+        setError(true);
       }
     } catch {
-      show(isHe ? 'שגיאה - נסה שוב' : 'Error fetching suggestions');
+      setError(true);
     } finally {
       setLoading(false);
     }
   };
 
   // Kick off on mount
-  React.useEffect(() => { fetchSuggestions(); }, []);
+  React.useEffect(() => { fetchSuggestions(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggle = (i: number) => setSuggestions(prev =>
     prev ? prev.map((s, idx) => idx === i ? { ...s, selected: !s.selected } : s) : prev
@@ -449,61 +455,56 @@ function AIPackingSheet({ trip, supplies, onClose }: {
     <Sheet title={isHe ? 'מה לארוז?' : 'What to pack?'} onClose={onClose}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-        {/* Loading state */}
+        {/* Loading state — official PackLoader from design system */}
         {loading && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20, padding: '28px 0 20px' }}>
-            {/* Pulsing orb + spinning compass */}
-            <div style={{ position: 'relative', width: 88, height: 88 }}>
-              {[1.5, 1.15].map((scale, i) => (
-                <m.div
-                  key={i}
-                  animate={{ scale: [scale, scale * 1.10, scale], opacity: [0.10, 0.18, 0.10] }}
-                  transition={{ duration: 2, delay: i * 0.4, repeat: Infinity, ease: 'easeInOut' }}
-                  style={{
-                    position: 'absolute', inset: 0, borderRadius: '50%',
-                    background: 'radial-gradient(circle, var(--lg-forest) 0%, transparent 70%)',
-                  }}
-                />
-              ))}
-              <m.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }}
-                style={{
-                  position: 'absolute', inset: 0, display: 'flex',
-                  alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                <div style={{
-                  width: 56, height: 56, borderRadius: 16,
-                  background: 'linear-gradient(145deg, var(--lg-forest), var(--brand-deep))',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: 'var(--lg-glow-forest)',
-                }}>
-                  <Icon name="checklist" size={26} color="#fff" />
-                </div>
-              </m.div>
-            </div>
-
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '32px 0 24px' }}>
+            <PackLoader theme={BRAND_THEME} size={110} />
             <div style={{ textAlign: 'center' }}>
-              <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 20, color: 'var(--lg-ink)', margin: '0 0 6px' }}>
+              <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 19, color: 'var(--lg-ink)', margin: '0 0 5px' }}>
                 {isHe ? 'מכין רשימת ציוד…' : 'Building your packing list…'}
               </p>
               <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: 0 }}>
                 {isHe ? 'מותאם לטיול ולפעילויות שלך' : 'Tailored to your trip & activities'}
               </p>
             </div>
+          </div>
+        )}
 
-            {/* Skeleton items */}
-            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[80, 65, 72, 55].map((w, i) => (
-                <div key={i} className="skeleton" style={{ height: 44, borderRadius: 12, width: `${w}%`, opacity: 1 - i * 0.15 }} />
-              ))}
+        {/* Error state */}
+        {!loading && error && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '36px 0 20px', textAlign: 'center' }}>
+            <div style={{
+              width: 60, height: 60, borderRadius: 18,
+              background: 'var(--surface-2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: 'inset 0 0 0 1.5px oklch(50% 0.15 30 / 20%)',
+            }}>
+              <Icon name="x" size={26} color="var(--terra-text)" />
+            </div>
+            <div>
+              <p style={{ fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, color: 'var(--lg-ink)', margin: '0 0 5px' }}>
+                {isHe ? 'לא הצלחנו לטעון' : "Couldn't load suggestions"}
+              </p>
+              <p style={{ fontSize: 12.5, color: 'var(--text-3)', margin: '0 0 18px' }}>
+                {isHe ? 'בדוק חיבור לאינטרנט ונסה שוב' : 'Check your connection and try again'}
+              </p>
+              <button
+                onClick={() => fetchSuggestions()}
+                style={{
+                  height: 46, padding: '0 26px', border: 0, borderRadius: 'var(--lg-r-btn)', cursor: 'pointer',
+                  background: 'var(--lg-forest)', color: '#fff',
+                  fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14,
+                  boxShadow: 'var(--lg-glow-forest)',
+                }}
+              >
+                {isHe ? 'נסה שוב' : 'Try again'}
+              </button>
             </div>
           </div>
         )}
 
         {/* Suggestions list */}
-        {!loading && suggestions && (
+        {!loading && !error && suggestions && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <p style={{ fontSize: 13, color: 'var(--text-2)', margin: 0 }}>

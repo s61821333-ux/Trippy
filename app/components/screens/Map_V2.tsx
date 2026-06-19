@@ -9,23 +9,15 @@ import { useI18n } from '@/lib/i18n';
 import { getCurrencySymbol } from '@/lib/currency';
 import type { MapEvent, MapHotel } from '../ui/LeafletMap';
 import Icon from '../ui/Icon';
+import { RouteLoader, BRAND_THEME } from '../ui/TripLoaders';
 
 // ── Dynamically import Leaflet (client-only, no SSR) ─────────────────────────
 
 const LeafletMap = dynamic(() => import('../ui/LeafletMap'), {
   ssr: false,
   loading: () => (
-    <div style={{
-      width: '100%', height: '100%',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'var(--bg)',
-    }}>
-      <div style={{
-        width: 44, height: 44, borderRadius: '50%',
-        border: '3px solid transparent',
-        borderTopColor: 'var(--lg-terra)',
-        animation: 'spin 0.9s linear infinite',
-      }} />
+    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
+      <RouteLoader theme={BRAND_THEME} size={130} />
     </div>
   ),
 });

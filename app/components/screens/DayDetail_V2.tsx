@@ -7,12 +7,12 @@ import GlassBtn from '../ui/GlassBtn';
 import Icon from '../ui/Icon';
 import type { MapEvent } from '../ui/LeafletMap';
 
+import { RouteLoader, BRAND_THEME } from '../ui/TripLoaders';
+
 // ── Lazy-load Leaflet (client-only, avoids SSR penalty) ───────────────────────
 const LeafletMap = dynamic(() => import('../ui/LeafletMap'), { ssr: false, loading: () => (
-  <div style={{ width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',
-    background:'var(--bg)' }}>
-    <div style={{ width:40,height:40,borderRadius:'50%',border:'3px solid transparent',
-      borderTopColor:'var(--lg-terra)',animation:'spin .9s linear infinite' }} />
+  <div style={{ width:'100%',height:'100%',display:'flex',alignItems:'center',justifyContent:'center',background:'var(--bg)' }}>
+    <RouteLoader theme={BRAND_THEME} size={120} />
   </div>
 ) });
 import { StampIcon } from '../ui/StampIcon';
@@ -1135,9 +1135,10 @@ export default function DayDetail_V2() {
 
   return (
     <div className="flex flex-col h-full w-full" style={{ background: 'transparent' }}>
+      <div className="lg-scroll" style={{ flex: 1, overflowY: 'auto' }}>
 
-      {/* ── Sticky header ── */}
-      <div className="resp-container" style={{ padding: '6px 20px 12px', flexShrink: 0 }}>
+      {/* ── Header ── */}
+      <div className="resp-container" style={{ padding: '6px 20px 12px' }}>
         {/* Back to dashboard */}
         <button
           onClick={() => setScreen('dashboard')}
@@ -1237,8 +1238,7 @@ export default function DayDetail_V2() {
       </div>
 
       {/* ── Body ── */}
-      <div className="lg-scroll" style={{ flex: 1, overflowY: 'auto', paddingBottom: 'var(--nav-total-h)' }}>
-        <div className="resp-container">
+        <div className="resp-container" style={{ paddingBottom: 'var(--nav-total-h)' }}>
 
         {/* Context bar: Weather + Day budget */}
         {(weather || dayBudget > 0) && (
@@ -1343,7 +1343,7 @@ export default function DayDetail_V2() {
           />
         )}
         </div>{/* /resp-container */}
-      </div>
+      </div>{/* /lg-scroll */}
 
       {showAdd && (
         <AddEventSheet

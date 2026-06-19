@@ -203,8 +203,8 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
   const [fetched,  setFetched]  = useState(!!intel);
   const [fetchErr, setFetchErr] = useState(false);
 
-  const fetchIntel = async () => {
-    if (fetched || loading) return;
+  const fetchIntel = async (force = false) => {
+    if (!force && (fetched || loading)) return;
     setLoading(true);
     setFetchErr(false);
     try {
@@ -279,9 +279,15 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
         <div style={{ padding: '4px 14px 14px' }}>
           {fetchErr ? (
             <button
-              onClick={e => { e.stopPropagation(); setFetchErr(false); fetchIntel(); }}
-              style={{ fontSize: 12, color: 'var(--terra-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, touchAction: 'manipulation' }}
+              onClick={e => { e.stopPropagation(); fetchIntel(true); }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                fontSize: 12.5, fontWeight: 600, color: 'var(--terra-text)',
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0',
+                touchAction: 'manipulation',
+              }}
             >
+              <Icon name="swap" size={13} color="var(--terra-text)" />
               {isHe ? 'נסה שוב' : 'Tap to retry'}
             </button>
           ) : (

@@ -19,7 +19,9 @@
     "test:persona:headed": "playwright test tests/persona_test.spec.ts --headed --project=\"iPhone 17 Chrome\"",
     "test:wide": "playwright test tests/wide_test.spec.ts --project=\"iPhone 17 Chrome\"",
     "test:wide:headed": "playwright test tests/wide_test.spec.ts --headed --project=\"iPhone 17 Chrome\"",
-    "test:all": "playwright test tests/fast_test.spec.ts tests/deep_test.spec.ts tests/extended_test.spec.ts tests/persona_test.spec.ts tests/appearance_test.spec.ts",
+    "test:usability": "playwright test tests/usability_test.spec.ts --project=\"iPhone 17 Chrome\"",
+    "test:usability:headed": "playwright test tests/usability_test.spec.ts --headed --project=\"iPhone 17 Chrome\"",
+    "test:all": "playwright test tests/fast_test.spec.ts tests/deep_test.spec.ts tests/extended_test.spec.ts tests/persona_test.spec.ts tests/appearance_test.spec.ts tests/usability_test.spec.ts",
     "test:report": "playwright show-report"
   },
   "dependencies": {

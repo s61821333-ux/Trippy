@@ -276,7 +276,10 @@ export const useAppStore = create<AppState>()(
         // Terms check only — trip loading is handled reactively by AppShell's boot effect
         // when authUser is set, ensuring a single load path with no duplicate DB calls.
         try {
-          const consent = await dbGetPrivacyConsent(user.id)
+          const consent = await Promise.race([
+            dbGetPrivacyConsent(user.id),
+            new Promise<null>(resolve => setTimeout(() => resolve(null), 5_000)),
+          ])
           const termsAccepted = consent !== null ? consent.content_hash === TERMS_VERSION : persistedTerms
           set({ termsAccepted, termsChecked: true })
         } catch {
@@ -360,7 +363,7 @@ export const useAppStore = create<AppState>()(
           const loadWithTimeout = Promise.race([
             dbLoadTripById(tripId),
             new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error('load_timeout')), 15_000)
+              setTimeout(() => reject(new Error('load_timeout')), 8_000)
             ),
           ]);
           const data = await loadWithTimeout;

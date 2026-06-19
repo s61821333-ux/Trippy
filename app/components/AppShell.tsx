@@ -366,13 +366,16 @@ function Shell() {
     lastLoadedTripRef.current = tripDbId;
     // A persisted tripDbId means the user was INSIDE this trip when they last left
     // (switchTrip/leaveTrip/deleteTrip all clear tripDbId). On reload, restore them
-    // to that trip's dashboard instead of dumping them on the picker — landing on
-    // home while the trip is live in the store wedged the UI (navbar showed, taps
-    // did nothing). showLoader avoids a flash of the picker before the dashboard.
-    loadTripById(tripDbId, { showLoader: true, showEntry: false, navigate: true }).catch(() => {
+    // to that trip. Go straight to the dashboard and let it render its skeleton while
+    // the trip body loads in the background (showLoader:false) — a blocking full-screen
+    // loader here just gets you stuck staring at a spinner. If the load fails, fall
+    // back to the picker instead of leaving an empty skeleton hanging.
+    useAppStore.setState({ screen: 'dashboard' });
+    loadTripById(tripDbId, { showLoader: false, showEntry: false, navigate: true }).catch(() => {
       lastLoadedTripRef.current = null;
+      switchTrip();
     });
-  }, [authUser, tripDbId, trip, loadTripById]);
+  }, [authUser, tripDbId, trip, loadTripById, switchTrip]);
 
   // Track demo clicks (when in demo mode: tripDbId is null and trip exists)
   const isDemo = !!trip && !tripDbId;
