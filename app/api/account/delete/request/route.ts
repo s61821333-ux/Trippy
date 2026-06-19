@@ -66,9 +66,7 @@ export async function POST(_request: Request) {
 
     // Send confirmation email via Supabase Auth email (or log in dev)
     // In production, replace this with your email provider (Resend, SendGrid, etc.)
-    console.info('[account/delete/request] confirmation email for', user.email)
-    console.info('  Confirm:', confirmUrl)
-    console.info('  Cancel: ', cancelUrl)
+    console.info('[account/delete/request] confirmation email sent')
 
     // TODO: integrate email provider - example with Resend:
     // await resend.emails.send({

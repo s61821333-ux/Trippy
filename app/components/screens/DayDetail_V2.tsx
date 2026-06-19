@@ -522,7 +522,7 @@ function TimelineView({ events }: { events: TripEvent[] }) {
         const height = Math.max((ev.duration / 60 / 2) * TICK_H, 28);
         return (
           <m.div key={ev.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 32, delay: Math.min(i, 7) * 0.07 }}
-            style={{ position: 'absolute', insetInlineStart: 46, insetInlineEnd: 20, top, height, borderRadius: 12, padding: '4px 8px', background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: '#fff', boxShadow: `0 6px 18px ${color}55`, overflow: 'hidden' }}
+            style={{ position: 'absolute', insetInlineStart: 46, insetInlineEnd: 20, top, height, borderRadius: 12, padding: '4px 8px', background: `linear-gradient(135deg, ${color}, ${color}cc)`, color: 'var(--text-inv)', boxShadow: `0 6px 18px ${color}55`, overflow: 'hidden' }}
           >
             <div style={{ fontSize: 11, fontWeight: 700, lineHeight: 1.05, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.name}</div>
             <div style={{ fontSize: 8.5, opacity: 0.85, fontFamily: 'var(--font-mono)', lineHeight: 1.05 }}>{ev.time}-{toTime(toMins(ev.time) + ev.duration)}</div>
@@ -585,7 +585,7 @@ function RescheduleSheet({ event, onClose, dayLabel }: {
       onClose={onClose}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="time-row" style={{ display: 'flex', gap: 12 }}>
           <Field
             label={locale === 'he' ? 'שעת התחלה' : 'Start time'}
             type="time"
@@ -609,11 +609,11 @@ function RescheduleSheet({ event, onClose, dayLabel }: {
                 onClick={() => { setDurPreset(d); if (d !== 'Custom') syncEndFromPreset(d, startTime); }}
                 style={{
                   flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px',
-                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
+                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13, minWidth: 60,
                   background: durPreset === d ? 'var(--lg-terra)' : 'var(--surface-2)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
                   boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'var(--shadow-xs)',
-                  transition: 'all .25s', whiteSpace: 'nowrap',
+                  transition: 'background .25s, box-shadow .25s', whiteSpace: 'nowrap',
                 }}
               >
                 {getDurLabel(d, locale)}
@@ -725,7 +725,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
         <Field label={locale === 'he' ? 'שם האירוע' : 'Event name'} placeholder="-" value={name} onChange={setName} autoFocus />
 
         {/* Start + End times */}
-        <div style={{ display: 'flex', gap: 12 }}>
+        <div className="time-row" style={{ display: 'flex', gap: 12 }}>
           <Field
             label={locale === 'he' ? 'שעת התחלה' : 'Start time'}
             type="time"
@@ -750,11 +750,11 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                 onClick={() => { setDurPreset(d); if (d !== 'Custom') syncEndFromPreset(d, startTime); }}
                 style={{
                   flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px',
-                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
+                  fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13, minWidth: 60,
                   background: durPreset === d ? 'var(--lg-terra)' : 'var(--surface-2)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
                   boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'var(--shadow-xs)',
-                  transition: 'all .25s', whiteSpace: 'nowrap',
+                  transition: 'background .25s, box-shadow .25s', whiteSpace: 'nowrap',
                 }}
               >
                 {getDurLabel(d, locale)}

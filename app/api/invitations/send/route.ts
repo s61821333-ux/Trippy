@@ -50,6 +50,10 @@ export async function POST(request: NextRequest) {
 
   const { tripId, invitedEmail } = parsed.data
 
+  // Per-email rate limit: max 3 invitations to the same address per 24h (prevents email flooding)
+  const rlEmail = checkRateLimit(`invite:email:${invitedEmail.toLowerCase().trim()}`, 3, 86400)
+  if (!rlEmail.allowed) return rateLimitResponse(rlEmail.retryAfter, 3)
+
   // Verify caller is a participant of the trip before sending invite
   const admin = tryAdminClient()
   if (admin) {

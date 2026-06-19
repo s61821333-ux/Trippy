@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { m, AnimatePresence, useMotionValue, animate } from 'framer-motion';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '@/lib/store';
@@ -393,7 +393,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
 
   const existingNames = useMemo(() => supplies.map(s => s.name), [supplies]);
 
-  const fetchSuggestions = async () => {
+  const fetchSuggestions = useCallback(async () => {
     setLoading(true);
     setError(false);
     try {
@@ -422,10 +422,10 @@ function AIPackingSheet({ trip, supplies, onClose }: {
     } finally {
       setLoading(false);
     }
-  };
+  }, [trip, locale, existingNames, eventCats]);
 
   // Kick off on mount
-  React.useEffect(() => { fetchSuggestions(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchSuggestions(); }, [fetchSuggestions]);
 
   const toggle = (i: number) => setSuggestions(prev =>
     prev ? prev.map((s, idx) => idx === i ? { ...s, selected: !s.selected } : s) : prev
@@ -492,7 +492,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
                 onClick={() => fetchSuggestions()}
                 style={{
                   height: 46, padding: '0 26px', border: 0, borderRadius: 'var(--lg-r-btn)', cursor: 'pointer',
-                  background: 'var(--lg-forest)', color: '#fff',
+                  background: 'var(--lg-forest)', color: 'var(--text-inv)',
                   fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 14,
                   boxShadow: 'var(--lg-glow-forest)',
                 }}
@@ -561,7 +561,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
                 disabled={selectedCount === 0}
                 style={{
                   flex: 2, height: 50, border: 0, borderRadius: 'var(--lg-r-btn)', cursor: 'pointer',
-                  background: 'var(--lg-forest)', color: '#fff',
+                  background: 'var(--lg-forest)', color: 'var(--text-inv)',
                   fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15,
                   boxShadow: 'var(--lg-glow-forest)',
                   opacity: selectedCount === 0 ? 0.4 : 1,
@@ -642,7 +642,7 @@ export default function Packing_V2() {
     useShallow(s => ({ trip: s.trip, supplies: s.supplies, suppliesLoaded: s.suppliesLoaded, loadSupplies: s.loadSupplies, toggleSupply: s.toggleSupply, deleteSupplyItem: s.deleteSupplyItem }))
   );
 
-  useEffect(() => { loadSupplies(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { loadSupplies(); }, [loadSupplies]);
 
   const [activeCat,  setActiveCat]  = useState<FilterCat>('All');
   const [showAdd,    setShowAdd]    = useState(false);
@@ -936,3 +936,4 @@ export default function Packing_V2() {
     </div>
   );
 }
+

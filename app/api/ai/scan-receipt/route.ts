@@ -27,6 +27,7 @@ export async function POST(request: NextRequest) {
 
   const { imageBase64, mediaType = 'image/jpeg' } = body;
   if (!imageBase64) return Response.json({ error: 'imageBase64 required' }, { status: 400 });
+  if (imageBase64.length > 10_000_000) return Response.json({ error: 'Image too large' }, { status: 413 });
 
   // Validate media type
   const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];

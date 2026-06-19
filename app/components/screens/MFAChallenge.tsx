@@ -103,7 +103,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
 
         <h1 style={{
           fontFamily: 'var(--font-sans)', fontSize: 22, fontWeight: 700,
-          color: '#fff', margin: '0 0 6px', letterSpacing: '-0.02em',
+          color: 'var(--text-inv)', margin: '0 0 6px', letterSpacing: '-0.02em',
         }}>
           {isHe ? 'אמת את זהותך' : 'Verify your identity'}
         </h1>
@@ -138,7 +138,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
                 border: error
                   ? '1.5px solid rgba(239,68,68,0.6)'
                   : '1.5px solid rgba(255,255,255,0.14)',
-                borderRadius: 16, color: '#fff',
+                borderRadius: 16, color: 'var(--text-inv)',
                 outline: 'none', marginBottom: 8,
                 caretColor: 'var(--lg-terra-bright, #E89260)',
                 transition: 'border-color 0.2s',
@@ -191,3 +191,4 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
   if (typeof window === 'undefined') return null;
   return createPortal(content, document.body);
 }
+

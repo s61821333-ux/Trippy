@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import Sheet from '../ui/Sheet';
 import Field from '../ui/Field';
 import Icon from '../ui/Icon';
@@ -184,6 +184,7 @@ function StepGenerating({ progress, totalDays, locale }: {
   const isHe   = locale === 'he';
   const pct    = totalDays > 0 ? Math.round((progress / totalDays) * 100) : 0;
   const msgIdx = Math.min(Math.max(0, progress), PROGRESS_MSGS.length - 1);
+  const reduce = useReducedMotion();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0, padding: '16px 0 24px' }}>
@@ -192,8 +193,8 @@ function StepGenerating({ progress, totalDays, locale }: {
         {[1.6, 1.3, 1.0].map((scale, i) => (
           <m.div
             key={i}
-            animate={{ scale: [scale, scale * 1.08, scale], opacity: [0.12, 0.20, 0.12] }}
-            transition={{ duration: 2.2, delay: i * 0.35, repeat: Infinity, ease: 'easeInOut' }}
+            animate={reduce ? { scale, opacity: 0.15 } : { scale: [scale, scale * 1.08, scale], opacity: [0.12, 0.20, 0.12] }}
+            transition={reduce ? {} : { duration: 2.2, delay: i * 0.35, repeat: Infinity, ease: 'easeInOut' }}
             style={{
               position: 'absolute', inset: 0, borderRadius: '50%',
               background: 'radial-gradient(circle, var(--lg-terra) 0%, transparent 70%)',
@@ -202,8 +203,8 @@ function StepGenerating({ progress, totalDays, locale }: {
         ))}
         {/* Spinning compass */}
         <m.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+          animate={reduce ? {} : { rotate: 360 }}
+          transition={reduce ? {} : { duration: 3, repeat: Infinity, ease: 'linear' }}
           style={{
             position: 'absolute', inset: 0, display: 'flex',
             alignItems: 'center', justifyContent: 'center',

@@ -14,6 +14,15 @@ import {
   mfaUnenroll,
 } from '@/lib/db';
 
+// Strip script tags, on* handlers, and javascript: hrefs from an SVG string
+// before rendering via dangerouslySetInnerHTML.
+function sanitizeSvg(svg: string): string {
+  return svg
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*)/gi, '')
+    .replace(/href\s*=\s*["']javascript:[^"']*["']/gi, '');
+}
+
 interface Factor {
   id: string;
   friendly_name?: string;
@@ -96,6 +105,9 @@ function OtpInput({ value, onChange }: { value: string; onChange: (v: string) =>
     </div>
   );
 }
+
+// Set to true when Supabase TOTP/MFA is re-enabled in the project settings.
+const TOTP_ENABLED = false;
 
 export default function SecuritySettings({ onClose }: { onClose: () => void }) {
   const { locale } = useI18n();
@@ -187,10 +199,10 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
     >
       <div style={{ display: 'flex', flexDirection: 'column', paddingBottom: 16 }}>
 
-        {/* ── Two-Factor Auth ─────────────────────────────────────────────────── */}
-        <p style={SECTION_STYLE}>{isHe ? 'אימות דו-שלבי' : 'Two-Factor Auth'}</p>
+        {/* ── Two-Factor Auth — hidden until TOTP_ENABLED = true ──────────────── */}
+        {TOTP_ENABLED && <p style={SECTION_STYLE}>{isHe ? 'אימות דו-שלבי' : 'Two-Factor Auth'}</p>}
 
-        <m.div className="lg" style={{ padding: '4px 16px', marginBottom: 20 }}
+        {TOTP_ENABLED && <m.div className="lg" style={{ padding: '4px 16px', marginBottom: 20 }}
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
 
           {loading ? (
@@ -266,14 +278,13 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
                     : 'Scan the QR code with Google Authenticator, Authy, or any TOTP app.'}
                 </p>
 
-                {/* QR code */}
+                {/* QR code — SVG sanitized to strip script/handler injection vectors */}
                 <div
                   style={{
                     display: 'flex', justifyContent: 'center', marginBottom: 16,
                     background: '#fff', borderRadius: 16, padding: 12,
                   }}
-                  // The QR code SVG from Supabase is trusted content
-                  dangerouslySetInnerHTML={{ __html: enrollData.qrCode }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeSvg(enrollData.qrCode) }}
                 />
 
                 {/* Backup secret */}
@@ -321,7 +332,7 @@ export default function SecuritySettings({ onClose }: { onClose: () => void }) {
               </m.div>
             )}
           </AnimatePresence>
-        </m.div>
+        </m.div>}
 
       </div>
     </Sheet>

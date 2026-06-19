@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { m } from 'framer-motion';
@@ -44,7 +44,7 @@ export default function AIMenuSheet({ onClose, onAsk, onFind }: {
       badge: isHe ? 'גילוי' : 'DISCOVER',
       title: isHe ? 'גלו אטרקציות מקומיות' : 'Discover local spots',
       desc: isHe ? 'מסעדות, אטרקציות ופעילויות — מסוננות ליום הנוכחי' : 'Restaurants, sights and things to do — matched to today\'s day',
-      hint: isHe ? 'לפי המיקום של היום' : 'Based on where you are today',
+      hint: isHe ? 'AI בוחר עבורך מסעדות, אטרקציות ופעילויות' : 'AI picks restaurants, sights & activities near you',
       onClick: onFind,
       grad: 'linear-gradient(145deg, var(--lg-forest) 0%, var(--lg-forest-deep) 100%)',
       glow: '0 8px 32px oklch(50% 0.130 155 / 30%)',
@@ -117,7 +117,7 @@ export default function AIMenuSheet({ onClose, onAsk, onFind }: {
             <div style={{ flex: 1, minWidth: 0, padding: '18px 16px 18px 18px' }}>
               <div style={{
                 fontFamily: 'var(--font-sans)', fontSize: 18, fontWeight: 800,
-                letterSpacing: '-0.015em', color: '#fff', marginBottom: 5,
+                letterSpacing: '-0.015em', color: 'var(--text-inv)', marginBottom: 5,
                 lineHeight: 1.1,
               }}>
                 {c.title}

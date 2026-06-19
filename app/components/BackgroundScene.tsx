@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { TripTheme } from '@/lib/types';
 
 interface Props {
@@ -220,6 +220,29 @@ function CityBg() {
     {x:700, y:475, w:85, h:225, c:'#687888'},
   ];
 
+  // Pre-compute window data once — Math.random() in JSX causes new values every render
+  const bgWindowData = useMemo(() => bgBuildings.map(b => ({
+    b,
+    windows: Array.from({length: Math.floor(b.h/22)}, (_, r) =>
+      Array.from({length: Math.floor(b.w/14)}, (_, c) => ({
+        x: b.x+4+c*14, y: b.y-b.h+6+r*22,
+        fill: Math.random()>0.4 ? '#fffaaa' : 'none',
+        op: Math.random()>0.4 ? 0.6 : 0,
+      }))
+    ).flat(),
+  })), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const fgWindowData = useMemo(() => fgBuildings.map(b => ({
+    b,
+    windows: Array.from({length: Math.floor(b.h/20)}, (_, r) =>
+      Array.from({length: Math.floor(b.w/16)}, (_, c) => ({
+        x: b.x+4+c*16, y: b.y-b.h+5+r*20,
+        fill: Math.random()>0.5 ? '#ffe880' : '#fff4a0',
+        op: Math.random()>0.5 ? 0.75 : 0.4,
+      }))
+    ).flat(),
+  })), []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <svg width="100%" height="100%" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -245,42 +268,25 @@ function CityBg() {
       ))}
       {/* Background glow */}
       <ellipse cx="400" cy="500" rx="450" ry="100" fill="#ffb030" opacity="0.12" filter="url(#cBlur4)"/>
-      {/* Background buildings */}
+      {/* Background buildings — windows pre-computed once to avoid Math.random on every render */}
       <g ref={bldgRef}>
-        {bgBuildings.map((b,i) => (
+        {bgWindowData.map(({ b, windows }, i) => (
           <g key={i}>
             <rect x={b.x} y={b.y-b.h} width={b.w} height={b.h} fill={b.c} opacity="0.75"/>
-            {/* Windows */}
-            {Array.from({length: Math.floor(b.h/22)}, (_, r) =>
-              Array.from({length: Math.floor(b.w/14)}, (_, c) => (
-                <rect
-                  key={`${r}-${c}`}
-                  x={b.x+4+c*14} y={b.y-b.h+6+r*22}
-                  width="8" height="12" rx="1"
-                  fill={Math.random()>0.4 ? '#fffaaa' : 'none'}
-                  opacity={Math.random()>0.4 ? 0.6 : 0}
-                />
-              ))
-            )}
+            {windows.map((w, wi) => (
+              <rect key={wi} x={w.x} y={w.y} width="8" height="12" rx="1" fill={w.fill} opacity={w.op}/>
+            ))}
           </g>
         ))}
       </g>
       {/* Foreground buildings */}
       <g ref={fgRef}>
-        {fgBuildings.map((b,i) => (
+        {fgWindowData.map(({ b, windows }, i) => (
           <g key={i}>
             <rect x={b.x} y={b.y-b.h} width={b.w} height={b.h} fill={b.c}/>
-            {Array.from({length: Math.floor(b.h/20)}, (_, r) =>
-              Array.from({length: Math.floor(b.w/16)}, (_, c) => (
-                <rect
-                  key={`${r}-${c}`}
-                  x={b.x+4+c*16} y={b.y-b.h+5+r*20}
-                  width="9" height="12" rx="1"
-                  fill={Math.random()>0.5 ? '#ffe880' : '#fff4a0'}
-                  opacity={Math.random()>0.5 ? 0.75 : 0.4}
-                />
-              ))
-            )}
+            {windows.map((w, wi) => (
+              <rect key={wi} x={w.x} y={w.y} width="9" height="12" rx="1" fill={w.fill} opacity={w.op}/>
+            ))}
           </g>
         ))}
       </g>
@@ -494,14 +500,20 @@ function BeachBg() {
       return ()=>{ window.removeEventListener('mousemove', mv); window.removeEventListener('touchmove', mv); };
     }, []);
 
+    // Pre-compute star positions once — Math.random() in JSX re-runs every render
+    const stars = useMemo(() => Array.from({length:120}, (_,i) => ({
+      id: i,
+      x: Math.floor(Math.random()*800),
+      y: Math.floor(Math.random()*600),
+      r: Math.random()*1.6,
+      fill: Math.random()>0.6 ? '#ffd8b0' : '#cfe8ff',
+    })), []);
+
     return (
       <svg width="100%" height="100%" viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
         <rect width="800" height="600" fill="#050814"/>
         <g ref={starsRef}>
-          {Array.from({length:120}).map((_,i)=>{
-            const x = Math.floor(Math.random()*800), y = Math.floor(Math.random()*600), r = Math.random()*1.6;
-            return <circle key={i} cx={x} cy={y} r={r} fill={Math.random()>0.6? '#ffd8b0' : '#cfe8ff'} opacity={0.8}/>;
-          })}
+          {stars.map(s => <circle key={s.id} cx={s.x} cy={s.y} r={s.r} fill={s.fill} opacity={0.8}/>)}
         </g>
         <g>
           <circle cx="640" cy="120" r="70" fill="#ffd8b0" opacity="0.12"/>

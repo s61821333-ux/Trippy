@@ -626,6 +626,8 @@ export function AISheet({ dayNumber }: AISheetProps) {
 
     fetchSuggestions(exclude)
       .then(data => {
+        if (elapsedRef.current) { clearInterval(elapsedRef.current); elapsedRef.current = null; }
+        if (msgRef.current)     { clearInterval(msgRef.current);     msgRef.current     = null; }
         setSuggestions(data);
         setAiSuggestions(data);
         setLoading(false);
@@ -635,8 +637,8 @@ export function AISheet({ dayNumber }: AISheetProps) {
         setLoading(false);
       })
       .finally(() => {
-        if (elapsedRef.current) clearInterval(elapsedRef.current);
-        if (msgRef.current)     clearInterval(msgRef.current);
+        if (elapsedRef.current) { clearInterval(elapsedRef.current); elapsedRef.current = null; }
+        if (msgRef.current)     { clearInterval(msgRef.current);     msgRef.current     = null; }
       });
   };
 
@@ -759,7 +761,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
             onClick={handleLoadMore}
             disabled={loadingMore}
             className="lg-btn lg-btn-glass"
-            style={{ height: 44, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+            style={{ height: 44, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: loadingMore ? 0.5 : 1, transition: 'opacity .2s' }}
           >
             <Icon name="sparkle" size={13} color="var(--lg-terra)" />
             {loadingMore

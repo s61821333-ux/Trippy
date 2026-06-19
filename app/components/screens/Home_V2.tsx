@@ -182,7 +182,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
                     width: 16, height: 16, borderRadius: '50%', background: th.accent,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Icon name="check" size={9} style={{ color: '#fff' }} />
+                    <Icon name="check" size={9} style={{ color: 'var(--text-inv)' }} />
                   </div>
                 )}
               </button>
@@ -381,7 +381,7 @@ export default function Home_V2() {
               aria-label={authUser?.username}
               style={{
                 width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                background: 'var(--brand)', color: '#fff',
+                background: 'var(--brand)', color: 'var(--text-inv)',
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
                 boxShadow: 'var(--lg-glow-forest)',
@@ -637,3 +637,4 @@ export default function Home_V2() {
     </div>
   );
 }
+

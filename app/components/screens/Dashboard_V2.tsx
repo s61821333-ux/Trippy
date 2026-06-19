@@ -67,7 +67,7 @@ function BudgetEditSheet({ current, currSym, onClose, onSave }: {
             }}
             style={{
               flex: 2, height: 52, border: 0, borderRadius: 'var(--lg-r-btn)',
-              background: 'var(--lg-forest)', color: '#fff',
+              background: 'var(--lg-forest)', color: 'var(--text-inv)',
               fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 15, cursor: 'pointer',
               boxShadow: 'var(--lg-glow-forest)',
             }}
@@ -613,7 +613,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
                 const n = parseFloat(budgetVal);
                 if (!isNaN(n) && n > 0) { onAddBudget(n); show(t('budgetSavedToast')); setShowBudgetInput(false); }
               }}
-              style={{ height: 48, padding: '0 16px', border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: '#fff', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: 'var(--lg-glow-forest)', flexShrink: 0 }}
+              style={{ height: 48, padding: '0 16px', border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: 'var(--text-inv)', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', boxShadow: 'var(--lg-glow-forest)', flexShrink: 0 }}
             >
               {t('saveBtn')}
             </button>
@@ -657,7 +657,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
             </div>
             <button
               onClick={handleAdd}
-              style={{ height: 48, width: 48, flexShrink: 0, border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--lg-glow-forest)' }}
+              style={{ height: 48, width: 48, flexShrink: 0, border: 0, borderRadius: 14, background: 'var(--lg-forest)', color: 'var(--text-inv)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'var(--lg-glow-forest)' }}
               aria-label={isHe ? 'הוסף' : 'Add'}
             >
               <Icon name="plus" size={20} color="#fff" />
@@ -922,16 +922,14 @@ export default function DashboardScreenV2() {
   const _hasBudget     = trip.budget ? 100 : 0;
   const _hasStartDate  = trip.startDate ? 100 : 0;
   const _hasCountries  = (trip.countries?.length ?? 0) > 0 ? 100 : 0;
-  const _hasCrew       = trip.participants.length > 0 ? 100 : 0;
   const _hasExpenses   = expenses.length > 0 ? 100 : 0;
   const readinessPct   = Math.round(
-    plannedPct  * 0.35 +
-    packedPct   * 0.25 +
-    _hasBudget  * 0.15 +
+    plannedPct    * 0.35 +
+    packedPct     * 0.25 +
+    _hasBudget    * 0.15 +
     _hasStartDate * 0.10 +
     _hasCountries * 0.05 +
-    _hasCrew    * 0.05 +
-    _hasExpenses * 0.05
+    _hasExpenses  * 0.10
   );
   const readinessColor = readinessPct >= 80 ? 'var(--brand)' : readinessPct >= 50 ? 'var(--terra)' : 'var(--danger)';
 
@@ -1162,13 +1160,13 @@ export default function DashboardScreenV2() {
           {/* Body text */}
           {coachLoading ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
-              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,.35)', borderTopColor: '#fff', animation: 'spin .8s linear infinite', flexShrink: 0 }} />
+              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,.35)', borderTopColor: 'var(--text-inv)', animation: 'spin .8s linear infinite', flexShrink: 0 }} />
               <span style={{ fontSize: 13, color: 'rgba(255,255,255,.7)', fontStyle: 'italic' }}>
                 {isRTL ? 'חושב על עצות לדרך…' : 'Looking at your trip…'}
               </span>
             </div>
           ) : (
-            <p style={{ fontSize: 14, lineHeight: 1.65, color: '#fff', fontWeight: 500, margin: 0 }}>
+            <p style={{ fontSize: 14, lineHeight: 1.65, color: 'var(--text-inv)', fontWeight: 500, margin: 0 }}>
               {coachAdvice ?? aiSummary}
             </p>
           )}
@@ -1182,7 +1180,7 @@ export default function DashboardScreenV2() {
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
                   background: 'var(--on-accent-fill-strong)', border: 0, borderRadius: 9999,
-                  padding: '7px 14px', cursor: 'pointer', color: '#fff',
+                  padding: '7px 14px', cursor: 'pointer', color: 'var(--text-inv)',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 12,
                   WebkitTapHighlightColor: 'transparent',
                 }}
@@ -1195,7 +1193,7 @@ export default function DashboardScreenV2() {
             {/* View day plan link */}
             <button
               onClick={() => setScreen('day')}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'none', border: 0, cursor: 'pointer', color: '#fff', fontWeight: 600, fontSize: 13 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'none', border: 0, cursor: 'pointer', color: 'var(--text-inv)', fontWeight: 600, fontSize: 13 }}
             >
               {t('viewSuggestions')}
               <Icon name="arrow" size={14} color="#fff" style={{ transform: isRTL ? 'scaleX(-1)' : 'none' }} />

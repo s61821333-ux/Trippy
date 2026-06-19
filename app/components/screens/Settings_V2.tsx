@@ -389,7 +389,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
             <Row
               icon="lock"
               title={locale === 'he' ? 'אבטחת חשבון' : 'Account Security'}
-              sub={locale === 'he' ? 'MFA ואפשרויות נוספות' : 'MFA & more'}
+              sub={locale === 'he' ? 'אפשרויות אבטחה' : 'Security options'}
               right={<Icon name={isRTL ? 'chevL' : 'chevR'} size={16} style={{ color: 'var(--text-3)', flexShrink: 0 }} />}
               onClick={onSecurity}
             />

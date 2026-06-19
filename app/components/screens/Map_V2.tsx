@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
@@ -11,7 +11,7 @@ import type { MapEvent, MapHotel } from '../ui/LeafletMap';
 import Icon from '../ui/Icon';
 import { RouteLoader, BRAND_THEME } from '../ui/TripLoaders';
 
-// ── Dynamically import Leaflet (client-only, no SSR) ─────────────────────────
+// ג”€ג”€ Dynamically import Leaflet (client-only, no SSR) ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€
 
 const LeafletMap = dynamic(() => import('../ui/LeafletMap'), {
   ssr: false,
@@ -22,14 +22,14 @@ const LeafletMap = dynamic(() => import('../ui/LeafletMap'), {
   ),
 });
 
-// ── Day-label colours (matches LeafletMap palette) ───────────────────────────
+// ג”€ג”€ Day-label colours (matches LeafletMap palette) ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€
 
 const DAY_PALETTE = [
   '#C4714A', '#3B6E52', '#6B5CE7', '#2B7A8E',
   '#D4531A', '#C8944A', '#E05A3A', '#1B6A8A',
 ];
 
-// ── Event-detail card shown when a pin is tapped ─────────────────────────────
+// ג”€ג”€ Event-detail card shown when a pin is tapped ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€
 
 function EventCard({
   ev,
@@ -63,7 +63,7 @@ function EventCard({
           alignItems: 'center', justifyContent: 'center',
         }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'rgba(255,255,255,.8)', lineHeight: 1, letterSpacing: '0.05em' }}>DAY</span>
-          <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, color: '#fff', lineHeight: 1 }}>{ev.day}</span>
+          <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 18, color: 'var(--text-inv)', lineHeight: 1 }}>{ev.day}</span>
         </div>
 
         {/* Details */}
@@ -103,7 +103,7 @@ function EventCard({
           onClick={() => onGoToDay(ev.day)}
           style={{
             flex: 1, height: 40, border: 0, borderRadius: 12, cursor: 'pointer',
-            background: dayColor, color: '#fff',
+            background: dayColor, color: 'var(--text-inv)',
             fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
           }}
@@ -133,7 +133,7 @@ function EventCard({
   );
 }
 
-// ── No-pins empty state ───────────────────────────────────────────────────────
+// ג”€ג”€ No-pins empty state ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€
 
 function EmptyMapState({ onGoToDay, t }: { onGoToDay: (d: number) => void; t: (k: string) => string }) {
   return (
@@ -155,7 +155,7 @@ function EmptyMapState({ onGoToDay, t }: { onGoToDay: (d: number) => void; t: (k
         onClick={() => onGoToDay(1)}
         style={{
           height: 44, padding: '0 18px', border: 0, borderRadius: 10, cursor: 'pointer',
-          background: 'var(--lg-forest)', color: '#fff',
+          background: 'var(--lg-forest)', color: 'var(--text-inv)',
           fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
           display: 'inline-flex', alignItems: 'center', gap: 6,
         }}
@@ -167,7 +167,7 @@ function EmptyMapState({ onGoToDay, t }: { onGoToDay: (d: number) => void; t: (k
   );
 }
 
-// ── Day legend pill ───────────────────────────────────────────────────────────
+// ג”€ג”€ Day legend pill ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€
 
 function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
   days: number;
@@ -205,7 +205,7 @@ function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
           WebkitTapHighlightColor: 'transparent',
         }}
       >
-        {locale === 'he' ? 'הכל' : 'ALL'}
+        {locale === 'he' ? '׳”׳›׳' : 'ALL'}
       </button>
       {Array.from({ length: days }, (_, i) => i + 1).map(d => (
         <button
@@ -227,7 +227,7 @@ function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
   );
 }
 
-// ── Main Map_V2 ───────────────────────────────────────────────────────────────
+// ג”€ג”€ Main Map_V2 ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€ג”€
 
 export default function Map_V2() {
   const { trip, setScreen, setActiveDay, tripDbId, currencyByTrip } = useAppStore(
@@ -343,7 +343,7 @@ export default function Map_V2() {
       <h1 style={{ position: 'absolute', width: 1, height: 1, padding: 0, margin: -1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap', border: 0 }}>
         {t('mapTitle')}
       </h1>
-      {/* ── Real Leaflet map (full bleed) ── */}
+      {/* ג”€ג”€ Real Leaflet map (full bleed) ג”€ג”€ */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 0, touchAction: 'none' }}>
         <LeafletMap
           events={visibleEvents}
@@ -354,7 +354,7 @@ export default function Map_V2() {
         />
       </div>
 
-      {/* ── Top controls overlay ── */}
+      {/* ג”€ג”€ Top controls overlay ג”€ג”€ */}
       <div style={{
         position: 'absolute', top: 56, left: 16, right: 16,
         display: 'flex', flexDirection: 'column', gap: 10, zIndex: 20,
@@ -413,7 +413,7 @@ export default function Map_V2() {
         )}
       </div>
 
-      {/* ── Export to Google Maps FAB ── */}
+      {/* ג”€ג”€ Export to Google Maps FAB ג”€ג”€ */}
       {allMapEvents.length > 0 && (
         <m.button
           initial={{ opacity: 0, scale: 0.8 }}
@@ -433,10 +433,10 @@ export default function Map_V2() {
             letterSpacing: '0.06em', color: 'var(--lg-forest)',
             WebkitTapHighlightColor: 'transparent',
           }}
-          aria-label={locale === 'he' ? 'פתח ב-Google Maps' : 'Open route in Google Maps'}
+          aria-label={locale === 'he' ? '׳₪׳×׳— ׳‘-Google Maps' : 'Open route in Google Maps'}
         >
           <Icon name="map" size={14} color="var(--lg-forest)" />
-          {locale === 'he' ? 'מסלול ב-Google Maps' : 'Open in Maps'}
+          {locale === 'he' ? '׳׳¡׳׳•׳ ׳‘-Google Maps' : 'Open in Maps'}
         </m.button>
       )}
 
@@ -457,12 +457,12 @@ export default function Map_V2() {
               color: 'var(--lg-ink)', whiteSpace: 'nowrap',
             }}
           >
-            {locale === 'he' ? 'נפתח ב-Google Maps ✓' : 'Opened in Google Maps ✓'}
+            {locale === 'he' ? '׳ ׳₪׳×׳— ׳‘-Google Maps ג“' : 'Opened in Google Maps ג“'}
           </m.div>
         )}
       </AnimatePresence>
 
-      {/* ── Bottom card: event detail OR empty state ── */}
+      {/* ג”€ג”€ Bottom card: event detail OR empty state ג”€ג”€ */}
       <div style={{
         position: 'absolute', left: 16, right: allMapEvents.length > 0 ? 120 : 16,
         bottom: 'calc(var(--nav-total-h, 92px) + 8px)',
@@ -485,3 +485,4 @@ export default function Map_V2() {
     </div>
   );
 }
+

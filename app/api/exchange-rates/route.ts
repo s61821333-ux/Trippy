@@ -1,5 +1,8 @@
 import { NextRequest } from 'next/server'
 import { unstable_cache } from 'next/cache'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/env'
 
 const ALLOWED_BASES = ['USD', 'EUR', 'ILS', 'GBP', 'JPY', 'AUD', 'CAD', 'CHF', 'THB', 'AED', 'TRY', 'INR', 'MXN', 'SGD']
 
@@ -21,6 +24,16 @@ function buildCachedFetcher(base: string) {
 // Server-side proxy with 1-hour Next.js cache. Eliminates direct external API
 // calls from the browser on every dashboard mount.
 export async function GET(request: NextRequest) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(SUPABASE_URL(), SUPABASE_ANON_KEY(), {
+    cookies: {
+      getAll: () => cookieStore.getAll(),
+      setAll: (c) => { try { c.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } catch {} },
+    },
+  })
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return Response.json({ error: 'Not authenticated' }, { status: 401 })
+
   const base = (request.nextUrl.searchParams.get('base') ?? 'USD').toUpperCase()
 
   if (!ALLOWED_BASES.includes(base)) {

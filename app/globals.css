@@ -3389,13 +3389,6 @@ html[data-dark="true"] {
   font-variant-numeric: tabular-nums;
 }
 
-/* Row 29: Crew name truncation */
-.crew-name {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 80px;
-}
 
 /* Row 42: Weather temp - tabular nums */
 .weather-temp {
@@ -3638,18 +3631,6 @@ body, * {
   border-radius: 12px;
 }
 
-/* Row 272: Add crew avatar placeholder */
-.crew-add-placeholder {
-  border: 2px dashed var(--border, rgba(0, 0, 0, 0.12));
-  color: var(--text-3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-}
-[data-dark="true"] .crew-add-placeholder {
-  border-color: rgba(255, 255, 255, 0.18);
-}
 
 /* Row 282: Leaflet attribution text */
 .leaflet-control-attribution {
@@ -4669,6 +4650,24 @@ body, * {
 [dir="rtl"] .lg-menu-item { text-align: end; }
 [dir="rtl"] .lg-chip { direction: rtl; }
 
+/* ── Time-picker row — stacks vertically on very narrow screens ─────────── */
+@media (max-width: 420px) {
+  .time-row { flex-direction: column !important; }
+}
+
+/* ── Dark mode glass — reduce saturation to prevent skin-tone orange cast ── */
+[data-dark="true"] .lg,
+[data-dark="true"] .lg-strong,
+[data-dark="true"] .lg-card {
+  backdrop-filter: blur(24px) saturate(1.2) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(1.2) !important;
+}
+
+/* ── Shared inverse-text token (for brand/terra backgrounds) ────────────── */
+:root {
+  --surface-rim: oklch(100% 0 0 / 12%);
+}
+
 /* ── Reduced motion — disable all new animations ───────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .lg-deep-enter,
@@ -4678,6 +4677,13 @@ body, * {
   .lg-interactive,
   .lg-push,
   .lg-fab { transition: none !important; }
+  /* Skeleton shimmer */
+  .skeleton-shimmer { animation: none !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* BackgroundScene cloud/wave drift — redefine keyframe as no-op */
+  @keyframes cloudDrift { from, to { transform: none; } }
 }
 [data-reduced-motion="true"] .lg-deep-enter,
 [data-reduced-motion="true"] .lg-reveal,

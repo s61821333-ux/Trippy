@@ -1,5 +1,14 @@
 import type { NextConfig } from "next";
 
+const isProd = process.env.NODE_ENV === 'production';
+
+// In production we drop 'unsafe-eval' to avoid AV/EDR false-positive triggers on
+// eval-like webpack patterns in the compiled bundle. Next.js 14+ does not need
+// eval at runtime; it only appears in dev fast-refresh.
+const scriptSrc = isProd
+  ? "script-src 'self' 'strict-dynamic' https://va.vercel-scripts.com"
+  : "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com";
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control',  value: 'on' },
   { key: 'X-Frame-Options',          value: 'SAMEORIGIN' },
@@ -10,8 +19,7 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      // Next.js requires unsafe-eval in dev; unsafe-inline for CSS-in-JS.
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://va.vercel-scripts.com",
+      scriptSrc,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",

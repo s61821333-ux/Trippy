@@ -334,7 +334,7 @@ function WishCard({ item, onDelete, onSchedule }: {
         onClick={onSchedule}
         style={{
           marginTop: 12, width: '100%', height: 40, border: 0, borderRadius: 12, cursor: 'pointer',
-          background: 'var(--lg-forest)', color: '#fff',
+          background: 'var(--lg-forest)', color: 'var(--text-inv)',
           fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 13,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
         }}
@@ -418,3 +418,4 @@ export default function WishlistSheet({ onClose }: WishlistSheetProps) {
     </Sheet>
   );
 }
+

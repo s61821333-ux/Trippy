@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { m, AnimatePresence } from 'framer-motion';
 import React, { useLayoutEffect, useState } from 'react';
@@ -147,6 +147,7 @@ export default function NavBar_V2({
                 borderRadius: 28,
                 pointerEvents: 'auto',
                 width: 'min(260px, calc(100vw - 32px))',
+                maxWidth: 'calc(100vw - 32px)',
                 position: 'absolute',
                 zIndex: 41,
                 bottom: 'calc(100% + 8px)',
@@ -351,7 +352,7 @@ export default function NavBar_V2({
               gap: 3,
             }}
           >
-            <Icon name="sparkle" size={19} style={{ color: '#fff' }} />
+            <Icon name="sparkle" size={19} style={{ color: 'var(--text-inv)' }} />
             <span style={{
               fontFamily: 'var(--font-sans)',
               fontSize: 9,

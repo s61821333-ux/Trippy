@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
   url.searchParams.set('limit', '5')
 
   try {
-    const res = await fetch(url.toString(), { next: { revalidate: 0 } })
+    const res = await fetch(url.toString(), { next: { revalidate: 60 } })
     const data = await res.json()
     if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
       return NextResponse.json({ error: data.status }, { status: 502 })
