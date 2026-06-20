@@ -205,7 +205,7 @@ function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
           WebkitTapHighlightColor: 'transparent',
         }}
       >
-        {locale === 'he' ? '׳”׳›׳' : 'ALL'}
+        {locale === 'he' ? 'הכל' : 'ALL'}
       </button>
       {Array.from({ length: days }, (_, i) => i + 1).map(d => (
         <button
@@ -413,7 +413,7 @@ export default function Map_V2() {
         )}
       </div>
 
-      {/* ג”€ג”€ Export to Google Maps FAB ג”€ג”€ */}
+      {/* ── Export to Google Maps FAB ── */}
       {allMapEvents.length > 0 && (
         <m.button
           initial={{ opacity: 0, scale: 0.8 }}
@@ -433,10 +433,10 @@ export default function Map_V2() {
             letterSpacing: '0.06em', color: 'var(--lg-forest)',
             WebkitTapHighlightColor: 'transparent',
           }}
-          aria-label={locale === 'he' ? '׳₪׳×׳— ׳‘-Google Maps' : 'Open route in Google Maps'}
+          aria-label={locale === ‘he’ ? ‘פתח מסלול ב-Google Maps’ : ‘Open route in Google Maps’}
         >
           <Icon name="map" size={14} color="var(--lg-forest)" />
-          {locale === 'he' ? '׳׳¡׳׳•׳ ׳‘-Google Maps' : 'Open in Maps'}
+          {locale === 'he' ? 'פתח ב-Google Maps' : 'Open in Maps'}
         </m.button>
       )}
 
@@ -457,12 +457,12 @@ export default function Map_V2() {
               color: 'var(--lg-ink)', whiteSpace: 'nowrap',
             }}
           >
-            {locale === 'he' ? '׳ ׳₪׳×׳— ׳‘-Google Maps ג“' : 'Opened in Google Maps ג“'}
+            {locale === 'he' ? 'נפתח ב-Google Maps ✓' : 'Opened in Google Maps ✓'}
           </m.div>
         )}
       </AnimatePresence>
 
-      {/* ג”€ג”€ Bottom card: event detail OR empty state ג”€ג”€ */}
+      {/* ── Bottom card: event detail OR empty state ── */}
       <div style={{
         position: 'absolute', left: 16, right: allMapEvents.length > 0 ? 120 : 16,
         bottom: 'calc(var(--nav-total-h, 92px) + 8px)',
