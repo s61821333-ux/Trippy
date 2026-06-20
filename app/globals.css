@@ -2986,6 +2986,26 @@ button[data-primary] {
   --z-top:     9999;
 }
 
+/* Desktop nav tooltips */
+@media (hover: hover) and (pointer: fine) {
+  [data-nav-tip] { position: relative; }
+  [data-nav-tip]:hover::after {
+    content: attr(data-nav-tip);
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--text);
+    color: var(--bg);
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: var(--z-top);
+  }
+}
+
 /* Row 352: Notes textarea padding */
 .notes-textarea {
   padding: var(--space-4, 16px);

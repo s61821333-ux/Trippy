@@ -286,6 +286,8 @@ export default function NavBar_V2({
                 aria-label={t(tab.ariaKey)}
                 aria-current={isActive ? 'page' : undefined}
                 aria-selected={isActive}
+                title={tab.label}
+                data-nav-tip={tab.label}
                 style={{
                   position: 'relative',
                   zIndex: 'var(--z-base)',
