@@ -30,7 +30,7 @@ Trippy פותר בדיוק את זה: מקום אחד, לכולם, עם AI שע�
 
 **מתי משתמשים:** בשלב התכנון (שבועות לפני הנסיעה) ובמהלך הטיול עצמו — כשצריך לדעת מה הפעילות הבאה, כמה כסף נשאר, ומה לא לאבד.
 
-**רמת מומחיות:** לא נדרש ידע טכני — ממשק עם ה-UX של אפליקציה נייטיבית, כניסה ביומטרית (Passkey), והצטרפות ללא הרשמה.
+**רמת מומחיות:** לא נדרש ידע טכני — ממשק עם ה-UX של אפליקציה נייטיבית,  כניסה באמצעות מייל , והצטרפות ללא הרשמה.
 
 ---
 
@@ -60,25 +60,6 @@ npm install
 cp .env.example .env.local   # מלאו את מפתחות Supabase + Anthropic
 npm run dev
 # → http://localhost:3000
-```
-
-### משתני סביבה ואינטגרציות חיצוניות
-
-```env
-# SUPABASE
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-
-# AI ASSISTANT
-ANTHROPIC_API_KEY=
-
-# GOOGLE CLOUDE FOR MAPS & SEARCH
-NEXT_PUBLIC_GOOGLE_PLACES_KEY=
-
-# LIVE DOMAIN
-CLOUDFLARE_TURNSTILE_SECRET=
-NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=
 ```
 
 ---
@@ -299,7 +280,6 @@ NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=
 | **Supabase** | Backend-as-a-Service | Postgres DB, Auth (Passkeys/JWT), RLS, Storage |
 | **Anthropic Claude** | AI API | יצירת מסלול, צ'אט Haiko, הצעות גאפ-פילר, סריקת קבלות, מאמן תקציב, מידע יעד |
 | **Google CLOUDE API** |  API | להצגת מפות ולכניסה דרך גוגל  Autocomplete לחיפוש מיקומים בהוספת אירוע |
-| **Cloudflare Turnstile** | CAPTCHA | הגנת Bot בכניסה עם Passkey |
 | **Weather API** | מזג אוויר | תחזית לכל ימי הטיול לפי מיקום |
 | **Exchange Rates API** | פיננסי | המרת מטבע בזמן אמת לתקציב |
 | **Vercel** | Deploy | אחסון ו-Edge Functions |

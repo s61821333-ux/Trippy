@@ -10,7 +10,7 @@ import { supplyStamp } from '@/lib/categoryStamp';
 import Ring from '../ui/Ring';
 import Icon from '../ui/Icon';
 import Sheet from '../ui/Sheet';
-import { SparkleLoader, BRAND_THEME } from '../ui/TripLoaders';
+import { SparkleLoader, LoaderStyles, BRAND_THEME } from '../ui/TripLoaders';
 import Field from '../ui/Field';
 import GlassBtn from '../ui/GlassBtn';
 import Eyebrow from '../ui/Eyebrow';
@@ -457,6 +457,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
 
         {loading && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '32px 0 24px' }}>
+            <LoaderStyles />
             <SparkleLoader theme={BRAND_THEME} size={110} />
             <div style={{ textAlign: 'center' }}>
               <p style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 19, color: 'var(--lg-ink)', margin: '0 0 5px' }}>
