@@ -671,7 +671,7 @@ function Shell() {
             />
           )}
 
-          <main id="main-content" className="flex-1 flex flex-col relative overflow-hidden w-full">
+          <main id="main-content" className="flex-1 flex flex-col relative overflow-hidden w-full" style={{ maxWidth: 1440, margin: '0 auto' }}>
             <AnimatePresence mode="wait" initial={false}>
               <m.div
                 key={screen}
