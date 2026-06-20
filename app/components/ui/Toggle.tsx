@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { m } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 
@@ -9,7 +10,7 @@ interface ToggleProps {
   label: string;
 }
 
-export default function Toggle({ on, onClick, label }: ToggleProps) {
+function Toggle({ on, onClick, label }: ToggleProps) {
   const { isRTL } = useI18n();
   return (
     <button
@@ -29,3 +30,4 @@ export default function Toggle({ on, onClick, label }: ToggleProps) {
     </button>
   );
 }
+export default React.memo(Toggle);

@@ -16,7 +16,7 @@ interface StatTripletProps {
 }
 
 /** Borderless stat triplet - mono label over bold value (HANDOFF dashboard). */
-export default function StatTriplet({ stats, separators = true, style }: StatTripletProps) {
+function StatTriplet({ stats, separators = true, style }: StatTripletProps) {
   return (
     <div className="stat-triplet" style={style}>
       {stats.map((s, i) => (
@@ -31,3 +31,4 @@ export default function StatTriplet({ stats, separators = true, style }: StatTri
     </div>
   );
 }
+export default React.memo(StatTriplet);

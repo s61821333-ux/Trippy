@@ -12,7 +12,7 @@ interface ProgressThinProps {
 }
 
 /** Thin progress bar (HANDOFF): terra fill, optional terra→sand gradient. */
-export default function ProgressThin({ pct, gradient, forest, height = 6, style, 'aria-label': ariaLabel }: ProgressThinProps) {
+function ProgressThin({ pct, gradient, forest, height = 6, style, 'aria-label': ariaLabel }: ProgressThinProps) {
   const clamped = Math.max(0, Math.min(100, pct));
   const cls = gradient ? ' is-gradient' : forest ? ' is-forest' : '';
   return (
@@ -29,3 +29,4 @@ export default function ProgressThin({ pct, gradient, forest, height = 6, style,
     </div>
   );
 }
+export default React.memo(ProgressThin);

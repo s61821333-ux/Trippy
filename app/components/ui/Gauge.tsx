@@ -19,7 +19,7 @@ interface GaugeProps {
  * stroke-dasharray 2 9), round-cap progress arc, center number + mono label +
  * status line. Builds on the same ring math as Ring.tsx.
  */
-export default function Gauge({
+function Gauge({
   pct, size = 210, stroke = 10, arc = 'var(--terra)',
   number, label, status, statusColor = 'var(--brand)', 'aria-label': ariaLabel,
 }: GaugeProps) {
@@ -58,3 +58,4 @@ export default function Gauge({
     </div>
   );
 }
+export default React.memo(Gauge);

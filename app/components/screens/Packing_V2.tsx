@@ -635,7 +635,7 @@ function SectionDivider({
 
 // ── Main Packing_V2 ───────────────────────────────────────────────────────────
 
-export default function Packing_V2() {
+function Packing_V2() {
   const { t, locale } = useI18n();
 
   const { trip, supplies, suppliesLoaded, loadSupplies, toggleSupply, deleteSupplyItem } = useAppStore(
@@ -691,6 +691,7 @@ export default function Packing_V2() {
           </h1>
         </m.div>
 
+        <div className="resp-two-col">
         {/* ── Progress card ── */}
         <m.div
           className="lg lg-strong"
@@ -773,6 +774,8 @@ export default function Packing_V2() {
           </div>
         </m.div>
 
+        {/* col 2: filter + list + add */}
+        <div>
         {/* ── Category filter rail ── */}
         <div
           role="group"
@@ -922,6 +925,8 @@ export default function Packing_V2() {
             {locale === 'he' ? 'הוסף פריט' : 'Add item'}
           </m.button>
         )}
+        </div>{/* /col 2 */}
+        </div>{/* /resp-two-col */}
 
         {showAdd && <AddItemSheet onClose={() => setShowAdd(false)} />}
         {showAI && trip && (
@@ -935,4 +940,4 @@ export default function Packing_V2() {
     </div>
   );
 }
-
+export default React.memo(Packing_V2);

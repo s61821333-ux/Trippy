@@ -13,10 +13,11 @@ interface EyebrowProps {
  * Mono metadata eyebrow (HANDOFF rule 5). The `.mono-eyebrow` rule in
  * globals.css swaps to Assistant + sentence case in Hebrew automatically.
  */
-export default function Eyebrow({ children, tone = 'muted', className = '', style }: EyebrowProps) {
+function Eyebrow({ children, tone = 'muted', className = '', style }: EyebrowProps) {
   return (
     <span className={`mono-eyebrow${tone === 'terra' ? ' is-terra' : ''} ${className}`.trim()} style={style}>
       {children}
     </span>
   );
 }
+export default React.memo(Eyebrow);

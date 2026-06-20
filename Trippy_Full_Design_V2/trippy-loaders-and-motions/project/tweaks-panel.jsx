@@ -195,6 +195,7 @@ function useTweaks(defaults) {
 // is what actually hides the panel.
 function TweaksPanel({ title = 'Tweaks', children }) {
   const [open, setOpen] = React.useState(false);
+  const [offset, setOffset] = React.useState({ x: 16, y: 16 });
   const dragRef = React.useRef(null);
   const offsetRef = React.useRef({ x: 16, y: 16 });
   const PAD = 16;
@@ -254,6 +255,7 @@ function TweaksPanel({ title = 'Tweaks', children }) {
         y: startBottom - (ev.clientY - sy),
       };
       clampToViewport();
+      setOffset({ ...offsetRef.current });
     };
     const up = () => {
       window.removeEventListener('mousemove', move);
@@ -268,7 +270,7 @@ function TweaksPanel({ title = 'Tweaks', children }) {
     <>
       <style>{__TWEAKS_STYLE}</style>
       <div ref={dragRef} className="twk-panel" data-omelette-chrome=""
-           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+           style={{ right: offset.x, bottom: offset.y }}>
         <div className="twk-hd" onMouseDown={onDragStart}>
           <b>{title}</b>
           <button className="twk-x" aria-label="Close tweaks"

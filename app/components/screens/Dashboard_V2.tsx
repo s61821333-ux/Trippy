@@ -744,7 +744,7 @@ function dayDateLabel(startDate: string | undefined, dayNum: number): { top: str
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function DashboardScreenV2() {
+function DashboardScreenV2() {
   const { trip, setScreen, setActiveDay, supplies, tripDbId, currencyByTrip, setTripBudget, createInviteLink, loadExpenses, expensesLoaded } = useAppStore();
   const { t, locale } = useI18n();
   const { show } = useToast();
@@ -1485,3 +1485,4 @@ export default function DashboardScreenV2() {
     </div>
   );
 }
+export default React.memo(DashboardScreenV2);

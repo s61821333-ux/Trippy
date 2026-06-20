@@ -73,7 +73,8 @@
       "PowerShell($binFile = \"C:\\\\Users\\\\guy9d\\\\.claude\\\\projects\\\\c--Users-guy9d-Desktop-Trippy\\\\2026f7ef-6805-4375-9ec5-16294f6e2e40\\\\tool-results\\\\webfetch-1780073482632-byeowv.bin\"; $outDir = \"C:\\\\Users\\\\guy9d\\\\.claude\\\\projects\\\\c--Users-guy9d-Desktop-Trippy\\\\design-extract\"; New-Item -ItemType Directory -Force $outDir | Out-Null; Copy-Item $binFile \"$outDir\\\\design.gz\"; tar -xzf \"$outDir\\\\design.gz\" -C $outDir; Get-ChildItem $outDir -Recurse | Select-Object FullName, Length | Format-Table -AutoSize)",
       "Bash(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\app\\\\api\\\\ai\\\\recommend\")",
       "Bash(Out-Null)",
-      "Bash(node -e \"const a = require\\('c:/Users/guy9d/Desktop/Trippy/node_modules/@vercel/analytics'\\); console.log\\(Object.keys\\(a\\)\\)\")"
+      "Bash(node -e \"const a = require\\('c:/Users/guy9d/Desktop/Trippy/node_modules/@vercel/analytics'\\); console.log\\(Object.keys\\(a\\)\\)\")",
+      "Bash(npm audit *)"
     ],
     "additionalDirectories": [
       "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"

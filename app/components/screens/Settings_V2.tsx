@@ -267,6 +267,9 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
         )}
       </m.div>
 
+      <div className="resp-two-col">
+      {/* col 1: trip info */}
+      <div>
       {/* ── Trip info ── */}
       <Eyebrow style={{ marginBottom: 4 }}>{t('settingsTrip')}</Eyebrow>
 
@@ -331,7 +334,10 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
           onClick={handleExportPDF}
         />
       </m.div>
+      </div>{/* /col 1 */}
 
+      {/* col 2: appearance + security + actions */}
+      <div>
       {/* ── Appearance ── */}
       <Eyebrow style={{ marginBottom: 10 }}>{t('appearanceLabel')}</Eyebrow>
 
@@ -452,6 +458,8 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
       <p style={{ textAlign: 'center', fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', letterSpacing: '0.06em' }}>
         Trippy · v2.0 · Liquid Glass
       </p>
+      </div>{/* /col 2 */}
+      </div>{/* /resp-two-col */}
 
       {/* ── Currency picker sheet ── */}
       {mounted && createPortal(<AnimatePresence>

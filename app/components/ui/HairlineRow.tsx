@@ -19,7 +19,7 @@ interface HairlineRowProps {
  * Hairline list row (HANDOFF rule 4 - rows over cards). Leading stamp/avatar,
  * flexible middle, right-aligned datum, 1px var(--rule) bottom border.
  */
-export default function HairlineRow({
+function HairlineRow({
   leading, children, trailing, onClick, as, disabled, noRule, className = '', style,
   'aria-label': ariaLabel,
 }: HairlineRowProps) {
@@ -38,3 +38,4 @@ export default function HairlineRow({
     </Tag>
   );
 }
+export default React.memo(HairlineRow);

@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { m, Reorder, useDragControls } from 'framer-motion';
 import GlassBtn from '../ui/GlassBtn';
@@ -1041,7 +1041,7 @@ function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 
-export default function DayDetail_V2() {
+function DayDetail_V2() {
   const {
     trip, activeDay, setActiveDay,
     addEvent, editEvent, deleteEvent,
@@ -1375,3 +1375,4 @@ export default function DayDetail_V2() {
     </div>
   );
 }
+export default React.memo(DayDetail_V2);

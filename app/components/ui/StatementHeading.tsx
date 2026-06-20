@@ -20,7 +20,7 @@ const MOTION_TAG = { h1: m.h1, h2: m.h2, h3: m.h3, p: m.p } as const;
  * Two-tone statement headline (HANDOFF rule 2): bright fact / muted promise.
  * Bold DM Sans via .text-display* (Assistant 800 in Hebrew, handled in CSS).
  */
-export default function StatementHeading({
+function StatementHeading({
   lines, size = 'base', as = 'h1', animate = true, className = '', style,
 }: StatementHeadingProps) {
   const Tag = (animate ? MOTION_TAG[as] : as) as React.ElementType;
@@ -38,3 +38,4 @@ export default function StatementHeading({
     </Tag>
   );
 }
+export default React.memo(StatementHeading);

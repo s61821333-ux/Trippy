@@ -75,10 +75,9 @@ function CompassLoader({ theme, speed = 1, size = 124 }) {
 
 // ── 2 · Route — drawing a path between two pins ───────────────────
 const ROUTE_PATH = 'M26 86 C 60 30, 96 124, 130 70 S 178 26, 190 34';
-function RouteLoader({ theme, speed = 1, size = 124 }) {
-  const t = theme, d = (s) => (s / speed) + 's';
-  const Pin = ({ x, y, color, delay }) => (
-    <g style={{ transformOrigin: `${x}px ${y}px`, animation: `tlPinPop ${d(3.4)} ${d(delay)} ease-in-out infinite` }}>
+function Pin({ x, y, color, duration, delayStr }) {
+  return (
+    <g style={{ transformOrigin: `${x}px ${y}px`, animation: `tlPinPop ${duration} ${delayStr} ease-in-out infinite` }}>
       <path d={`M${x} ${y} c -8 -10 -8 -19 0 -25 c 8 -6 16 0 16 9 c 0 7 -7 12 -16 16 Z`}
         transform={`rotate(45 ${x} ${y})`} fill={color} opacity="0" style={{ display: 'none' }} />
       <path d={`M${x} ${y - 2} a 8.5 8.5 0 1 1 0.01 0 Z`} fill="none" />
@@ -86,6 +85,9 @@ function RouteLoader({ theme, speed = 1, size = 124 }) {
       <circle cx={x} cy={y - 19} r="4.5" fill="#FBF7F0" />
     </g>
   );
+}
+function RouteLoader({ theme, speed = 1, size = 124 }) {
+  const t = theme, d = (s) => (s / speed) + 's';
   return (
     <div style={{ width: size, height: size * 0.72, position: 'relative' }} role="status" aria-label="Loading">
       <svg viewBox="0 0 216 116" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
@@ -95,8 +97,8 @@ function RouteLoader({ theme, speed = 1, size = 124 }) {
         {/* drawing route */}
         <path d={ROUTE_PATH} fill="none" stroke={t.c1} strokeWidth="3" strokeLinecap="round"
           style={{ '--len': 320, strokeDasharray: 320, animation: `tlDraw ${d(3.4)} cubic-bezier(.45,0,.2,1) infinite` }} />
-        <Pin x={26} y={86} color={t.c1} delay={0} />
-        <Pin x={190} y={34} color={t.c2} delay={1.7} />
+        <Pin x={26} y={86} color={t.c1} duration={d(3.4)} delayStr={d(0)} />
+        <Pin x={190} y={34} color={t.c2} duration={d(3.4)} delayStr={d(1.7)} />
       </svg>
       {/* traveler riding the path */}
       <div style={{ position: 'absolute', inset: 0 }}>

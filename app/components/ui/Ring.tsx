@@ -11,7 +11,7 @@ interface RingProps {
   'aria-label'?: string;
 }
 
-export default function Ring({ pct = 0, size = 56, stroke = 5, color = 'var(--lg-terra)', children, 'aria-label': ariaLabel }: RingProps) {
+function Ring({ pct = 0, size = 56, stroke = 5, color = 'var(--lg-terra)', children, 'aria-label': ariaLabel }: RingProps) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   return (
@@ -45,3 +45,4 @@ export default function Ring({ pct = 0, size = 56, stroke = 5, color = 'var(--lg
     </span>
   );
 }
+export default React.memo(Ring);

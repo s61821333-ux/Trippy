@@ -966,6 +966,21 @@ select {
   .dash-span2 { grid-column: 1 / -1; }
 }
 
+/* 2-column layout on desktop, single column on mobile */
+.resp-two-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+@media (min-width: 1024px) {
+  .resp-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+}
+
 /* ─── Screen inset ────────────────────────────────────────────── */
 /* Content extends full height (bottom: 0) so it goes *behind* the  */
 /* floating NavBar pill, letting the glass backdrop-filter show real */

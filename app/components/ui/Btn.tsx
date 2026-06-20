@@ -17,7 +17,7 @@ interface BtnProps {
   'aria-label'?: string;
 }
 
-export default function Btn({ children, kind = 'terra', onClick, style, full, disabled, type = 'button', 'aria-label': ariaLabel }: BtnProps) {
+function Btn({ children, kind = 'terra', onClick, style, full, disabled, type = 'button', 'aria-label': ariaLabel }: BtnProps) {
   return (
     <button
       type={type}
@@ -31,3 +31,4 @@ export default function Btn({ children, kind = 'terra', onClick, style, full, di
     </button>
   );
 }
+export default React.memo(Btn);

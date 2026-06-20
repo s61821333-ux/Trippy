@@ -19,7 +19,7 @@ const VARIANTS: Record<ChipVariant, { bg: string; color: string; border: string 
   warn:    { bg: 'var(--terra-light)',color: 'var(--terra)',   border: '1px solid rgba(196,113,74,0.18)' },
 };
 
-export default function Chip({ children, v = 'neutral', style = {} }: ChipProps) {
+function Chip({ children, v = 'neutral', style = {} }: ChipProps) {
   const s = VARIANTS[v];
   return (
     <span style={{
@@ -34,3 +34,4 @@ export default function Chip({ children, v = 'neutral', style = {} }: ChipProps)
     </span>
   );
 }
+export default React.memo(Chip);
