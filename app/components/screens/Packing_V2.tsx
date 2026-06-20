@@ -778,9 +778,8 @@ export default function Packing_V2() {
           role="group"
           aria-label="Filter by category"
           style={{
-            display: 'flex', gap: 7, overflowX: 'auto', marginBottom: 18, paddingBottom: 2,
+            display: 'flex', gap: 7, overflowX: 'auto', paddingTop: 28, paddingBottom: 48, paddingInline: 2, marginTop: -28, marginBottom: -28,
             scrollSnapType: 'x mandatory', scrollbarWidth: 'none',
-            paddingInline: 2,
             WebkitMaskImage: 'linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent 100%)',
             maskImage: 'linear-gradient(to right, transparent 0, black 8px, black calc(100% - 8px), transparent 100%)',
           } as React.CSSProperties}

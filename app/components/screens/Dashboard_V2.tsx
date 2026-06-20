@@ -1062,7 +1062,7 @@ export default function DashboardScreenV2() {
           aria-label="Trip days"
           /* full-bleed + vertical breathing room so the active day's terra glow
              ("shine") is never clipped by the scroll container's overflow */
-          style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '10px 20px 14px', margin: '0 -20px', scrollPaddingInline: 20 }}
+          style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '34px 20px 56px', margin: '-24px -20px -42px', scrollPaddingInline: 20 }}
         >
           {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
             const dayNum   = i + 1;

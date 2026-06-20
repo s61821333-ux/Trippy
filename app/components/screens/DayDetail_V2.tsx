@@ -1216,7 +1216,7 @@ export default function DayDetail_V2() {
         </p>
 
         {/* Day pill rail - 48×60 mono-date pills, active terra (HANDOFF) */}
-        <div className="lg-scroll days-container" style={{ display: 'flex', gap: 7, overflowX: 'auto' }}>
+        <div className="lg-scroll days-container" style={{ display: 'flex', gap: 7, overflowX: 'auto', padding: '34px 0 56px', margin: '-34px 0 -56px' }}>
           {Array.from({ length: Math.min(trip.days, 30) }, (_, i) => {
             const d  = i + 1;
             const on = d === activeDay;

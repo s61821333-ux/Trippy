@@ -135,9 +135,9 @@ export default function NavBar_V2({
             <m.div
               key="expand-panel"
               className="lg lg-strong"
-              initial={{ opacity: 0, y: 12, scale: 0.92 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 12, scale: 0.92 }}
+              initial={{ opacity: 0, y: 12, scale: 0.92, x: '-50%' }}
+              animate={{ opacity: 1, y: 0, scale: 1, x: '-50%' }}
+              exit={{ opacity: 0, y: 12, scale: 0.92, x: '-50%' }}
               transition={PANEL_SPRING}
               style={{
                 display: 'flex',
@@ -147,12 +147,10 @@ export default function NavBar_V2({
                 borderRadius: 28,
                 pointerEvents: 'auto',
                 width: 'min(260px, calc(100vw - 32px))',
-                maxWidth: 'calc(100vw - 32px)',
                 position: 'absolute',
                 zIndex: 41,
                 bottom: 'calc(100% + 8px)',
                 left: '50%',
-                marginLeft: 'min(-130px, calc(-50vw + 16px))',
               }}
             >
               <button
