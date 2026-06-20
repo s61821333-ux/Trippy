@@ -357,7 +357,7 @@ export default function Map_V2() {
       {/* ג”€ג”€ Top controls overlay ג”€ג”€ */}
       <div style={{
         position: 'absolute', top: 56, left: 16, right: 16,
-        display: 'flex', flexDirection: 'column', gap: 10, zIndex: 20,
+        display: 'flex', flexDirection: 'column', gap: 10, zIndex: 'var(--z-above)',
         pointerEvents: 'none',
       }}>
         {/* Search bar */}
@@ -425,7 +425,7 @@ export default function Map_V2() {
             position: 'absolute',
             bottom: 'calc(var(--nav-total-h, 92px) + 16px)',
             right: 16,
-            zIndex: 30,
+            zIndex: 'var(--z-above)',
             border: 0, cursor: 'pointer',
             display: 'flex', alignItems: 'center', gap: 7,
             padding: '10px 16px', borderRadius: 9999,
@@ -452,7 +452,7 @@ export default function Map_V2() {
               position: 'absolute',
               bottom: 'calc(var(--nav-total-h, 92px) + 72px)',
               left: '50%', transform: 'translateX(-50%)',
-              zIndex: 40, padding: '10px 18px', borderRadius: 9999,
+              zIndex: 'var(--z-above)', padding: '10px 18px', borderRadius: 9999,
               fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 600,
               color: 'var(--lg-ink)', whiteSpace: 'nowrap',
             }}
@@ -466,7 +466,7 @@ export default function Map_V2() {
       <div style={{
         position: 'absolute', left: 16, right: allMapEvents.length > 0 ? 120 : 16,
         bottom: 'calc(var(--nav-total-h, 92px) + 8px)',
-        zIndex: 20,
+        zIndex: 'var(--z-above)',
       }}>
         <AnimatePresence mode="wait">
           {selectedEvent ? (

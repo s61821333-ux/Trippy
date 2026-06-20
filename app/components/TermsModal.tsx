@@ -202,7 +202,7 @@ export default function TermsModal() {
         style={{
           position: 'fixed',
           inset: 0,
-          zIndex: 9999,
+          zIndex: 'var(--z-top)',
           background: 'rgba(0,0,0,0.72)',
           backdropFilter: 'blur(8px)',
           display: 'flex',

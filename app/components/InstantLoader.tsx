@@ -14,7 +14,7 @@ export default function InstantLoader() {
         justifyContent: 'center',
         gap: 24,
         background: 'var(--bg)',
-        zIndex: 9999,
+        zIndex: 'var(--z-top)',
       }}
     >
       <style>{`@keyframes Trippy-spin{to{transform:rotate(360deg)}}@keyframes Trippy-pulse{0%,100%{opacity:1}50%{opacity:.55}}@media (prefers-reduced-motion: reduce){.Trippy-instant-spin{animation:none!important}.Trippy-instant-word{animation:none!important}}`}</style>

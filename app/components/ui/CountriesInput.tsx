@@ -244,7 +244,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
             transition={{ duration: 0.14 }}
             style={{
               position: 'absolute', top: '100%', left: 0, right: 0,
-              zIndex: 100, marginTop: 4,
+              zIndex: 'var(--z-tour)', marginTop: 4,
               background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 'var(--radius-md)', boxShadow: 'var(--shadow-md)',
               overflow: 'hidden', transformOrigin: 'top',

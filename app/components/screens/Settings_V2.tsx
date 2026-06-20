@@ -462,14 +462,14 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
               onClick={() => setShowCurrencyPicker(false)}
-              style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'oklch(16% 0.018 60 / 42%)', backdropFilter: 'blur(3px)' }}
+              style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', background: 'oklch(16% 0.018 60 / 42%)', backdropFilter: 'blur(3px)' }}
             />
             <m.div
               key="currency-sheet"
               className="lg lg-strong"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={spring.gentle}
-              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '20px 20px calc(env(safe-area-inset-bottom, 0px) + 48px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0', maxHeight: '65vh', overflowY: 'auto' }}
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 'var(--z-overlay)', padding: '20px 20px calc(env(safe-area-inset-bottom, 0px) + 48px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0', maxHeight: '65vh', overflowY: 'auto' }}
             >
               <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 16px' }} />
               <p className="eyebrow-lg" style={{ color: 'var(--text-3)', marginBottom: 14, fontSize: 9 }}>Select currency</p>
@@ -512,14 +512,14 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
               onClick={() => setShowTripEdit(false)}
-              style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'oklch(16% 0.018 60 / 42%)', backdropFilter: 'blur(3px)' }}
+              style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', background: 'oklch(16% 0.018 60 / 42%)', backdropFilter: 'blur(3px)' }}
             />
             <m.div
               key="trip-edit-sheet"
               className="lg lg-strong"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={spring.gentle}
-              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '24px 24px calc(env(safe-area-inset-bottom, 0px) + 48px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0', maxHeight: '85vh', overflowY: 'auto' }}
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 'var(--z-overlay)', padding: '24px 24px calc(env(safe-area-inset-bottom, 0px) + 48px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0', maxHeight: '85vh', overflowY: 'auto' }}
             >
               <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 20px' }} />
               <p style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 16 }}>
@@ -588,14 +588,14 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.18 }}
               onClick={() => setShowDeleteConfirm(false)}
-              style={{ position: 'fixed', inset: 0, zIndex: 80, background: 'oklch(16% 0.018 60 / 42%)', backdropFilter: 'blur(3px)' }}
+              style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-overlay)', background: 'oklch(16% 0.018 60 / 42%)', backdropFilter: 'blur(3px)' }}
             />
             <m.div
               key="sheet"
               className="lg lg-strong"
               initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
               transition={spring.gentle}
-              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 81, padding: '24px 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0' }}
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 'var(--z-overlay)', padding: '24px 24px calc(env(safe-area-inset-bottom, 0px) + 40px)', borderRadius: 'var(--lg-r-lg) var(--lg-r-lg) 0 0' }}
             >
               <div style={{ width: 40, height: 5, borderRadius: 3, background: 'oklch(20% 0.03 60 / 18%)', margin: '0 auto 20px' }} />
               <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--lg-ink)', textAlign: 'center', marginBottom: 20, lineHeight: 1.5 }}>

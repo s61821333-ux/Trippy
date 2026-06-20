@@ -104,7 +104,7 @@ export default function NavBar_V2({
         flexDirection: 'column',
         alignItems: 'center',
         gap: 8,
-        zIndex: 250,
+        zIndex: 'var(--z-modal-lg)',
         pointerEvents: 'none',
         transform: 'translateZ(0)',
         WebkitTransform: 'translateZ(0)',
@@ -116,7 +116,7 @@ export default function NavBar_V2({
         <div
           aria-hidden="true"
           onClick={() => setExpandOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 39 }}
+          style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-above)' }}
         />
       )}
 
@@ -148,7 +148,7 @@ export default function NavBar_V2({
                 pointerEvents: 'auto',
                 width: 'min(260px, calc(100vw - 32px))',
                 position: 'absolute',
-                zIndex: 41,
+                zIndex: 'var(--z-above)',
                 bottom: 'calc(100% + 8px)',
                 left: '50%',
               }}
@@ -288,7 +288,7 @@ export default function NavBar_V2({
                 aria-selected={isActive}
                 style={{
                   position: 'relative',
-                  zIndex: 1,
+                  zIndex: 'var(--z-base)',
                   width: TAB_W,
                   height: TAB_W,
                   border: 0,

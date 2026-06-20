@@ -2955,6 +2955,14 @@ button[data-primary] {
   --z-modal:    30;
   --z-toast:    50;
   --z-tour:     100;
+
+  /* Audit z-index scale */
+  --z-base:    1;
+  --z-above:   20;
+  --z-overlay: 80;
+  --z-modal-lg: 200;
+  --z-toast-hi: 1000;
+  --z-top:     9999;
 }
 
 /* Row 352: Notes textarea padding */

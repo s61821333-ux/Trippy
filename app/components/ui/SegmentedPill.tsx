@@ -46,7 +46,7 @@ export default function SegmentedPill({
                 transition={{ type: 'spring', stiffness: 380, damping: 32 }}
               />
             )}
-            <span style={{ position: 'relative', zIndex: 1 }}>{opt.label}</span>
+            <span style={{ position: 'relative', zIndex: 'var(--z-base)' }}>{opt.label}</span>
           </button>
         );
       })}

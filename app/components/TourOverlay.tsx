@@ -196,7 +196,7 @@ export default function TourOverlay() {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 9000, pointerEvents: 'all' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-top)', pointerEvents: 'all' }}>
       {/* Dark backdrop */}
       <div
         onClick={skip}
@@ -218,7 +218,7 @@ export default function TourOverlay() {
             border: '2px solid rgba(255,255,255,0.50)',
             pointerEvents: 'all',
             cursor: 'default',
-            zIndex: 1,
+            zIndex: 'var(--z-base)',
           }}
         />
       )}
@@ -244,7 +244,7 @@ export default function TourOverlay() {
             padding: '22px 20px 18px',
             boxShadow: '0 24px 64px rgba(0,0,0,0.40)',
             border: '1px solid var(--border)',
-            zIndex: 9002,
+            zIndex: 'var(--z-top)',
           }}
         >
           {/* Step icon */}

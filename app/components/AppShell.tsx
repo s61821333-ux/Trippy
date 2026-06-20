@@ -572,7 +572,7 @@ function Shell() {
             href="#main-content"
             style={{
               position: 'absolute',
-              top: -999, left: 0, zIndex: 99999,
+              top: -999, left: 0, zIndex: 'var(--z-top)',
               padding: '8px 16px',
               background: 'var(--bg)',
               color: 'var(--brand)',
@@ -617,7 +617,7 @@ function Shell() {
               display: 'flex',
               alignItems: 'center',
               gap: 6,
-              zIndex: 9999,
+              zIndex: 'var(--z-top)',
             }}>
               <Icon name="offline" size={14} style={{ color: 'var(--danger)', flexShrink: 0 }} />
               {pendingChanges.length === 0
@@ -636,7 +636,7 @@ function Shell() {
                 position: 'fixed',
                 bottom: 'calc(env(safe-area-inset-bottom, 0px) + 72px)',
                 insetInlineEnd: 16,
-                zIndex: 9000,
+                zIndex: 'var(--z-top)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 5,
@@ -769,7 +769,7 @@ function Shell() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.22 }}
                 style={{
-                  position: 'fixed', inset: 0, zIndex: 9990,
+                  position: 'fixed', inset: 0, zIndex: 'var(--z-top)',
                   background: 'var(--bg)',
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center',

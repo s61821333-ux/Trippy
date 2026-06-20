@@ -108,7 +108,7 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
     }
     return {
       position: 'fixed',
-      zIndex: 9999,
+      zIndex: 'var(--z-top)',
       width: POPOVER_W,
       left,
       ...(above ? { bottom } : { top }),

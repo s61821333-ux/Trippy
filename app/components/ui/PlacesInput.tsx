@@ -139,7 +139,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
         />
         {open && noResults && (
           <div role="status" aria-live="polite" style={{
-            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000,
+            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 'var(--z-toast-hi)',
             background: 'var(--surface)', border: '1px solid var(--border)',
             borderRadius: 'var(--radius-md)', marginTop: 4, padding: '12px 14px',
             fontSize: 14, color: 'var(--text-3)', boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
@@ -153,7 +153,7 @@ export default function PlacesInput({ label, placeholder, value, onChange, onSel
             top: '100%',
             left: 0,
             right: 0,
-            zIndex: 1000,
+            zIndex: 'var(--z-toast-hi)',
             background: 'var(--surface)',
             border: '1px solid var(--border)',
             borderRadius: 'var(--radius-md)',

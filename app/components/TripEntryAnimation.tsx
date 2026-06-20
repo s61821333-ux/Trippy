@@ -25,7 +25,7 @@ export default function TripEntryAnimation({ tripName, onDone }: Props) {
         exit={{ opacity: 0 }}
         transition={{ duration: 0.22 }}
         style={{
-          position: 'fixed', inset: 0, zIndex: 9999,
+          position: 'fixed', inset: 0, zIndex: 'var(--z-top)',
           background: 'var(--bg)',
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',

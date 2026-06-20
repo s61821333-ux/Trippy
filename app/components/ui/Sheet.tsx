@@ -155,7 +155,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
         transition={{ duration: 0.20 }}
         onClick={isDismissable ? onClose : undefined}
         style={{
-          position: 'fixed', inset: 0, zIndex: 200,
+          position: 'fixed', inset: 0, zIndex: 'var(--z-modal-lg)',
           background: 'var(--sheet-backdrop, rgba(26, 20, 16, 0.55))',
           display: 'flex',
           alignItems: full ? 'stretch' : 'flex-end',

@@ -19,7 +19,7 @@ export default function StatusBar() {
   return (
     <div style={{
       position: 'absolute', top: 0, left: 0, right: 0, height: 52,
-      zIndex: 50, pointerEvents: 'none',
+      zIndex: 'var(--z-above)', pointerEvents: 'none',
       display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
       padding: '0 22px 7px',
       color: ink, fontFamily: "'DM Sans', system-ui, sans-serif",

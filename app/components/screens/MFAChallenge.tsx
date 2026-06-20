@@ -60,7 +60,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       style={{
-        position: 'fixed', inset: 0, zIndex: 300,
+        position: 'fixed', inset: 0, zIndex: 'var(--z-modal-lg)',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
         background: 'linear-gradient(162deg, #1a1208 0%, #2a1c10 45%, #1a1208 100%)',
@@ -81,7 +81,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.38, ease: [0.25, 0, 0, 1], delay: 0.1 }}
         style={{
-          position: 'relative', zIndex: 1,
+          position: 'relative', zIndex: 'var(--z-base)',
           width: '100%', maxWidth: 380,
           background: 'rgba(255,255,255,0.07)',
           backdropFilter: 'blur(48px) saturate(1.8)',

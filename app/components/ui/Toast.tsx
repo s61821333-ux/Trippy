@@ -54,7 +54,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           bottom: 'calc(var(--navbar-clearance, 96px) + 8px)',
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 9999,
+          zIndex: 'var(--z-top)',
           pointerEvents: msg ? 'auto' : 'none',
         }}
       >

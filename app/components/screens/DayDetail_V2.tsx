@@ -860,7 +860,7 @@ function DraggableEvent({ event, index, currCode, onEdit, onReschedule, onSugges
         onPointerDown={e => { e.preventDefault(); controls.start(e); }}
         style={{
           position: 'absolute', insetInlineStart: 0, top: 0, bottom: 0,
-          width: 20, cursor: 'grab', touchAction: 'none', zIndex: 2,
+          width: 20, cursor: 'grab', touchAction: 'none', zIndex: 'var(--z-base)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
         aria-label="Drag to reorder"
@@ -973,7 +973,7 @@ function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
       {/* Selected event card overlay */}
       {selected && (
         <div style={{
-          position: 'absolute', bottom: 12, left: 12, right: 12, zIndex: 20,
+          position: 'absolute', bottom: 12, left: 12, right: 12, zIndex: 'var(--z-above)',
           background: 'var(--lg-panel-strong)', backdropFilter: 'var(--lg-blur-strong)',
           WebkitBackdropFilter: 'var(--lg-blur-strong)',
           borderRadius: 16, padding: '12px 14px',
@@ -1001,7 +1001,7 @@ function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
       {/* No pins state */}
       {mapEvents.length === 0 && (
         <div style={{
-          position: 'absolute', inset: 0, zIndex: 10,
+          position: 'absolute', inset: 0, zIndex: 'var(--z-above)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           background: 'var(--lg-panel)', backdropFilter: 'var(--lg-blur)',
           WebkitBackdropFilter: 'var(--lg-blur)',
@@ -1019,7 +1019,7 @@ function DayMapView({ evs, activeDay, mapsUrl, hotels }: {
           target="_blank"
           rel="noopener noreferrer"
           style={{
-            position: 'absolute', top: 12, right: 12, zIndex: 20,
+            position: 'absolute', top: 12, right: 12, zIndex: 'var(--z-above)',
             display: 'inline-flex', alignItems: 'center', gap: 6,
             height: 36, padding: '0 14px', borderRadius: 9999,
             background: 'var(--lg-panel-strong)', backdropFilter: 'var(--lg-blur)',
