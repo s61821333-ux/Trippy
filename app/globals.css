@@ -179,6 +179,15 @@
   --t-caption: 0.8125rem;
   --t-micro:   0.6875rem;
 
+  /* ── Font-size micro-scale ── */
+  --fs-2xs:  0.625rem;    /* 10px */
+  --fs-xs:   0.6875rem;   /* 11px */
+  --fs-sm:   0.75rem;     /* 12px */
+  --fs-md:   0.8125rem;   /* 13px */
+  --fs-base: 0.875rem;    /* 14px */
+  --fs-lg:   0.9375rem;   /* 15px */
+  --fs-body: 1rem;        /* 16px — iOS safe minimum */
+
   /* ── Avatar palette - 6 brand-adjacent hues, no purple/magenta ── */
   --avatar-1: oklch(55% 0.115 40);   /* terracotta - darkened for white text contrast */
   --avatar-2: oklch(48% 0.100 72);   /* sand gold  - darkened; use --avatar-2-text for initials */
