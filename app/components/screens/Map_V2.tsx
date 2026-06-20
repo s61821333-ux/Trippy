@@ -189,8 +189,8 @@ function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
     <div
       className="lg-scroll"
       style={{
-        display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2,
-        scrollSnapType: 'x mandatory', paddingInline: 4,
+        display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4,
+        scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', paddingInline: 4,
       }}
     >
       <button
@@ -433,7 +433,7 @@ export default function Map_V2() {
             letterSpacing: '0.06em', color: 'var(--lg-forest)',
             WebkitTapHighlightColor: 'transparent',
           }}
-          aria-label={locale === ‘he’ ? ‘פתח מסלול ב-Google Maps’ : ‘Open route in Google Maps’}
+          aria-label={locale === 'he' ? 'פתח מסלול ב-Google Maps' : 'Open route in Google Maps'}
         >
           <Icon name="map" size={14} color="var(--lg-forest)" />
           {locale === 'he' ? 'פתח ב-Google Maps' : 'Open in Maps'}

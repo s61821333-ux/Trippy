@@ -365,6 +365,7 @@ function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger, isBrand
       onMouseLeave={() => setHovered(false)}
       style={{
         height: 44, padding: '0 13px', gap: 6, flexShrink: 0,
+        scrollSnapAlign: 'start',
         display: 'flex', alignItems: 'center',
         background: bg,
         color: textColor,
@@ -459,7 +460,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
             )}
           </div>
           {event.notes && <p dir="auto" style={{ fontSize: 13, lineHeight: 1.5, color: 'var(--text-2)', margin: '0 0 14px' }}>{event.notes}</p>}
-          <div className="lg-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto' }}>
+          <div className="lg-scroll" style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
             <QuickAction icon="edit"    label={locale === 'he' ? 'עריכה'    : 'Edit'}       color="var(--lg-forest)" onClick={() => { setOpen(false); onEdit(event); }} />
             <QuickAction icon="clock"   label={locale === 'he' ? 'שינוי זמן' : 'Reschedule'} color="var(--lg-terra)"  onClick={() => { setOpen(false); onReschedule(event); }} />
             {(event.location || (event.lat != null && event.lng != null)) && (
@@ -602,13 +603,13 @@ function RescheduleSheet({ event, onClose, dayLabel }: {
 
         <div>
           <label style={monoLabel}>{locale === 'he' ? 'משך (קיצור דרך)' : 'Duration shortcut'}</label>
-          <div className="lg-scroll" style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
+          <div className="lg-scroll" style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
             {DUR_LABELS.map(d => (
               <button
                 key={d}
                 onClick={() => { setDurPreset(d); if (d !== 'Custom') syncEndFromPreset(d, startTime); }}
                 style={{
-                  flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px',
+                  flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px', scrollSnapAlign: 'start',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13, minWidth: 60,
                   background: durPreset === d ? 'var(--lg-terra)' : 'var(--surface-2)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
@@ -743,13 +744,13 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
         {/* Duration presets (shortcuts) */}
         <div>
           <label style={monoLabel}>{locale === 'he' ? 'משך (קיצור דרך)' : 'Duration shortcut'}</label>
-          <div className="lg-scroll" style={{ display: 'flex', gap: 6, overflowX: 'auto' }}>
+          <div className="lg-scroll" style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', paddingBottom: 4 }}>
             {DUR_LABELS.map(d => (
               <button
                 key={d}
                 onClick={() => { setDurPreset(d); if (d !== 'Custom') syncEndFromPreset(d, startTime); }}
                 style={{
-                  flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px',
+                  flex: 'none', border: 0, cursor: 'pointer', borderRadius: 12, padding: '11px 13px', scrollSnapAlign: 'start',
                   fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13, minWidth: 60,
                   background: durPreset === d ? 'var(--lg-terra)' : 'var(--surface-2)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
