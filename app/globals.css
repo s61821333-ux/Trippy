@@ -695,6 +695,20 @@ input, textarea, select, button, a, [role="button"] {
   touch-action: manipulation;
 }
 
+:where(button) {
+  transition: opacity var(--dur-fast), background var(--dur-fast),
+              box-shadow var(--dur-fast), transform var(--dur-fast);
+  cursor: pointer;
+}
+:where(button):active {
+  transform: scale(0.97);
+}
+@media (hover: hover) and (pointer: fine) {
+  :where(button):hover {
+    opacity: 0.88;
+  }
+}
+
 /* Ensure every native form control meets the 44px touch target minimum */
 input:not([type="checkbox"]):not([type="radio"]),
 textarea,
