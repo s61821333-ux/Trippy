@@ -226,7 +226,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
       className="lg-scroll"
       style={{ height: '100%', overflowY: 'auto', background: 'transparent' }}
     >
-      <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
+      <div className="resp-container" style={{ padding: `6px 20px calc(130px + env(safe-area-inset-bottom, 0px))` }}>
       {/* ── Back button ── */}
       <button
         onClick={() => setScreen('dashboard')}

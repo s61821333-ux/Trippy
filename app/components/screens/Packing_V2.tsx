@@ -668,7 +668,7 @@ export default function Packing_V2() {
       className="lg-scroll"
       style={{ height: '100%', overflowY: 'auto', background: 'transparent' }}
     >
-      <div className="resp-container" style={{ padding: '6px 20px 130px' }}>
+      <div className="resp-container" style={{ padding: `6px 20px calc(130px + env(safe-area-inset-bottom, 0px))` }}>
         {!suppliesLoaded && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
             {[1, 2, 3, 4].map(i => (
