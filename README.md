@@ -3,7 +3,7 @@
 # Trippy — מתכנן טיולים קבוצתי חופשי
 
 **פרויקט חי:** [letsexploring.com](https://letsexploring.com) | **GitHub:** (https://github.com/s61821333-ux/Trippy)
-
+**הזמנה לטיול חי: **https://letsexploring.com/join/7324c133399b3bc37deca381ed9e96cd9a63ed44754477371239397e681a8f06 
 ---
 
 ## סקירה כללית
