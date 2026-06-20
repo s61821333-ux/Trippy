@@ -89,7 +89,7 @@ function CheckCircle({ done }: { done: boolean }) {
         boxShadow:   done
           ? 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 30%)'
           : 'inset 0 0 0 2px oklch(50% 0.02 60 / 22%)',
-        transition:  'background 0.25s, box-shadow 0.25s',
+        transition:  'background var(--dur-base), box-shadow var(--dur-base)',
       }}
       aria-hidden="true"
     >
@@ -164,7 +164,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
           boxShadow: item.checked
             ? 'none'
             : 'var(--lg-shadow), inset 0 1px 0 oklch(100% 0 0 / 22%)',
-          transition: 'box-shadow 0.25s',
+          transition: 'box-shadow var(--dur-base)',
           overflow: 'hidden',
           cursor: 'pointer',
         }}
@@ -178,7 +178,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
             width: 4,
             background: accentColor,
             opacity: item.checked ? 0.3 : 0.9,
-            transition: 'opacity 0.25s',
+            transition: 'opacity var(--dur-base)',
             borderRadius: isRTL ? '0 18px 18px 0' : '18px 0 0 18px',
           }}
         />
@@ -189,7 +189,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
           flex: 1, minWidth: 0,
           padding: '12px 10px 12px 12px',
           opacity: item.checked ? 0.46 : 1,
-          transition: 'opacity 0.25s',
+          transition: 'opacity var(--dur-base)',
         }}>
           <StampIcon iconKey={stampKey} size={36} style={{ flexShrink: 0 }} />
 
@@ -230,7 +230,7 @@ function PackingItem({ item, i, onToggle, onDelete, locale }: {
             opacity: 0.55,
             WebkitTapHighlightColor: 'transparent',
             touchAction: 'manipulation',
-            transition: 'opacity 0.2s',
+            transition: 'opacity var(--dur-base)',
           }}
           onPointerEnter={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '1'; }}
           onPointerLeave={e => { (e.currentTarget as HTMLButtonElement).style.opacity = '0.55'; }}
@@ -310,7 +310,7 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
                   background: category === c ? 'var(--lg-forest)' : 'var(--field-bg)',
                   color: category === c ? '#fff' : 'var(--field-label)',
                   boxShadow: category === c ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px var(--field-border)',
-                  transition: 'all .25s',
+                  transition: 'all var(--dur-base)',
                 }}
               >
                 {getCatLabel(c, locale)}
@@ -339,7 +339,7 @@ function AddItemSheet({ onClose }: { onClose: () => void }) {
                     background: (assignee === '' && name === 'Anyone') || assignee === name ? 'var(--lg-forest)' : 'var(--field-bg)',
                     color: (assignee === '' && name === 'Anyone') || assignee === name ? '#fff' : 'var(--field-label)',
                     boxShadow: (assignee === '' && name === 'Anyone') || assignee === name ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px var(--field-border)',
-                    transition: 'all .25s',
+                    transition: 'all var(--dur-base)',
                   }}
                 >
                   {name}
@@ -536,7 +536,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
                         padding: '10px 14px', border: 0, borderRadius: 14, cursor: 'pointer', textAlign: 'start',
                         background: item.selected ? 'var(--lg-panel)' : 'transparent',
                         boxShadow: item.selected ? 'inset 0 0 0 1.5px var(--lg-forest)' : 'var(--shadow-xs)',
-                        transition: 'all .18s',
+                        transition: 'all var(--dur-fast)',
                       }}
                     >
                       <span style={{
@@ -544,7 +544,7 @@ function AIPackingSheet({ trip, supplies, onClose }: {
                         background: item.selected ? 'var(--lg-forest)' : 'transparent',
                         boxShadow: item.selected ? 'var(--lg-glow-forest)' : 'inset 0 0 0 2px oklch(50% 0.02 60 / 25%)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        transition: 'all .18s',
+                        transition: 'all var(--dur-fast)',
                       }}>
                         {item.selected && <Icon name="check" size={12} color="#fff" />}
                       </span>
@@ -623,7 +623,7 @@ function SectionDivider({
       <span style={{
         display: 'inline-flex', alignItems: 'center',
         transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
-        transition: 'transform 0.22s ease',
+        transition: 'transform var(--dur-base) ease',
         color: 'var(--text-3)',
       }}>
         <Icon name="chevR" size={13} color="var(--text-3)" />
@@ -706,7 +706,7 @@ export default function Packing_V2() {
               : pct > 0
                 ? `linear-gradient(135deg, oklch(62% 0.14 ${44 - pct * 0.16}deg / 10%) 0%, transparent 65%)`
                 : 'none',
-            transition: 'background 0.6s ease',
+            transition: 'background var(--dur-slow) ease',
           }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '18px 16px', position: 'relative' }}>
@@ -812,7 +812,7 @@ export default function Packing_V2() {
                     : 'var(--shadow-sm), inset 0 1px 0 oklch(100% 0 0 / 65%), inset 0 0 0 1px oklch(100% 0 0 / 18%)',
                   backdropFilter: isActive ? undefined : 'blur(16px) saturate(1.6)',
                   WebkitBackdropFilter: isActive ? undefined : 'blur(16px) saturate(1.6)',
-                  transition: 'all .25s', whiteSpace: 'nowrap',
+                  transition: 'all var(--dur-base)', whiteSpace: 'nowrap',
                   WebkitTapHighlightColor: 'transparent',
                   display: 'flex', alignItems: 'center', gap: 6,
                 }}

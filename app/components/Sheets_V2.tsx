@@ -761,7 +761,7 @@ export function AISheet({ dayNumber }: AISheetProps) {
             onClick={handleLoadMore}
             disabled={loadingMore}
             className="lg-btn lg-btn-glass"
-            style={{ height: 44, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: loadingMore ? 0.5 : 1, transition: 'opacity .2s' }}
+            style={{ height: 44, width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, opacity: loadingMore ? 0.5 : 1, transition: 'opacity var(--dur-base)' }}
           >
             <Icon name="sparkle" size={13} color="var(--lg-terra)" />
             {loadingMore

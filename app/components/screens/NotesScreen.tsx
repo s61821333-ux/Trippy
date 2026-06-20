@@ -65,7 +65,7 @@ export default function NotesScreen() {
               color: 'var(--lg-ink)', lineHeight: 1.6, outline: 'none',
               background: 'var(--lg-panel-strong)',
               boxShadow: 'inset 0 0 0 1px oklch(50% 0.02 60 / 14%)',
-              transition: 'box-shadow .2s',
+              transition: 'box-shadow var(--dur-base)',
             }}
           />
         </div>

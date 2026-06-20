@@ -310,7 +310,7 @@ function HotelSheet({ dayNum, existing, onClose }: {
                     background: checkOut === d ? 'var(--lg-forest)' : 'var(--surface-2)',
                     color: checkOut === d ? '#fff' : 'var(--text-2)',
                     boxShadow: checkOut === d ? 'var(--lg-glow-forest), inset 0 1px 0 oklch(100% 0 0 / 28%)' : 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 48%)',
-                    transition: 'all .25s',
+                    transition: 'all var(--dur-base)',
                   }}
                 >
                   Day {d}
@@ -372,7 +372,7 @@ function QuickAction({ icon, label, onClick, color, ariaLabel, isDanger, isBrand
         borderRadius: 9999, cursor: 'pointer',
         boxShadow: isBrand ? `0 2px 8px ${color}22, inset 0 1px 0 oklch(100% 0 0 / 40%)` : 'var(--shadow-xs), inset 0 1px 0 oklch(100% 0 0 / 45%)',
         fontFamily: 'var(--font-sans)',
-        transition: 'background .2s, color .2s, box-shadow .2s',
+        transition: 'background var(--dur-base), color var(--dur-base), box-shadow var(--dur-base)',
       }}
     >
       <Icon name={icon as any} size={15} color={isDanger && hovered ? 'var(--danger)' : isBrand ? color : color} />
@@ -441,7 +441,7 @@ function EventAccordion({ event, index, currCode, onEdit, onReschedule, onSugges
         </m.span>
       </button>
 
-      <div style={{ maxHeight: open ? 320 : 0, overflow: 'hidden', transition: 'max-height .4s var(--snap)' }}>
+      <div style={{ maxHeight: open ? 320 : 0, overflow: 'hidden', transition: 'max-height var(--dur-slow) var(--snap)' }}>
         <div style={{ padding: '0 14px 14px' }}>
           <div style={{ height: 1, background: 'oklch(50% 0.02 60 / 12%)', margin: '0 0 12px' }} />
           <div style={{ display: 'flex', gap: 18, marginBottom: 10 }}>
@@ -613,7 +613,7 @@ function RescheduleSheet({ event, onClose, dayLabel }: {
                   background: durPreset === d ? 'var(--lg-terra)' : 'var(--surface-2)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
                   boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'var(--shadow-xs)',
-                  transition: 'background .25s, box-shadow .25s', whiteSpace: 'nowrap',
+                  transition: 'background var(--dur-base), box-shadow var(--dur-base)', whiteSpace: 'nowrap',
                 }}
               >
                 {getDurLabel(d, locale)}
@@ -754,7 +754,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                   background: durPreset === d ? 'var(--lg-terra)' : 'var(--surface-2)',
                   color: durPreset === d ? '#fff' : 'var(--text-2)',
                   boxShadow: durPreset === d ? 'var(--lg-glow-terra)' : 'var(--shadow-xs)',
-                  transition: 'background .25s, box-shadow .25s', whiteSpace: 'nowrap',
+                  transition: 'background var(--dur-base), box-shadow var(--dur-base)', whiteSpace: 'nowrap',
                 }}
               >
                 {getDurLabel(d, locale)}
@@ -793,7 +793,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
                   background: cat === c ? 'var(--lg-forest)' : 'var(--surface-2)',
                   color: cat === c ? '#fff' : 'var(--text-2)',
                   boxShadow: cat === c ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
-                  transition: 'all .25s',
+                  transition: 'all var(--dur-base)',
                 }}
               >
                 <Icon name={ic as any} size={13} color={cat === c ? '#fff' : 'var(--text-3)'} />
@@ -817,7 +817,7 @@ function AddEventSheet({ onClose, editing, defaultTime, dayLabel }: {
             type="number" min="0" inputMode="decimal"
             placeholder={locale === 'he' ? 'לדוגמה: 25' : 'e.g. 25'}
             value={cost} onChange={e => setCost(e.target.value)}
-            style={{ width: '100%', boxSizing: 'border-box', height: 48, border: 0, borderRadius: 14, paddingInlineStart: 16, paddingInlineEnd: 16, fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--lg-ink)', outline: 'none', background: 'var(--field-bg)', boxShadow: 'inset 0 0 0 1px var(--field-border)', transition: 'box-shadow .2s' }}
+            style={{ width: '100%', boxSizing: 'border-box', height: 48, border: 0, borderRadius: 14, paddingInlineStart: 16, paddingInlineEnd: 16, fontFamily: 'var(--font-sans)', fontSize: 15, color: 'var(--lg-ink)', outline: 'none', background: 'var(--field-bg)', boxShadow: 'inset 0 0 0 1px var(--field-border)', transition: 'box-shadow var(--dur-base)' }}
           />
         </div>
 

@@ -93,7 +93,7 @@ function AddWishItemSheet({ onClose }: { onClose: () => void }) {
                   background: cat === id ? 'var(--lg-terra)' : 'var(--field-bg)',
                   color: cat === id ? '#fff' : 'var(--field-label)',
                   boxShadow: cat === id ? 'var(--lg-glow-terra)' : 'inset 0 0 0 1px var(--field-border)',
-                  transition: 'all .2s',
+                  transition: 'all var(--dur-base)',
                 }}
               >
                 {locale === 'he' ? labelHe : labelEn}
@@ -212,7 +212,7 @@ function ScheduleSheet({ item, onClose }: { item: WishlistItem; onClose: () => v
                     background: selectedDay === d ? 'var(--lg-forest)' : 'var(--field-bg)',
                     color: selectedDay === d ? '#fff' : 'var(--field-label)',
                     boxShadow: selectedDay === d ? 'var(--lg-glow-forest)' : 'inset 0 0 0 1px var(--field-border)',
-                    transition: 'all .2s',
+                    transition: 'all var(--dur-base)',
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1,
                   }}
                 >

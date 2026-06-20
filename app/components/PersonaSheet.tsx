@@ -138,7 +138,7 @@ function ChipRow<T extends string>({
               background: active ? 'var(--lg-forest)' : 'var(--surface-2)',
               color: active ? '#fff' : 'var(--lg-ink)',
               boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
-              transition: 'all 160ms ease',
+              transition: 'all var(--dur-fast)',
               display: 'inline-flex', alignItems: 'center', gap: 6,
             }}
           >
@@ -305,7 +305,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                     boxShadow: active
                       ? `0 4px 16px ${intent.glow}`
                       : 'var(--shadow-xs)',
-                    transition: 'all .18s ease',
+                    transition: 'all var(--dur-fast)',
                     WebkitTapHighlightColor: 'transparent',
                   }}
                 >
@@ -315,7 +315,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                     background: active
                       ? `oklch(from ${intent.color} l c h / 18%)`
                       : 'oklch(50% 0.02 60 / 7%)',
-                    transition: 'background .18s',
+                    transition: 'background var(--dur-fast)',
                   }}>
                     <Icon
                       name={intent.icon}
@@ -327,7 +327,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                     fontSize: 12, fontWeight: active ? 700 : 500,
                     color: active ? intent.color : 'var(--text-2)',
                     lineHeight: 1.2, textAlign: 'center',
-                    transition: 'color .18s',
+                    transition: 'color var(--dur-fast)',
                   }}>
                     {isHe ? intent.labelHe : intent.label}
                   </span>
@@ -412,7 +412,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                     color: active ? '#fff' : 'var(--lg-ink)',
                     fontFamily: 'var(--font-sans)', fontWeight: active ? 700 : 500, fontSize: 13,
                     boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
-                    transition: 'all .18s',
+                    transition: 'all var(--dur-fast)',
                     WebkitTapHighlightColor: 'transparent',
                   }}
                 >
@@ -440,7 +440,7 @@ export default function PersonaSheet({ dayNumber, onClose: onCloseProp }: Person
                     color: active ? '#fff' : 'var(--lg-ink)',
                     fontFamily: 'var(--font-sans)', fontWeight: active ? 700 : 500, fontSize: 13,
                     boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
-                    transition: 'all .18s',
+                    transition: 'all var(--dur-fast)',
                     WebkitTapHighlightColor: 'transparent',
                   }}
                 >

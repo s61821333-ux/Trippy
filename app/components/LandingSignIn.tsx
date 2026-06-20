@@ -74,7 +74,7 @@ export default function LandingSignIn({ compact = false, locale = 'en' }: Props)
           cursor: googleLoading ? 'not-allowed' : 'pointer',
           opacity: googleLoading ? 0.7 : 1,
           boxShadow: 'var(--shadow-lg)',
-          transition: 'opacity 0.15s',
+          transition: 'opacity var(--dur-fast)',
         }}
       >
         {googleLoading ? <Spinner /> : <GoogleIcon />}

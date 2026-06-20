@@ -64,7 +64,7 @@ export default function Field({
     outline: 'none',
     minHeight: 44,
     boxSizing: 'border-box' as const,
-    transition: 'background 0.2s ease, box-shadow 0.2s ease',
+    transition: 'background var(--dur-base) ease, box-shadow var(--dur-base) ease',
     boxShadow: error
       ? 'inset 0 0 0 1.5px var(--danger), inset 0 1px 0 oklch(100% 0 0 / 50%)'
       : focused
@@ -101,7 +101,7 @@ export default function Field({
             letterSpacing: '0.08em',
             textTransform: 'uppercase' as const,
             color: focused ? 'var(--brand)' : 'var(--text-2)',
-            transition: 'color 0.2s ease',
+            transition: 'color var(--dur-base) ease',
           }}
         >
           {label}
@@ -123,7 +123,7 @@ export default function Field({
               color: focused ? 'var(--brand)' : 'var(--field-icon)',
               display: 'flex',
               pointerEvents: 'none',
-              transition: 'color 0.2s ease',
+              transition: 'color var(--dur-base) ease',
             }}
           >
             {icon}

@@ -27,7 +27,7 @@ export default function LandingLangToggle({ locale }: Props) {
         borderRadius: 'var(--radius-full)',
         padding: '5px 14px',
         cursor: 'pointer',
-        transition: 'color 0.15s, border-color 0.15s',
+        transition: 'color var(--dur-fast), border-color var(--dur-fast)',
         lineHeight: 1,
       }}
       onMouseEnter={e => {

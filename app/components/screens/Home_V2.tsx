@@ -162,7 +162,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
                   background:  cTheme === th.id ? th.bg   : 'var(--bg)',
                   border:      cTheme === th.id ? `2px solid ${th.accent}` : '1.5px solid var(--border)',
                   boxShadow:   cTheme === th.id ? `0 4px 18px ${th.accent}30` : 'none',
-                  transition:  'all 0.18s cubic-bezier(0.34,1.56,0.64,1)',
+                  transition:  'all var(--dur-fast) var(--ease-spring)',
                   WebkitTapHighlightColor: 'transparent',
                   position: 'relative',
                 }}
@@ -172,7 +172,7 @@ function CreateSheet({ onClose }: { onClose: () => void }) {
                   fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
                   letterSpacing: '0.10em', textTransform: 'uppercase',
                   color: cTheme === th.id ? th.accent : 'var(--text-2)',
-                  transition: 'color 0.15s',
+                  transition: 'color var(--dur-fast)',
                 }}>
                   {locale === 'he' ? th.labelHe : th.label}
                 </span>
@@ -466,7 +466,7 @@ export default function Home_V2() {
                   border: '2px solid var(--lg-terra)', width: '100%',
                   cursor: loadingTripId && !isLoading ? 'default' : 'pointer',
                   opacity: loadingTripId && !isLoading ? 0.48 : 1,
-                  transition: 'opacity 0.18s',
+                  transition: 'opacity var(--dur-fast)',
                   WebkitTapHighlightColor: 'transparent',
                   touchAction: 'manipulation',
                   boxShadow: '0 4px 18px oklch(62% 0.12 50 / 12%)',
@@ -583,7 +583,7 @@ export default function Home_V2() {
                         onClick={() => handleOpen(trip.id)}
                         disabled={loadingTripId !== null}
                         aria-label={`Open ${trip.name}`}
-                        style={{ opacity: loadingTripId && !isLoading ? 0.48 : 1, transition: 'opacity 0.18s' }}
+                        style={{ opacity: loadingTripId && !isLoading ? 0.48 : 1, transition: 'opacity var(--dur-fast)' }}
                         leading={<StampIcon iconKey={stampKey} size={46} aria-hidden="true" />}
                         trailing={
                           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

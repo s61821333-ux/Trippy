@@ -268,7 +268,7 @@ export default function DayTimelineView({ events, dayEndHour, onAdd, onSuggest, 
                 flexDirection: 'column',
                 justifyContent: 'center',
                 gap: 2,
-                transition: 'box-shadow 0.15s',
+                transition: 'box-shadow var(--dur-fast)',
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>

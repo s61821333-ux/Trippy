@@ -201,7 +201,7 @@ function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
           color: selectedDay == null ? '#fff' : 'var(--text-3)',
           fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
           letterSpacing: '0.06em', boxShadow: selectedDay == null ? 'var(--lg-glow-terra)' : 'none',
-          transition: 'all .2s', scrollSnapAlign: 'start',
+          transition: 'all var(--dur-base)', scrollSnapAlign: 'start',
           WebkitTapHighlightColor: 'transparent',
         }}
       >
@@ -216,7 +216,7 @@ function DayLegend({ days, startDate, selectedDay, onSelect, locale }: {
             background: selectedDay === d ? DAY_PALETTE[(d - 1) % DAY_PALETTE.length] : 'var(--surface-2)',
             color: selectedDay === d ? '#fff' : 'var(--text-3)',
             fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700,
-            transition: 'all .2s', scrollSnapAlign: 'start',
+            transition: 'all var(--dur-base)', scrollSnapAlign: 'start',
             WebkitTapHighlightColor: 'transparent', whiteSpace: 'nowrap',
           }}
         >

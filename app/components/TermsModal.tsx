@@ -359,7 +359,7 @@ export default function TermsModal() {
                 color: scrolledToBottom ? 'white' : 'var(--text-3)',
                 fontSize: 15,
                 fontWeight: 700,
-                transition: 'all 0.2s ease',
+                transition: 'all var(--dur-base) ease',
                 boxShadow: scrolledToBottom ? 'var(--shadow-md)' : 'none',
               }}
             >

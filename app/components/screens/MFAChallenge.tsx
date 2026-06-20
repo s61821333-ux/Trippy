@@ -141,7 +141,7 @@ export default function MFAChallenge({ onSuccess, onSignOut }: Props) {
                 borderRadius: 16, color: 'var(--text-inv)',
                 outline: 'none', marginBottom: 8,
                 caretColor: 'var(--lg-terra-bright, #E89260)',
-                transition: 'border-color 0.2s',
+                transition: 'border-color var(--dur-base)',
                 boxSizing: 'border-box',
               }}
               autoComplete="one-time-code"

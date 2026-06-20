@@ -137,7 +137,7 @@ export default function GlassBtn({
         minWidth: 44,
         minHeight: 44,
         opacity: isDisabled ? 0.45 : 1,
-        transition: 'background 0.18s ease, box-shadow 0.18s ease',
+        transition: 'background var(--dur-fast) ease, box-shadow var(--dur-fast) ease',
         WebkitTapHighlightColor: 'transparent',
         touchAction: 'manipulation',
         whiteSpace: 'nowrap',

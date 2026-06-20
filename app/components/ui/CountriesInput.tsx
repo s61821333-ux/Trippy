@@ -171,7 +171,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
           minHeight: 44, padding: '6px 12px',
           background: 'var(--bg)', border: '1px solid var(--border)',
           borderRadius: 'var(--radius-md)', cursor: 'text',
-          transition: 'border-color 0.15s',
+          transition: 'border-color var(--dur-fast)',
         }}
       >
         {/* Chips */}
@@ -261,7 +261,7 @@ export default function CountriesInput({ value, onChange, label }: Props) {
                   width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                   padding: '12px 14px', minHeight: 48,
                   background: 'none', border: 'none',
-                  cursor: 'pointer', textAlign: 'start', transition: 'background 0.1s',
+                  cursor: 'pointer', textAlign: 'start', transition: 'background var(--dur-fast)',
                   touchAction: 'manipulation',
                 }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg)')}

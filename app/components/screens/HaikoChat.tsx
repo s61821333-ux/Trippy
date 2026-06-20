@@ -245,7 +245,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
                     color: 'var(--terra-text)',
                     fontFamily: 'var(--font-sans)', fontSize: 12.5, fontWeight: 600,
                     whiteSpace: 'nowrap', WebkitTapHighlightColor: 'transparent',
-                    transition: 'background .15s, transform .12s',
+                    transition: 'background var(--dur-fast), transform var(--dur-fast)',
                   }}
                 >
                   <Icon name={s.icon} size={12} color="var(--terra-text)" />
@@ -278,7 +278,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
               padding: '11px 16px', fontSize: 15, color: 'var(--text)', outline: 'none',
               fontFamily: 'var(--font-sans)', lineHeight: 1.4,
               boxShadow: 'inset 0 0 0 1.5px var(--field-border)',
-              transition: 'box-shadow .2s',
+              transition: 'box-shadow var(--dur-base)',
             }}
           />
           <m.button
@@ -297,7 +297,7 @@ export default function HaikoChat({ onClose }: { onClose: () => void }) {
                 : 'var(--shadow-xs)',
               cursor: canSend ? 'pointer' : 'default',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'background .2s, box-shadow .2s, filter .12s',
+              transition: 'background var(--dur-base), box-shadow var(--dur-base), filter var(--dur-fast)',
               WebkitTapHighlightColor: 'transparent',
             }}
           >

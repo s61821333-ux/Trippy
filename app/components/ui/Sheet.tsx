@@ -161,7 +161,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
           alignItems: full ? 'stretch' : 'flex-end',
           justifyContent: full ? 'flex-end' : undefined,
           paddingBottom: kbH > 0 ? kbH : undefined,
-          transition: 'padding-bottom 0.2s ease',
+          transition: 'padding-bottom var(--dur-base) ease',
         }}
       >
         <m.div

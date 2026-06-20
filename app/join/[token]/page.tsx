@@ -218,7 +218,7 @@ export default function JoinPage() {
                       fontWeight: 700, fontSize: 15, border: 'none',
                       cursor: status === 'joining' ? 'not-allowed' : 'pointer',
                       opacity: status === 'joining' ? 0.7 : 1,
-                      transition: 'opacity 0.15s',
+                      transition: 'opacity var(--dur-fast)',
                     }}
                   >
                     {status === 'joining' ? 'Joining…' : '✈️ Join Trip'}

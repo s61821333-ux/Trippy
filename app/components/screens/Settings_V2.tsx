@@ -314,7 +314,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                     fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 12,
                     background: locale === l ? 'var(--lg-forest)' : 'transparent',
                     color:      locale === l ? '#fff' : 'var(--text-3)',
-                    transition: 'all .25s', WebkitTapHighlightColor: 'transparent',
+                    transition: 'all var(--dur-base)', WebkitTapHighlightColor: 'transparent',
                   }}
                 >
                   {l === 'en' ? 'EN' : locale === 'he' ? 'עב' : 'HE'}
@@ -353,7 +353,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                 background: themeMode === opt.id ? 'var(--lg-forest)' : 'var(--lg-panel-strong)',
                 color:      themeMode === opt.id ? '#fff' : 'var(--text-2)',
                 boxShadow:  themeMode === opt.id ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
-                transition: 'all .25s', WebkitTapHighlightColor: 'transparent',
+                transition: 'all var(--dur-base)', WebkitTapHighlightColor: 'transparent',
               }}
             >
               <Icon name={opt.icon} size={20} color={themeMode === opt.id ? '#fff' : 'var(--text-3)'} />
@@ -482,7 +482,7 @@ export default function Settings_V2({ onSecurity }: { onSecurity?: () => void })
                       display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px',
                       border: 0, borderRadius: 14, cursor: 'pointer', textAlign: 'start',
                       background: currency === c.code ? 'var(--lg-forest)' : 'transparent',
-                      transition: 'background .2s',
+                      transition: 'background var(--dur-base)',
                     }}
                   >
                     <span style={{ fontFamily: 'var(--font-mono)', fontSize: 14, fontWeight: 700, color: currency === c.code ? '#fff' : 'var(--text-3)', width: 32, flexShrink: 0 }}>

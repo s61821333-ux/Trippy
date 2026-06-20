@@ -256,7 +256,7 @@ function DestinationIntelCard({ country, locale }: { country: string; locale: st
         <span style={{ minWidth: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {loading
             ? <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'var(--lg-terra)', animation: 'spin .8s linear infinite', display: 'block' }} />
-            : <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ transform: arrowRotate, transition: 'transform .25s', color: 'var(--text-3)', display: 'block', flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
+            : <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" style={{ transform: arrowRotate, transition: 'transform var(--dur-base)', color: 'var(--text-3)', display: 'block', flexShrink: 0 }}><path d="M9 18l6-6-6-6"/></svg>
           }
         </span>
       </button>
@@ -430,7 +430,7 @@ function BudgetBreakdown({ trip, currSym, expenses }: {
           {/* Stacked bar */}
           <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', marginBottom: 10 }}>
             {topCats.map(([cat, val]) => (
-              <div key={cat} style={{ width: `${(val / catTotal) * 100}%`, background: cat === 'manual' ? 'var(--text-3)' : catColor(cat), transition: 'width .4s' }} />
+              <div key={cat} style={{ width: `${(val / catTotal) * 100}%`, background: cat === 'manual' ? 'var(--text-3)' : catColor(cat), transition: 'width var(--dur-slow)' }} />
             ))}
           </div>
           {/* Legend */}
@@ -465,7 +465,7 @@ function BudgetBreakdown({ trip, currSym, expenses }: {
                 <div style={{ flex: 1, height: 7, borderRadius: 4, background: 'var(--surface-2)', overflow: 'hidden' }}>
                   <div style={{
                     width: `${(amount / maxDay) * 100}%`, height: '100%', borderRadius: 4,
-                    background: `var(--lg-terra)`, transition: 'width .4s',
+                    background: `var(--lg-terra)`, transition: 'width var(--dur-slow)',
                   }} />
                 </div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--text-3)', width: 52, textAlign: 'end', flexShrink: 0 }}>
@@ -558,7 +558,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
                 strokeWidth={7}
                 strokeLinecap="round"
                 strokeDasharray={`${Math.round(pct * 163.36)} 163.36`}
-                style={{ transition: 'stroke-dasharray .5s ease, stroke .3s' }}
+                style={{ transition: 'stroke-dasharray var(--dur-slow) ease, stroke var(--dur-slow)' }}
               />
             </svg>
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: statusColor }}>
@@ -715,7 +715,7 @@ function ExpenseSheet({ trip, currSym, currCode, onClose, onAddBudget }: {
                   {currSym}{exp.amount.toLocaleString()}
                 </span>
                 <button onClick={() => { deleteExpense(exp.id); show(t('expenseRemovedToast')); }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, opacity: 0.5, transition: 'opacity .2s' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 6, opacity: 0.5, transition: 'opacity var(--dur-base)' }}
                   onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
                   onMouseLeave={e => (e.currentTarget.style.opacity = '0.5')}
                   aria-label={t('deleteExpenseLabel')}
@@ -1296,7 +1296,7 @@ export default function DashboardScreenV2() {
                     height: '100%',
                     background: budgetStatusColor,
                     borderRadius: 2,
-                    transition: 'width .4s, background .3s',
+                    transition: 'width var(--dur-slow), background var(--dur-slow)',
                   }} />
                 </div>
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--text-3)' }}>
@@ -1464,7 +1464,7 @@ export default function DashboardScreenV2() {
             <p className="eyebrow-lg" style={{ color: 'var(--text-3)', margin: 0 }}>
               {t('tripCalendarLabel')}
             </p>
-            <Icon name={showCalendar ? 'chevL' : 'chevR'} size={14} color="var(--text-3)" style={{ transform: showCalendar ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform .3s' }} />
+            <Icon name={showCalendar ? 'chevL' : 'chevR'} size={14} color="var(--text-3)" style={{ transform: showCalendar ? 'rotate(-90deg)' : 'rotate(90deg)', transition: 'transform var(--dur-slow)' }} />
           </button>
           {showCalendar && <CalendarHeatmap trip={trip} />}
         </div>

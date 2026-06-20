@@ -105,7 +105,7 @@ function StepTrack({ step }: { step: 'form' | 'generating' | 'preview' }) {
               ? 'linear-gradient(145deg, var(--lg-terra-bright), var(--lg-terra))'
               : 'var(--surface-2)',
             boxShadow: i === idx ? '0 3px 12px oklch(65% 0.18 40 / 30%)' : 'none',
-            transition: 'all .3s',
+            transition: 'all var(--dur-slow)',
           }}>
             {i < idx ? (
               <Icon name="check" size={13} color="#fff" />
@@ -122,7 +122,7 @@ function StepTrack({ step }: { step: 'form' | 'generating' | 'preview' }) {
               background: i < idx
                 ? 'linear-gradient(90deg, var(--lg-terra), var(--lg-terra-bright))'
                 : 'var(--surface-2)',
-              transition: 'background .4s',
+              transition: 'background var(--dur-slow)',
             }} />
           )}
         </React.Fragment>
@@ -161,7 +161,7 @@ function ChipGroup<T extends string>({
                 background: active ? 'var(--lg-forest)' : 'var(--surface-2)',
                 color: active ? '#fff' : 'var(--text-2)',
                 boxShadow: active ? 'var(--lg-glow-forest)' : 'var(--shadow-xs)',
-                transition: 'all .2s',
+                transition: 'all var(--dur-base)',
                 WebkitTapHighlightColor: 'transparent',
                 outline: active ? 'none' : undefined,
               }}
@@ -360,7 +360,7 @@ function StepPreview({ plan, locale, onConfirm, creating }: {
               </m.span>
             </button>
 
-            <div style={{ maxHeight: expandedDay === day.dayNumber ? 400 : 0, overflow: 'hidden', transition: 'max-height .3s ease' }}>
+            <div style={{ maxHeight: expandedDay === day.dayNumber ? 400 : 0, overflow: 'hidden', transition: 'max-height var(--dur-slow) ease' }}>
               <div style={{ paddingBottom: 10 }}>
                 {day.events.map((ev, i) => (
                   <div key={i} style={{
@@ -439,7 +439,7 @@ function StepPreview({ plan, locale, onConfirm, creating }: {
           fontFamily: 'var(--font-sans)', fontWeight: 700, fontSize: 16,
           display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
           boxShadow: creating ? 'none' : '0 6px 24px oklch(65% 0.18 40 / 35%)',
-          transition: 'all .3s',
+          transition: 'all var(--dur-slow)',
           WebkitTapHighlightColor: 'transparent',
         }}
       >
@@ -704,7 +704,7 @@ export default function PlanWithAISheet({ onClose }: { onClose: () => void }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                   boxShadow: '0 6px 24px oklch(65% 0.18 40 / 32%)',
                   opacity: !destination.trim() || !days || Number(days) < 1 ? 0.42 : 1,
-                  transition: 'opacity .2s, box-shadow .2s',
+                  transition: 'opacity var(--dur-base), box-shadow var(--dur-base)',
                   marginTop: 4, WebkitTapHighlightColor: 'transparent',
                 }}
               >

@@ -17,7 +17,7 @@ export default function Toggle({ on, onClick, label }: ToggleProps) {
       style={{
         width: 50, height: 30, borderRadius: 9999, border: 0, cursor: 'pointer', padding: 3, flexShrink: 0,
         background: on ? 'var(--lg-forest)' : 'oklch(50% 0.02 60 / 24%)',
-        boxShadow: on ? 'var(--lg-glow-forest)' : 'none', transition: 'background .3s',
+        boxShadow: on ? 'var(--lg-glow-forest)' : 'none', transition: 'background var(--dur-slow)',
         WebkitTapHighlightColor: 'transparent',
       }}
     >

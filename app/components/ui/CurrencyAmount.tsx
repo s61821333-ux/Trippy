@@ -128,7 +128,7 @@ export default function CurrencyAmount({ amount, base, style, className, decimal
           padding: 0, display: 'inline-flex', alignItems: 'center', gap: 2,
           fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit',
           color: isPeeking ? 'var(--lg-terra)' : 'inherit',
-          transition: 'color .2s',
+          transition: 'color var(--dur-base)',
           textDecoration: isPeeking ? 'none' : 'underline dotted oklch(50% 0.02 60 / 30%)',
           textUnderlineOffset: 3,
         }}
