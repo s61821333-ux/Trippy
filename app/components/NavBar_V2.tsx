@@ -66,6 +66,8 @@ export default function NavBar_V2({
 
   const [expandOpen, setExpandOpen] = useState(false);
   const menuBtnRef = React.useRef<HTMLButtonElement>(null);
+  const bdScrolling = React.useRef(false);
+  const bdTouchY = React.useRef(0);
 
   React.useEffect(() => { setExpandOpen(false); }, [active]);
 
@@ -115,7 +117,9 @@ export default function NavBar_V2({
       {expandOpen && (
         <div
           aria-hidden="true"
-          onClick={() => setExpandOpen(false)}
+          onTouchStart={e => { bdScrolling.current = false; bdTouchY.current = e.touches[0].clientY; }}
+          onTouchMove={e => { if (Math.abs(e.touches[0].clientY - bdTouchY.current) > 8) bdScrolling.current = true; }}
+          onClick={() => { if (!bdScrolling.current) setExpandOpen(false); bdScrolling.current = false; }}
           style={{ position: 'fixed', inset: 0, zIndex: 'var(--z-above)' }}
         />
       )}

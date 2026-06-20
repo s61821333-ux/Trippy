@@ -192,7 +192,7 @@ export default function Sheet({ children, onClose, title, subtitle, isDismissabl
             borderLeft: '1px solid oklch(100% 0 0 / 18%)',
             borderRight: '1px solid oklch(13% 0.012 55 / 5%)',
             borderBottom: 'none',
-            padding: full ? 'var(--space-6) var(--space-6)' : '0 var(--space-5)',
+            padding: full ? 'var(--space-6) var(--space-6)' : '10px var(--space-5) 0',
             paddingBottom: kbH > 0
               ? 'max(20px, env(safe-area-inset-bottom, 20px))'
               : full
