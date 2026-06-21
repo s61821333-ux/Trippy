@@ -9,7 +9,7 @@
 
 ## What is Trippy?
 
-**Trippy** is the one-stop shop for planning group trips — daily itinerary, interactive map, shared budget, and packing list, all synced in real time across the whole group. Built for experienced trip organizers who are tired of juggling 6 tools at once. An AI generates a full itinerary from a single sentence.
+**Trippy** is the one-stop shop for planning group trips — daily itinerary, interactive map, shared budget, and packing list, all synced in real time across the whole group. Built for experienced trip organizers who are tired of juggling 6 tools at once. An AI suggests you new places to explore from blogs and a chatbot will helps you anytime .
 
 ---
 
