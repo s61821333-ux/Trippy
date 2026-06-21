@@ -18,36 +18,36 @@
 <table>
   <tr>
     <td align="center">
-      <img src="public/screenshots/dashboard.png" width="480"/><br/>
+      <img src="https://raw.githubusercontent.com/s61821333-ux/Trippy/main/public/screenshots/dashboard.png" width="480"/><br/>
       <b>Dashboard</b><br/>
       <sub>Trip overview — countdown, weather forecast per day, budget gauge, and next activity at a glance</sub>
     </td>
     <td align="center">
-      <img src="public/screenshots/itinerary.png" width="480"/><br/>
+      <img src="https://raw.githubusercontent.com/s61821333-ux/Trippy/main/public/screenshots/itinerary.png" width="480"/><br/>
       <b>Daily Itinerary</b><br/>
       <sub>Timeline view per day with activity cards, categories, hotel checkout, and time blocks</sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="public/screenshots/map.png" width="480"/><br/>
+      <img src="https://raw.githubusercontent.com/s61821333-ux/Trippy/main/public/screenshots/map.png" width="480"/><br/>
       <b>Interactive Map</b><br/>
       <sub>All trip points plotted on a live map with day budget and weather shown inline</sub>
     </td>
     <td align="center">
-      <img src="public/screenshots/packing.png" width="480"/><br/>
+      <img src="https://raw.githubusercontent.com/s61821333-ux/Trippy/main/public/screenshots/packing.png" width="480"/><br/>
       <b>Packing List</b><br/>
       <sub>Group packing list organized by category (Gear, Documents, Health, Food) with AI-generated suggestions</sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="public/screenshots/ai-mood.png" width="480"/><br/>
+      <img src="https://raw.githubusercontent.com/s61821333-ux/Trippy/main/public/screenshots/ai-mood.png" width="480"/><br/>
       <b>Haiko AI — Mood Picker</b><br/>
       <sub>AI discovery flow: pick a vibe, refine by sub-category, set location, duration, and budget — then find spots</sub>
     </td>
     <td align="center">
-      <img src="public/screenshots/ai-spots.png" width="480"/><br/>
+      <img src="https://raw.githubusercontent.com/s61821333-ux/Trippy/main/public/screenshots/ai-spots.png" width="480"/><br/>
       <b>Haiko AI — Spot Results</b><br/>
       <sub>AI-curated local spots with ratings, price level, and one-tap "Add to day plan" or Wishlist</sub>
     </td>
