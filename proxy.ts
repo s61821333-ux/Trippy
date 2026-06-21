@@ -9,6 +9,9 @@ function buildCsp(nonce: string): string {
   const isDev = process.env.NODE_ENV !== 'production'
   return [
     "default-src 'self'",
+    // nonce covers Next.js inline bootstrap; strict-dynamic trusts anything
+    // those scripts load dynamically (chunks, Vercel Analytics via createElement, etc.)
+    // unsafe-eval only in dev: React uses eval for enhanced error stack reconstruction.
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''}`,
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
@@ -20,31 +23,13 @@ function buildCsp(nonce: string): string {
   ].join('; ')
 }
 
-async function checkApprovalStatus(userId: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/user_approvals?select=status&user_id=eq.${userId}`,
-      {
-        headers: {
-          apikey: process.env.SUPABASE_SERVICE_ROLE_KEY!,
-          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY!}`,
-          Accept: 'application/vnd.pgrst.object+json',
-        },
-        signal: AbortSignal.timeout(3000),
-      },
-    )
-    if (!res.ok) return null
-    const data = await res.json().catch(() => null)
-    return data?.status ?? null
-  } catch {
-    return null
-  }
-}
-
 export async function proxy(request: NextRequest) {
   const nonce = btoa(crypto.randomUUID())
   const csp = buildCsp(nonce)
 
+  // Forward nonce + CSP to Next.js App Router via request headers.
+  // Next.js parses Content-Security-Policy from the *request* headers to extract
+  // the nonce and apply it to inline scripts during SSR (see Next.js CSP docs).
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-nonce', nonce)
   requestHeaders.set('Content-Security-Policy', csp)
@@ -59,6 +44,7 @@ export async function proxy(request: NextRequest) {
       if (origin && !sameOrigin && !ALLOWED_ORIGINS.includes(origin)) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
       }
+      // Require JSON content-type on routes that send a body (DELETE has no body)
       if (method !== 'DELETE') {
         const ct = request.headers.get('content-type') ?? ''
         if (!ct.includes('application/json') && !ct.includes('multipart/form-data')) {
@@ -70,8 +56,9 @@ export async function proxy(request: NextRequest) {
 
   let response = NextResponse.next({ request: { headers: requestHeaders } })
 
-  // Skip session refresh (and approval check) for unauthenticated visitors and API routes.
-  // API routes validate auth themselves; approval gate only applies to UI routes.
+  // Session refresh is only needed when a Supabase auth cookie exists.
+  // Anonymous visitors (every first load) skip the network round-trip entirely,
+  // and API routes validate auth themselves via their own server client.
   const hasAuthCookie = request.cookies
     .getAll()
     .some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'))
@@ -90,6 +77,7 @@ export async function proxy(request: NextRequest) {
         cookiesToSet.forEach(({ name, value, options }) =>
           request.cookies.set({ name, value, ...options })
         )
+        // Preserve nonce in request headers when recreating response for cookie writes.
         response = NextResponse.next({ request: { headers: requestHeaders } })
         cookiesToSet.forEach(({ name, value, options }) =>
           response.cookies.set({ name, value, ...options })
@@ -98,53 +86,7 @@ export async function proxy(request: NextRequest) {
     },
   })
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // ── Approval gate ─────────────────────────────────────────────
-  const pathname = request.nextUrl.pathname
-  const adminId = process.env.ADMIN_USER_ID
-  const isAdminUser = user && adminId && user.id === adminId
-
-  // /g-ctrl — admin panel, admin only
-  if (pathname === '/g-ctrl' || pathname.startsWith('/g-ctrl/')) {
-    if (!user || !isAdminUser) {
-      return new NextResponse('Forbidden', { status: 403 })
-    }
-  }
-
-  // /app/* — requires an approved account
-  if (user && !isAdminUser && pathname.startsWith('/app')) {
-    const cached = request.cookies.get('x-trippy-approved')?.value
-
-    if (cached !== 'approved') {
-      const status = await checkApprovalStatus(user.id)
-
-      if (status === 'approved') {
-        // Cache for 1 hour to skip the DB call on subsequent requests
-        response.cookies.set('x-trippy-approved', 'approved', {
-          httpOnly: true,
-          sameSite: 'lax',
-          path: '/',
-          maxAge: 3600,
-          secure: process.env.NODE_ENV === 'production',
-        })
-      } else if (status === 'rejected' || status === 'blocked') {
-        const url = request.nextUrl.clone()
-        url.pathname = '/pending'
-        url.search = ''
-        url.searchParams.set('status', status)
-        return NextResponse.redirect(url)
-      } else {
-        // pending or null (DB unreachable on first login — callback handles the record creation)
-        const url = request.nextUrl.clone()
-        url.pathname = '/pending'
-        url.search = ''
-        return NextResponse.redirect(url)
-      }
-    }
-  }
-  // ─────────────────────────────────────────────────────────────
-
+  await supabase.auth.getUser()
   response.headers.set('Content-Security-Policy', csp)
   return response
 }
