@@ -418,6 +418,15 @@ export async function dbUpdateTripInfo(tripId: string, updates: { name?: string;
   if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
 }
 
+export async function dbSaveBudget(tripId: string, budget: number) {
+  const r = await fetch(`/api/trips/${tripId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ budget }),
+  })
+  if (!r.ok) { const b = await r.json().catch(() => ({})); throw new Error(b.error ?? `HTTP ${r.status}`) }
+}
+
 export async function dbUpdateTripTheme(tripId: string, theme: string) {
   const r = await fetch(`/api/trips/${tripId}`, {
     method: 'PATCH',
@@ -694,6 +703,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     })(),
     tripNotes:         (data.trip_notes as string[]) ?? [],
     hotels:            Array.isArray((data as any).hotels) ? (data as any).hotels as HotelStay[] : [],
+    budget:            typeof (data as any).budget === 'number' ? (data as any).budget : undefined,
     participants,
     dayMeta,
     events,

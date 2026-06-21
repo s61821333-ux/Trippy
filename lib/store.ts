@@ -14,7 +14,7 @@ import {
   dbAddSupply, dbToggleSupply, dbDeleteSupply, dbUpdateSupplyCritical,
   dbAddEmergencyContact, dbDeleteEmergencyContact,
   dbUpdateTripNotes, dbUpdateDayMeta, dbUpdateHotels,
-  dbUpdateTripInfo as dbSyncTripInfo, dbUpdateTripTheme,
+  dbUpdateTripInfo as dbSyncTripInfo, dbUpdateTripTheme, dbSaveBudget,
   dbGetPrivacyConsent, dbSavePrivacyConsent, TERMS_VERSION,
   dbDeleteAccount,
   dbAddWishlistItem, dbDeleteWishlistItem,
@@ -835,7 +835,9 @@ export const useAppStore = create<AppState>()(
       },
 
       setTripBudget: (budget) => {
+        const { tripDbId } = get();
         set(s => ({ trip: s.trip ? { ...s.trip, budget } : null }));
+        if (tripDbId) dbSaveBudget(tripDbId, budget).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
       },
 
       deleteExpense: (id) => {

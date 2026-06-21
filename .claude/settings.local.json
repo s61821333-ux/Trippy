@@ -74,7 +74,9 @@
       "Bash(New-Item -ItemType Directory -Force \"c:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\\\\app\\\\api\\\\ai\\\\recommend\")",
       "Bash(Out-Null)",
       "Bash(node -e \"const a = require\\('c:/Users/guy9d/Desktop/Trippy/node_modules/@vercel/analytics'\\); console.log\\(Object.keys\\(a\\)\\)\")",
-      "Bash(npm audit *)"
+      "Bash(npm audit *)",
+      "mcp__supabase__execute_sql",
+      "mcp__supabase__apply_migration"
     ],
     "additionalDirectories": [
       "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"
