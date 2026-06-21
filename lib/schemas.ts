@@ -76,6 +76,7 @@ export const UpdateTripBody = z.object({
   theme: z.string().max(50).optional(),
   countries: z.array(z.string().max(100)).max(30).optional(),
   trip_notes: z.array(z.string().max(5000)).optional(),
+  budget: z.number().min(0).optional(),
   day_meta: z.array(z.object({
     day_index: z.number().int().min(0),
     region: z.string().max(200).optional(),

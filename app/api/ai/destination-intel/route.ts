@@ -112,9 +112,10 @@ Return ONLY minified JSON (no markdown, no explanation):
       ],
     });
 
-    const raw   = '{' + (msg.content[0].type === 'text' ? msg.content[0].text.trim() : '}');
-    const clean = raw.replace(/\s*```$/, '').trim();
-    const data  = JSON.parse(clean) as DestinationIntel;
+    const text  = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '';
+    const jsonStr = '{' + text;
+    const objMatch = jsonStr.match(/\{[\s\S]*\}/);
+    const data  = JSON.parse(objMatch?.[0] ?? jsonStr) as DestinationIntel;
 
     if (intelCache.size >= INTEL_CACHE_MAX) {
       const oldest = intelCache.keys().next().value;

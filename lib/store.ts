@@ -835,7 +835,15 @@ export const useAppStore = create<AppState>()(
       },
 
       setTripBudget: (budget) => {
+        const { tripDbId } = get();
         set(s => ({ trip: s.trip ? { ...s.trip, budget } : null }));
+        if (tripDbId) {
+          fetch(`/api/trips/${tripDbId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ budget }),
+          }).catch(err => set({ lastSyncError: err?.message ?? 'save_failed' }));
+        }
       },
 
       deleteExpense: (id) => {

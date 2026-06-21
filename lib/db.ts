@@ -701,6 +701,7 @@ export function rowToTrip(data: NonNullable<Awaited<ReturnType<typeof dbLoadTrip
     emergencyContacts,
     wishlist,
     createdBy: (data as any).created_by ?? undefined,
+    budget:    (data as any).budget != null ? Number((data as any).budget) : undefined,
   }
 
   return { trip, supplies }

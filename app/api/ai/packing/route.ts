@@ -80,10 +80,20 @@ Aim for 15-20 items. Be specific (e.g. "SPF 50 sunscreen" not just "sunscreen").
       ],
     });
 
-    const raw  = '[' + (msg.content[0].type === 'text' ? msg.content[0].text.trim() : ']');
-    const clean = raw.replace(/\s*```$/, '').trim();
+    const text  = msg.content[0].type === 'text' ? msg.content[0].text.trim() : '';
+    const jsonStr = '[' + text;
+    const arrayMatch = jsonStr.match(/\[[\s\S]*\]/);
+    let rawItems: Array<{ name?: string; category?: string }>;
+    try {
+      rawItems = JSON.parse(arrayMatch?.[0] ?? jsonStr);
+    } catch {
+      rawItems = [...(arrayMatch?.[0] ?? jsonStr).matchAll(/\{[^{}]*\}/g)].flatMap(m => {
+        try { return [JSON.parse(m[0]) as { name?: string; category?: string }]; } catch { return []; }
+      });
+      if (rawItems.length === 0) throw new Error('no parseable items');
+    }
 
-    const parsed = (JSON.parse(clean) as Array<{ name?: string; category?: string }>)
+    const parsed = rawItems
       .filter(i => i.name)
       .map(i => ({ name: String(i.name), category: safeCategory(i.category) }))
       .slice(0, 25);
