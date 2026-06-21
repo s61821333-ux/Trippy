@@ -194,7 +194,7 @@ const INTEL_ICONS_HE: [keyof Intel, string, string][] = [
 function DestinationIntelCard({ country, locale }: { country: string; locale: string }) {
   const isHe = locale === 'he';
   const isRTL = isHe;
-  const cacheKey = `Trippy-intel-v3-${country}-${locale}`;
+  const cacheKey = `Trippy-intel-v2-${country}-${locale}`;
 
   const [intel,    setIntel]    = useState<Intel | null>(() => {
     try { const s = localStorage.getItem(cacheKey); return s ? JSON.parse(s) : null; } catch { return null; }

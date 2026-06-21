@@ -36,15 +36,3 @@ export const ANTHROPIC_API_KEY = () =>
 /** App base URL (e.g. https://trippy.app) */
 export const APP_URL = () =>
   process.env.APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-
-/** Supabase auth user ID of the single admin (Guy). Auto-approves on sign-in. */
-export const ADMIN_USER_ID = () =>
-  require('ADMIN_USER_ID')
-
-/** Email address to send new-user notification emails to */
-export const ADMIN_EMAIL = () =>
-  process.env.ADMIN_EMAIL ?? ''
-
-/** Resend API key for transactional email — optional; skipped if absent */
-export const RESEND_API_KEY = () =>
-  process.env.RESEND_API_KEY ?? ''

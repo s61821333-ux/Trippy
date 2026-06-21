@@ -10,14 +10,14 @@ export const runtime = 'edge';
 // Core data needed to render Dashboard on entry.
 // expenses / supplies / emergency_contacts are loaded lazily when their screens are first opened.
 const TRIP_SELECT = `
-  id, name, days, start_date, theme, trip_notes, countries, hotels, budget, created_by,
+  id, name, days, start_date, theme, trip_notes, countries, hotels, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
   events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, tags, votes, added_by, wishlist ),
   trip_participants ( user_id, initials, color )
 `
 
 const TRIP_SELECT_FALLBACK = `
-  id, name, days, start_date, theme, trip_notes, countries, budget, created_by,
+  id, name, days, start_date, theme, trip_notes, countries, created_by,
   day_meta ( day_index, region, emoji, lat, lng, description ),
   events ( id, day_index, time, duration, name, category, location, lat, lng, notes, cost, added_by, wishlist ),
   trip_participants ( user_id, initials, color )
@@ -76,7 +76,6 @@ export async function PATCH(
   if (d.theme      !== undefined) patch.theme      = d.theme
   if (d.trip_notes !== undefined) patch.trip_notes = d.trip_notes
   if (d.countries  !== undefined) patch.countries  = d.countries
-  if (d.budget     !== undefined) patch.budget     = d.budget
 
   const client = admin ?? supabase
   const { error } = await client.from('trips').update(patch).eq('id', tripId)

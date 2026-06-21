@@ -70,16 +70,20 @@ export async function POST(request: NextRequest) {
   const svc = serviceClient();
   if (svc) {
     try {
-      const { data: row } = await svc
-        .from('destination_guides')
-        .select('data, updated_at')
-        .eq('country', country.toLowerCase())
-        .eq('locale', locale)
-        .maybeSingle();
-      if (row?.data && Date.now() - new Date(row.updated_at as string).getTime() < DB_TTL_MS) {
-        const data = row.data as DestinationIntel;
-        intelCache.set(cacheKey, { data, ts: Date.now() });
-        return Response.json(data, { headers: { 'X-Cache': 'DB' } });
+      // Try exact locale match first, then fall back to 'en'
+      const localesToTry = locale !== 'en' ? [locale, 'en'] : ['en'];
+      for (const tryLocale of localesToTry) {
+        const { data: row } = await svc
+          .from('destination_guides')
+          .select('data, updated_at')
+          .eq('country', country.toLowerCase())
+          .eq('locale', tryLocale)
+          .maybeSingle();
+        if (row?.data && Date.now() - new Date(row.updated_at as string).getTime() < DB_TTL_MS) {
+          const data = row.data as DestinationIntel;
+          intelCache.set(cacheKey, { data, ts: Date.now() });
+          return Response.json(data, { headers: { 'X-Cache': 'DB' } });
+        }
       }
     } catch { /* fall through to AI generation */ }
   }
