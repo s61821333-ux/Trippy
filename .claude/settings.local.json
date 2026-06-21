@@ -79,7 +79,8 @@
       "mcp__supabase__get_logs",
       "PowerShell(cd \"C:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\"; npx tsc --noEmit 2>&1 | Where-Object { $_ -notmatch \"supabase/functions\" } | Select-String -Pattern \"error TS\" | Select-Object -First 20)",
       "PowerShell(cd \"C:\\\\Users\\\\guy9d\\\\Desktop\\\\Trippy\"; npx tsc --noEmit 2>&1 | Where-Object { $_ -notmatch \"supabase/functions\" } | Select-Object -First 30)",
-      "Bash(node -e \"console.log\\(require\\('./node_modules/@anthropic-ai/sdk/package.json'\\).version\\)\")"
+      "Bash(node -e \"console.log\\(require\\('./node_modules/@anthropic-ai/sdk/package.json'\\).version\\)\")",
+      "WebFetch(domain:app.notion.com)"
     ],
     "additionalDirectories": [
       "c:\\Users\\guy9d\\Desktop\\Trippy\\app\\api\\trips\\[tripId]"
